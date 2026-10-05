@@ -205,6 +205,7 @@ button{touch-action:manipulation}
   .suBox{padding:14px}
 }
 .sbtns{position:absolute;left:50%;top:10px;transform:translateX(-50%);display:flex;gap:6px;z-index:6}
+@media (min-width:641px){body:not(.land) .sbtns{left:auto;right:10px;transform:none;top:62px}}
 .sb{font-family:var(--body);font-weight:900;font-size:.78rem;border:3px solid var(--wood-d);border-radius:10px;background:var(--cream);color:var(--ink);padding:4px 10px;cursor:pointer;box-shadow:0 3px 0 var(--wood-d)}
 .sb:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
 #menuBtn,#rotBtn,.drawerTop{display:none}
@@ -2087,8 +2088,11 @@ $("menuBtn").onclick=()=>document.body.classList.toggle("drawer");$("drawerX").o
 $("hideBtn").onclick=()=>{const on=document.body.classList.toggle("hideui");$("hideBtn").textContent=on?"Show":"Hide";$("hideBtn").setAttribute("aria-pressed",on);try{localStorage.setItem("bukid-hideui",on?"1":"0")}catch(e){}};
 try{if(localStorage.getItem("bukid-hideui")==="1"){document.body.classList.add("hideui");$("hideBtn").textContent="Show"}}catch(e){}
 $("rotBtn").onclick=async()=>{try{if(!document.fullscreenElement&&document.documentElement.requestFullscreen)await document.documentElement.requestFullscreen();await screen.orientation.lock("landscape");relayout()}catch(e){relayout();if(innerWidth<innerHeight)toast("Turn your phone sideways for landscape.",3000)}};
+function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.querySelector(".toolbar");if(!sb||!tb)return;
+  if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
+setInterval(placeSbtns,1500);
 function setLand(){const b=document.body,land=innerWidth>innerHeight&&(innerHeight<=600||!!(window.matchMedia&&matchMedia("(pointer:coarse)").matches));if(land!==b.classList.contains("land")){b.classList.toggle("land",land);if(!land)b.classList.remove("drawer")}}
-let rlT=[];function relayout(){const r=()=>{setLand();try{resize()}catch(e){}};r();rlT.forEach(clearTimeout);rlT=[120,400,900].map(t=>setTimeout(r,t))}
+let rlT=[];function relayout(){const r=()=>{setLand();try{resize()}catch(e){}placeSbtns()};r();rlT.forEach(clearTimeout);rlT=[120,400,900].map(t=>setTimeout(r,t))}
 window.addEventListener("orientationchange",relayout);document.addEventListener("fullscreenchange",relayout);if(window.visualViewport)visualViewport.addEventListener("resize",relayout);if(window.screen&&screen.orientation&&screen.orientation.addEventListener)screen.orientation.addEventListener("change",relayout);setLand();
 $("tTown").onclick=startJeep;
 $("sellAll").onclick=sellAll;$("shopOpen").onclick=()=>{S.shopOpen=S.shopOpen===false;save();invUI(true);toast(S.shopOpen?"The stall is open. Buyers will come.":"The stall is closed. No buyers will come.",2600)};$("goMkt").onclick=()=>{goView("market")};
