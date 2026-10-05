@@ -354,7 +354,7 @@ body.land .stage{width:100vw;height:100vh;height:100dvh}
 
   <div class="tray-head"><h2>Shop</h2><span class="hint">Build buildings, buy boats and open a field on the island.</span></div>
   <div class="panel shopP">
-    <h4>Buildings</h4><div class="scs" id="shopB"></div>
+    <h4>Buildings · need 🪵 wood (have a worker chop trees)</h4><div class="scs" id="shopB"></div>
     <h4>Boats</h4><div class="scs" id="shopV"></div>
     <h4>On the Island</h4><div class="scs" id="shopI"></div>
   </div>
@@ -761,8 +761,8 @@ function bush(b,x,z,flower,seed,sz=1){const r=rnd(seed);[[0,.32,0,.5],[.4,.27,.1
 (function decor(){
   const b=new Builder();
   [[-3.8,-9.6,0xe2402f],[-6.5,-10.5,0xf08a24],[-13.6,-11,0xf5c732],[-14,6.5,null],[-9,8,0xe2402f],[-3.5,9,0xf5c732],[1.5,10,null],[5,9.5,0xf08a24],[13.6,2.6,0xe2402f],[14.2,-3.2,null],[8.6,-7.6,0xf5c732],[-26.5,-1,0xf08a24],[14,8,null],[6.5,-10,0xe2402f]]
-    .forEach(([x,z,f],k)=>BASETREES.push({id:"b"+k,x,z,f,seed:k*37+5}));world.add(TREEG);
-  [[-5,6,0xff7bb0],[7,5.5,0xffd84a],[-5.4,-7.6,0xb48cff],[3.2,-6.5,0xffffff],[13.4,-.8,0xff7bb0],[-1.5,7,0xffffff],
+    .forEach(([x,z,f],k)=>{if(Math.hypot(x+5,z+9.4)<2.6)return;BASETREES.push({id:"b"+k,x,z,f,seed:k*37+5})});world.add(TREEG);
+  [[-5,6,0xff7bb0],[7,5.5,0xffd84a],[3.2,-6.5,0xffffff],[13.4,-.8,0xff7bb0],[-1.5,7,0xffffff],
    [-4.6,-2.7,0xffffff,1.3],[-4.7,5.7,null,1.4],[5.4,5.9,0xffffff,1.3],[5.5,-3.7,null,1.2],[2.2,6.6,0xff7bb0,1.1],[-1.2,-4.3,0xffffff,.9],[3.4,-4.5,null,1],[-5.3,2.3,0xffd84a,.9],
    [-26,-5.5,null,1.3],[-25.6,6.4,0xffffff,1.1],[-8,5,null,1.2],[-13,6.3,0xff7bb0,1.1],[-4,8,null,1.5],[5.8,6.9,0xffffff,1.2],[9.8,-1.2,null,1.1],[-17.5,6.5,0xffffff,1.4]].forEach(([x,z,f,sz],k)=>bush(b,x,z,f,k*13+3,sz||1));
   // signpost
@@ -1485,7 +1485,7 @@ document.querySelectorAll("#wx .btn").forEach(b=>b.onclick=()=>{if(b.dataset.s==
 
 /* ================= EXTRAS STEP ================= */
 function stepExtras(dt,t){
-  stepParticles(dt);stepFlies(t);stepFarmer(dt,t);stepHelpers(dt,t);stepCrew(dt,t);stepTrip(dt,t);stepJeep(dt,t);stepFolk(dt,t);stepRaid(dt,t);stepBuyers(dt,t);stockUI();stepIncome(dt);BUILDG.children.forEach(g=>{if(g.userData.spin)g.userData.spin.rotation.x+=dt*1.6});stepWater(dt);stepWeather(dt,t);twinkles.forEach(sp=>{const v=Math.max(0,Math.sin(t*2.2+sp.userData.ph));sp.scale.setScalar(.05+v*.38);sp.material.rotation=t;});
+  stepParticles(dt);stepFlies(t);stepFarmer(dt,t);stepHelpers(dt,t);stepFerry(dt,t);stepCrew(dt,t);stepTrip(dt,t);stepJeep(dt,t);stepFolk(dt,t);stepRaid(dt,t);stepBuyers(dt,t);stockUI();stepIncome(dt);BUILDG.children.forEach(g=>{if(g.userData.spin)g.userData.spin.rotation.x+=dt*1.6});stepWater(dt);stepWeather(dt,t);twinkles.forEach(sp=>{const v=Math.max(0,Math.sin(t*2.2+sp.userData.ph));sp.scale.setScalar(.05+v*.38);sp.material.rotation=t;});
   weedTimer-=dt;if(weedTimer<=0){weedTimer=4+Math.random()*4;spawnWeed()}
   weeds.forEach(w=>{if(w.state==="ground"){const e=t-w.born;const s=Math.min(1,e*2);w.m.scale.setScalar(s<1?s*(1+.3*Math.sin(s*Math.PI)):1)}});
   tileObjs.forEach((o,i)=>{if(!o.cm.visible)return;const e=o.pop!=null?t-o.pop:9;const s=e<.5?.55+.45*(1+2.2*Math.pow(e/.5-1,3)+1.2*Math.pow(e/.5-1,2)):1;
@@ -2077,7 +2077,7 @@ function updateTag(){
   else if(hovered.build!=null){const o=(S.builds||[])[hovered.build];if(!o){hovered=null;return}const d=BUILDS.find(q=>q.id===o.id);wp=_p.set(o.x,2.9,o.z);txt=(d?d.n:"Item")+" · tap to rotate or move"}
   else if(hovered.drop){if(!AD.on){hovered=null;return}wp=_p.set(AD.g.position.x,AD.g.position.y+1.3,AD.g.position.z);txt="Airdrop · tap to open"}
   else if(hovered.ftree!=null){const k=hovered.ftree,T=FTREES[k];if(!T){hovered=null;return}const l=treeLeft(k),gr=treeGrow(k);wp=_p.set(T.x,(.6+2.8*(T.born!=null?.3+.7*gr:1))*T.s,T.z);
-    if(TOOL==="chop")txt="Chop down "+treeName(T)+" · +"+(gr>=1?3:1)+" Wood";else if(!T.kind)txt="Tree · use Chop to cut it";else if(gr<1){txt="Young "+treeName(T)+" · grows up in "+fmt(l);prog=gr}else if(l<=0)txt=treeName(T)+" · Ripe · tap with Harvest";else{txt=treeName(T)+" · fruit in "+fmt(l);prog=1-l/FTREE_T}}
+    if(TOOL==="chop")txt="Chop down "+treeName(T)+" · +"+(gr>=1?5:1)+" Wood";else if(!T.kind)txt="Tree · use Chop to cut it";else if(gr<1){txt="Young "+treeName(T)+" · grows up in "+fmt(l);prog=gr}else if(l<=0)txt=treeName(T)+" · Ripe · tap with Harvest";else{txt=treeName(T)+" · fruit in "+fmt(l);prog=1-l/FTREE_T}}
   else if(hovered.isle!=null){const s=ISLE.spots[hovered.isle];wp=ISLE.spotWorld(hovered.isle,_p);txt=s.n+" · tap"}
   else if(hovered.weed){const w=hovered.weed;if(w.state!=="ground"){hovered=null;return}wp=_p.set(w.x,.75,w.z);txt="Pull weeds · +2"}
   else if(hovered.tile!=null){const t=S.tiles[hovered.tile];if(!t)return;const [x,z]=tilePos(hovered.tile),st=tileState(t);
@@ -2472,12 +2472,12 @@ function stepCrew(dt,t){const W=SEL&&CREW[SEL];
 
 /* ================= SHOP: buildings, boats, island farm ================= */
 const BUILDS=[
-  {id:"kubo",n:"Nipa Hut",cost:800,lv:2,r:1.5,inc:6,d:"Bamboo and nipa house on stilts."},
-  {id:"bodega",n:"Warehouse",cost:1200,lv:3,r:1.7,inc:8,d:"Storage for crops and farm tools."},
-  {id:"kamalig",n:"Big Barn",cost:2500,lv:4,r:2.3,inc:15,d:"Red barn with two doors and a hayloft."},
-  {id:"kiskisan",n:"Windmill",cost:2000,lv:5,r:1.4,inc:12,d:"Mill whose blades turn in the wind."},
-  {id:"bato",n:"Stone House",cost:3500,lv:6,r:2.1,inc:22,d:"Stone and wood house with capiz windows and a balcony."},
-  {id:"mansyon",n:"Mansion",cost:9000,lv:7,r:3.4,inc:45,d:"Grand two-storey white mansion with columns, a balcony, a big front door and a garden."}];
+  {id:"kubo",n:"Nipa Hut",cost:800,wood:8,lv:2,r:1.5,inc:6,d:"Bamboo and nipa house on stilts."},
+  {id:"bodega",n:"Warehouse",cost:1200,wood:12,lv:3,r:1.7,inc:8,d:"Storage for crops and farm tools."},
+  {id:"kamalig",n:"Big Barn",cost:2500,wood:20,lv:4,r:2.3,inc:15,d:"Red barn with two doors and a hayloft."},
+  {id:"kiskisan",n:"Windmill",cost:2000,wood:15,lv:5,r:1.4,inc:12,d:"Mill whose blades turn in the wind."},
+  {id:"bato",n:"Stone House",cost:3500,wood:25,lv:6,r:2.1,inc:22,d:"Stone and wood house with capiz windows and a balcony."},
+  {id:"mansyon",n:"Mansion",cost:9000,wood:40,lv:7,r:3.4,inc:45,d:"Grand two-storey white mansion with columns, a balcony, a big front door and a garden."}];
 const BOATS=[{id:"bangka",n:"Rowboat",cost:600,lv:2,speed:3.6,d:"Rowboat with outriggers. Slow but reliable."},
   {id:"speed",n:"Speed Boat",cost:2500,lv:5,speed:10,d:"Motorboat. Just a few seconds to the island."}];
 const ISLEITEMS=[{id:"isla",n:"Secret Island",cost:100000,lv:3,d:"Buy the whole Secret Island next to the GoPyesta carnival, with a 6×6 field for secret crops. Needs a boat."},
@@ -2557,7 +2557,8 @@ function validPlace(x,z,r){
   for(const T of FTREES)if(Math.hypot(x-T.x,z-T.z)<r+.85*(T.s||1))return false;
   return true}
 let PLACE=null;const GHOSTMAT=new THREE.MeshBasicMaterial({color:0x7fe08a,transparent:true,opacity:.45,depthWrite:false});
-function startPlace(id,fromInv,moving){const d=BUILDS.find(q=>q.id===id);if(!d)return;if(moving){}else if(fromInv){if(!((S.decor||{})[id]>0))return}else{if(S.lv<d.lv)return toast(d.n+" unlocks at Level "+d.lv+".");if(S.coins<d.cost)return toast("You need "+d.cost.toLocaleString()+" coins for "+d.n+".")}
+const woodHave=()=>(S.inv||{}).wood|0;
+function startPlace(id,fromInv,moving){const d=BUILDS.find(q=>q.id===id);if(!d)return;if(!moving&&!fromInv&&d.wood&&woodHave()<d.wood)return toast("You need "+d.wood+" wood for the "+d.n+" (you have "+woodHave()+"). Have a worker chop trees with 🪓 Chop.",4200);if(moving){}else if(fromInv){if(!((S.decor||{})[id]>0))return}else{if(S.lv<d.lv)return toast(d.n+" unlocks at Level "+d.lv+".");if(S.coins<d.cost)return toast("You need "+d.cost.toLocaleString()+" coins for "+d.n+".")}
   cancelPlace();const g=makeBuild(id);g.traverse(o=>{if(o.isMesh)o.material=GHOSTMAT});const ring=new THREE.Mesh(new THREE.RingGeometry(d.r-.08,d.r,32),GHOSTMAT);ring.rotation.x=-Math.PI/2;ring.position.y=.05;g.add(ring);
   g.position.set(cam.tx,0,cam.tz);scene.add(g);PLACE={d,g,r:moving?moving.r||0:0,ok:false,fromInv:!!fromInv,moving:moving||null};g.rotation.y=PLACE.r;if(moving){cam.tx=moving.x;cam.tz=moving.z}updateGhost(cam.tx,cam.tz);
   $("placeBar").hidden=false;$("placeTxt").textContent=(moving?"Move: ":"Build: ")+d.n+" · tap where to place it";setTool("move");document.querySelector(".stage").scrollIntoView({block:"nearest",behavior:"smooth"})}
@@ -2565,7 +2566,7 @@ function updateGhost(x,z){if(!PLACE)return;PLACE.x=x;PLACE.z=z;PLACE.g.position.
 function cancelPlace(){if(PLACE){scene.remove(PLACE.g);if(PLACE.moving){S.builds=(S.builds||[]).concat(PLACE.moving);renderBuilds()}PLACE=null}$("placeBar").hidden=true}
 function confirmPlace(){if(!PLACE||!PLACE.ok)return toast("Can't build here. Pick an empty grassy spot.");const d=PLACE.d,p={x:PLACE.x,z:PLACE.z};
   if(PLACE.moving){S.builds=(S.builds||[]).concat({...PLACE.moving,x:+p.x.toFixed(2),z:+p.z.toFixed(2),r:PLACE.r});PLACE.moving=null;burst(p.x,.5,p.z,0xc98a4b,12);cancelPlace();renderBuilds();after();return toast("Moved: "+d.n+".",2200)}
-  if(PLACE.fromInv){S.decor[d.id]--}else{if(S.coins<d.cost)return toast("Not enough coins.");S.coins-=d.cost}
+  if(PLACE.fromInv){S.decor[d.id]--}else{if(S.coins<d.cost)return toast("Not enough coins.");if(d.wood&&woodHave()<d.wood)return toast("You need "+d.wood+" wood.");S.coins-=d.cost;if(d.wood){S.inv.wood-=d.wood;if(S.inv.wood<=0)delete S.inv.wood;invUI(true)}}
   if(d.tree){S.ptrees=(S.ptrees||[]).concat({u:Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36),kind:d.tree,x:+p.x.toFixed(2),z:+p.z.toFixed(2),at:now(),seed:Math.floor(Math.random()*9000)+100});buildTrees()}
   else S.builds=(S.builds||[]).concat({id:d.id,x:+p.x.toFixed(2),z:+p.z.toFixed(2),r:PLACE.r});
   burst(p.x,.5,p.z,0xc98a4b,18);gain(0,Math.round(d.cost/100),null);cancelPlace();renderBuilds();after();shopUI(true);toast(d.inc?"Built: "+d.n+"! +"+d.inc+" coins per minute.":"Placed: "+d.n+".",3000);townUI(true)}
@@ -2582,6 +2583,28 @@ let incT=0;function stepIncome(dt){if(VISIT)return;incT+=dt;if(incT<60)return;in
   const l1=labelSprite("Pier to the Island");l1.position.set(19.6,1.5,2.6);scene.add(l1);
 
   scene.add(b.mesh())})();
+/* -- passenger ferry: every 5 minutes from the farm boat terminal to the GoPyesta island -- */
+const FERRY={g:new THREE.Group(),pax:[],walkers:[],phase:"",A:{x:22.6,z:3.9},B:{x:44.6,z:5.9},ARCH:{x:IX_-11.4,z:IZ_+.8}};
+(function(){const b=new Builder(),g=FERRY.g;b.add("box",0xf4f4f0,0,.2,0,4.4,.7,1.7);b.add("box",0xf4f4f0,2.4,.2,0,1.3,.7,1.3,0,Math.PI/4,0);b.add("box",0x2f7fb8,0,.42,0,4.45,.14,1.74);b.add("box",0xd9342b,0,.05,0,4.45,.12,1.74);
+  b.add("box",0x8a6a4a,0,.56,0,4.2,.05,1.55);for(let k=0;k<3;k++)b.add("box",0x6b4422,-1.4+k*1.2,.75,0,.3,.3,1.4);b.add("box",0xf5c732,-.2,1.7,0,3.4,.08,1.8);[[-1.8,.8],[-1.8,-.8],[1.4,.8],[1.4,-.8]].forEach(([x,z])=>b.add("cyl",0x9aa3ab,x,1.15,z,.04,1.1,.04));
+  b.add("box",0x2b3640,2.2,.95,0,.6,.5,1);b.add("box",0x9fd8f0,2.5,1.05,0,.02,.3,.8);b.add("cyl",0xe8622a,-2.3,.85,.55,.18,.05,.18,Math.PI/2,0,0);
+  g.add(b.mesh());const lg=new THREE.Mesh(new THREE.PlaneGeometry(1.8,.9),GPMAT.logoF);lg.position.set(-.3,1.95,0);lg.rotation.x=-Math.PI/2;g.add(lg);
+  const SH=[0xe86a9a,0x3fa8e8,0xf2b632,0x8a4ac0,0x2fb08a,0xe2402f],SK=[0xe0a878,0xc68a5a,0xa8724a];
+  for(let k=0;k<6;k++){const p=new Builder(),x=-1.4+Math.floor(k/2)*1.2,z=k%2?.4:-.4;p.add("box",SH[k],0,.32,0,.22,.34,.3);p.add("sph",SK[k%3],0,.6,0,.12,.13,.12);p.add("cyl",SH[(k+2)%6],0,.73,0,.15,.03,.15);const m=p.mesh();m.position.set(x,.7,z);g.add(m);FERRY.pax.push(m)}
+  g.position.set(FERRY.A.x,0,FERRY.A.z);scene.add(g);
+  const sg=labelSprite("Boat Terminal · Ferry every 5 min");sg.position.set(18.6,2.4,4.2);sg.scale.set(3,.75,1);scene.add(sg);
+  const sb=new Builder();sb.add("box",0xa87a48,20.2,.5,4.3,3.2,.1,1.6);[[18.8,3.7],[21.6,3.7],[18.8,4.9],[21.6,4.9]].forEach(([x,z])=>sb.add("cyl",0x6b4a2c,x,-.6,z,.1,2.2,.1));sb.add("box",0x2f7fb8,20.2,1.9,4.3,3.4,.1,1.8);[[18.8,3.6],[21.6,3.6]].forEach(([x,z])=>sb.add("cyl",0x2b3640,x,1.2,z,.05,1.4,.05));scene.add(sb.mesh());
+  for(let k=0;k<6;k++){const f=makeFarmer({shirt:SH[k],pants:[0x2b2b3a,0x3b5f9a][k%2],skin:SK[k%3],hat:SH[(k+3)%6]});f.g.visible=false;scene.add(f.g);FERRY.walkers.push({f,o:{cr:0},k})}})();
+function stepFerry(dt,t){const c=(Date.now()/1000)%300,F=FERRY,g=F.g,A=F.A,B=F.B;let x=A.x,z=A.z,ph="dockA",u=0;
+  if(c<6){ph="board"}else if(c<36){ph="go";u=(c-6)/30}else if(c<48){ph="unload";x=B.x;z=B.z}else if(c<78){ph="back";u=(c-48)/30}
+  if(ph==="go"||ph==="back"){const e=u<.5?2*u*u:1-2*(1-u)*(1-u),f0=ph==="go"?A:B,f1=ph==="go"?B:A;x=f0.x+(f1.x-f0.x)*e;z=f0.z+(f1.z-f0.z)*e;g.rotation.y=ph==="go"?-Math.atan2(B.z-A.z,B.x-A.x):Math.PI-Math.atan2(B.z-A.z,B.x-A.x);
+    if(Math.random()<.35)burst(x-Math.cos(g.rotation.y)*2.4,.1,z+Math.sin(g.rotation.y)*2.4,0xffffff,1,.3)}else g.rotation.y=ph==="unload"?0:0;
+  g.position.set(x,Math.sin(t*1.6)*.05-.05,z);g.rotation.z=Math.sin(t*1.3)*.02;
+  const carrying=ph==="board"||ph==="go";F.pax.forEach(p=>p.visible=carrying);
+  if(ph!==F.phase){if(ph==="unload"){F.walkers.forEach((w,k)=>{w.f.g.visible=true;w.f.g.position.set(B.x-1+(k%3)*.5,0,B.z-1.3-(k>2?.4:0));w.t=0})}if(ph==="back"||ph==="dockA")F.walkers.forEach(w=>w.f.g.visible=false);
+    if(ph==="go"&&!VISIT&&typeof toast==="function"&&Math.hypot(cam.tx-30,cam.tz-3)<30)toast("⛴️ The ferry is leaving for the GoPyesta island with passengers.",2600);F.phase=ph}
+  if(ph==="unload")F.walkers.forEach(w=>{const G=w.f.g;if(!G.visible)return;const tx=F.ARCH.x+(w.k%3-1)*.6,tz=F.ARCH.z+(w.k>2?.6:-.6),dx=tx-G.position.x,dz=tz-G.position.z,d=Math.hypot(dx,dz);
+    if(d<.2){G.visible=false;return}const sp=1.6*dt;G.position.x+=dx/d*Math.min(sp,d);G.position.z+=dz/d*Math.min(sp,d);G.position.y=G.position.x<48.6?1.2:.5;G.rotation.y=Math.atan2(-dz,dx);animWorker(w.f,w.o,dt,t,true,0,0,0,0)})}
 /* -- player boat -- */
 const MYBOAT=new THREE.Group();scene.add(MYBOAT);let MYBOAT_ID=null;
 function buildBoat(){while(MYBOAT.children.length)MYBOAT.remove(MYBOAT.children[0]);const bt=ownBoat();MYBOAT_ID=bt&&bt.id;MYBOAT.visible=!!bt;if(!bt)return;const b=new Builder(),w=new Builder();
@@ -2629,9 +2652,9 @@ function stepRaid(dt,t){if(VISIT)return;
 /* -- shop UI -- */
 function card(it,status,btn,cls){return `<div class="sc ${cls||""}"><b>${it.n}</b><small>${it.d}</small><div class="scRow"><span class="price">${it.cost.toLocaleString()} coins${S.lv<it.lv?" · Level "+it.lv:""}</span>${btn}</div>${status?`<em>${status}</em>`:""}</div>`}
 let _shopKey="";
-function shopUI(force){const key=[S.lv,(S.boats||[]).join(","),(S.plots||[]).join(","),S.guard,(S.builds||[]).length].join("|");if(!force&&key===_shopKey)return;_shopKey=key;
+function shopUI(force){const key=[S.lv,(S.boats||[]).join(","),(S.plots||[]).join(","),S.guard,(S.builds||[]).length,woodHave()].join("|");if(!force&&key===_shopKey)return;_shopKey=key;
   const cnt=id=>(S.builds||[]).filter(o=>o.id===id).length;
-  $("shopB").innerHTML=BUILDS.filter(d=>!d.decor).map(d=>card(d,cnt(d.id)?"You have "+cnt(d.id):"",`<button class="btn sm" data-b="${d.id}">Build</button>`,S.lv<d.lv?"lock":"")).join("");
+  $("shopB").innerHTML=BUILDS.filter(d=>!d.decor).map(d=>card({...d,d:d.d+(d.wood?" Needs 🪵 "+d.wood+" wood.":"")},cnt(d.id)?"You have "+cnt(d.id):"",`<button class="btn sm" data-b="${d.id}">Build</button>`,S.lv<d.lv?"lock":"")).join("");
   $("shopV").innerHTML=BOATS.map(d=>{const own=(S.boats||[]).includes(d.id);return card(d,own?"Owned":"",own?"":`<button class="btn sm" data-v="${d.id}">Buy</button>`,S.lv<d.lv&&!own?"lock":own?"own":"")}).join("");
   $("shopI").innerHTML=ISLEITEMS.map(d=>{const own=d.id==="isla"?ownIsle():!!S.guard;return card(d,own?"Owned":"",own?"":`<button class="btn sm" data-i="${d.id}">Buy</button>`,S.lv<d.lv&&!own?"lock":own?"own":"")}).join("");
   document.querySelectorAll("#shopB [data-b]").forEach(b=>b.onclick=()=>startPlace(b.dataset.b));
@@ -3230,7 +3253,7 @@ function chopTree(k,x,y){const T=FTREES[k];const W=CREW.farmer;
   if(W&&W.o&&W.o.queue&&!VISIT){if(W.o.queue.some(q=>q.tree===T.id))return;W.o.resting=false;W.o.queue.push({type:"chop",tree:T.id});updateCrewUI();return toast(wName("farmer")+" grabs the axe and goes to chop the "+treeName(T)+".",2800)}
   doChop(T.id,x,y)}
 const FALLING=[];
-function doChop(id,x,y){const k=FTREES.findIndex(q=>q.id===id);if(k<0)return;const T=FTREES[k],grown=treeGrow(k)>=1,w=grown?3:1;
+function doChop(id,x,y){const k=FTREES.findIndex(q=>q.id===id);if(k<0)return;const T=FTREES[k],grown=treeGrow(k)>=1,w=grown?5:1;
   if(T.base)S.cut=(S.cut||[]).concat(T.id);else S.ptrees=(S.ptrees||[]).filter(p=>"p"+p.u!==T.id);delete S.trees[T.id];
   TREEG.remove(T.g);scene.add(T.g);T.g.remove(T.hit);T.g.rotation.z=0;FALLING.push({g:T.g,t:0,x:T.x,z:T.z});
   burst(T.x,.5,T.z,0xc98a4b,16,.4);const got=addItem("wood",w,x,y);gain(0,2,null);buildTrees();after();invUI(true);
