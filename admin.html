@@ -7,7 +7,12 @@
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1f3a16;--card:#2b2118;--ink:#f6ead2;--wood:#c98a4b;--btn:#4fa83a;--err:#ff8a7a;color-scheme:dark}}
 :root[data-theme="dark"]{--bg:#1f3a16;--card:#2b2118;--ink:#f6ead2;--wood:#c98a4b;--btn:#4fa83a;--err:#ff8a7a;color-scheme:dark}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;background:var(--bg);font:600 16px/1.45 system-ui,sans-serif;color:var(--ink);display:flex;justify-content:center;padding:24px 16px}
-main{width:min(520px,100%)}h1{color:#fff;font-size:1.6rem;margin:0 0 14px;text-shadow:0 2px 0 rgba(0,0,0,.25)}
+main{width:min(980px,100%)}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:18px}@media (max-width:800px){.grid2{grid-template-columns:1fr}}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:6px 0 10px}.stat{border:3px solid var(--wood);border-radius:12px;padding:8px;text-align:center}.stat b{display:block;font-size:1.5rem;font-variant-numeric:tabular-nums}.stat small{opacity:.8}
+table{width:100%;border-collapse:collapse;font-size:.85rem}th,td{padding:6px 6px;border-bottom:2px solid rgba(143,90,42,.25);text-align:left;white-space:nowrap}th{position:sticky;top:0;background:var(--card);cursor:pointer}td.n{text-align:right;font-variant-numeric:tabular-nums}
+.tbl{max-height:56vh;overflow:auto;border:3px solid var(--wood);border-radius:12px}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#9aa3ab;margin-right:6px}.dot.on{background:#3fcf4a}
+.toolsrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.toolsrow input{flex:1;min-width:160px}h1{color:#fff;font-size:1.6rem;margin:0 0 14px;text-shadow:0 2px 0 rgba(0,0,0,.25)}
 .card{background:var(--card);border:4px solid var(--wood);border-radius:16px;padding:16px;box-shadow:0 6px 0 var(--wood);margin-bottom:18px}
 label{display:block;font-weight:800;margin:10px 0 4px}input,textarea{width:100%;font:inherit;padding:10px 12px;border:3px solid var(--wood);border-radius:10px;background:transparent;color:var(--ink)}
 textarea{font:600 .82rem/1.35 ui-monospace,monospace;word-break:break-all;min-height:110px}
@@ -22,7 +27,8 @@ ul{padding-left:18px;margin:6px 0 0}li{margin:4px 0;word-break:break-all;font-si
   <form id="unlockF"><label for="pw">Admin password</label><input id="pw" type="password" autocomplete="current-password" required>
   <button type="submit" id="unlockB">Unlock</button><p class="err" id="lockErr" role="alert"></p></form>
 </section>
-<section class="card" id="gift" hidden>
+<div class="grid2" id="adminGrid" hidden>
+<section class="card" id="gift">
   <form id="giftF">
     <label for="who">Player username or farm name</label><input id="who" required maxlength="40" placeholder="e.g. rayle or Rayle's Farm">
     <label for="amt">Coins to give</label><input id="amt" type="number" min="1" max="1000000" step="1" value="5000" required>
@@ -36,11 +42,20 @@ ul{padding-left:18px;margin:6px 0 0}li{margin:4px 0;word-break:break-all;font-si
   </div>
   <label>Made this session</label><ul id="hist"><li>None yet.</li></ul>
   <hr style="border:0;border-top:3px dashed var(--wood);margin:18px 0 6px">
-  <label>Restart the game for everyone</label>
+  <label>Restart server · reload every player's game</label>
   <p class="note">Every player's game saves their farm and reloads within about 20 seconds. Use it after you publish an update.</p>
-  <button type="button" id="restartB" style="background:#c8382b">🔄 Restart all players</button><p class="err" id="rsMsg" role="status"></p>
+  <button type="button" id="restartB" style="background:#c8382b">🔄 Restart server</button><p class="err" id="rsMsg" role="status"></p>
   <button type="button" class="alt" id="lockB">Lock</button>
 </section>
+<section class="card" id="players">
+  <label>Players</label>
+  <div class="stats"><div class="stat"><b id="stTotal">–</b><small>Installed / signed up</small></div><div class="stat"><b id="stOn">–</b><small>Online now</small></div><div class="stat"><b id="stToday">–</b><small>New today</small></div><div class="stat"><b id="stAvg">–</b><small>Average level</small></div></div>
+  <div class="toolsrow"><input id="pq" placeholder="Search username or farm"><button type="button" class="alt" id="pRefresh" style="margin:0">Refresh</button><button type="button" id="pCsv" style="margin:0">Download CSV</button></div>
+  <p class="note" id="pNote">Counts players who opened the game with an account since the online map was added.</p>
+  <div class="tbl"><table><thead><tr><th data-s="u">Username</th><th data-s="farm">Farm</th><th data-s="lv">Level</th><th data-s="coins">Coins</th><th data-s="animals">Animals</th><th data-s="seen">Last seen</th><th data-s="created">Joined</th></tr></thead><tbody id="pBody"><tr><td colspan="7">Unlock to load players.</td></tr></tbody></table></div>
+  <p class="err" id="pErr" role="alert"></p>
+</section>
+</div>
 </main>
 <script>
 const ENC={"salt": "H2dVWCh4wBcPwaoacs1fFg==", "iv": "yD20rV2Bitmu0Lqf", "ct": "WmXE/ZJHn7Y0PwQUOoK/OF3SeEuSGkdrrllKir3mpvY6eHTmRM3RMxTqsXCp/n2nuM5PDQMQ0Xn1GVdmv1478Fp9VKV9T5lrHPUc+nYKh4GQRKJqRPvAQiKp6BNQaUu6GYdEZbe7TjBmAtmNSshYCtxYTOEzzoWlfaDRZMzmZnPCgLZpVDxf/61aezDrBITYvrUZTYOMyEeuVsCxAThNBFPtDBuUKMzARpmpp8XqsD2Vulc6DyLaKHYkYmm8NiVMVwA2iLeFYwhJusdhDJyosYgzep8sRFKdKfwpP9mi", "it": 310000};
@@ -51,7 +66,7 @@ $("unlockF").onsubmit=async e=>{e.preventDefault();$("lockErr").textContent="";$
   try{const base=await crypto.subtle.importKey("raw",new TextEncoder().encode($("pw").value.trim()),"PBKDF2",false,["deriveKey"]);
     const key=await crypto.subtle.deriveKey({name:"PBKDF2",salt:b64(ENC.salt),iterations:ENC.it,hash:"SHA-256"},base,{name:"AES-GCM",length:256},false,["decrypt"]);
     const jwk=JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM",iv:b64(ENC.iv)},key,b64(ENC.ct))));
-    SK=await crypto.subtle.importKey("jwk",jwk,{name:"ECDSA",namedCurve:"P-256"},false,["sign"]);$("pw").value="";$("lock").hidden=true;$("gift").hidden=false;$("who").focus()}
+    SK=await crypto.subtle.importKey("jwk",jwk,{name:"ECDSA",namedCurve:"P-256"},false,["sign"]);$("pw").value="";$("lock").hidden=true;$("adminGrid").hidden=false;$("who").focus();loadPlayers()}
   catch(err){$("lockErr").textContent=window.crypto&&crypto.subtle?"Wrong password.":"Open this page over https."}$("unlockB").disabled=false};
 document.querySelectorAll(".quick button").forEach(b=>b.onclick=()=>{$("amt").value=b.dataset.a});
 const hist=[];
@@ -63,10 +78,25 @@ $("giftF").onsubmit=async e=>{e.preventDefault();$("giftErr").textContent="";con
   $("code").value=code;$("out").hidden=false;hist.unshift(c.toLocaleString()+" coins → "+u);$("hist").innerHTML="";hist.forEach(t=>{const li=document.createElement("li");li.textContent=t;$("hist").append(li)})};
 $("copyB").onclick=async()=>{try{await navigator.clipboard.writeText($("code").value);$("copyB").textContent="Copied!"}catch(e){$("code").select();document.execCommand("copy");$("copyB").textContent="Copied!"}setTimeout(()=>$("copyB").textContent="Copy code",1600)};
 $("shareB").onclick=async()=>{const t="Your Farming gift code (open the game, tap 🎁 Redeem Code):\n"+$("code").value;if(navigator.share){try{await navigator.share({text:t})}catch(e){}}else{try{await navigator.clipboard.writeText(t)}catch(e){}$("shareB").textContent="Copied!";setTimeout(()=>$("shareB").textContent="Share",1600)}};
+let PL=[],PNOW=Date.now(),SORT={k:"seen",d:-1};
+const esc=v=>String(v==null?"":v).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const ago=ms=>{const m=Math.floor(ms/60000);return m<1?"just now":m<60?m+"m ago":m<1440?Math.floor(m/60)+"h ago":Math.floor(m/1440)+"d ago"};
+const dfmt=t=>t?new Date(t).toLocaleString("en-PH",{timeZone:"Asia/Manila",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}):"–";
+async function signed(tag){const at=Date.now(),sig=new Uint8Array(await crypto.subtle.sign({name:"ECDSA",hash:"SHA-256"},SK,new TextEncoder().encode(tag+":"+at)));return{at,sig:b64u(sig)}}
+async function loadPlayers(){$("pErr").textContent="";$("pRefresh").disabled=true;try{const r=await fetch("/api/admin/players",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(await signed("players"))});const d=await r.json();if(!r.ok)throw new Error(d.error||r.status);PL=d.players||[];PNOW=d.now||Date.now();drawPlayers()}catch(e){$("pErr").textContent="Couldn't load players: "+e.message}$("pRefresh").disabled=false}
+function drawPlayers(){const q=$("pq").value.trim().toLowerCase(),on=p=>PNOW-p.seen<150000,day=new Date(PNOW).toLocaleDateString("en-PH",{timeZone:"Asia/Manila"});
+  $("stTotal").textContent=PL.length;$("stOn").textContent=PL.filter(on).length;$("stToday").textContent=PL.filter(p=>p.created&&new Date(p.created).toLocaleDateString("en-PH",{timeZone:"Asia/Manila"})===day).length;$("stAvg").textContent=PL.length?(PL.reduce((a,p)=>a+(p.lv||1),0)/PL.length).toFixed(1):"–";
+  const L=PL.filter(p=>!q||(p.u+" "+p.farm+" "+p.farmer).toLowerCase().includes(q)).sort((a,b)=>{const x=a[SORT.k],y=b[SORT.k];return(typeof x==="string"?String(x).localeCompare(y):(x||0)-(y||0))*SORT.d});
+  $("pBody").innerHTML=L.length?L.map(p=>`<tr><td><span class="dot${on(p)?" on":""}"></span><b>${esc(p.u)}</b></td><td>${esc(p.farm)}<br><small>${esc(p.farmer)}</small></td><td class="n">${p.lv||1}</td><td class="n">${(p.coins||0).toLocaleString()}</td><td class="n">${p.animals||0}</td><td>${on(p)?"Online":ago(PNOW-p.seen)}</td><td>${dfmt(p.created)}</td></tr>`).join(""):'<tr><td colspan="7">No players yet.</td></tr>'}
+document.querySelectorAll("th[data-s]").forEach(th=>th.onclick=()=>{const k=th.dataset.s;SORT=SORT.k===k?{k,d:-SORT.d}:{k,d:k==="u"||k==="farm"?1:-1};drawPlayers()});
+$("pq").oninput=drawPlayers;$("pRefresh").onclick=loadPlayers;
+$("pCsv").onclick=()=>{const rows=[["username","farm","farmer","level","coins","animals","last_seen","joined"],...PL.map(p=>[p.u,p.farm,p.farmer,p.lv,p.coins,p.animals,new Date(p.seen).toISOString(),p.created?new Date(p.created).toISOString():""])];
+  const csv=rows.map(r=>r.map(v=>'"'+String(v==null?"":v).replace(/"/g,'""')+'"').join(",")).join("\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="farming-players.csv";a.click()};
+setInterval(()=>{if(SK&&!document.hidden)loadPlayers()},60000);
 $("restartB").onclick=async()=>{const m=$("rsMsg");m.style.color="";m.textContent="Sending…";$("restartB").disabled=true;
   try{const at=Date.now(),sig=new Uint8Array(await crypto.subtle.sign({name:"ECDSA",hash:"SHA-256"},SK,new TextEncoder().encode("restart:"+at)));
     const r=await fetch("/api/restart",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({at,sig:b64u(sig)})});const d=await r.json().catch(()=>({}));
     if(!r.ok)throw new Error(d.error||("Error "+r.status));m.style.color="#3f8f2c";m.textContent="Done! Players' games will reload within about 20 seconds."}
   catch(e){m.style.color="";m.textContent="Couldn't restart: "+e.message}$("restartB").disabled=false};
-$("lockB").onclick=()=>{SK=null;$("gift").hidden=true;$("out").hidden=true;$("lock").hidden=false;$("pw").focus()};
+$("lockB").onclick=()=>{SK=null;$("adminGrid").hidden=true;$("out").hidden=true;$("lock").hidden=false;$("pw").focus()};
 </script></body></html>
