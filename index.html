@@ -2010,7 +2010,7 @@ cv.addEventListener("pointermove",e=>{
   const prev=pointers.get(e.pointerId);
   if(!prev){if(e.pointerType==="mouse")hoverAt(e);return}
   const dx=e.clientX-prev.x,dy=e.clientY-prev.y;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
-  if(pointers.size===1){dragMoved+=Math.abs(dx)+Math.abs(dy);if(downAt&&Math.hypot(e.clientX-downAt.x,e.clientY-downAt.y)>6){cv.classList.add("drag");if(e.shiftKey||(e.buttons&2)){camT.az-=dx*.008;camT.pol=Math.min(1.35,Math.max(.35,camT.pol-dy*.006));cam.auto=false;setAuto();return}pan(dx,dy)}}
+  if(pointers.size===1){dragMoved+=Math.abs(dx)+Math.abs(dy);if(downAt&&Math.hypot(e.clientX-downAt.x,e.clientY-downAt.y)>(e.pointerType==="mouse"?6:16)){cv.classList.add("drag");if(e.shiftKey||(e.buttons&2)){camT.az-=dx*.008;camT.pol=Math.min(1.35,Math.max(.35,camT.pol-dy*.006));cam.auto=false;setAuto();return}pan(dx,dy)}}
   else if(pointers.size===2){const [a,b]=[...pointers.values()],d=Math.hypot(a.x-b.x,a.y-b.y),an=Math.atan2(b.y-a.y,b.x-a.x);if(pinch0){camT.dist=Math.min(90,Math.max(5,camT.dist*pinch0/d));let da=an-ang0;da=Math.atan2(Math.sin(da),Math.cos(da));camT.az+=da;camT.pol=Math.min(1.35,Math.max(.35,camT.pol-dy*.004))}pinch0=d;ang0=an;dragMoved=99;cam.follow=false;cam.auto=false;setAuto()}
 });
 function pan(dx,dy){const k=camT.dist*.0022,sa=Math.sin(cam.az),ca=Math.cos(cam.az);
@@ -2023,7 +2023,7 @@ let onIsle=false;
 function checkIsle(){const n=Math.hypot(cam.tx-IX,cam.tz-IZ)<34;$("tIsle").textContent=TRIP.on?"Sailing…":ownBoat()?(S.boatAt==="isla"?"Sail back to the Farm":"Sail to the Island"):(n?"Back to the Farm":"Go to the Island");if(n!==onIsle){onIsle=n;
   if(!TRIP.on){if(n)toast("You can see the GoPyesta Carnival Island.",2200)}}}
 function endPtr(e){
-  const wasTap=pointers.size===1&&downAt&&Math.hypot(e.clientX-downAt.x,e.clientY-downAt.y)<=6&&dragMoved<12;
+  const tr=e.pointerType==="mouse"?6:16,wasTap=pointers.size===1&&downAt&&Math.hypot(e.clientX-downAt.x,e.clientY-downAt.y)<=tr&&dragMoved<tr*2.5;
   pointers.delete(e.pointerId);if(!pointers.size){cv.classList.remove("drag");pinch0=0}
   if(wasTap&&e.type==="pointerup")clickAt(e);
 }
@@ -2403,7 +2403,8 @@ function runQueue(W,dt,t){
   if(!o.manual){o.manual=true;releaseAuto(W)}
   if(!q){g.visible=!o.resting;look=Math.sin(t*1.2)*.35;animWorker(W,o,dt,t,false,0,0,0,look);return true}
   g.visible=true;o.resting=false;
-  if(q.phase==null){q.phase="go";q.wait=0}
+  if(q.phase==null){q.phase="go";q.wait=0;q.age=0}q.age=(q.age||0)+dt;
+  if(q.age>(q.type==="walk"?40:30)&&q.phase==="go"){o.queue.shift();if(q.weed)q.weed.claim=false;updateCrewUI();animWorker(W,o,dt,t,false,0,0,0,0);return true}
   const tg=taskTarget(q);
   if(!tg){if(q.type==="animal")toast("Can't reach the animal right now.");o.queue.shift();updateCrewUI();animWorker(W,o,dt,t,false,0,0,0,0);return true}
   if(q.phase==="go"){const p=g.position,dx=tg[0]-p.x,dz=tg[1]-p.z,d=Math.hypot(dx,dz);let stop=q.type==="walk"||q.type==="rest"?0:(q.type==="animal"?.75:.42);
@@ -3249,9 +3250,7 @@ const treeLeft=k=>{const T=FTREES[k];S.trees=S.trees||{};if(T.born!=null&&treeGr
 const treeYield=k=>3+Math.floor(hsh("t"+FTREES[k].id+":"+(S.trees[FTREES[k].id]||0))*3);
 const treeName=T=>T.kind?ITEMS[T.kind].n+" Tree":"Tree";
 let chopAsk=null;
-function chopTree(k,x,y){const T=FTREES[k];const W=CREW.farmer;
-  if(W&&W.o&&W.o.queue&&!VISIT){if(W.o.queue.some(q=>q.tree===T.id))return;W.o.resting=false;W.o.queue.push({type:"chop",tree:T.id});updateCrewUI();return toast(wName("farmer")+" grabs the axe and goes to chop the "+treeName(T)+".",2800)}
-  doChop(T.id,x,y)}
+function chopTree(k,x,y){const T=FTREES[k];if(!T||VISIT)return;doChop(T.id,x,y)}
 const FALLING=[];
 function doChop(id,x,y){const k=FTREES.findIndex(q=>q.id===id);if(k<0)return;const T=FTREES[k],grown=treeGrow(k)>=1,w=grown?5:1;
   if(T.base)S.cut=(S.cut||[]).concat(T.id);else S.ptrees=(S.ptrees||[]).filter(p=>"p"+p.u!==T.id);delete S.trees[T.id];
@@ -3332,7 +3331,7 @@ function stepFarm2(dt,t){
     else{AD.ring.material.opacity=.45+.4*Math.sin(t*4);AD.ring.scale.setScalar(1+.08*Math.sin(t*4));AD.life-=dt;if(AD.life<=0){AD.on=false;g.visible=false;AD.t=200+Math.random()*200}}}}
 
 function loop(t){
-  const dt=Math.min(.05,(t-last)/1000);last=t;const ts=t/1000;
+  const dt=Math.min(.1,(t-last)/1000);last=t;const ts=t/1000;
   applyCam(dt);stepAnimals(dt,ts);stepExtras(dt,ts);stepFarm2(dt,ts);stepNet(dt);stepSound(dt);stepFish(dt,ts);ISLE.step(dt,ts);checkIsle();
   clouds.forEach(c=>{c.position.x+=c.userData.v*dt;if(c.position.x>130)c.position.x=-60});
   tileObjs.forEach((o,i)=>{if(o.sp.visible){o.sp.rotation.y=ts*2+i;o.sp.position.y=.95+Math.sin(ts*3+i)*.08}});
