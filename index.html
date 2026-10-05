@@ -2883,7 +2883,7 @@ var TOWNFLAG=null,lamps_=[];
   b.add("box",0x9aa3ab,JEEP_FARM.x-1.5,.08,-9.8,3,.12,1.2);[-1.2,1.2].forEach(dx=>b.add("cyl",0x2b3640,JEEP_FARM.x-1.5+dx,1.1,-10.2,.06,2.2,.06));b.add("box",0x3f8f2c,JEEP_FARM.x-1.5,2.25,-10,3.2,.1,1.4);
   {const l=labelSprite("Ride to Town");l.position.set(JEEP_FARM.x-1.5,2.9,-10);scene.add(l)}
   // trees, lamps, benches
-  for(let k=0;k<14;k++){const a=k/14*Math.PI*2,R=k%2?13.5:15.5,x=T.x+Math.cos(a)*R,z=T.z+Math.sin(a)*R;if(Math.abs(z+8)<2.4&&x>T.x)continue;if(z<T.z-8&&Math.abs(x-T.x)<13)continue;if(z>T.z+8&&Math.abs(x-T.x+1)<6)continue;tree(b,x,z,k%3?null:0xf08a24,k*7+400)}
+  for(let k=0;k<14;k++){const a=k/14*Math.PI*2,R=k%2?13.5:15.5,x=T.x+Math.cos(a)*R,z=T.z+Math.sin(a)*R;if(Math.abs(z+8)<2.4&&x>T.x)continue;if(z<T.z-8&&Math.abs(x-T.x)<13)continue;if(z>T.z+8&&Math.abs(x-T.x+1)<6)continue;if(Math.abs(x-(T.x+11.5))<4.5&&Math.abs(z-(T.z+6))<4.5)continue;if(Math.abs(z-(T.z+19.5))<3.5||Math.abs(x-(T.x+23))<3.5||Math.abs(x-(T.x-24))<3.5||Math.abs(z-(T.z-16.5))<3)continue;tree(b,x,z,k%3?null:0xf08a24,k*7+400)}
   for(let k=0;k<6;k++){const a=k/6*Math.PI*2+.3,x=T.x+Math.cos(a)*6.3,z=T.z+Math.sin(a)*6.3;b.add("cyl",0x2b3640,x,1.1,z,.05,2.2,.05);lamps_.push([x,z]);
     b.add("box",0xc98a4b,T.x+Math.cos(a+.5)*6.1,.45,T.z+Math.sin(a+.5)*6.1,1.3,.07,.4,0,-(a+.5)+Math.PI/2,0)}
   // houses around town
