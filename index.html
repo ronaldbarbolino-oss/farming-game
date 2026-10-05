@@ -129,6 +129,22 @@ h2{font-family:var(--display);font-weight:400;font-size:1.25rem;margin:0;color:#
 @media (prefers-reduced-motion:reduce){.float{animation:none}}
 @media (max-width:440px){.logo{font-size:1.5rem}.cbtn{min-width:36px;height:36px}}
 button{touch-action:manipulation}
+.mktTop{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.cap{display:flex;align-items:center;gap:8px;font-weight:900;font-size:.85rem;flex:1 1 220px;min-width:0}
+.capbar{flex:1;height:12px;background:#e7d8b5;border:2px solid var(--wood-d);border-radius:7px;overflow:hidden;min-width:80px}
+.capbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#9cd86a,var(--leaf));transition:width .3s}
+.capbar i.full{background:linear-gradient(90deg,#f0a35a,#d9342b)}
+.cap b{font-variant-numeric:tabular-nums}
+.mktBtns{display:flex;gap:6px;flex-wrap:wrap}
+.mktNote{margin:8px 2px;font-size:.78rem;font-weight:700;color:#7a5a3a;line-height:1.4;max-width:75ch}
+.invG{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+.invEmpty{grid-column:1/-1;margin:6px;font-weight:800;color:#7a5a3a;font-size:.85rem}
+.ic{display:grid;grid-template-columns:48px 1fr;gap:4px 8px;border:3px solid #e2c99a;background:#fffaf0;border-radius:12px;padding:6px;align-items:center;min-width:0}
+.ic.isl{border-color:#b48cdc;background:#f6efff}
+.ic img{width:48px;height:48px;grid-row:span 2}
+.icT{display:flex;flex-direction:column;min-width:0}.icT b{font-size:.88rem}.icT small{font-size:.72rem;font-weight:800;color:#7a5a3a;font-variant-numeric:tabular-nums}
+.tr{font-size:.68rem;font-weight:900;color:#7a5a3a}.tr.up{color:#2a8a2a}.tr.dn{color:#c0392b}
+.icB{display:flex;gap:5px;flex-wrap:wrap}
 .shopP h4{font-family:var(--display);font-weight:400;font-size:1.05rem;margin:4px 2px;color:var(--wood-d)}
 .scs{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-bottom:6px}
 .sc{border:3px solid #e2c99a;background:#fffaf0;border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:3px;min-width:0}
@@ -187,6 +203,7 @@ button{touch-action:manipulation}
       <button class="cbtn" data-v="field">Taniman</button>
       <button class="cbtn" data-v="pen">Hayupan</button>
       <button class="cbtn" data-v="barn">Kamalig</button>
+      <button class="cbtn" data-v="market">Puwesto</button>
       <button class="cbtn" data-v="falls">Talon</button>
       <button class="cbtn" data-v="isla">Isla</button>
       <button class="cbtn" data-v="lab">Loob ng Lab</button>
@@ -234,6 +251,16 @@ button{touch-action:manipulation}
     <button class="btn alt" data-s="winter">Taglamig</button>
     <button class="btn alt" data-s="auto" id="wxAuto">Auto</button>
   </div></div>
+
+  <div class="tray-head" id="mktHead"><h2>Imbakan at Puwesto</h2><span class="hint" id="mktT"></span></div>
+  <div class="panel mktP">
+    <div class="mktTop">
+      <div class="cap"><span>Imbakan</span><div class="capbar"><i id="invBar"></i></div><b id="invCap">0 / 60</b></div>
+      <div class="mktBtns"><button class="btn" id="sellAll">Ibenta Lahat</button><button class="btn" id="shopOpen">Bukas ang Puwesto</button><button class="btn alt" id="goMkt">Tingnan ang Puwesto</button></div>
+    </div>
+    <p class="mktNote">Napupunta rito ang lahat ng inani mo: gulay, prutas, itlog at gatas. Ibenta ang mga ito dito, o hayaang bumili ang mga mamimiling dumadaan sa puwesto. Mas mahal nang 15% ang bayad nila. Nagbabago ang presyo tuwing 3 minuto, kaya magbenta kapag ▲ mataas.</p>
+    <div class="invG" id="inv"></div>
+  </div>
 
   <div class="tray-head"><h2>Tindahan</h2><span class="hint">Magtayo ng gusali, bumili ng bangka, at magbukas ng taniman sa isla.</span></div>
   <div class="panel shopP">
@@ -298,7 +325,7 @@ const xpNeed=l=>Math.round(10*Math.pow(l,1.55));
 const FX0=-3.5, FZ0=-3;                       // field corner
 const PEN={x0:-11.5,x1:-6,z0:-3,z1:4};          // animal pen bounds
 
-function fresh(){return{builds:[],boats:[],boatAt:"farm",guard:false,plots:[],helperOn:true,coins:80,xp:0,lv:1,size:0,sel:"pechay",tiles:Array(25).fill(null).map(()=>({k:"grass"})),pens:[]}}
+function fresh(){return{inv:{},shopOpen:true,builds:[],boats:[],boatAt:"farm",guard:false,plots:[],helperOn:true,coins:80,xp:0,lv:1,size:0,sel:"pechay",tiles:Array(25).fill(null).map(()=>({k:"grass"})),pens:[]}}
 let S=fresh();
 try{const raw=localStorage.getItem("bukid-v1");if(raw){S=Object.assign(fresh(),JSON.parse(raw));if(!SIZES[S.size]||!Array.isArray(S.tiles)||S.tiles.length!==expectTiles(S))S=fresh()}}catch(e){}
 if(window.claude?.hot?.data?.S)S=window.claude.hot.data.S;
@@ -1236,7 +1263,7 @@ document.querySelectorAll("#wx .btn").forEach(b=>b.onclick=()=>{if(b.dataset.s==
 
 /* ================= EXTRAS STEP ================= */
 function stepExtras(dt,t){
-  stepParticles(dt);stepFlies(t);stepFarmer(dt,t);stepHelper(dt,t);stepCrew(dt,t);stepTrip(dt,t);stepRaid(dt,t);stepIncome(dt);BUILDG.children.forEach(g=>{if(g.userData.spin)g.userData.spin.rotation.x+=dt*1.6});stepWater(dt);stepWeather(dt,t);twinkles.forEach(sp=>{const v=Math.max(0,Math.sin(t*2.2+sp.userData.ph));sp.scale.setScalar(.05+v*.38);sp.material.rotation=t;});
+  stepParticles(dt);stepFlies(t);stepFarmer(dt,t);stepHelper(dt,t);stepCrew(dt,t);stepTrip(dt,t);stepRaid(dt,t);stepBuyers(dt,t);stockUI();stepIncome(dt);BUILDG.children.forEach(g=>{if(g.userData.spin)g.userData.spin.rotation.x+=dt*1.6});stepWater(dt);stepWeather(dt,t);twinkles.forEach(sp=>{const v=Math.max(0,Math.sin(t*2.2+sp.userData.ph));sp.scale.setScalar(.05+v*.38);sp.material.rotation=t;});
   weedTimer-=dt;if(weedTimer<=0){weedTimer=4+Math.random()*4;spawnWeed()}
   weeds.forEach(w=>{if(w.state==="ground"){const e=t-w.born;const s=Math.min(1,e*2);w.m.scale.setScalar(s<1?s*(1+.3*Math.sin(s*Math.PI)):1)}});
   tileObjs.forEach((o,i)=>{if(!o.cm.visible)return;const e=o.pop!=null?t-o.pop:9;const s=e<.5?.55+.45*(1+2.2*Math.pow(e/.5-1,3)+1.2*Math.pow(e/.5-1,2)):1;
@@ -1574,7 +1601,7 @@ return{root,spots:SPOTS,hits:hitBoxes,boat,
 
 /* ================= CAMERA ================= */
 const VIEWS={falls:{tx:11,ty:.6,tz:-14,dist:16,pol:1.05},all:{tx:-3,ty:.6,tz:-1.5,dist:32,pol:.85},field:{tx:.5,ty:.6,tz:1,dist:17,pol:.9},pen:{tx:-15,ty:.6,tz:-.8,dist:25,pol:.9},barn:{tx:2,ty:.6,tz:-7.5,dist:15,pol:1},
-  isla:{tx:IX,ty:1,tz:IZ,dist:56,pol:.98},lab:{tx:IX+1,ty:1.6,tz:IZ-1,dist:12,pol:.5,roofOff:true},tug:{dist:17,pol:1.02,follow:true}};
+  isla:{tx:IX,ty:1,tz:IZ,dist:56,pol:.98},market:{tx:9.5,ty:.8,tz:-.7,dist:11,pol:1.02},lab:{tx:IX+1,ty:1.6,tz:IZ-1,dist:12,pol:.5,roofOff:true},tug:{dist:17,pol:1.02,follow:true}};
 const cam={az:.75,pol:.85,dist:32,tx:-3,ty:.6,tz:-1.5,auto:false,follow:false};
 const DEF={...cam};
 let camT={...cam};
@@ -1629,8 +1656,8 @@ const ray=new THREE.Raycaster(),ndc=new THREE.Vector2();
 let hovered=null;   // {tile:i} or {pen:i}
 function pickAt(e){
   const r=cv.getBoundingClientRect();ndc.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(ndc,camera);
-  const hits=ray.intersectObjects([...WHITS,...ISLE.hits,...weeds.filter(w=>w.state==="ground").map(w=>w.m),...animalGroup.children,...tileObjs.map(o=>o.hit)],true);
-  for(const h of hits){if(h.object.userData.worker){const W=CREW[h.object.userData.worker];if(W&&W.g.visible)return{worker:h.object.userData.worker};continue}if(h.object.userData.isle!=null)return{isle:h.object.userData.isle};const pi=h.object.userData.pen;if(pi!=null&&animalObjs[pi]&&!animalObjs[pi].g.visible)continue;if(h.object.userData.weed)return{weed:h.object.userData.weed};if(h.object.userData.pen!=null&&!h.object.isSprite)return{pen:h.object.userData.pen};if(h.object.isSprite&&h.object.userData.pen!=null)return{pen:h.object.userData.pen};if(h.object.userData.tile!=null)return{tile:h.object.userData.tile}}
+  const hits=ray.intersectObjects([STALLHIT,...WHITS,...ISLE.hits,...weeds.filter(w=>w.state==="ground").map(w=>w.m),...animalGroup.children,...tileObjs.map(o=>o.hit)],true);
+  for(const h of hits){if(h.object.userData.stall)return{stall:true};if(h.object.userData.worker){const W=CREW[h.object.userData.worker];if(W&&W.g.visible)return{worker:h.object.userData.worker};continue}if(h.object.userData.isle!=null)return{isle:h.object.userData.isle};const pi=h.object.userData.pen;if(pi!=null&&animalObjs[pi]&&!animalObjs[pi].g.visible)continue;if(h.object.userData.weed)return{weed:h.object.userData.weed};if(h.object.userData.pen!=null&&!h.object.isSprite)return{pen:h.object.userData.pen};if(h.object.isSprite&&h.object.userData.pen!=null)return{pen:h.object.userData.pen};if(h.object.userData.tile!=null)return{tile:h.object.userData.tile}}
   return null;
 }
 function hoverAt(e){if(PLACE){placePointer(e,false);hovered=null;return}const p=pickAt(e);hovered=p&&p.worker?null:p;cv.dataset.worker=p&&p.worker?"1":""}
@@ -1638,6 +1665,7 @@ function clickAt(e){
   if(PLACE){placePointer(e,true);return}
   const p=pickAt(e);hovered=p&&p.worker?null:p;
   const x=e.clientX,y=e.clientY-24;
+  if(p&&p.stall){openMarket();return}
   if(p&&p.worker){selectWorker(SEL===p.worker?null:p.worker);return}
   if(SEL&&!(p&&p.isle!=null)){commandAt(e,p);return}
   if(!p)return;
@@ -1654,7 +1682,8 @@ const _p=new THREE.Vector3();
 function updateTag(){
   hl.visible=false;tag.hidden=true;if(!hovered)return;
   let txt,prog=null,wp;
-  if(hovered.isle!=null){const s=ISLE.spots[hovered.isle];wp=ISLE.spotWorld(hovered.isle,_p);txt=s.n+" · pindutin"}
+  if(hovered.stall){wp=_p.set(7.6,2.9,-.7);txt="Puwesto ng Paninda · "+invCount()+" paninda · pindutin"}
+  else if(hovered.isle!=null){const s=ISLE.spots[hovered.isle];wp=ISLE.spotWorld(hovered.isle,_p);txt=s.n+" · pindutin"}
   else if(hovered.weed){const w=hovered.weed;if(w.state!=="ground"){hovered=null;return}wp=_p.set(w.x,.75,w.z);txt="Bunutin ang damo · +2"}
   else if(hovered.tile!=null){const t=S.tiles[hovered.tile];if(!t)return;const [x,z]=tilePos(hovered.tile),st=tileState(t);
     const ok=toolOk(hovered.tile);hl.visible=TOOL!=="move"&&TOOL!=="care";hl.material.color.setHex(ok?0x9cf07a:0xff8a7a);hl.material.opacity=ok?.5:.35;const ty=tileY(hovered.tile);hl.position.set(x,ty+(t.k==="grass"?.09:.17),z);wp=_p.set(x,ty+1.05,z);
@@ -1701,19 +1730,19 @@ function tap(i,x,y){
   else if(t.k==="soil"){const c=crop(S.sel);if(S.lv<c.lv)return toast(c.n+" ay bukas sa Antas "+c.lv+".");if(S.coins<c.c)return toast("Kulang ang barya para sa "+c.n+".");S.coins-=c.c;S.tiles[i]={k:"crop",c:c.id,at:now()};floatText("-"+c.c,x,y);burstTile(i,0x6cc046,6,.2)}
   else{const st=tileState(t);
     if(st.dead){S.tiles[i]={k:"soil"};toast("Nalanta ang "+st.c.n+". Nilinis na.")}
-    else if(st.left<=0){S.tiles[i]={k:"soil"};const v=Math.round(st.c.s*(1-.6*st.w));gain(v,st.c.xp,x,y);if(st.w>0)toast("Nalalanta na kaya "+v+" barya lang");burstTile(i,st.c.col,18,.4);burstTile(i,0x6cc046,8,.4)}
+    else if(st.left<=0){if(!harvestItem(st,x,y))return;S.tiles[i]={k:"soil"};burstTile(i,st.c.col,18,.4);burstTile(i,0x6cc046,8,.4)}
     else toast(st.c.n+": "+fmt(st.left)+" pa bago anihin")}
   after();
 }
 function tapPen(i,x,y){const p=S.pens[i],a=animal(p.id);
   if(p.sick){const c=cureCost(a);if(S.coins<c)return toast("Kailangan ng "+c+" barya para sa gamot.");S.coins-=c;p.sick=false;floatText("Gumaling! −"+c,x,y);const o=animalObjs[i];if(o)burst(o.g.position.x,.7,o.g.position.z,0x7fe08a,14);toast(a.n+" ay magaling na.");after();return}
-  const left=a.t-(now()-p.at);if(left>0)return toast(a.item+" sa loob ng "+fmt(left));p.at=now();gain(a.s,a.xp,x,y);after()}
+  const left=a.t-(now()-p.at);if(left>0)return toast(a.item+" sa loob ng "+fmt(left));const it=AITEM[a.id];if(it){if(!addItem(it,1,x,y))return;gain(0,a.xp,null)}else gain(a.s,a.xp,x,y);p.at=now();after()}
 function harvestAll(){
-  let co=0,xp=0,n=0;
-  S.tiles.forEach((t,i)=>{const st=tileState(t);if(st&&!st.dead&&st.left<=0){co+=Math.round(st.c.s*(1-.6*st.w));xp+=st.c.xp;n++;S.tiles[i]={k:"soil"};burstTile(i,st.c.col,8,.4)}});
-  S.pens.forEach(p=>{const a=animal(p.id);if(!p.sick&&now()-p.at>=a.t){co+=a.s;xp+=a.xp;n++;p.at=now()}});
-  if(!n)return toast("Wala pang handang anihin.");
-  const r=$("tAll").getBoundingClientRect();gain(co,xp,r.left+r.width/2,r.top);toast(n+" na ani · +"+co+" barya");after();
+  let xp=0,n=0,cash=0,stop=false;
+  S.tiles.forEach((t,i)=>{if(stop)return;const st=tileState(t);if(st&&!st.dead&&st.left<=0){const q=st.w>.5?0:1;if(q&&!addItem(st.c.id,q,null)){stop=true;return}xp+=st.c.xp;n++;S.tiles[i]={k:"soil"};burstTile(i,st.c.col,8,.4)}});
+  S.pens.forEach(p=>{if(stop)return;const a=animal(p.id);if(!p.sick&&now()-p.at>=a.t){const it=AITEM[a.id];if(it){if(!addItem(it,1,null)){stop=true;return}}else cash+=a.s;xp+=a.xp;n++;p.at=now()}});
+  if(!n)return toast(stop?"Puno na ang imbakan! Magbenta muna sa puwesto.":"Wala pang handang anihin.");
+  const r=$("tAll").getBoundingClientRect();gain(cash,xp,r.left+r.width/2,r.top);toast(n+" na ani ang napunta sa imbakan"+(cash?" · +"+cash+" barya":"")+(stop?". Puno na ang imbakan.":""),3000);after();invUI(true);
 }
 function plowAll(){
   const empty=S.tiles.map((t,i)=>t.k==="grass"?i:-1).filter(i=>i>=0);
@@ -1763,6 +1792,7 @@ function ui(){
 $("tPlow").onclick=plowAll;$("tAll").onclick=harvestAll;$("tExpand").onclick=expand;
 $("tHelper").onclick=()=>{S.helperOn=!S.helperOn;helperUI();save();toast(S.helperOn?"Nag-aani na ulit ang katulong.":"Pinagpahinga mo ang katulong sa kamalig.")};
 $("tPlot").onclick=buyPlot;
+$("sellAll").onclick=sellAll;$("shopOpen").onclick=()=>{S.shopOpen=S.shopOpen===false;save();invUI(true);toast(S.shopOpen?"Bukas na ang puwesto. Darating ang mga mamimili.":"Sarado ang puwesto. Walang darating na mamimili.",2600)};$("goMkt").onclick=()=>{goView("market")};
 $("placeRot").onclick=()=>{if(PLACE){PLACE.r=(PLACE.r+Math.PI/2)%(Math.PI*2);PLACE.g.rotation.y=PLACE.r}};$("placeOk").onclick=confirmPlace;$("placeX").onclick=cancelPlace;
 $("tCure").onclick=()=>{const sick=S.pens.map((p,i)=>[p,i]).filter(([p])=>p.sick);if(!sick.length)return toast("Walang may sakit na hayop.");const cost=sick.reduce((s2,[p])=>s2+cureCost(animal(p.id)),0);if(S.coins<cost)return toast("Kailangan ng "+cost+" barya para gamutin lahat.");S.coins-=cost;sick.forEach(([p,i])=>{p.sick=false;const o=animalObjs[i];if(o)burst(o.g.position.x,.7,o.g.position.z,0x7fe08a,10)});toast(sick.length+" hayop ang gumaling · −"+cost+" barya");after()};
 $("tIsle").onclick=()=>{if(ownBoat())startTrip();else if(onIsle)goView("all");else toast("Bumili muna ng bangka sa Tindahan para makapunta sa isla. Puwede mo itong tanawin gamit ang view na Isla.",4200)};
@@ -1780,11 +1810,11 @@ function initHelper(){
   const tag=labelSprite("Katulong");tag.position.y=1.8;tag.scale.set(1.1,.28,1);f.g.add(tag);
   helper={...f,fill,o:{state:"idle",st:1,cr:0,tile:-1,carry:0,tx:0,tz:0}};
 }
-function ripeIdx(){const p=helper.g.position;let best=-1,bd=1e9;
+function ripeIdx(){if(invFull())return -1;const p=helper.g.position;let best=-1,bd=1e9;
   S.tiles.forEach((t,i)=>{const st=tileState(t);if(!st||st.p<1||isIsleTile(i))return;const [x,z]=tileXZ(i),d=Math.hypot(x-p.x,z-p.z)-(st.w>0?3:0);if(d<bd){bd=d;best=i}});return best}
 function helperHarvest(i){const t=S.tiles[i],st=tileState(t);if(!st||st.p<1)return;const [x,z]=tileXZ(i);
   if(st.dead){S.tiles[i]={k:"soil"};burstTile(i,0x8b6b3d,6)}
-  else{const v=Math.round(st.c.s*(1-.6*st.w));S.tiles[i]={k:"soil"};const sc=toScreen(x,1.3,z);gain(v,st.c.xp,sc.x,sc.y);burstTile(i,st.c.col,14,.4);burstTile(i,0x6cc046,6,.4);helper.o.carry++}
+  else{const sc=toScreen(x,1.3,z);if(!harvestItem(st,sc.x,sc.y))return;S.tiles[i]={k:"soil"};burstTile(i,st.c.col,14,.4);burstTile(i,0x6cc046,6,.4);helper.o.carry++}
   after()}
 function helperUI(){const b=$("tHelper");if(!b)return;b.textContent=S.helperOn?"Katulong: Nag-aani":"Katulong: Nagpapahinga";b.classList.toggle("alt",!S.helperOn)}
 function stepHelper(dt,t){
@@ -1861,7 +1891,7 @@ function releaseAuto(W){const o=W.o;
   o.state="idle";o.st=.3}
 function harvestTile(i,W){const t=S.tiles[i],st=tileState(t);if(!st||st.p<1)return false;const [x,z]=tileXZ(i);
   if(st.dead){S.tiles[i]={k:"soil"};burstTile(i,0x8b6b3d,6)}
-  else{const v=Math.round(st.c.s*(1-.6*st.w)),sc=toScreen(x,1.3,z);S.tiles[i]={k:"soil"};gain(v,st.c.xp,sc.x,sc.y);burstTile(i,st.c.col,14,.4);if(W===helper)helper.o.carry++}
+  else{const sc=toScreen(x,1.3,z);if(!harvestItem(st,sc.x,sc.y))return false;S.tiles[i]={k:"soil"};burstTile(i,st.c.col,14,.4);if(W===helper)helper.o.carry++}
   after();return true}
 function doTask(W,q){const tg=taskTarget(q),sc=tg?toScreen(tg[0],1.3,tg[1]):{x:0,y:0};
   if(q.type==="plow"){const t=S.tiles[q.tile];if(!t||t.k!=="grass")return;if(S.coins<PLOW)return toast("Kulang ang barya pang-araro.");S.coins-=PLOW;t.k="soil";gain(0,1,sc.x,sc.y);burstTile(q.tile,0x8d5a32,12);after()}
@@ -2087,6 +2117,82 @@ function buyIsle(id){const d=ISLEITEMS.find(q=>q.id===id);if(S.lv<d.lv)return to
   else{S.coins-=d.cost;S.guard=true;toast("May bantay na sa isla.",2400)}
   after();shopUI(true)}
 
+/* ================= STORAGE & MARKET STALL ================= */
+const AITEM={manok:"itlog",bibe:"itlog_bibe",pato:"itlog_pato",kambing:"gatas_kambing",baka:"gatas_baka",kalabaw:"gatas_kalabaw"};
+const ITEMS={itlog:{n:"Itlog ng Manok",p:25,ic:"egg",col:"#fff3d6"},itlog_bibe:{n:"Itlog ng Bibe",p:35,ic:"egg",col:"#e6efdc"},itlog_pato:{n:"Itlog ng Pato",p:45,ic:"egg",col:"#d4e4ef"},
+  gatas_kambing:{n:"Gatas ng Kambing",p:80,ic:"milk",col:"#3fb04a"},gatas_baka:{n:"Gatas ng Baka",p:150,ic:"milk",col:"#2f7fb8"},gatas_kalabaw:{n:"Gatas ng Kalabaw",p:260,ic:"milk",col:"#8a4ac0"}};
+CROPS.forEach(c=>{ITEMS[c.id]={n:c.n,p:c.s,crop:true,isl:!!c.island}});
+const invCount=()=>Object.values(S.inv||{}).reduce((a,b)=>a+(b|0),0);
+const invCap=()=>{const b=S.builds||[];return 60+80*b.filter(o=>o.id==="bodega").length+150*b.filter(o=>o.id==="kamalig").length};
+const invFull=()=>invCount()>=invCap();
+let fullT=0;
+function addItem(id,q,x,y){if(!ITEMS[id])return false;S.inv=S.inv||{};
+  if(invCount()+q>invCap()){if(performance.now()-fullT>4000){fullT=performance.now();toast("Puno na ang imbakan! Magbenta muna sa puwesto o magtayo ng Bodega.",3600)}return false}
+  S.inv[id]=(S.inv[id]||0)+q;if(x!=null)floatText("+"+q+" "+ITEMS[id].n,x,y);return true}
+function harvestItem(st,x,y){const q=st.w>.5?0:1;if(q&&!addItem(st.c.id,q,x,y))return false;gain(0,st.c.xp,null);if(!q)toast("Bulok na ang "+st.c.n+", wala nang maibebenta.",2200);return true}
+/* market prices change every 3 minutes */
+const DAYLEN=180;
+function hsh(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0)/4294967295}
+const mktDay=()=>Math.floor(Date.now()/1000/DAYLEN);
+const multOf=(id,d)=>.78+.55*hsh(id+":"+d);
+const priceOf=id=>Math.max(1,Math.round(ITEMS[id].p*multOf(id,mktDay())));
+const trendOf=id=>{const d=mktDay(),a=multOf(id,d),b=multOf(id,d-1);return a>b+.04?1:a<b-.04?-1:0};
+function sell(id,q,x,y){const have=(S.inv||{})[id]|0;q=Math.min(q,have);if(q<=0)return;const v=priceOf(id)*q;S.inv[id]=have-q;if(!S.inv[id])delete S.inv[id];
+  gain(v,0,x,y);toast("Naibenta: "+q+" "+ITEMS[id].n+" · +"+v.toLocaleString()+" barya",2200);after();invUI(true)}
+function sellAll(){let v=0,n=0;Object.keys(S.inv||{}).forEach(id=>{const q=S.inv[id]|0;if(q>0&&ITEMS[id]){v+=priceOf(id)*q;n+=q}});if(!n)return toast("Wala ka pang paninda sa imbakan.");
+  S.inv={};const r=$("sellAll").getBoundingClientRect();gain(v,Math.round(n/4),r.left+r.width/2,r.top);toast("Naibenta ang "+n+" paninda · +"+v.toLocaleString()+" barya",3000);after();invUI(true)}
+/* icons for eggs and milk */
+const ITEMIC={};
+function itemIcon(id){const it=ITEMS[id];if(it.crop)return ICONS[id]||"";if(ITEMIC[id])return ITEMIC[id];
+  const c=document.createElement("canvas");c.width=c.height=96;const x=c.getContext("2d");x.fillStyle="#f3e6c8";x.beginPath();x.arc(48,50,42,0,Math.PI*2);x.fill();
+  if(it.ic==="egg"){x.fillStyle="#c49a5a";x.beginPath();x.ellipse(48,72,30,9,0,0,Math.PI*2);x.fill();[[34,56],[60,58],[47,46]].forEach(([ex,ey])=>{x.fillStyle=it.col;x.strokeStyle="#b8905a";x.lineWidth=2.5;x.beginPath();x.ellipse(ex,ey,11,15,0,0,Math.PI*2);x.fill();x.stroke()})}
+  else{x.fillStyle="#fff";x.strokeStyle="#5a6a7a";x.lineWidth=3;x.beginPath();x.moveTo(36,34);x.lineTo(60,34);x.lineTo(64,46);x.lineTo(64,80);x.lineTo(32,80);x.lineTo(32,46);x.closePath();x.fill();x.stroke();
+    x.fillStyle=it.col;x.fillRect(33,54,30,14);x.fillStyle="#d9342b";x.fillRect(40,24,16,10)}
+  return ITEMIC[id]=c.toDataURL()}
+let _invKey="";
+function invUI(force){const d=mktDay(),key=JSON.stringify(S.inv||{})+"|"+d+"|"+invCap()+"|"+S.shopOpen;if(!force&&key===_invKey)return;_invKey=key;
+  const n=invCount(),cap=invCap();$("invCap").textContent=n+" / "+cap;$("invBar").style.width=Math.min(100,n/cap*100)+"%";$("invBar").classList.toggle("full",n>=cap);
+  $("shopOpen").textContent=S.shopOpen!==false?"Bukas ang Puwesto":"Sarado ang Puwesto";$("shopOpen").classList.toggle("alt",S.shopOpen===false);
+  const left=DAYLEN-Math.floor(Date.now()/1000)%DAYLEN;$("mktT").textContent="Magbabago ang presyo sa loob ng "+fmt(left);
+  const ids=Object.keys(S.inv||{}).filter(id=>(S.inv[id]|0)>0&&ITEMS[id]);
+  const g=$("inv");g.textContent="";
+  if(!ids.length){const e=document.createElement("p");e.className="invEmpty";e.textContent="Wala pang laman ang imbakan. Mag-ani ng gulay at prutas, o kunin ang itlog at gatas ng mga hayop.";g.append(e);return}
+  ids.sort((a,b)=>priceOf(b)*S.inv[b]-priceOf(a)*S.inv[a]).forEach(id=>{const it=ITEMS[id],q=S.inv[id],p=priceOf(id),tr=trendOf(id);
+    const c=document.createElement("div");c.className="ic"+(it.isl?" isl":"");
+    const img=document.createElement("img");img.alt="";img.src=itemIcon(id);
+    const t=document.createElement("div");t.className="icT";const b=document.createElement("b");b.textContent=it.n;const sm=document.createElement("small");
+    sm.textContent="×"+q+" · "+p+" barya bawat isa";const tg=document.createElement("span");tg.className="tr "+(tr>0?"up":tr<0?"dn":"");tg.textContent=tr>0?"▲ Mataas":tr<0?"▼ Mababa":"• Karaniwan";t.append(b,sm,tg);
+    const r=document.createElement("div");r.className="icB";const b1=document.createElement("button");b1.className="btn sm alt";b1.textContent="Ibenta 1";b1.onclick=e=>sell(id,1,e.clientX,e.clientY-20);
+    const b2=document.createElement("button");b2.className="btn sm";b2.textContent="Lahat · "+(p*q).toLocaleString();b2.onclick=e=>sell(id,q,e.clientX,e.clientY-20);r.append(b1,b2);
+    c.append(img,t,r);g.append(c)})}
+function openMarket(){const el=$("mktHead");if(el)el.scrollIntoView({behavior:"smooth",block:"start"});invUI(true)}
+/* stall: stock on display, hit box, sign */
+const STALLHIT=new THREE.Mesh(new THREE.BoxGeometry(1.6,2.4,4.8),new THREE.MeshBasicMaterial({visible:false}));STALLHIT.position.set(7.6,1.1,-.7);STALLHIT.userData.stall=true;scene.add(STALLHIT);
+const STOCK=new THREE.Group();scene.add(STOCK);
+(function(){const r=rnd(77),cols=[0xe2402f,0xf5c732,0x7ccf4a,0xf08a24,0xfff3d6,0x7a3f9c];for(let k=0;k<3;k++)for(let j=0;j<16;j++){const m=new THREE.Mesh(new THREE.SphereGeometry(.085,8,6),am(cols[(k*3+j)%cols.length]));m.position.set(7.6+(r()-.5)*.7,.74+Math.floor(j/8)*.09,-2.2+k*1.5+(r()-.5)*1);m.castShadow=true;STOCK.add(m)}})();
+const STALLSIGN=labelSprite("Puwesto ng Paninda");STALLSIGN.position.set(7.6,2.6,-.7);scene.add(STALLSIGN);
+let _stockN=-1;function stockUI(){const n=invCount(),cap=invCap(),show=Math.round(Math.min(1,n/Math.max(20,cap*.5))*STOCK.children.length);if(show===_stockN)return;_stockN=show;STOCK.children.forEach((m,i)=>m.visible=i<show)}
+/* customers that walk up and buy */
+const BUYERS=[],BNAMES=["Aling Nena","Mang Kanor","Ate Joy","Kuya Ben","Lola Sita","Tito Boy","Ate Grace","Mang Lito"];
+let buyT=12;
+function spawnBuyer(){const r=Math.random,f=makeFarmer({shirt:[0xe86a9a,0x3fa8e8,0xf2b632,0x8a4ac0,0x2fb08a][Math.floor(r()*5)],pants:[0x3a3a4a,0x6b4a2c,0x2f4f7a][Math.floor(r()*3)],skin:[0xe0a878,0xc68a5a,0xa8724a][Math.floor(r()*3)],hat:[0xd8b860,0xf4f4f0,0xc0392b][Math.floor(r()*3)]});
+  const z=-1.9+r()*2.4;f.g.position.set(16,0,z+(r()-.5)*4);scene.add(f.g);const nm=BNAMES[Math.floor(r()*BNAMES.length)],tag=labelSprite(nm);tag.position.y=1.8;tag.scale.set(1.1,.28,1);f.g.add(tag);
+  BUYERS.push({...f,nm,o:{cr:0},st:"go",tx:8.75,tz:z,t:0})}
+function stepBuyers(dt,t){
+  buyT-=dt;if(buyT<=0){buyT=25+Math.random()*20;if(S.shopOpen!==false&&invCount()>0&&BUYERS.length<2&&!isBad())spawnBuyer()}
+  for(let k=BUYERS.length-1;k>=0;k--){const B=BUYERS[k],g=B.g;let walking=false,armR=0;
+    const walkTo=(x,z,sp)=>{const dx=x-g.position.x,dz=z-g.position.z,d=Math.hypot(dx,dz);if(d<.06)return true;const want=Math.atan2(-dz,dx);let da=want-g.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));g.rotation.y+=da*Math.min(1,dt*6);
+      if(Math.abs(da)<.8){g.position.x+=dx/d*Math.min(sp*dt,d);g.position.z+=dz/d*Math.min(sp*dt,d)}walking=true;return false};
+    if(B.st==="go"){if(walkTo(B.tx,B.tz,1.1)){B.st="look";B.t=2.2;g.rotation.y=Math.PI}}
+    else if(B.st==="look"){B.t-=dt;armR=B.t<1?1.4:0;if(B.t<=0){buyFrom(B);B.st="leave";B.tx=16+Math.random()*2;B.tz=g.position.z+(Math.random()-.5)*6}}
+    else if(B.st==="leave"){if(walkTo(B.tx,B.tz,1.2)||isBad()&&g.position.x>14){scene.remove(g);BUYERS.splice(k,1);continue}}
+    animWorker(B,B.o,dt,t,walking,0,0,armR,B.st==="look"?Math.sin(t*1.5)*.4:0)}}
+function buyFrom(B){const ids=Object.keys(S.inv||{}).filter(id=>(S.inv[id]|0)>0&&ITEMS[id]);if(!ids.length){floatSpot(B,"Ubos na pala…");return}
+  const id=ids[Math.floor(Math.random()*ids.length)],q=Math.min(S.inv[id],1+Math.floor(Math.random()*3)),v=Math.round(priceOf(id)*1.15)*q;
+  S.inv[id]-=q;if(!S.inv[id])delete S.inv[id];S.coins+=v;const sc=toScreen(B.g.position.x,2,B.g.position.z);floatText("+"+v,sc.x,sc.y);
+  toast(B.nm+" ay bumili ng "+q+" "+ITEMS[id].n+" · +"+v+" barya",2600);after();invUI(true)}
+function floatSpot(B,txt){const sc=toScreen(B.g.position.x,2,B.g.position.z);floatText(txt,sc.x,sc.y)}
+
 /* ================= ACCOUNTS: sign up, one farm per player ================= */
 var CLOUD={db:null,user:null,id:null,profile:null,dirty:false,busy:false,lastPub:""};
 const SHIRTS=[0xd94a3a,0x2f7fb8,0x3f8f2c,0xe8a82a,0x8a4ac0];
@@ -2169,12 +2275,12 @@ function loop(t){
   tileObjs.forEach((o,i)=>{if(o.sp.visible){o.sp.rotation.y=ts*2+i;o.sp.position.y=.95+Math.sin(ts*3+i)*.08}});
   acc+=dt;if(acc>.2){acc=0;syncField()}
   updateTag();
-  {let c;if(cv.classList.contains("drag"))c="grabbing";else if(cv.dataset.worker==="1")c="pointer";else if(TOOL==="move")c=SEL?"cell":"grab";else if(hovered&&hovered.tile!=null)c=toolOk(hovered.tile)?"pointer":"not-allowed";else if(hovered&&(hovered.pen!=null||hovered.weed))c=TOOL==="care"||TOOL==="harvest"?"pointer":"not-allowed";else if(hovered&&hovered.isle!=null)c="help";else if(SEL&&TOOL==="move")c="cell";else c="crosshair";if(cv.style.cursor!==c)cv.style.cursor=c}
+  {let c;if(cv.classList.contains("drag"))c="grabbing";else if(cv.dataset.worker==="1")c="pointer";else if(TOOL==="move")c=SEL?"cell":"grab";else if(hovered&&hovered.tile!=null)c=toolOk(hovered.tile)?"pointer":"not-allowed";else if(hovered&&(hovered.pen!=null||hovered.weed))c=TOOL==="care"||TOOL==="harvest"?"pointer":"not-allowed";else if(hovered&&hovered.isle!=null)c="help";else if(hovered&&hovered.stall)c="pointer";else if(SEL&&TOOL==="move")c="cell";else c="crosshair";if(cv.style.cursor!==c)cv.style.cursor=c}
   renderer.render(scene,camera);requestAnimationFrame(loop);
 }
 function start(){
   makeIcons();resize();buildField();buildSnowLayers();scene.add(sun.target);initFarmer();initHelper();initCrew();renderBuilds();buildBoat();shopUI(true);syncAnimals();ui();wxUI();helperUI();applyCam(1);
-  $("loading").hidden=true;requestAnimationFrame(loop);setInterval(ui,1000);initCloud();
+  $("loading").hidden=true;requestAnimationFrame(loop);setInterval(ui,1000);setInterval(()=>invUI(false),1000);invUI(true);initCloud();
 }
 window.claude?.hot?.ready?window.claude.hot.ready(start):start();
 })();
