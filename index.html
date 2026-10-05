@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="tl">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta name="description" content="Larong pagsasaka: magtanim, mag-alaga ng hayop, magtayo ng bahay at maglayag sa isla.">
+<meta name="description" content="Farming game: plant crops, raise animals, build houses and sail to the island.">
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font-size:14px;font-family:system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 </head>
 <body>
@@ -126,6 +126,12 @@ h2{font-family:var(--display);font-weight:400;font-size:1.25rem;margin:0;color:#
 .keep{display:flex;gap:8px;align-items:center;font-weight:800!important;margin-top:4px}
 .err{color:#b3261e;font-weight:800;font-size:.8rem;margin:0;min-height:1em}
 .suRow{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.authM{background:rgba(30,60,20,.92);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:60}
+.tabs{display:flex;gap:6px;margin:2px 0 6px}
+.tabB{flex:1;font-family:var(--display);font-size:1rem;border:3px solid var(--wood-d);border-radius:10px;background:#fffaf0;color:var(--ink);padding:6px;cursor:pointer}
+.tabB.on{background:var(--leaf);color:#fff;border-color:#2a6619}
+.tabB:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+#auSignup,#auLogin{display:flex;flex-direction:column;gap:6px}#auSignup[hidden],#auLogin[hidden]{display:none}
 @media (prefers-reduced-motion:reduce){.float{animation:none}}
 @media (max-width:440px){.logo{font-size:1.5rem}.cbtn{min-width:36px;height:36px}}
 button{touch-action:manipulation}
@@ -191,151 +197,185 @@ button{touch-action:manipulation}
 body.hideui .crew,body.hideui .views,body.hideui .cam,body.hideui .modeTag,body.hideui .toolbar,body.hideui .tip,body.hideui #menuBtn,body.hideui #rotBtn{display:none!important}
 @media (pointer:coarse) and (orientation:portrait){#rotBtn{display:inline-block}}
 @media (max-width:640px) and (orientation:portrait){.sbtns{left:auto;right:8px;transform:none;top:226px;flex-direction:column}}
-@media (orientation:landscape) and (max-height:540px){
-  .wrap{padding:0;max-width:none;gap:0}
-  .stage{position:fixed;inset:0;height:auto;min-height:0;border:0;border-radius:0;box-shadow:none;z-index:10}
-  .hud{position:fixed;top:calc(6px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:12;background:rgba(58,38,21,.6);padding:3px 8px;border-radius:12px;flex-wrap:nowrap;gap:6px;max-width:48vw;overflow:hidden}
-  .hud .logo{font-size:1rem;text-shadow:none}.saved{display:none}.acct{font-size:.68rem;padding:2px 6px;max-width:16vw}
-  .stat{padding:1px 6px;font-size:.72rem;box-shadow:none;border-width:2px}.xpbar{width:40px}.lvl{width:18px;height:18px;font-size:.65rem}
-  .sbtns{top:calc(6px + env(safe-area-inset-top,0px));left:auto;right:calc(8px + env(safe-area-inset-right,0px));transform:none}
-  #menuBtn{display:inline-block}#rotBtn{display:none!important}
-  body.hideui .hud{display:none}
-  .toolbar{top:auto;bottom:calc(6px + env(safe-area-inset-bottom,0px));left:50%;right:auto;transform:translateX(-50%);flex-wrap:nowrap;max-width:none;gap:4px}
-  .tb{height:38px;font-size:.8rem;padding:0 8px 0 4px;flex:none}.tb span{display:inline}
-  .crew{top:calc(44px + env(safe-area-inset-top,0px));left:calc(8px + env(safe-area-inset-left,0px));bottom:auto;max-width:30vw}
-  .crewc{padding:2px;gap:2px}.cw-sel{flex-basis:100%}.cw-sel small{display:none}.cw-mini{font-size:.6rem;padding:1px 4px}
-  .views{top:auto;bottom:calc(52px + env(safe-area-inset-bottom,0px));left:calc(8px + env(safe-area-inset-left,0px));right:auto;max-width:34vw;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
-  .views .cbtn{flex:none;height:30px;font-size:.75rem;padding:0 8px}
-  .cam{top:calc(44px + env(safe-area-inset-top,0px));right:calc(8px + env(safe-area-inset-right,0px));bottom:auto;flex-direction:column;gap:4px}
-  .cam .cbtn{min-width:34px;height:34px;font-size:.9rem;padding:0 6px}
-  .modeTag{top:auto;bottom:calc(52px + env(safe-area-inset-bottom,0px));font-size:.7rem}
-  .tip{display:none}.placeBar{bottom:52px}
-  #below{position:fixed;top:0;right:0;bottom:0;width:min(460px,62vw);overflow-y:auto;z-index:30;background:var(--grass-d);padding:10px calc(10px + env(safe-area-inset-right,0px)) 30px 10px;transform:translateX(105%);transition:transform .25s ease;box-shadow:-6px 0 18px rgba(0,0,0,.35);display:flex;flex-direction:column;gap:10px}
-  body.drawer #below{transform:none}
-  .drawerTop{display:flex;justify-content:space-between;align-items:center;position:sticky;top:-10px;background:var(--grass-d);padding:6px 0;z-index:2;color:#fff;font-family:var(--display);font-size:1.2rem}
-}
+body.land .wrap{padding:0;max-width:none;gap:0}
+body.land .stage{position:fixed;inset:0;height:auto;min-height:0;border:0;border-radius:0;box-shadow:none;z-index:10}
+body.land .hud{position:fixed;top:calc(6px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:12;background:rgba(58,38,21,.6);padding:3px 8px;border-radius:12px;flex-wrap:nowrap;gap:6px;max-width:48vw;overflow:hidden}
+body.land .hud .logo{font-size:1rem;text-shadow:none}
+body.land .saved{display:none}
+body.land .acct{font-size:.68rem;padding:2px 6px;max-width:16vw}
+body.land .stat{padding:1px 6px;font-size:.72rem;box-shadow:none;border-width:2px}
+body.land .xpbar{width:40px}
+body.land .lvl{width:18px;height:18px;font-size:.65rem}
+body.land .sbtns{top:calc(6px + env(safe-area-inset-top,0px));left:auto;right:calc(8px + env(safe-area-inset-right,0px));transform:none}
+body.land #menuBtn{display:inline-block}
+body.land #rotBtn{display:none!important}
+body.land.hideui .hud{display:none}
+body.land .toolbar{top:auto;bottom:calc(6px + env(safe-area-inset-bottom,0px));left:50%;right:auto;transform:translateX(-50%);flex-wrap:nowrap;max-width:none;gap:4px}
+body.land .tb{height:38px;font-size:.8rem;padding:0 8px 0 4px;flex:none}
+body.land .tb span{display:inline}
+body.land .crew{top:calc(44px + env(safe-area-inset-top,0px));left:calc(8px + env(safe-area-inset-left,0px));bottom:auto;max-width:30vw}
+body.land .crewc{padding:2px;gap:2px}
+body.land .cw-sel{flex-basis:100%}
+body.land .cw-sel small{display:none}
+body.land .cw-mini{font-size:.6rem;padding:1px 4px}
+body.land .views{top:auto;bottom:calc(52px + env(safe-area-inset-bottom,0px));left:calc(8px + env(safe-area-inset-left,0px));right:auto;max-width:34vw;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+body.land .views .cbtn{flex:none;height:30px;font-size:.75rem;padding:0 8px}
+body.land .cam{top:calc(44px + env(safe-area-inset-top,0px));right:calc(8px + env(safe-area-inset-right,0px));bottom:auto;flex-direction:column;gap:4px}
+body.land .cam .cbtn{min-width:34px;height:34px;font-size:.9rem;padding:0 6px}
+body.land .modeTag{top:auto;bottom:calc(52px + env(safe-area-inset-bottom,0px));font-size:.7rem}
+body.land .tip{display:none}
+body.land .placeBar{bottom:52px}
+body.land #below{position:fixed;top:0;right:0;bottom:0;width:min(460px,62vw);overflow-y:auto;z-index:30;background:var(--grass-d);padding:10px calc(10px + env(safe-area-inset-right,0px)) 30px 10px;transform:translateX(105%);transition:transform .25s ease;box-shadow:-6px 0 18px rgba(0,0,0,.35);display:flex;flex-direction:column;gap:10px}
+body.land.drawer #below{transform:none}
+body.land .drawerTop{display:flex;justify-content:space-between;align-items:center;position:sticky;top:-10px;background:var(--grass-d);padding:6px 0;z-index:2;color:#fff;font-family:var(--display);font-size:1.2rem}
+body.land{overflow:hidden;overscroll-behavior:none}
+body.land .stage{width:100vw;height:100vh;height:100dvh}
 @media (prefers-reduced-motion:reduce){#below{transition:none}}
 </style>
 
 <div class="wrap">
   <header class="hud">
-    <div class="who"><h1 class="logo" id="logo">Farming</h1><button class="acct" id="acct" type="button">Bisita · Mag-sign up</button><span class="saved" id="acctSave">Naka-save sa browser na ito</span></div>
+    <div class="who"><h1 class="logo" id="logo">Farming</h1><button class="acct" id="acct" type="button">Guest · Sign up</button><span class="saved" id="acctSave">Saved in this browser</span></div>
     <div class="stats">
-      <div class="stat" title="Panahon"><span id="season">Tagsibol</span></div>
-      <div class="stat" title="Barya"><span class="coin"></span><span id="coins">0</span></div>
-      <div class="stat" title="Antas at XP"><span class="lvl" id="lvl">1</span><span class="xpbar"><i id="xp"></i></span></div>
+      <div class="stat" title="Weather"><span id="season">Spring</span></div>
+      <div class="stat" title="Coins"><span class="coin"></span><span id="coins">0</span></div>
+      <div class="stat" title="Level and XP"><span class="lvl" id="lvl">1</span><span class="xpbar"><i id="xp"></i></span></div>
     </div>
   </header>
 
   <div class="stage" id="stage">
-    <canvas id="cv" aria-label="3D na bukid: i-drag para iikot, pindutin ang lote para mag-araro, magtanim o mag-ani"></canvas>
-    <div class="loading" id="loading">Inihahanda ang bukid…</div>
-    <div class="sbtns"><button class="sb" id="menuBtn" type="button">☰ Menu</button><button class="sb" id="hideBtn" type="button" aria-pressed="false">Itago</button><button class="sb" id="rotBtn" type="button">↻ Landscape</button></div>
-    <div class="crew" id="crew" role="group" aria-label="Mga tauhan"></div>
-    <div class="modeTag" id="modeTag">Galaw: iikot at igalaw lang ang view</div>
-    <div class="tip" id="tip">I-slide para igalaw ang view · dalawang daliri para iikot at mag-zoom · right-click o Shift para iikot · scroll para mag-zoom</div>
-    <div class="views" role="group" aria-label="Pumunta sa">
-      <button class="cbtn" data-v="all">Buong Bukid</button>
-      <button class="cbtn" data-v="field">Taniman</button>
-      <button class="cbtn" data-v="pen">Hayupan</button>
-      <button class="cbtn" data-v="barn">Kamalig</button>
-      <button class="cbtn" data-v="market">Puwesto</button>
-      <button class="cbtn" data-v="falls">Talon</button>
-      <button class="cbtn" data-v="bayan">Bayan</button>
-      <button class="cbtn" data-v="isla">Isla</button>
-      <button class="cbtn" data-v="lab">Loob ng Lab</button>
+    <canvas id="cv" aria-label="3D farm: drag to rotate, tap a plot to plow, plant or harvest"></canvas>
+    <div class="loading" id="loading">Preparing the farm…</div>
+    <div class="sbtns"><button class="sb" id="menuBtn" type="button">☰ Menu</button><button class="sb" id="hideBtn" type="button" aria-pressed="false">Hide</button><button class="sb" id="rotBtn" type="button">↻ Landscape</button></div>
+    <div class="crew" id="crew" role="group" aria-label="Workers"></div>
+    <div class="modeTag" id="modeTag">Move: rotate and pan the view only</div>
+    <div class="tip" id="tip">Slide to move the view · two fingers to rotate and zoom · right-click or Shift to rotate · scroll to zoom</div>
+    <div class="views" role="group" aria-label="Go to">
+      <button class="cbtn" data-v="all">Whole Farm</button>
+      <button class="cbtn" data-v="field">Fields</button>
+      <button class="cbtn" data-v="pen">Animals</button>
+      <button class="cbtn" data-v="barn">Barn</button>
+      <button class="cbtn" data-v="market">Stall</button>
+      <button class="cbtn" data-v="falls">Waterfall</button>
+      <button class="cbtn" data-v="bayan">Town</button>
+      <button class="cbtn" data-v="isla">Island</button>
+      <button class="cbtn" data-v="lab">Inside the Lab</button>
       <button class="cbtn" data-v="tug">Tugboat</button>
     </div>
-    <div class="toolbar" role="toolbar" aria-label="Gamit sa bukid">
-      <button class="tb on" data-t="move" aria-pressed="true" title="Galaw (1): iikot at igalaw ang view lang"><span>1</span>Galaw</button>
-      <button class="tb" data-t="plow" aria-pressed="false" title="Araro (2): gawing lupa ang damo"><span>2</span>Araro</button>
-      <button class="tb" data-t="plant" aria-pressed="false" title="Tanim (3): itanim ang napiling binhi"><span>3</span>Tanim</button>
-      <button class="tb" data-t="harvest" aria-pressed="false" title="Ani (4): anihin ang hinog na tanim"><span>4</span>Ani</button>
-      <button class="tb" data-t="care" aria-pressed="false" title="Alaga (5): kunin ang ani ng hayop, gamutin, bunutin ang damo"><span>5</span>Alaga</button>
+    <div class="toolbar" role="toolbar" aria-label="Farm tools">
+      <button class="tb on" data-t="move" aria-pressed="true" title="Move (1): rotate and pan the view only"><span>1</span>Move</button>
+      <button class="tb" data-t="plow" aria-pressed="false" title="Plow (2): turn grass into soil"><span>2</span>Plow</button>
+      <button class="tb" data-t="plant" aria-pressed="false" title="Plant (3): plant the selected seed"><span>3</span>Plant</button>
+      <button class="tb" data-t="harvest" aria-pressed="false" title="Harvest (4): harvest ripe crops"><span>4</span>Harvest</button>
+      <button class="tb" data-t="care" aria-pressed="false" title="Care (5): collect from animals, treat them, pull weeds"><span>5</span>Care</button>
     </div>
-    <div class="placeBar" id="placeBar" hidden><span id="placeTxt"></span><div><button class="cbtn" id="placeRot" type="button">Iikot</button><button class="cbtn on" id="placeOk" type="button">Ilagay dito</button><button class="cbtn" id="placeX" type="button">Kanselahin</button></div></div>
+    <div class="placeBar" id="placeBar" hidden><span id="placeTxt"></span><div><button class="cbtn" id="placeRot" type="button">Rotate</button><button class="cbtn on" id="placeOk" type="button">Place here</button><button class="cbtn" id="placeX" type="button">Cancel</button></div></div>
     <div class="cam">
-      <button class="cbtn" id="cL" aria-label="Iikot pakaliwa">↺</button>
-      <button class="cbtn" id="cR" aria-label="Iikot pakanan">↻</button>
+      <button class="cbtn" id="cL" aria-label="Rotate left">↺</button>
+      <button class="cbtn" id="cR" aria-label="Rotate right">↻</button>
       <button class="cbtn" id="cA" aria-pressed="false">Auto</button>
-      <button class="cbtn" id="c0" aria-label="Ibalik ang view">⌂</button>
+      <button class="cbtn" id="c0" aria-label="Reset view">⌂</button>
     </div>
   </div>
 
   <div id="below">
-  <div class="drawerTop"><b>Menu</b><button class="btn sm" id="drawerX" type="button">Isara ✕</button></div>
+  <div class="drawerTop"><b>Menu</b><button class="btn sm" id="drawerX" type="button">Close ✕</button></div>
   <div class="tools">
-    <button class="btn alt" id="tPlow">Araruhin Lahat</button>
-    <button class="btn alt" id="tAll">Ani Lahat</button>
+    <button class="btn alt" id="tPlow">Plow All</button>
+    <button class="btn alt" id="tAll">Harvest All</button>
     <button class="btn alt" id="tExpand"></button>
     <button class="btn alt" id="tPlot"></button>
     <button class="btn" id="tHelper"></button>
-    <button class="btn" id="tCure" style="background:#c0392b;box-shadow:0 4px 0 #8a2a1f">Gamutin Lahat</button>
+    <button class="btn" id="tCure" style="background:#c0392b;box-shadow:0 4px 0 #8a2a1f">Treat All</button>
     <button class="btn" id="tTown" style="background:#d9342b;box-shadow:0 4px 0 #8a1f17"></button>
-    <button class="btn" id="tIsle" style="background:#1f8fb8;box-shadow:0 4px 0 #136583">Pumunta sa Isla</button>
-    <button class="btn" id="tCheat" hidden style="background:#2f7fb8;box-shadow:0 4px 0 #1d5a85">Test: +100,000 barya</button>
-    <button class="btn" id="tLvl" hidden style="background:#2f7fb8;box-shadow:0 4px 0 #1d5a85">Test: Buksan lahat</button>
+    <button class="btn" id="tIsle" style="background:#1f8fb8;box-shadow:0 4px 0 #136583">Go to the Island</button>
+    <button class="btn" id="tCheat" hidden style="background:#2f7fb8;box-shadow:0 4px 0 #1d5a85">Test: +100,000 coins</button>
+    <button class="btn" id="tLvl" hidden style="background:#2f7fb8;box-shadow:0 4px 0 #1d5a85">Test: Unlock all</button>
   </div>
 
   <div class="tray-head">
-    <h2>Mga Binhi</h2>
-    <span class="hint">Pindutin ang damo sa loob ng bakod para araruhin, tapos magtanim.</span>
+    <h2>Seeds</h2>
+    <span class="hint">Tap the grass inside the fence to plow, then plant.</span>
   </div>
   <div class="panel"><div class="seeds" id="seeds"></div></div>
 
-  <div class="tray-head"><h2>Panahon</h2><span class="hint">Kusang nagpapalit ang panahon. Mas mahaba ang tag-init. Pumili ka rin kung gusto mo.</span></div>
+  <div class="tray-head"><h2>Weather</h2><span class="hint">The weather changes on its own. Summer lasts longer. You can also pick one yourself.</span></div>
   <div class="panel"><div class="tools" id="wx">
-    <button class="btn alt" data-s="spring">Tagsibol</button>
-    <button class="btn alt" data-s="summer">Tag-init</button>
-    <button class="btn alt" data-s="rainy">Tag-ulan</button>
-    <button class="btn alt" data-s="winter">Taglamig</button>
+    <button class="btn alt" data-s="spring">Spring</button>
+    <button class="btn alt" data-s="summer">Summer</button>
+    <button class="btn alt" data-s="rainy">Rainy</button>
+    <button class="btn alt" data-s="winter">Winter</button>
     <button class="btn alt" data-s="auto" id="wxAuto">Auto</button>
   </div></div>
 
-  <div class="tray-head" id="mktHead"><h2>Imbakan at Puwesto</h2><span class="hint" id="mktT"></span></div>
+  <div class="tray-head" id="mktHead"><h2>Storage and Stall</h2><span class="hint" id="mktT"></span></div>
   <div class="panel mktP">
     <div class="mktTop">
-      <div class="cap"><span>Imbakan</span><div class="capbar"><i id="invBar"></i></div><b id="invCap">0 / 60</b></div>
-      <div class="mktBtns"><button class="btn" id="sellAll">Ibenta Lahat</button><button class="btn" id="shopOpen">Bukas ang Puwesto</button><button class="btn alt" id="goMkt">Tingnan ang Puwesto</button></div>
+      <div class="cap"><span>Storage</span><div class="capbar"><i id="invBar"></i></div><b id="invCap">0 / 60</b></div>
+      <div class="mktBtns"><button class="btn" id="sellAll">Sell All</button><button class="btn" id="shopOpen">Stall Open</button><button class="btn alt" id="goMkt">View the Stall</button></div>
     </div>
-    <p class="mktNote">Napupunta rito ang lahat ng inani mo: gulay, prutas, itlog at gatas. Ibenta ang mga ito dito, o hayaang bumili ang mga mamimiling dumadaan sa puwesto. Mas mahal nang 15% ang bayad nila. Nagbabago ang presyo tuwing 3 minuto, kaya magbenta kapag ▲ mataas.</p>
+    <p class="mktNote">Everything you harvest goes here: vegetables, fruit, eggs and milk. Sell them here, or let passing buyers purchase at the stall. They pay 15% more. Prices change every 3 minutes, so sell when ▲ high.</p>
     <div class="invG" id="inv"></div>
   </div>
 
-  <div class="tray-head" id="townHead"><h2>Bayan</h2><span class="hint" id="townWhere"></span></div>
+  <div class="tray-head" id="townHead"><h2>Town</h2><span class="hint" id="townWhere"></span></div>
   <div class="panel shopP" id="townP">
-    <p class="mktNote">Sumakay ng jeep (20 barya) papuntang Bayan para mamili ng mga bagong binhi, gamit sa bukid, at gamit pambahay. Dito lang sa Bayan mabibili ang mga ito.</p>
-    <h4>Tindahan ng Binhi</h4><div class="scs" id="townSeeds"></div>
-    <h4>Ferreteria: gamit sa bukid</h4><div class="scs" id="townTools"></div>
-    <h4>Gamit Pambahay</h4><div class="scs" id="townDecor"></div>
-    <h4>Mga Gamit Mo</h4><div class="scs" id="myDecor"></div>
+    <p class="mktNote">Ride the jeep (20 coins) to Town to buy new seeds, farm tools and home goods. These are only sold in Town.</p>
+    <h4>Seed Shop</h4><div class="scs" id="townSeeds"></div>
+    <h4>Hardware Store: farm tools</h4><div class="scs" id="townTools"></div>
+    <h4>Home Goods</h4><div class="scs" id="townDecor"></div>
+    <h4>My Items</h4><div class="scs" id="myDecor"></div>
   </div>
 
-  <div class="tray-head"><h2>Tindahan</h2><span class="hint">Magtayo ng gusali, bumili ng bangka, at magbukas ng taniman sa isla.</span></div>
+  <div class="tray-head"><h2>Shop</h2><span class="hint">Build buildings, buy boats and open a field on the island.</span></div>
   <div class="panel shopP">
-    <h4>Mga Gusali</h4><div class="scs" id="shopB"></div>
-    <h4>Mga Bangka</h4><div class="scs" id="shopV"></div>
-    <h4>Sa Isla</h4><div class="scs" id="shopI"></div>
+    <h4>Buildings</h4><div class="scs" id="shopB"></div>
+    <h4>Boats</h4><div class="scs" id="shopV"></div>
+    <h4>On the Island</h4><div class="scs" id="shopI"></div>
   </div>
 
-  <div class="tray-head" id="lbHead"><h2>Mga Magsasaka</h2><span class="hint" id="lbHint"></span></div>
-  <div class="panel" id="lbPanel"><ol class="lb" id="lb"><li class="lbEmpty">Kinukuha ang listahan…</li></ol></div>
+  <div class="tray-head" id="lbHead"><h2>Farmers</h2><span class="hint" id="lbHint"></span></div>
+  <div class="panel" id="lbPanel"><ol class="lb" id="lb"><li class="lbEmpty">Loading the list…</li></ol></div>
 
-  <div class="tray-head"><h2>Hayupan</h2><span class="hint">Bumili ng lalaki at babae para magkaanak: kusang nabubuntis ang babae, at nanganganak pagkalipas ng 30 minuto. May kanya-kanyang kulungan ang bawat hayop. Kusa silang sumisilong kapag umuulan o nag-iisnow. Puwede silang magkasakit: gamutin ang may pulang krus sa loob ng 5 minuto o mamamatay ito.</span></div>
+  <div class="tray-head"><h2>Animals</h2><span class="hint">Buy a male and a female to breed: the female gets pregnant on her own and gives birth after 30 minutes. Each species has its own pen. They shelter on their own when it rains or snows. They can get sick: treat any with a red cross within 5 minutes or it will die.</span></div>
   <div class="panel"><div class="tools" id="shop"></div></div>
   </div>
 </div>
 
+<div class="modal authM" id="auth" hidden>
+  <div class="suBox">
+    <h3>Farming</h3>
+    <p class="suLead">Create your own account to start your own farm. Your farm is saved to your account on this device.</p>
+    <div class="tabs" role="tablist"><button class="tabB on" id="tabSu" type="button" role="tab">Sign up</button><button class="tabB" id="tabLi" type="button" role="tab">Log in</button></div>
+    <form id="auSignup" autocomplete="off">
+      <label for="auUser">Username</label><input id="auUser" maxlength="20" autocapitalize="none" placeholder="e.g. ron_farmer">
+      <label for="auPw">Password</label><input id="auPw" type="password" maxlength="64" autocomplete="new-password">
+      <label for="auPw2">Confirm password</label><input id="auPw2" type="password" maxlength="64" autocomplete="new-password">
+      <label for="auFarm">Farm name</label><input id="auFarm" maxlength="40" placeholder="e.g. Sunny Acres">
+      <label for="auName">Your farmer name</label><input id="auName" maxlength="24" placeholder="e.g. Farmer Ron">
+      <span class="lbl">Farmer shirt color</span><div class="sw" id="auShirts"></div>
+      <label class="keep" id="auImportRow" hidden><input type="checkbox" id="auImport"> Use the farm already saved on this device</label>
+      <p class="err" id="auErr" role="alert"></p>
+      <div class="suRow"><button class="btn" type="submit">Create account</button></div>
+    </form>
+    <form id="auLogin" autocomplete="on" hidden>
+      <label for="liUser">Username</label><input id="liUser" maxlength="20" autocapitalize="none" autocomplete="username">
+      <label for="liPw">Password</label><input id="liPw" type="password" maxlength="64" autocomplete="current-password">
+      <p class="err" id="liErr" role="alert"></p>
+      <div class="suRow"><button class="btn" type="submit">Log in</button></div>
+    </form>
+  </div>
+</div>
 <div class="modal" id="signup" hidden>
   <form class="suBox" id="suForm" autocomplete="off">
-    <h3 id="suTitle">Gumawa ng Sariling Bukid</h3>
-    <p class="suLead">Magkakaroon ka ng sariling bukid na naka-save sa account mo, at makikita ka ng ibang manlalaro sa listahan ng mga magsasaka.</p>
-    <label for="suFarm">Pangalan ng bukid</label><input id="suFarm" maxlength="40" placeholder="Hal. Bukid ng Saya">
-    <label for="suName">Pangalan mo sa laro</label><input id="suName" maxlength="24" placeholder="Hal. Mang Ronald">
-    <span class="lbl">Kulay ng damit ng magsasaka</span><div class="sw" id="suShirts"></div>
-    <label class="keep" id="suKeepRow"><input type="checkbox" id="suKeep" checked> Dalhin ang kasalukuyang progreso sa bagong bukid</label>
+    <h3 id="suTitle">Create Your Own Farm</h3>
+    <p class="suLead">You'll get your own farm saved to your account, and other players will see you in the farmer list.</p>
+    <label for="suFarm">Farm name</label><input id="suFarm" maxlength="40" placeholder="e.g. Happy Acres">
+    <label for="suName">Your name in the game</label><input id="suName" maxlength="24" placeholder="e.g. Farmer Ron">
+    <span class="lbl">Farmer's shirt color</span><div class="sw" id="suShirts"></div>
+    <label class="keep" id="suKeepRow"><input type="checkbox" id="suKeep" checked> Bring your current progress to the new farm</label>
     <p class="err" id="suErr" role="alert"></p>
-    <div class="suRow"><button class="btn alt" type="button" id="suLater">Mamaya na</button><button class="btn" type="submit" id="suGo">Simulan ang Bukid</button></div>
+    <div class="suRow"><button class="btn alt" type="button" id="logoutBtn">Log out</button><button class="btn alt" type="button" id="suClose">Close</button><button class="btn alt" type="button" id="suLater" hidden>Later</button><button class="btn" type="submit" id="suGo">Start Farming</button></div>
   </form>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -343,34 +383,34 @@ body.hideui .crew,body.hideui .views,body.hideui .cam,body.hideui .modeTag,body.
 (function(){
 /* ================= DATA ================= */
 const CROPS=[
- {id:"pechay",n:"Pechay",t:5,c:5,s:12,xp:1,lv:1,col:0x86d65a,shape:"leaf"},
- {id:"mais",n:"Mais",t:5,c:10,s:26,xp:2,lv:1,col:0xf5c732,shape:"corn"},
- {id:"kamatis",n:"Kamatis",t:5,c:18,s:48,xp:3,lv:2,col:0xe2402f,shape:"ball"},
- {id:"talong",n:"Talong",t:5,c:25,s:72,xp:4,lv:3,col:0x7a3f9c,shape:"long"},
- {id:"sitaw",n:"Sitaw",t:5,c:35,s:105,xp:6,lv:4,col:0x8fcc3c,shape:"bean"},
- {id:"sampaguita",n:"Sampaguita",t:5,c:30,s:95,xp:5,lv:3,col:0xffffff,shape:"flower"},
- {id:"ampalaya",n:"Ampalaya",t:5,c:45,s:150,xp:8,lv:5,col:0x4caa3e,shape:"long"},
- {id:"rosas",n:"Rosas",t:5,c:55,s:190,xp:10,lv:5,col:0xe2304a,shape:"flower"},
- {id:"kalabasa",n:"Kalabasa",t:5,c:60,s:230,xp:12,lv:6,col:0xf08a24,shape:"pump"},
- {id:"sili",n:"Sili",t:5,c:15,s:55,xp:3,lv:2,col:0xd9342b,shape:"bean",town:true},
- {id:"pakwan",n:"Pakwan",t:6,c:30,s:110,xp:5,lv:2,col:0x3a9a3a,shape:"pump",town:true},
- {id:"presa",n:"Presa",t:7,c:40,s:150,xp:6,lv:3,col:0xe8304a,shape:"ball",town:true},
- {id:"ubas",n:"Ubas",t:9,c:70,s:260,xp:9,lv:5,col:0x6a3a9a,shape:"ball",town:true},
- {id:"lilang_dahon",n:"Lilang Dahon",t:8,c:60,s:260,xp:10,lv:3,col:0x8a4ac0,shape:"fern",island:true},
- {id:"gintong_bunga",n:"Gintong Bunga",t:10,c:120,s:520,xp:16,lv:5,col:0xf2c230,shape:"ball",island:true},
- {id:"bughaw_kabute",n:"Bughaw na Kabute",t:12,c:200,s:900,xp:24,lv:7,col:0x3fa8e8,shape:"shroom",island:true},
- {id:"pinya",n:"Pinya",t:5,c:90,s:360,xp:18,lv:8,col:0xf0b62a,shape:"pine"}
+ {id:"pechay",n:"Bok Choy",t:5,c:5,s:12,xp:1,lv:1,col:0x86d65a,shape:"leaf"},
+ {id:"mais",n:"Corn",t:5,c:10,s:26,xp:2,lv:1,col:0xf5c732,shape:"corn"},
+ {id:"kamatis",n:"Tomato",t:5,c:18,s:48,xp:3,lv:2,col:0xe2402f,shape:"ball"},
+ {id:"talong",n:"Eggplant",t:5,c:25,s:72,xp:4,lv:3,col:0x7a3f9c,shape:"long"},
+ {id:"sitaw",n:"String Beans",t:5,c:35,s:105,xp:6,lv:4,col:0x8fcc3c,shape:"bean"},
+ {id:"sampaguita",n:"Jasmine",t:5,c:30,s:95,xp:5,lv:3,col:0xffffff,shape:"flower"},
+ {id:"ampalaya",n:"Bitter Gourd",t:5,c:45,s:150,xp:8,lv:5,col:0x4caa3e,shape:"long"},
+ {id:"rosas",n:"Rose",t:5,c:55,s:190,xp:10,lv:5,col:0xe2304a,shape:"flower"},
+ {id:"kalabasa",n:"Squash",t:5,c:60,s:230,xp:12,lv:6,col:0xf08a24,shape:"pump"},
+ {id:"sili",n:"Chili",t:5,c:15,s:55,xp:3,lv:2,col:0xd9342b,shape:"bean",town:true},
+ {id:"pakwan",n:"Watermelon",t:6,c:30,s:110,xp:5,lv:2,col:0x3a9a3a,shape:"pump",town:true},
+ {id:"presa",n:"Strawberry",t:7,c:40,s:150,xp:6,lv:3,col:0xe8304a,shape:"ball",town:true},
+ {id:"ubas",n:"Grapes",t:9,c:70,s:260,xp:9,lv:5,col:0x6a3a9a,shape:"ball",town:true},
+ {id:"lilang_dahon",n:"Violet Leaf",t:8,c:60,s:260,xp:10,lv:3,col:0x8a4ac0,shape:"fern",island:true},
+ {id:"gintong_bunga",n:"Golden Fruit",t:10,c:120,s:520,xp:16,lv:5,col:0xf2c230,shape:"ball",island:true},
+ {id:"bughaw_kabute",n:"Blue Mushroom",t:12,c:200,s:900,xp:24,lv:7,col:0x3fa8e8,shape:"shroom",island:true},
+ {id:"pinya",n:"Pineapple",t:5,c:90,s:360,xp:18,lv:8,col:0xf0b62a,shape:"pine"}
 ];
 const ANIMALS=[
- {id:"manok",n:"Manok",item:"Itlog",t:60,cost:120,s:25,xp:2,lv:2},
- {id:"kambing",n:"Kambing",item:"Gatas",t:180,cost:350,s:80,xp:5,lv:4},
- {id:"bibe",n:"Bibe",item:"Itlog",t:75,cost:150,s:35,xp:2,lv:2,zone:"pond"},
- {id:"pato",n:"Pato",item:"Itlog ng pato",t:90,cost:220,s:45,xp:3,lv:3,zone:"pond"},
- {id:"pusa",n:"Pusa",item:"Lambing",t:60,cost:180,s:12,xp:4,lv:3,zone:"farm"},
- {id:"aso",n:"Aso",item:"Lambing",t:60,cost:200,s:15,xp:4,lv:3,zone:"farm"},
- {id:"baka",n:"Baka",item:"Gatas",t:300,cost:700,s:150,xp:9,lv:6},
- {id:"kabayo",n:"Kabayo",item:"Sakay",t:240,cost:900,s:200,xp:11,lv:7},
- {id:"kalabaw",n:"Kalabaw",item:"Gatas ng kalabaw",t:360,cost:1100,s:260,xp:14,lv:7}
+ {id:"manok",n:"Chicken",item:"Eggs",t:60,cost:120,s:25,xp:2,lv:2},
+ {id:"kambing",n:"Goat",item:"Milk",t:180,cost:350,s:80,xp:5,lv:4},
+ {id:"bibe",n:"Duck",item:"Eggs",t:75,cost:150,s:35,xp:2,lv:2,zone:"pond"},
+ {id:"pato",n:"Mallard",item:"Mallard eggs",t:90,cost:220,s:45,xp:3,lv:3,zone:"pond"},
+ {id:"pusa",n:"Cat",item:"Cuddles",t:60,cost:180,s:12,xp:4,lv:3,zone:"farm"},
+ {id:"aso",n:"Dog",item:"Cuddles",t:60,cost:200,s:15,xp:4,lv:3,zone:"farm"},
+ {id:"baka",n:"Cow",item:"Milk",t:300,cost:700,s:150,xp:9,lv:6},
+ {id:"kabayo",n:"Horse",item:"Ride",t:240,cost:900,s:200,xp:11,lv:7},
+ {id:"kalabaw",n:"Carabao",item:"Carabao milk",t:360,cost:1100,s:260,xp:14,lv:7}
 ];
 const ZLIM={pen:12,pond:8,farm:4};const zoneOf=id=>(ANIMALS.find(a=>a.id===id)||{}).zone||"pen";
 const RIPE=45,WILT=30,GQ=20,WQ=10;
@@ -381,10 +421,10 @@ const PEN={x0:-11.5,x1:-6,z0:-3,z1:4};          // animal pen bounds
 
 function fresh(){return{inTown:false,seeds:[],tools:[],fert:0,basket:0,decor:{},inv:{},shopOpen:true,builds:[],boats:[],boatAt:"farm",guard:false,plots:[],helperOn:true,coins:80,xp:0,lv:1,size:0,sel:"pechay",tiles:Array(25).fill(null).map(()=>({k:"grass"})),pens:[]}}
 let S=fresh();
-try{const raw=localStorage.getItem("bukid-v1");if(raw){S=Object.assign(fresh(),JSON.parse(raw));if(!SIZES[S.size]||!Array.isArray(S.tiles)||S.tiles.length!==expectTiles(S))S=fresh()}}catch(e){}
+
 if(window.claude?.hot?.data?.S)S=window.claude.hot.data.S;
 window.claude?.hot?.snapshot?.(()=>({S}));
-const save=()=>{try{localStorage.setItem("bukid-v1",JSON.stringify(S))}catch(e){}if(typeof CLOUD!=="undefined"&&CLOUD)CLOUD.dirty=true};
+const save=()=>{try{if(typeof LOCAL!=="undefined"&&LOCAL.user)localStorage.setItem("farming-save-"+LOCAL.user,JSON.stringify(S))}catch(e){}if(typeof CLOUD!=="undefined"&&CLOUD)CLOUD.dirty=true};
 const $=id=>document.getElementById(id);
 const crop=id=>CROPS.find(c=>c.id===id);
 const animal=id=>ANIMALS.find(a=>a.id===id);
@@ -398,7 +438,7 @@ function tileState(t){
 }
 function rnd(seed){let s=seed%2147483647||1;return()=>(s=(s*16807)%2147483647)/2147483647}
 
-if(!window.THREE){$("loading").textContent="Hindi ma-load ang 3D. Paki-refresh ang page.";return}
+if(!window.THREE){$("loading").textContent="Could not load 3D. Please refresh the page.";return}
 
 /* ================= THREE SETUP ================= */
 const cv=$("cv"),stage=$("stage");
@@ -451,7 +491,7 @@ const mix=(a,b,t)=>_ca.set(a).lerp(_cb.set(b),Math.max(0,Math.min(1,t))).getHex(
 /* -------- extra farmland parcels -------- */
 const PN=8;
 const IX_=64,IZ_=4;
-const PLOTS=[{id:"isla",n:"Lihim na Taniman",x0:IX_-13,z0:IZ_+1,sz:6,y:1.2,island:true,cost:2000,lv:3},{id:"timog",n:"Timog na Lupa",x0:-4,z0:12,cost:1500,lv:4},{id:"kanluran",n:"Kanlurang Lupa",x0:-17,z0:10,cost:4000,lv:6},{id:"malayo",n:"Malayong Lupa",x0:-26.5,z0:10,cost:8000,lv:8}];
+const PLOTS=[{id:"isla",n:"Secret Field",x0:IX_-13,z0:IZ_+1,sz:6,y:1.2,island:true,cost:2000,lv:3},{id:"timog",n:"South Land",x0:-4,z0:12,cost:1500,lv:4},{id:"kanluran",n:"West Land",x0:-17,z0:10,cost:4000,lv:6},{id:"malayo",n:"Far Land",x0:-26.5,z0:10,cost:8000,lv:8}];
 function inPlotArea(x,z,m=.6){return PLOTS.some(p=>!p.island&&x>p.x0-m&&x<p.x0+PN+m&&z>p.z0-m&&z<p.z0+PN+m)}
 let _LK="",_LC=null;
 function layout(){const key=S.size+"|"+(S.plots||[]).join(",");if(key===_LK&&_LC)return _LC;
@@ -462,10 +502,10 @@ function tileXZ(i){const L=layout();for(const a of L){if(i<a.start+a.n*a.n){cons
 function expectTiles(st){let n=SIZES[st.size]**2;(st.plots||[]).forEach(id=>{const p=PLOTS.find(q=>q.id===id);if(p)n+=(p.sz||PN)**2});return n}
 function nextPlot(){return PLOTS.find(p=>!p.island&&!(S.plots||[]).includes(p.id))}
 function buyPlot(){const p=nextPlot();if(!p)return;
-  if(S.lv<p.lv)return toast(p.n+" ay mabibili sa Antas "+p.lv+".");
-  if(S.coins<p.cost)return toast("Kailangan ng "+p.cost.toLocaleString()+" barya para sa "+p.n+".");
+  if(S.lv<p.lv)return toast(p.n+" unlocks at Level "+p.lv+".");
+  if(S.coins<p.cost)return toast("You need "+p.cost.toLocaleString()+" coins for "+p.n+".");
   S.coins-=p.cost;S.plots=(S.plots||[]).concat(p.id);for(let k=0;k<PN*PN;k++)S.tiles.push({k:"grass"});
-  hovered=null;save();buildField();ui();toast("Nabili mo ang "+p.n+"! Pumunta ka na roon.",2800);
+  hovered=null;save();buildField();ui();toast("You bought "+p.n+"! Head over there now.",2800);
   Object.assign(camT,{tx:p.x0+PN/2,ty:.6,tz:p.z0+PN/2,dist:20,pol:.9});cam.follow=false}
 let PLOTLABS=[];
 function plotDecor(b){
@@ -474,7 +514,7 @@ function plotDecor(b){
     if(own){fence(b,p.x0-.2,p.z0-.2,p.x0+m+.2,p.z0+m+.2,(mx,mz,ei)=>p.island?(ei===3&&Math.abs(mz-p.z0-.5)<.6):(ei===0&&Math.abs(mx-cx)<.6),y);
       const s=labelSprite(p.n);s.position.set(cx,y+1.35,p.z0-.6);scene.add(s);PLOTLABS.push(s)}
     else{[[0,0],[m,0],[0,m],[m,m]].forEach(([dx,dz])=>{b.add("cyl",0x9b6a3a,p.x0+dx,y+.35,p.z0+dz,.05,.7,.05);b.add("box",0xe8622a,p.x0+dx,y+.62,p.z0+dz,.05,.12,.3)});
-      const s=labelSprite((p.island?"Lihim na Taniman · ":"Bakante · ")+p.cost.toLocaleString());s.position.set(cx,y+1.1,p.z0+m/2);scene.add(s);PLOTLABS.push(s)}})}
+      const s=labelSprite((p.island?"Secret Field · ":"Empty · ")+p.cost.toLocaleString());s.position.set(cx,y+1.1,p.z0+m/2);scene.add(s);PLOTLABS.push(s)}})}
 /* -------- farm terrain shape, pens, snow, helpers -------- */
 const RIVER=[[12,-16.9],[12.3,-13],[11.4,-9],[11.2,-5],[11.6,-1],[11.1,3],[10.2,5.6],[9.4,6.5]];
 const _sm=t=>{t=Math.max(0,Math.min(1,t));return t*t*(3-2*t)};const _c2=new THREE.Color();
@@ -486,9 +526,9 @@ function farmH(x,z){let h=0;
   const qd=Math.hypot((x-12)/1.95,(z+17.5)/1.45);if(qd<1.1)h=Math.min(h,-.65*(1-_sm((qd-.3)/.8)));
   if(x>18.5)h=Math.min(h,-3.4*_sm((x-18.5)/9));
   return h}
-const PENS={manok:{x0:-10.8,x1:-7.2,z0:-6.4,z1:-2.7,n:"Manukan",gate:"s"},kambing:{x0:-10.8,x1:-7.2,z0:1,z1:4.8,n:"Kambingan",gate:"n"},
-  baka:{x0:-16.8,x1:-12.9,z0:-6.6,z1:-2.7,n:"Bakahan",gate:"s"},kalabaw:{x0:-16.8,x1:-12.9,z0:1,z1:5,n:"Kalabawan",gate:"n"},
-  kabayo:{x0:-23.8,x1:-19.2,z0:-4.4,z1:3,n:"Kuwadra",gate:"e"}};
+const PENS={manok:{x0:-10.8,x1:-7.2,z0:-6.4,z1:-2.7,n:"Chicken Coop",gate:"s"},kambing:{x0:-10.8,x1:-7.2,z0:1,z1:4.8,n:"Goat Pen",gate:"n"},
+  baka:{x0:-16.8,x1:-12.9,z0:-6.6,z1:-2.7,n:"Cow Pen",gate:"s"},kalabaw:{x0:-16.8,x1:-12.9,z0:1,z1:5,n:"Carabao Pen",gate:"n"},
+  kabayo:{x0:-23.8,x1:-19.2,z0:-4.4,z1:3,n:"Stable",gate:"e"}};
 const PLIM={manok:8,kambing:6,baka:5,kalabaw:5,kabayo:6};
 function inAnyPen(x,z,m=.3){for(const k in PENS){const p=PENS[k];if(x>p.x0-m&&x<p.x1+m&&z>p.z0-m&&z<p.z1+m)return true}return false}
 const SNOWB=new Builder();
@@ -894,7 +934,7 @@ function buildFences(){
     // duck hut by the pond
     const hx=11.4,hz=11.1;pb.add("box",0xc98a4b,hx,.35,hz,1.2,.7,.9);pb.add("cone4",0xb5452f,hx,.95,hz,.95,.55,.8,0,Math.PI/4,0);pb.add("box",0x3a2615,hx,.25,hz-.46,.4,.4,.02);
     pb.add("box",0x9b6a3a,hx,.08,hz-.75,.5,.04,.5,-.25,0,0);SNOWB.add("cone4",0xffffff,hx,1.1,hz,.8,.28,.68,0,Math.PI/4,0);
-    const dl=labelSprite("Bahay ng Bibe");dl.position.set(hx,1.75,hz);scene.add(dl);
+    const dl=labelSprite("Duck House");dl.position.set(hx,1.75,hz);scene.add(dl);
     penFence=pb.mesh();scene.add(penFence)}
   fenceMesh=b.mesh();scene.add(fenceMesh);
 }
@@ -1014,7 +1054,7 @@ const MT={};
 function mooTex(id){
   if(MT[id])return MT[id];const c=document.createElement("canvas");c.width=256;c.height=128;const x=c.getContext("2d");
   x.font="900 64px Nunito, Arial Rounded MT Bold, sans-serif";x.textAlign="center";x.textBaseline="middle";x.lineWidth=12;x.strokeStyle="#8f5a2a";x.fillStyle="#fff";
-  const w={baka:"Moo!",kambing:"Meee!",kalabaw:"Mooh!",kabayo:"Hiii!",aso:"Aw aw!",pusa:"Miyaw!",pato:"Kwak!",bibe:"Kwak!"}[id]||"Tok!";x.strokeText(w,128,64);x.fillText(w,128,64);
+  const w={baka:"Moo!",kambing:"Meee!",kalabaw:"Mooh!",kabayo:"Neigh!",aso:"Aw aw!",pusa:"Meow!",pato:"Quack!",bibe:"Quack!"}[id]||"Cluck!";x.strokeText(w,128,64);x.fillText(w,128,64);
   return MT[id]=new THREE.CanvasTexture(c);
 }
 const BT={};
@@ -1069,7 +1109,7 @@ function stepAnimals(dt,t){
     if(!o.state){o.state="idle";o.st=o.wait||1;o.nk=0;o.yaw=0;o.wl=0}
     if(bad&&!o.shelter){o.shelter=true;o.sheltered=false;const sp=shelterSpot(o,i);o.hide=sp[2];o.state="walk";o.tx=sp[0];o.tz=sp[1];U.moo.visible=false}
     if(!bad&&o.shelter){o.shelter=false;o.sheltered=false;g.visible=true;o.state="idle";o.st=.3+Math.random()}
-    if(roll&&!p.sick){const ch=(U.pet?.4:1)*(bad?(o.sheltered?.025:.14):.012);if(Math.random()<ch){p.sick=true;p.sickAt=now();toast("Nagkasakit ang "+a.n+"! Gamutin sa loob ng 5 minuto o mamamatay ito.",4200);save()}}
+    if(roll&&!p.sick){const ch=(U.pet?.4:1)*(bad?(o.sheltered?.025:.14):.012);if(Math.random()<ch){p.sick=true;p.sickAt=now();toast("Got sick: "+a.n+"! Treat it within 5 minutes or it will die.",4200);save()}}
     if(p.sick&&now()-(p.sickAt||now())>SICK_DIE)dead.push(i);
     o.sick=!!p.sick;if(p.sick)p.at+=dt;
     if(o.sickB){o.sickB.visible=o.sick&&g.visible;if(o.sick)o.sickB.position.y=U.h+.15+Math.sin(t*4+i)*.06}
@@ -1255,10 +1295,10 @@ const twinkles=[];
     const a=q*2.1+j,rr=.9*s;sp.position.set(tx+Math.cos(a)*rr,(1.7+q*.35)*s,tz+Math.sin(a)*rr);sp.userData.ph=j*1.7+q*2.3;scene.add(sp);twinkles.push(sp)}})})();
 /* ================= WEATHER & SEASONS ================= */
 const SEASONS={
-  spring:{n:"Tagsibol",sky:0xffffff,fog:0xc6ebf8,fn:40,ff:88,hemi:.85,sun:1,sunC:0xfff1d6,tint:0xffffff,em:0x000000,emI:0,gTint:0xffffff,gI:0,sunV:1,rain:0,snow:0,cloud:0xffffff,water:0x4aa8d8,flow:1},
-  summer:{n:"Tag-init",sky:0xfff3dc,fog:0xe0f0f4,fn:48,ff:100,hemi:.95,sun:1.25,sunC:0xffe8b8,tint:0xfff6e0,em:0x000000,emI:0,gTint:0xf6eab0,gI:0,sunV:1.3,rain:0,snow:0,cloud:0xffffff,water:0x3fb0dc,flow:1},
-  rainy:{n:"Tag-ulan",sky:0x7a8894,fog:0x8a98a4,fn:16,ff:58,hemi:.62,sun:.32,sunC:0xd8e0e8,tint:0xc2ccd0,em:0x000000,emI:0,gTint:0xa8bca8,gI:0,sunV:0,rain:1,snow:0,cloud:0x6e7880,water:0x3c7c9c,flow:1.6},
-  winter:{n:"Taglamig",sky:0xdfe8f0,fog:0xdbe5ee,fn:20,ff:70,hemi:.85,sun:.7,sunC:0xe8f0ff,tint:0xf0f4ff,em:0xd0dde8,emI:.1,gTint:0xeef3ee,gI:.12,sunV:.45,rain:0,snow:1,cloud:0xf4f8fb,water:0xc2e2f2,flow:.25}
+  spring:{n:"Spring",sky:0xffffff,fog:0xc6ebf8,fn:40,ff:88,hemi:.85,sun:1,sunC:0xfff1d6,tint:0xffffff,em:0x000000,emI:0,gTint:0xffffff,gI:0,sunV:1,rain:0,snow:0,cloud:0xffffff,water:0x4aa8d8,flow:1},
+  summer:{n:"Summer",sky:0xfff3dc,fog:0xe0f0f4,fn:48,ff:100,hemi:.95,sun:1.25,sunC:0xffe8b8,tint:0xfff6e0,em:0x000000,emI:0,gTint:0xf6eab0,gI:0,sunV:1.3,rain:0,snow:0,cloud:0xffffff,water:0x3fb0dc,flow:1},
+  rainy:{n:"Rainy",sky:0x7a8894,fog:0x8a98a4,fn:16,ff:58,hemi:.62,sun:.32,sunC:0xd8e0e8,tint:0xc2ccd0,em:0x000000,emI:0,gTint:0xa8bca8,gI:0,sunV:0,rain:1,snow:0,cloud:0x6e7880,water:0x3c7c9c,flow:1.6},
+  winter:{n:"Winter",sky:0xdfe8f0,fog:0xdbe5ee,fn:20,ff:70,hemi:.85,sun:.7,sunC:0xe8f0ff,tint:0xf0f4ff,em:0xd0dde8,emI:.1,gTint:0xeef3ee,gI:.12,sunV:.45,rain:0,snow:1,cloud:0xf4f8fb,water:0xc2e2f2,flow:.25}
 };
 const SORDER=["spring","summer","rainy","winter"],SEASON_LEN=150;const SDUR={spring:150,summer:330,rainy:150,winter:150};
 const WX={key:"spring",auto:true,timer:SEASON_LEN,flash:0};
@@ -1282,9 +1322,9 @@ snowGeo.setAttribute("position",new THREE.BufferAttribute(snowPos,3));
 const snowTex=(()=>{const k=document.createElement("canvas");k.width=k.height=32;const x=k.getContext("2d"),g=x.createRadialGradient(16,16,1,16,16,16);g.addColorStop(0,"rgba(255,255,255,1)");g.addColorStop(1,"rgba(255,255,255,0)");x.fillStyle=g;x.fillRect(0,0,32,32);return new THREE.CanvasTexture(k)})();
 const snowMat=new THREE.PointsMaterial({size:.16,map:snowTex,transparent:true,opacity:0,depthWrite:false});
 const snow=new THREE.Points(snowGeo,snowMat);snow.frustumCulled=false;scene.add(snow);
-function setSeason(k,manual){if(!SEASONS[k])return;WX.key=k;WX.timer=SDUR[k]||SEASON_LEN;if(manual){WX.auto=false}try{localStorage.setItem("bukid-season",k);localStorage.setItem("bukid-season-auto",WX.auto?"1":"0")}catch(e){}wxUI();toast("Panahon: "+SEASONS[k].n)}
+function setSeason(k,manual){if(!SEASONS[k])return;WX.key=k;WX.timer=SDUR[k]||SEASON_LEN;if(manual){WX.auto=false}try{localStorage.setItem("bukid-season",k);localStorage.setItem("bukid-season-auto",WX.auto?"1":"0")}catch(e){}wxUI();toast("Weather: "+SEASONS[k].n)}
 function stepWeather(dt,t){
-  WX.ui=(WX.ui||0)+dt;if(WX.ui>1){WX.ui=0;$("wxAuto").textContent=WX.auto?"Auto: "+fmt(WX.timer)+" bago magpalit":"Auto: naka-off"}
+  WX.ui=(WX.ui||0)+dt;if(WX.ui>1){WX.ui=0;$("wxAuto").textContent=WX.auto?"Auto: "+fmt(WX.timer)+" until it changes":"Auto: off"}
   if(WX.auto){WX.timer-=dt;if(WX.timer<=0){const i=SORDER.indexOf(WX.key);setSeason(SORDER[(i+1)%4],false)}}
   const T=SEASONS[WX.key],k=Math.min(1,dt*.7);
   for(const key in T){if(key==="n")continue;const cur=WC[key];if(cur&&cur.isColor)cur.lerp(_cb.set(T[key]),k);else WC[key]=lerp(WC[key],T[key],k)}
@@ -1315,7 +1355,7 @@ function stepWeather(dt,t){
 function wxUI(){
   const s=SEASONS[WX.key];$("season").textContent=s.n;
   document.querySelectorAll("#wx .btn").forEach(b=>{const on=b.dataset.s===WX.key||(b.dataset.s==="auto"&&WX.auto);b.classList.toggle("alt",!on)});
-  $("wxAuto").textContent=WX.auto?"Auto: "+fmt(WX.timer)+" bago magpalit":"Auto: naka-off";
+  $("wxAuto").textContent=WX.auto?"Auto: "+fmt(WX.timer)+" until it changes":"Auto: off";
 }
 document.querySelectorAll("#wx .btn").forEach(b=>b.onclick=()=>{if(b.dataset.s==="auto"){WX.auto=!WX.auto;WX.timer=SDUR[WX.key];try{localStorage.setItem("bukid-season-auto",WX.auto?"1":"0")}catch(e){}wxUI()}else setSeason(b.dataset.s,true)});
 
@@ -1618,14 +1658,14 @@ function stepFx(dt,t){
 }
 
 const SPOTS=[
-  {n:"Laboratoryo",d:"Pangunahing gusali ng pananaliksik. May mga lab bench, microscope, test tube, centrifuge, fume hood at computer sa loob.",box:[LAB.x,G0+1.6,LAB.z,LAB.w,3.4,LAB.d],v:"lab"},
-  {n:"Dormitoryo",d:"Tulugan ng mga mananaliksik. May tatlong bunk bed, mga locker at maliit na mesa.",box:[DORM.x,G0+1.4,DORM.z,DORM.w,2.9,DORM.d],v:"dorm"},
-  {n:"Bantayan",d:"Matayog na tore na may searchlight. Umiikot ang ilaw kapag gabi para bantayan ang dagat.",box:[TOWER.x,6,TOWER.z,3,10,3],v:"tore"},
-  {n:"Pantalan",d:"Pantalang kahoy kung saan dumadaong ang tugboat at ibinababa ang mga kargamento.",box:[(PIER.x0+PIER.x1)/2,1.3,PIER.z,PIER.x1-PIER.x0,1,PIER.w],v:"pier"},
-  {n:"Helipad",d:"Lapagan ng helicopter para sa mga emergency at supply.",box:[PAD.x,G0+.3,PAD.z,6,.8,6],v:"base"},
-  {n:"Tangke ng Gasolina",d:"Imbakan ng diesel para sa generator ng buong base.",box:[-3,G0+.9,-7.45,3.4,1.8,3.4],v:"base"},
-  {n:"Radyo Tore",d:"Antena sa tuktok ng burol para makausap ang mainland. Kumikislap ang pulang ilaw sa gabi.",box:[HILL.x,H(HILL.x,HILL.z)+3.5,HILL.z,2.5,7.5,2.5],v:"isla"},
-  {n:"Tugboat",d:"Maliit pero malakas na bangka na humihila ng barge at nagdadala ng supply. Pindutin ang Ilayag para umikot ito sa isla.",obj:boat,box:[0,1.2,0,6.4,3.4,2.6],v:"boat"}
+  {n:"Laboratoryo",d:"Main research building. Inside are lab benches, microscopes, test tubes, a centrifuge, a fume hood and computers.",box:[LAB.x,G0+1.6,LAB.z,LAB.w,3.4,LAB.d],v:"lab"},
+  {n:"Dormitoryo",d:"Researchers' sleeping quarters. Three bunk beds, lockers and a small table.",box:[DORM.x,G0+1.4,DORM.z,DORM.w,2.9,DORM.d],v:"dorm"},
+  {n:"Watchtower",d:"Tall tower with a searchlight. The light sweeps the sea at night.",box:[TOWER.x,6,TOWER.z,3,10,3],v:"tore"},
+  {n:"Pier",d:"Wooden pier where the tugboat docks and unloads cargo.",box:[(PIER.x0+PIER.x1)/2,1.3,PIER.z,PIER.x1-PIER.x0,1,PIER.w],v:"pier"},
+  {n:"Helipad",d:"Helicopter pad for emergencies and supplies.",box:[PAD.x,G0+.3,PAD.z,6,.8,6],v:"base"},
+  {n:"Fuel Tank",d:"Diesel storage for the base generator.",box:[-3,G0+.9,-7.45,3.4,1.8,3.4],v:"base"},
+  {n:"Radio Tower",d:"Antenna on the hilltop to talk to the mainland. Its red light blinks at night.",box:[HILL.x,H(HILL.x,HILL.z)+3.5,HILL.z,2.5,7.5,2.5],v:"isla"},
+  {n:"Tugboat",d:"Small but strong boat that tows a barge and carries supplies. Tap Sail to send it around the island.",obj:boat,box:[0,1.2,0,6.4,3.4,2.6],v:"boat"}
 ];
 const hitBoxes=[],hitMat=new THREE.MeshBasicMaterial({visible:false});
 SPOTS.forEach((s,i)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(s.box[3],s.box[4],s.box[5]),hitMat);m.position.set(s.box[0],s.box[1],s.box[2]);m.userData.spot=i;m.userData.isle=i;(s.obj||root).add(m);hitBoxes.push(m)});
@@ -1692,8 +1732,8 @@ function goView(k){const v=VIEWS[k];if(!v)return;const {follow,roofOff,...rest}=
   document.querySelectorAll(".views .cbtn").forEach(c=>c.classList.toggle("on",c.dataset.v===k));hideTip()}
 document.querySelectorAll(".views .cbtn").forEach(b=>b.onclick=()=>goView(b.dataset.v));
 let onIsle=false;
-function checkIsle(){const n=Math.hypot(cam.tx-IX,cam.tz-IZ)<34;$("tIsle").textContent=TRIP.on?"Naglalayag…":ownBoat()?(S.boatAt==="isla"?"Sumakay pauwi sa Bukid":"Sumakay papunta sa Isla"):(n?"Bumalik sa Bukid":"Pumunta sa Isla");if(n!==onIsle){onIsle=n;
-  if(!TRIP.on){if(n)toast("Tanaw mo ang Isla ng Pananaliksik.",2200)}}}
+function checkIsle(){const n=Math.hypot(cam.tx-IX,cam.tz-IZ)<34;$("tIsle").textContent=TRIP.on?"Sailing…":ownBoat()?(S.boatAt==="isla"?"Sail back to the Farm":"Sail to the Island"):(n?"Back to the Farm":"Go to the Island");if(n!==onIsle){onIsle=n;
+  if(!TRIP.on){if(n)toast("You can see the Research Island.",2200)}}}
 function endPtr(e){
   const wasTap=pointers.size===1&&downAt&&Math.hypot(e.clientX-downAt.x,e.clientY-downAt.y)<=6&&dragMoved<12;
   pointers.delete(e.pointerId);if(!pointers.size){cv.classList.remove("drag");pinch0=0}
@@ -1729,8 +1769,8 @@ function clickAt(e){
   if(!p)return;
   if(p.isle!=null){const s=ISLE.spots[p.isle];toast(s.n+": "+s.d,5500);if(s.v==="boat"&&!ISLE.sailing())goView("tug");else if(s.v==="lab"||s.v==="dorm")ISLE.setRoof(false);return}
   if(TOOL==="move")return;
-  if(p.weed){if(TOOL==="care"||TOOL==="harvest")playerWeed(p.weed,x,y);else toast("Gamitin ang Alaga para bunutin ang damo.")}
-  else if(p.pen!=null){if(TOOL==="care"||TOOL==="harvest")tapPen(p.pen,x,y);else toast("Gamitin ang Alaga para sa mga hayop.")}
+  if(p.weed){if(TOOL==="care"||TOOL==="harvest")playerWeed(p.weed,x,y);else toast("Use Care to pull weeds.")}
+  else if(p.pen!=null){if(TOOL==="care"||TOOL==="harvest")tapPen(p.pen,x,y);else toast("Use Care for the animals.")}
   else tap(p.tile,x,y);
 }
 const hl=new THREE.Mesh(new THREE.PlaneGeometry(.98,.98),new THREE.MeshBasicMaterial({color:0xfff3a0,transparent:true,opacity:.45,depthWrite:false}));
@@ -1740,15 +1780,15 @@ const _p=new THREE.Vector3();
 function updateTag(){
   hl.visible=false;tag.hidden=true;if(!hovered)return;
   let txt,prog=null,wp;
-  if(hovered.stall){wp=_p.set(7.6,2.9,-.7);txt="Puwesto ng Paninda · "+invCount()+" paninda · pindutin"}
-  else if(hovered.isle!=null){const s=ISLE.spots[hovered.isle];wp=ISLE.spotWorld(hovered.isle,_p);txt=s.n+" · pindutin"}
-  else if(hovered.weed){const w=hovered.weed;if(w.state!=="ground"){hovered=null;return}wp=_p.set(w.x,.75,w.z);txt="Bunutin ang damo · +2"}
+  if(hovered.stall){wp=_p.set(7.6,2.9,-.7);txt="Market Stall · "+invCount()+" goods · tap"}
+  else if(hovered.isle!=null){const s=ISLE.spots[hovered.isle];wp=ISLE.spotWorld(hovered.isle,_p);txt=s.n+" · tap"}
+  else if(hovered.weed){const w=hovered.weed;if(w.state!=="ground"){hovered=null;return}wp=_p.set(w.x,.75,w.z);txt="Pull weeds · +2"}
   else if(hovered.tile!=null){const t=S.tiles[hovered.tile];if(!t)return;const [x,z]=tilePos(hovered.tile),st=tileState(t);
     const ok=toolOk(hovered.tile);hl.visible=TOOL!=="move"&&TOOL!=="care";hl.material.color.setHex(ok?0x9cf07a:0xff8a7a);hl.material.opacity=ok?.5:.35;const ty=tileY(hovered.tile);hl.position.set(x,ty+(t.k==="grass"?.09:.17),z);wp=_p.set(x,ty+1.05,z);
-    txt=t.k==="grass"?"Araruhin · "+PLOW+" barya":t.k==="soil"?"Itanim: "+crop(S.sel).n:st.dead?"Patay na · pindutin para linisin":st.w>0?st.c.n+" · Nalalanta! Anihin agad":st.left<=0?st.c.n+" · Hinog na · "+fmt(RIPE-(now()-S.tiles[hovered.tile].at-st.c.t))+" bago malanta":st.c.n+" · lumalaki "+Math.round(st.p*100)+"%";
+    txt=t.k==="grass"?"Plow · "+PLOW+" coins":t.k==="soil"?"Plant: "+crop(S.sel).n:st.dead?"Dead · tap to clear":st.w>0?st.c.n+" · Wilting! Harvest now":st.left<=0?st.c.n+" · Ripe · "+fmt(RIPE-(now()-S.tiles[hovered.tile].at-st.c.t))+" before it wilts":st.c.n+" · growing "+Math.round(st.p*100)+"%";
     if(st&&st.left>0)prog=st.p}
   else{const o=animalObjs[hovered.pen],p=S.pens[hovered.pen];if(!o||!p||!o.g.visible)return;const a=animal(p.id),left=a.t-(now()-p.at);
-    wp=_p.copy(o.g.position);wp.y+=o.g.userData.h+.45;const gs=p.g==="F"?" ♀":" ♂";if(p.sick)txt=a.n+gs+" · May sakit! Mamamatay sa "+fmt(Math.max(0,SICK_DIE-(now()-(p.sickAt||now()))))+" · Gamutin: "+cureCost(a);else if(isBaby(p)){txt="Anak na "+a.n+gs+" · lalaki sa "+fmt(GROW_T-(now()-p.born));prog=(now()-p.born)/GROW_T}else{txt=a.n+gs+(p.preg?" · Buntis, manganganak sa "+fmt(Math.max(0,PREG_T-(now()-p.preg))):"")+" · "+(left<=0?"Kunin: "+a.item:a.item+" sa "+fmt(left));if(left>0)prog=1-left/a.t}}
+    wp=_p.copy(o.g.position);wp.y+=o.g.userData.h+.45;const gs=p.g==="F"?" ♀":" ♂";if(p.sick)txt=a.n+gs+" · Sick! Dies in "+fmt(Math.max(0,SICK_DIE-(now()-(p.sickAt||now()))))+" · Treat: "+cureCost(a);else if(isBaby(p)){txt="Baby "+a.n+gs+" · grows up in "+fmt(GROW_T-(now()-p.born));prog=(now()-p.born)/GROW_T}else{txt=a.n+gs+(p.preg?" · Pregnant, gives birth in "+fmt(Math.max(0,PREG_T-(now()-p.preg))):"")+" · "+(left<=0?"Collect: "+a.item:a.item+" in "+fmt(left));if(left>0)prog=1-left/a.t}}
   wp.project(camera);if(wp.z>1)return;
   const w=stage.clientWidth,h=stage.clientHeight;
   tag.hidden=false;tag.innerHTML=txt+(prog!=null?`<i><b style="width:${(prog*100).toFixed(1)}%"></b></i>`:"");
@@ -1762,14 +1802,14 @@ let toastT;function toast(m,ms){let t=document.querySelector(".toast");if(!t){t=
 function levelUp(){
   const unl=[...CROPS.filter(c=>c.lv===S.lv).map(c=>c.n),...ANIMALS.filter(a=>a.lv===S.lv).map(a=>a.n)];
   const o=document.createElement("div");o.className="lvlup";
-  o.innerHTML=`<div><h3>Antas ${S.lv}!</h3><p>${unl.length?"Bago: "+unl.join(", "):"Lumalago ang bukid mo."}</p><button class="btn">Sige!</button></div>`;
+  o.innerHTML=`<div><h3>Level ${S.lv}!</h3><p>${unl.length?"New: "+unl.join(", "):"Your farm is growing."}</p><button class="btn">OK!</button></div>`;
   o.querySelector("button").onclick=()=>{o.remove();ui()};document.body.appendChild(o);
 }
 function after(){save();syncField();ui()}
-const TOOLS={move:"Galaw: iikot at igalaw lang ang view",plow:"Araro: pindutin ang damo para gawing lupa · "+PLOW+" barya",plant:"Tanim: pindutin ang lupa para itanim ang napiling binhi",harvest:"Ani: pindutin ang hinog na tanim",care:"Alaga: kunin ang ani ng hayop, gamutin, o bunutin ang damo"};
+const TOOLS={move:"Move: rotate and pan the view only",plow:"Plow: tap grass to turn it into soil · "+PLOW+" coins",plant:"Plant: tap soil to plant the selected seed",harvest:"Harvest: tap ripe crops",care:"Care: collect from animals, treat them, or pull weeds"};
 let TOOL="move",modeT=0;
 function setTool(k){if(!TOOLS[k])return;TOOL=k;document.querySelectorAll(".tb").forEach(b=>{const on=b.dataset.t===k;b.classList.toggle("on",on);b.setAttribute("aria-pressed",on)});
-  const m=$("modeTag");m.textContent=k==="plant"?"Tanim: "+crop(S.sel).n+" · pindutin ang lupa":TOOLS[k];m.style.opacity=1;clearTimeout(modeT);modeT=setTimeout(()=>m.style.opacity=k==="move"?0:.85,2600)}
+  const m=$("modeTag");m.textContent=k==="plant"?"Plant: "+crop(S.sel).n+" · tap the soil":TOOLS[k];m.style.opacity=1;clearTimeout(modeT);modeT=setTimeout(()=>m.style.opacity=k==="move"?0:.85,2600)}
 document.querySelectorAll(".tb").forEach(b=>b.onclick=()=>setTool(b.dataset.t));
 window.addEventListener("keydown",e=>{if(e.target&&(e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA"))return;const k={"1":"move","2":"plow","3":"plant","4":"harvest","5":"care"}[e.key];if(k)setTool(k)});
 function toolOk(i){const t=S.tiles[i];if(!t)return null;
@@ -1780,47 +1820,47 @@ function toolOk(i){const t=S.tiles[i];if(!t)return null;
 function tap(i,x,y){
   const t=S.tiles[i];
   if(TOOL==="move"||TOOL==="care")return;
-  if(TOOL==="plow"&&t.k!=="grass")return toast(t.k==="soil"?"Naararo na ito. Gamitin ang Tanim para magtanim.":"May tanim na rito.");
-  if(TOOL==="plant"&&t.k!=="soil")return toast(t.k==="grass"?"Araruhin muna ito gamit ang Araro.":"May tanim na rito.");
-  if(TOOL==="plant"){const c=crop(S.sel),isl=isIsleTile(i);if(c.island&&!isl)return toast(c.n+" ay sa Lihim na Taniman sa isla lang puwedeng itanim.");if(!c.island&&isl)return toast("Mga lihim na tanim lang ang puwede sa isla.")}
-  if(TOOL==="harvest"&&t.k!=="crop")return toast("Walang tanim dito.");
-  if(t.k==="grass"){if(S.coins<PLOW)return toast("Kulang ang barya pang-araro.");S.coins-=PLOW;t.k="soil";gain(0,1,x,y);burstTile(i,0x8d5a32,12)}
-  else if(t.k==="soil"){const c=crop(S.sel);if(S.lv<c.lv)return toast(c.n+" ay bukas sa Antas "+c.lv+".");if(S.coins<c.c)return toast("Kulang ang barya para sa "+c.n+".");if(c.town&&!seedOwned(c.id))return toast("Bilhin muna ang binhi ng "+c.n+" sa Bayan.");S.coins-=c.c;const fz=S.fert>0?(S.fert--,1):0;S.tiles[i]={k:"crop",c:c.id,at:now(),f:fz};floatText("-"+c.c+(fz?" · may pataba":""),x,y);burstTile(i,0x6cc046,6,.2)}
+  if(TOOL==="plow"&&t.k!=="grass")return toast(t.k==="soil"?"Already plowed. Use Plant to plant here.":"Something is already planted here.");
+  if(TOOL==="plant"&&t.k!=="soil")return toast(t.k==="grass"?"Plow it first with the Plow tool.":"Something is already planted here.");
+  if(TOOL==="plant"){const c=crop(S.sel),isl=isIsleTile(i);if(c.island&&!isl)return toast(c.n+" can only be planted in the Secret Field on the island.");if(!c.island&&isl)return toast("Only secret crops can be planted on the island.")}
+  if(TOOL==="harvest"&&t.k!=="crop")return toast("Nothing is planted here.");
+  if(t.k==="grass"){if(S.coins<PLOW)return toast("Not enough coins to plow.");S.coins-=PLOW;t.k="soil";gain(0,1,x,y);burstTile(i,0x8d5a32,12)}
+  else if(t.k==="soil"){const c=crop(S.sel);if(S.lv<c.lv)return toast(c.n+" unlocks at Level "+c.lv+".");if(S.coins<c.c)return toast("Not enough coins for "+c.n+".");if(c.town&&!seedOwned(c.id))return toast("Buy seeds first: "+c.n+" in Town.");S.coins-=c.c;const fz=S.fert>0?(S.fert--,1):0;S.tiles[i]={k:"crop",c:c.id,at:now(),f:fz};floatText("-"+c.c+(fz?" · fertilized":""),x,y);burstTile(i,0x6cc046,6,.2)}
   else{const st=tileState(t);
-    if(st.dead){S.tiles[i]={k:"soil"};toast("Nalanta ang "+st.c.n+". Nilinis na.")}
+    if(st.dead){S.tiles[i]={k:"soil"};toast("Wilted: "+st.c.n+". Cleared.")}
     else if(st.left<=0){if(!harvestItem(st,x,y))return;S.tiles[i]={k:"soil"};burstTile(i,st.c.col,18,.4);burstTile(i,0x6cc046,8,.4)}
-    else toast(st.c.n+": "+fmt(st.left)+" pa bago anihin")}
+    else toast(st.c.n+": "+fmt(st.left)+" left before harvest")}
   after();
 }
 function tapPen(i,x,y){const p=S.pens[i],a=animal(p.id);
-  if(!p.sick&&isBaby(p))return toast("Bata pa ang "+a.n+". Lalaki ito sa loob ng "+fmt(GROW_T-(now()-p.born))+".");
-  if(p.sick){const c=cureCost(a);if(S.coins<c)return toast("Kailangan ng "+c+" barya para sa gamot.");S.coins-=c;p.sick=false;delete p.sickAt;floatText("Gumaling! −"+c,x,y);const o=animalObjs[i];if(o)burst(o.g.position.x,.7,o.g.position.z,0x7fe08a,14);toast(a.n+" ay magaling na.");after();return}
-  const left=a.t-(now()-p.at);if(left>0)return toast(a.item+" sa loob ng "+fmt(left));const it=AITEM[a.id];if(it){if(!addItem(it,1,x,y))return;gain(0,a.xp,null)}else gain(a.s,a.xp,x,y);p.at=now();after()}
+  if(!p.sick&&isBaby(p))return toast("Still young: "+a.n+". It grows up in "+fmt(GROW_T-(now()-p.born))+".");
+  if(p.sick){const c=cureCost(a);if(S.coins<c)return toast("You need "+c+" coins for medicine.");S.coins-=c;p.sick=false;delete p.sickAt;floatText("Healed! −"+c,x,y);const o=animalObjs[i];if(o)burst(o.g.position.x,.7,o.g.position.z,0x7fe08a,14);toast(a.n+" is healthy now.");after();return}
+  const left=a.t-(now()-p.at);if(left>0)return toast(a.item+" in "+fmt(left));const it=AITEM[a.id];if(it){if(!addItem(it,1,x,y))return;gain(0,a.xp,null)}else gain(a.s,a.xp,x,y);p.at=now();after()}
 function harvestAll(){
   let xp=0,n=0,cash=0,stop=false;
   S.tiles.forEach((t,i)=>{if(stop)return;const st=tileState(t);if(st&&!st.dead&&st.left<=0){const q=st.w>.5?0:1;if(q&&!addItem(st.c.id,q,null)){stop=true;return}xp+=st.c.xp;n++;S.tiles[i]={k:"soil"};burstTile(i,st.c.col,8,.4)}});
   S.pens.forEach(p=>{if(stop)return;const a=animal(p.id);if(!p.sick&&!isBaby(p)&&now()-p.at>=a.t){const it=AITEM[a.id];if(it){if(!addItem(it,1,null)){stop=true;return}}else cash+=a.s;xp+=a.xp;n++;p.at=now()}});
-  if(!n)return toast(stop?"Puno na ang imbakan! Magbenta muna sa puwesto.":"Wala pang handang anihin.");
-  const r=$("tAll").getBoundingClientRect();gain(cash,xp,r.left+r.width/2,r.top);toast(n+" na ani ang napunta sa imbakan"+(cash?" · +"+cash+" barya":"")+(stop?". Puno na ang imbakan.":""),3000);after();invUI(true);
+  if(!n)return toast(stop?"Storage is full! Sell some at the stall first.":"Nothing is ready to harvest yet.");
+  const r=$("tAll").getBoundingClientRect();gain(cash,xp,r.left+r.width/2,r.top);toast(n+" crops went to storage"+(cash?" · +"+cash+" coins":"")+(stop?". Storage is full.":""),3000);after();invUI(true);
 }
 function plowAll(){
   const empty=S.tiles.map((t,i)=>t.k==="grass"?i:-1).filter(i=>i>=0);
-  if(!empty.length)return toast("Naararo na ang lahat.");
-  const can=Math.min(empty.length,Math.floor(S.coins/PLOW));if(!can)return toast("Kulang ang barya pang-araro.");
-  empty.slice(0,can).forEach(i=>S.tiles[i].k="soil");S.coins-=can*PLOW;gain(0,can,null);toast(can+" lote ang naararo");after();
+  if(!empty.length)return toast("Everything is plowed already.");
+  const can=Math.min(empty.length,Math.floor(S.coins/PLOW));if(!can)return toast("Not enough coins to plow.");
+  empty.slice(0,can).forEach(i=>S.tiles[i].k="soil");S.coins-=can*PLOW;gain(0,can,null);toast(can+" plots plowed");after();
 }
 function expand(){
   const nx=S.size+1;if(nx>=SIZES.length)return;
-  if(S.coins<EXPAND[nx])return toast("Kailangan ng "+EXPAND[nx]+" barya.");
+  if(S.coins<EXPAND[nx])return toast("You need "+EXPAND[nx]+" coins.");
   S.coins-=EXPAND[nx];const oc=SIZES[S.size],nc=SIZES[nx],old=S.tiles,tiles=[];
   for(let r=0;r<nc;r++)for(let c=0;c<nc;c++)tiles.push(r<oc&&c<oc?old[r*oc+c]:{k:"grass"});
-  S.tiles=tiles.concat(old.slice(oc*oc));Object.values(CREW).forEach(W=>{if(W&&W.o){if(W.o.queue)W.o.queue.length=0;W.o.tile=-1}});S.size=nx;hovered=null;toast("Lumawak ang bukid! "+nc+"×"+nc);save();buildField();ui();
+  S.tiles=tiles.concat(old.slice(oc*oc));Object.values(CREW).forEach(W=>{if(W&&W.o){if(W.o.queue)W.o.queue.length=0;W.o.tile=-1}});S.size=nx;hovered=null;toast("The farm got bigger! "+nc+"×"+nc);save();buildField();ui();
 }
 function buyAnimal(a,gender){
-  if(S.lv<a.lv)return toast(a.n+" ay bukas sa Antas "+a.lv+".");
-  const z=a.zone||"pen";if(z==="pen"){if(S.pens.filter(p=>p.id===a.id).length>=(PLIM[a.id]||5))return toast("Puno na ang "+(PENS[a.id]?PENS[a.id].n:"kulungan")+".")}else if(S.pens.filter(p=>zoneOf(p.id)===z).length>=ZLIM[z])return toast(z==="pond"?"Puno na ang lawa.":"Sapat na ang alagang aso at pusa.");
-  if(S.coins<a.cost)return toast("Kulang ang barya para sa "+a.n+".");
-  S.coins-=a.cost;S.pens.push({id:a.id,at:now(),g:gender==="F"?"F":"M"});toast("Bumili ng "+(gender==="F"?"babaeng ":"lalaking ")+a.n+". Kailangan ng lalaki at babae para magkaanak.",3200);save();syncAnimals();ui();
+  if(S.lv<a.lv)return toast(a.n+" unlocks at Level "+a.lv+".");
+  const z=a.zone||"pen";if(z==="pen"){if(S.pens.filter(p=>p.id===a.id).length>=(PLIM[a.id]||5))return toast("Full: "+(PENS[a.id]?PENS[a.id].n:"pen")+".")}else if(S.pens.filter(p=>zoneOf(p.id)===z).length>=ZLIM[z])return toast(z==="pond"?"The pond is full.":"You have enough dogs and cats.");
+  if(S.coins<a.cost)return toast("Not enough coins for "+a.n+".");
+  S.coins-=a.cost;S.pens.push({id:a.id,at:now(),g:gender==="F"?"F":"M"});toast("Bought "+(gender==="F"?"babaeng ":"lalaking ")+a.n+". You need a male and a female to breed.",3200);save();syncAnimals();ui();
 }
 
 /* ================= DOM UI ================= */
@@ -1839,30 +1879,32 @@ function ui(){
   $("coins").textContent=S.coins.toLocaleString();$("lvl").textContent=S.lv;$("xp").style.width=(S.xp/xpNeed(S.lv)*100)+"%";
   const sd=$("seeds");
   if(sd._lv!==S.lv||sd._sel!==S.sel||sd._sd!==(S.seeds||[]).length){sd._sd=(S.seeds||[]).length;sd._lv=S.lv;sd._sel=S.sel;
-    sd.innerHTML=CROPS.map(c=>{const lock=S.lv<c.lv||(c.town&&!seedOwned(c.id));return `<button class="seed ${S.sel===c.id?"sel":""} ${lock?"lock":""} ${c.island?"isl":""}" data-id="${c.id}" aria-pressed="${S.sel===c.id}">${ICONS[c.id]?`<img src="${ICONS[c.id]}" alt="">`:""}<b>${c.n}</b><small>${lock?(S.lv<c.lv?"Antas "+c.lv:"Bilhin sa Bayan"):"−"+c.c+" → +"+c.s}</small><small>${lock?"":c.island?"Sa isla lang":fmt(c.t)}</small></button>`}).join("");
-    sd.querySelectorAll(".seed").forEach(b=>b.onclick=()=>{const c=crop(b.dataset.id);if(S.lv<c.lv)return toast(c.n+" ay bukas sa Antas "+c.lv+".");if(c.town&&!seedOwned(c.id))return toast("Bilhin ang binhi ng "+c.n+" sa Tindahan ng Binhi sa Bayan.",3000);S.sel=c.id;save();ui();setTool("plant")})}
+    sd.innerHTML=CROPS.map(c=>{const lock=S.lv<c.lv||(c.town&&!seedOwned(c.id));return `<button class="seed ${S.sel===c.id?"sel":""} ${lock?"lock":""} ${c.island?"isl":""}" data-id="${c.id}" aria-pressed="${S.sel===c.id}">${ICONS[c.id]?`<img src="${ICONS[c.id]}" alt="">`:""}<b>${c.n}</b><small>${lock?(S.lv<c.lv?"Level "+c.lv:"Buy in Town"):"−"+c.c+" → +"+c.s}</small><small>${lock?"":c.island?"Island only":fmt(c.t)}</small></button>`}).join("");
+    sd.querySelectorAll(".seed").forEach(b=>b.onclick=()=>{const c=crop(b.dataset.id);if(S.lv<c.lv)return toast(c.n+" unlocks at Level "+c.lv+".");if(c.town&&!seedOwned(c.id))return toast("Buy seeds for "+c.n+" at the Seed Shop in Town.",3000);S.sel=c.id;save();ui();setTool("plant")})}
   const shop=$("shop");
-  if(shop._lv!==S.lv){shop._lv=S.lv;shop.innerHTML=ANIMALS.map(a=>S.lv<a.lv?`<div class="abuy lock"><b>${a.n}</b><small>Antas ${a.lv}</small></div>`:`<div class="abuy"><b>${a.n}</b><small>${a.cost} barya</small><button class="btn sm" data-id="${a.id}" data-g="M">♂ Lalaki</button><button class="btn sm" data-id="${a.id}" data-g="F" style="background:#d9568a;box-shadow:0 4px 0 #9a2f5a">♀ Babae</button></div>`).join("");
+  if(shop._lv!==S.lv){shop._lv=S.lv;shop.innerHTML=ANIMALS.map(a=>S.lv<a.lv?`<div class="abuy lock"><b>${a.n}</b><small>Level ${a.lv}</small></div>`:`<div class="abuy"><b>${a.n}</b><small>${a.cost} coins</small><button class="btn sm" data-id="${a.id}" data-g="M">♂ Male</button><button class="btn sm" data-id="${a.id}" data-g="F" style="background:#d9568a;box-shadow:0 4px 0 #9a2f5a">♀ Female</button></div>`).join("");
     shop.querySelectorAll("button[data-id]").forEach(b=>b.onclick=()=>buyAnimal(animal(b.dataset.id),b.dataset.g))}
   const nx=S.size+1,ex=$("tExpand");
-  if(nx<SIZES.length){ex.disabled=false;ex.textContent="Palawakin "+SIZES[nx]+"×"+SIZES[nx]+" · "+EXPAND[nx]}else{ex.disabled=true;ex.textContent="Pinakamalaki na"}
-  {const np=nextPlot(),bp=$("tPlot");if(np){bp.disabled=false;bp.textContent="Bumili ng "+np.n+" · "+np.cost.toLocaleString()+(S.lv<np.lv?" · Antas "+np.lv:"")}else{bp.disabled=true;bp.textContent="Nabili mo na lahat ng lupa"}}
+  if(nx<SIZES.length){ex.disabled=false;ex.textContent="Expand "+SIZES[nx]+"×"+SIZES[nx]+" · "+EXPAND[nx]}else{ex.disabled=true;ex.textContent="Fully expanded"}
+  {const np=nextPlot(),bp=$("tPlot");if(np){bp.disabled=false;bp.textContent="Buy "+np.n+" · "+np.cost.toLocaleString()+(S.lv<np.lv?" · Level "+np.lv:"")}else{bp.disabled=true;bp.textContent="You bought all the land"}}
 }
 $("tPlow").onclick=plowAll;$("tAll").onclick=harvestAll;$("tExpand").onclick=expand;
-$("tHelper").onclick=()=>{S.helperOn=!S.helperOn;helperUI();save();toast(S.helperOn?"Nag-aani na ulit ang katulong.":"Pinagpahinga mo ang katulong sa kamalig.")};
+$("tHelper").onclick=()=>{S.helperOn=!S.helperOn;helperUI();save();toast(S.helperOn?"The helper is harvesting again.":"The helper is resting in the barn.")};
 $("tPlot").onclick=buyPlot;
 $("menuBtn").onclick=()=>document.body.classList.toggle("drawer");$("drawerX").onclick=()=>document.body.classList.remove("drawer");
-$("hideBtn").onclick=()=>{const on=document.body.classList.toggle("hideui");$("hideBtn").textContent=on?"Ipakita":"Itago";$("hideBtn").setAttribute("aria-pressed",on);try{localStorage.setItem("bukid-hideui",on?"1":"0")}catch(e){}};
-try{if(localStorage.getItem("bukid-hideui")==="1"){document.body.classList.add("hideui");$("hideBtn").textContent="Ipakita"}}catch(e){}
-$("rotBtn").onclick=async()=>{try{if(!document.fullscreenElement&&document.documentElement.requestFullscreen)await document.documentElement.requestFullscreen();await screen.orientation.lock("landscape");setTimeout(resize,300)}catch(e){toast("I-rotate ang phone mo nang pahiga para sa landscape.",3000)}};
-window.addEventListener("orientationchange",()=>setTimeout(resize,250));
+$("hideBtn").onclick=()=>{const on=document.body.classList.toggle("hideui");$("hideBtn").textContent=on?"Show":"Hide";$("hideBtn").setAttribute("aria-pressed",on);try{localStorage.setItem("bukid-hideui",on?"1":"0")}catch(e){}};
+try{if(localStorage.getItem("bukid-hideui")==="1"){document.body.classList.add("hideui");$("hideBtn").textContent="Show"}}catch(e){}
+$("rotBtn").onclick=async()=>{try{if(!document.fullscreenElement&&document.documentElement.requestFullscreen)await document.documentElement.requestFullscreen();await screen.orientation.lock("landscape");relayout()}catch(e){relayout();if(innerWidth<innerHeight)toast("Turn your phone sideways for landscape.",3000)}};
+function setLand(){const b=document.body,land=innerWidth>innerHeight&&(innerHeight<=600||!!(window.matchMedia&&matchMedia("(pointer:coarse)").matches));if(land!==b.classList.contains("land")){b.classList.toggle("land",land);if(!land)b.classList.remove("drawer")}}
+let rlT=[];function relayout(){const r=()=>{setLand();try{resize()}catch(e){}};r();rlT.forEach(clearTimeout);rlT=[120,400,900].map(t=>setTimeout(r,t))}
+window.addEventListener("orientationchange",relayout);document.addEventListener("fullscreenchange",relayout);if(window.visualViewport)visualViewport.addEventListener("resize",relayout);if(window.screen&&screen.orientation&&screen.orientation.addEventListener)screen.orientation.addEventListener("change",relayout);setLand();
 $("tTown").onclick=startJeep;
-$("sellAll").onclick=sellAll;$("shopOpen").onclick=()=>{S.shopOpen=S.shopOpen===false;save();invUI(true);toast(S.shopOpen?"Bukas na ang puwesto. Darating ang mga mamimili.":"Sarado ang puwesto. Walang darating na mamimili.",2600)};$("goMkt").onclick=()=>{goView("market")};
+$("sellAll").onclick=sellAll;$("shopOpen").onclick=()=>{S.shopOpen=S.shopOpen===false;save();invUI(true);toast(S.shopOpen?"The stall is open. Buyers will come.":"The stall is closed. No buyers will come.",2600)};$("goMkt").onclick=()=>{goView("market")};
 $("placeRot").onclick=()=>{if(PLACE){PLACE.r=(PLACE.r+Math.PI/2)%(Math.PI*2);PLACE.g.rotation.y=PLACE.r}};$("placeOk").onclick=confirmPlace;$("placeX").onclick=cancelPlace;
-$("tCure").onclick=()=>{const sick=S.pens.map((p,i)=>[p,i]).filter(([p])=>p.sick);if(!sick.length)return toast("Walang may sakit na hayop.");const cost=sick.reduce((s2,[p])=>s2+cureCost(animal(p.id)),0);if(S.coins<cost)return toast("Kailangan ng "+cost+" barya para gamutin lahat.");S.coins-=cost;sick.forEach(([p,i])=>{p.sick=false;delete p.sickAt;const o=animalObjs[i];if(o)burst(o.g.position.x,.7,o.g.position.z,0x7fe08a,10)});toast(sick.length+" hayop ang gumaling · −"+cost+" barya");after()};
-$("tIsle").onclick=()=>{if(ownBoat())startTrip();else if(onIsle)goView("all");else toast("Bumili muna ng bangka sa Tindahan para makapunta sa isla. Puwede mo itong tanawin gamit ang view na Isla.",4200)};
+$("tCure").onclick=()=>{const sick=S.pens.map((p,i)=>[p,i]).filter(([p])=>p.sick);if(!sick.length)return toast("No sick animals.");const cost=sick.reduce((s2,[p])=>s2+cureCost(animal(p.id)),0);if(S.coins<cost)return toast("You need "+cost+" coins to treat all.");S.coins-=cost;sick.forEach(([p,i])=>{p.sick=false;delete p.sickAt;const o=animalObjs[i];if(o)burst(o.g.position.x,.7,o.g.position.z,0x7fe08a,10)});toast(sick.length+" animals healed · −"+cost+" coins");after()};
+$("tIsle").onclick=()=>{if(ownBoat())startTrip();else if(onIsle)goView("all");else toast("Buy a boat at the Shop first to reach the island. You can still look at it with the Island view.",4200)};
 $("tCheat").onclick=e=>{S.coins+=100000;const r=e.currentTarget.getBoundingClientRect();floatText("+100,000",r.left+r.width/2,r.top);save();ui()};
-$("tLvl").onclick=()=>{if(S.lv<10){S.lv=10;S.xp=0}save();ui();toast("Antas 10: bukas na lahat ng tanim at hayop")};
+$("tLvl").onclick=()=>{if(S.lv<10){S.lv=10;S.xp=0}save();ui();toast("Level 10: all crops and animals unlocked")};
 
 /* ================= HELPER: auto-harvests ripe crops ================= */
 let helper=null;const _ts=new THREE.Vector3();
@@ -1872,7 +1914,7 @@ function initHelper(){
   const bk=new THREE.Group();bk.position.set(.22,.05,0);f.torso.add(bk);
   part(bk,gCyl,0xb07a3e,0,0,0,.15,.17,.15);part(bk,gCyl,0x8a5a2a,0,.085,0,.16,.03,.16);
   const fill=new THREE.Group();bk.add(fill);[[0,.1,0,0xe2402f],[.06,.11,.05,0xf5c732],[-.05,.11,-.04,0x7ccf4a]].forEach(([x,y,z,c])=>part(fill,gSph,c,x,y,z,.06,.05,.06));fill.visible=false;
-  const tag=labelSprite("Katulong");tag.position.y=1.8;tag.scale.set(1.1,.28,1);f.g.add(tag);
+  const tag=labelSprite("Helper");tag.position.y=1.8;tag.scale.set(1.1,.28,1);f.g.add(tag);
   helper={...f,fill,o:{state:"idle",st:1,cr:0,tile:-1,carry:0,tx:0,tz:0}};
 }
 function ripeIdx(){if(invFull())return -1;const p=helper.g.position;let best=-1,bd=1e9;
@@ -1881,7 +1923,7 @@ function helperHarvest(i){const t=S.tiles[i],st=tileState(t);if(!st||st.p<1)retu
   if(st.dead){S.tiles[i]={k:"soil"};burstTile(i,0x8b6b3d,6)}
   else{const sc=toScreen(x,1.3,z);if(!harvestItem(st,sc.x,sc.y))return;S.tiles[i]={k:"soil"};burstTile(i,st.c.col,14,.4);burstTile(i,0x6cc046,6,.4);helper.o.carry++}
   after()}
-function helperUI(){const b=$("tHelper");if(!b)return;b.textContent=S.helperOn?"Katulong: Nag-aani":"Katulong: Nagpapahinga";b.classList.toggle("alt",!S.helperOn)}
+function helperUI(){const b=$("tHelper");if(!b)return;b.textContent=S.helperOn?"Helper: Harvesting":"Helper: Resting";b.classList.toggle("alt",!S.helperOn)}
 function stepHelper(dt,t){
   if(!helper)return;if(runQueue(helper,dt,t))return;const f=helper,o=f.o,g=f.g;let walking=false,crT=0,armL=0,armR=0;o.st-=dt;
   const walkTo=(x,z,sp)=>{const dx=x-g.position.x,dz=z-g.position.z,d=Math.hypot(dx,dz);if(d<.05)return true;
@@ -1913,8 +1955,8 @@ function stepHelper(dt,t){
 const CREW={},WHITS=[];let SEL=null;
 const GPLANE=new THREE.Plane(new THREE.Vector3(0,1,0),0),_gpv=new THREE.Vector3();
 const TASKT={walk:0,plow:1.1,plant:.8,harvest:.8,weed:1.4,animal:.9,rest:0};
-const TASKN={walk:"Naglalakad",plow:"Nag-aararo",plant:"Nagtatanim",harvest:"Nag-aani",weed:"Nagbubunot ng damo",animal:"Nag-aalaga ng hayop",rest:"Nagpapahinga"};
-function wName(k){return k==="farmer"?((typeof CLOUD!=="undefined"&&CLOUD.profile&&CLOUD.profile.farmer)||"Juan"):"Katulong"}
+const TASKN={walk:"Walking",plow:"Plowing",plant:"Planting",harvest:"Harvesting",weed:"Pulling weeds",animal:"Tending animals",rest:"Resting"};
+function wName(k){return k==="farmer"?((typeof CLOUD!=="undefined"&&CLOUD.profile&&CLOUD.profile.farmer)||"Juan"):"Helper"}
 function wAuto(k){return k==="farmer"?S.farmerAuto!==false:S.helperOn!==false}
 function initCrew(){
   CREW.farmer=farmer;CREW.helper=helper;
@@ -1924,7 +1966,7 @@ function initCrew(){
 }
 const SELRING=new THREE.Mesh(new THREE.RingGeometry(.38,.5,28),new THREE.MeshBasicMaterial({color:0xffd84a,transparent:true,opacity:.9,depthWrite:false}));SELRING.rotation.x=-Math.PI/2;scene.add(SELRING);
 function selectWorker(k){SEL=k&&CREW[k]?k:null;renderCrewSel();const m=$("modeTag");
-  m.textContent=SEL?"Utos kay "+wName(SEL)+": pumili ng gamit, tapos pindutin kung saan":"Walang napiling tauhan: ikaw mismo ang gagawa";m.style.opacity=1;clearTimeout(modeT);modeT=setTimeout(()=>m.style.opacity=.85,2600)}
+  m.textContent=SEL?"Orders for "+wName(SEL)+": pick a tool, then tap where":"No worker selected: you will do it yourself";m.style.opacity=1;clearTimeout(modeT);modeT=setTimeout(()=>m.style.opacity=.85,2600)}
 function groundPoint(e){const r=cv.getBoundingClientRect();ndc.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(ndc,camera);
   const v=ray.ray.intersectPlane(GPLANE,_gpv);if(!v)return null;return{x:Math.max(-28,Math.min(17,v.x)),z:Math.max(-24,Math.min(14,v.z))}}
 function taskTarget(q){
@@ -1935,15 +1977,15 @@ function taskTarget(q){
   if(q.type==="animal"){const a=animalObjs[q.pen];return a&&a.g.visible?[a.g.position.x,a.g.position.z]:null}
   return null}
 function commandAt(e,p){
-  const W=CREW[SEL];if(!W)return;const q=W.o.queue;if(q.length>=16)return toast("Puno na ang listahan ng utos ni "+wName(SEL)+".");
+  const W=CREW[SEL];if(!W)return;const q=W.o.queue;if(q.length>=16)return toast("Order list is full for "+wName(SEL)+".");
   let task=null;
-  if(TOOL==="care"){if(p&&p.weed)task={type:"weed",weed:p.weed};else if(p&&p.pen!=null)task={type:"animal",pen:p.pen};else return toast("Sa Alaga, pindutin ang damo o ang hayop.")}
+  if(TOOL==="care"){if(p&&p.weed)task={type:"weed",weed:p.weed};else if(p&&p.pen!=null)task={type:"animal",pen:p.pen};else return toast("With Care, tap a weed or an animal.")}
   else if((TOOL==="plow"||TOOL==="plant"||TOOL==="harvest")&&p&&p.tile!=null){
-    const i=p.tile,t=S.tiles[i];if(isIsleTile(i))return toast("Hindi makakarating ang tauhan sa isla. Ikaw mismo ang mag-aalaga rito.");if(q.some(x=>x.tile===i&&x.type===TOOL))return;
+    const i=p.tile,t=S.tiles[i];if(isIsleTile(i))return toast("Workers can't reach the island. You must tend it yourself.");if(q.some(x=>x.tile===i&&x.type===TOOL))return;
     const willPlow=q.some(x=>x.tile===i&&x.type==="plow"),willPlant=q.some(x=>x.tile===i&&x.type==="plant");
-    if(TOOL==="plow"&&t.k!=="grass")return toast("Naararo na ang lote na ito.");
-    if(TOOL==="plant"){if(crop(S.sel).island)return toast("Sa isla lang puwedeng itanim ang "+crop(S.sel).n+".");if(t.k==="crop")return toast("May tanim na rito.");if(t.k==="grass"&&!willPlow)return toast("Utusan muna siyang araruhin ito.");const c=crop(S.sel);if(S.lv<c.lv)return toast(c.n+" ay bukas sa Antas "+c.lv+".")}
-    if(TOOL==="harvest"&&t.k!=="crop"&&!willPlant)return toast("Walang tanim dito na aanihin.");
+    if(TOOL==="plow"&&t.k!=="grass")return toast("This plot is already plowed.");
+    if(TOOL==="plant"){if(crop(S.sel).island)return toast("Can only be planted on the island: "+crop(S.sel).n+".");if(t.k==="crop")return toast("Something is already planted here.");if(t.k==="grass"&&!willPlow)return toast("Order them to plow it first.");const c=crop(S.sel);if(S.lv<c.lv)return toast(c.n+" unlocks at Level "+c.lv+".")}
+    if(TOOL==="harvest"&&t.k!=="crop"&&!willPlant)return toast("Nothing here to harvest.");
     task={type:TOOL,tile:i,crop:S.sel}}
   else{const gp=groundPoint(e);if(gp)task={type:"walk",x:gp.x,z:gp.z}}
   if(!task)return;
@@ -1959,8 +2001,8 @@ function harvestTile(i,W){const t=S.tiles[i],st=tileState(t);if(!st||st.p<1)retu
   else{const sc=toScreen(x,1.3,z);if(!harvestItem(st,sc.x,sc.y))return false;S.tiles[i]={k:"soil"};burstTile(i,st.c.col,14,.4);if(W===helper)helper.o.carry++}
   after();return true}
 function doTask(W,q){const tg=taskTarget(q),sc=tg?toScreen(tg[0],1.3,tg[1]):{x:0,y:0};
-  if(q.type==="plow"){const t=S.tiles[q.tile];if(!t||t.k!=="grass")return;if(S.coins<PLOW)return toast("Kulang ang barya pang-araro.");S.coins-=PLOW;t.k="soil";gain(0,1,sc.x,sc.y);burstTile(q.tile,0x8d5a32,12);after()}
-  else if(q.type==="plant"){const t=S.tiles[q.tile],c=crop(q.crop);if(!t||t.k!=="soil")return;if(S.coins<c.c)return toast("Kulang ang barya para sa "+c.n+".");if(c.town&&!seedOwned(c.id))return;S.coins-=c.c;const fz=S.fert>0?(S.fert--,1):0;S.tiles[q.tile]={k:"crop",c:c.id,at:now(),f:fz};floatText("-"+c.c,sc.x,sc.y);burstTile(q.tile,0x6cc046,6,.2);after()}
+  if(q.type==="plow"){const t=S.tiles[q.tile];if(!t||t.k!=="grass")return;if(S.coins<PLOW)return toast("Not enough coins to plow.");S.coins-=PLOW;t.k="soil";gain(0,1,sc.x,sc.y);burstTile(q.tile,0x8d5a32,12);after()}
+  else if(q.type==="plant"){const t=S.tiles[q.tile],c=crop(q.crop);if(!t||t.k!=="soil")return;if(S.coins<c.c)return toast("Not enough coins for "+c.n+".");if(c.town&&!seedOwned(c.id))return;S.coins-=c.c;const fz=S.fert>0?(S.fert--,1):0;S.tiles[q.tile]={k:"crop",c:c.id,at:now(),f:fz};floatText("-"+c.c,sc.x,sc.y);burstTile(q.tile,0x6cc046,6,.2);after()}
   else if(q.type==="harvest")harvestTile(q.tile,W);
   else if(q.type==="weed"){if(q.weed&&q.weed.state==="ground")playerWeed(q.weed,sc.x,sc.y)}
   else if(q.type==="animal")tapPen(q.pen,sc.x,sc.y);
@@ -1986,7 +2028,7 @@ function runQueue(W,dt,t){
   g.visible=true;o.resting=false;
   if(q.phase==null){q.phase="go";q.wait=0}
   const tg=taskTarget(q);
-  if(!tg){if(q.type==="animal")toast("Hindi maabot ang hayop ngayon.");o.queue.shift();updateCrewUI();animWorker(W,o,dt,t,false,0,0,0,0);return true}
+  if(!tg){if(q.type==="animal")toast("Can't reach the animal right now.");o.queue.shift();updateCrewUI();animWorker(W,o,dt,t,false,0,0,0,0);return true}
   if(q.phase==="go"){const p=g.position,dx=tg[0]-p.x,dz=tg[1]-p.z,d=Math.hypot(dx,dz),stop=q.type==="walk"||q.type==="rest"?0:(q.type==="animal"?.75:.42);
     if(d>stop+.03)walkTo(tg[0]-(d?dx/d:0)*stop,tg[1]-(d?dz/d:0)*stop,1.55);else{q.phase="work";q.tm=TASKT[q.type];if(d>.01)g.rotation.y=Math.atan2(-dz,dx)}}
   else{
@@ -2013,18 +2055,18 @@ function updateMarkers(){const W=SEL&&CREW[SEL],q=W?W.o.queue:[],tt=performance.
     else if(m)m.visible=false}}
 /* crew panel */
 function wStatus(k){const W=CREW[k];if(!W)return"";const o=W.o,q=o.queue&&o.queue[0];
-  if(q){const n=TASKN[q.type];return(q.phase==="work"?n:"Papunta para "+n.toLowerCase())+(o.queue.length>1?" · "+o.queue.length+" utos":"")}
-  if(!wAuto(k))return o.resting?"Nagpapahinga sa kamalig":"Naghihintay ng utos";
-  if(!W.g.visible)return"Sumisilong sa kamalig";
-  if(k==="farmer")return o.state==="go"||o.state==="kneel"||o.state==="pull"||o.state==="yank"?"Kusang nagbubunot ng damo":"Kusang naglilibot";
-  return o.state==="go"||o.state==="pick"?"Kusang nag-aani":"Naghihintay ng hinog na tanim"}
+  if(q){const n=TASKN[q.type];return(q.phase==="work"?n:"Heading to "+n.toLowerCase())+(o.queue.length>1?" · "+o.queue.length+" orders":"")}
+  if(!wAuto(k))return o.resting?"Resting in the barn":"Waiting for orders";
+  if(!W.g.visible)return"Sheltering in the barn";
+  if(k==="farmer")return o.state==="go"||o.state==="kneel"||o.state==="pull"||o.state==="yank"?"Pulling weeds on their own":"Wandering on their own";
+  return o.state==="go"||o.state==="pick"?"Harvesting on their own":"Waiting for ripe crops"}
 function renderCrew(){const box=$("crew");box.textContent="";
   ["farmer","helper"].forEach(k=>{const d=document.createElement("div");d.className="crewc";d.dataset.w=k;
     const sel=document.createElement("button");sel.className="cw-sel";sel.type="button";sel.innerHTML='<i></i><b></b><small></small>';sel.onclick=()=>selectWorker(SEL===k?null:k);
     const au=document.createElement("button");au.className="cw-mini";au.type="button";au.onclick=()=>{if(k==="farmer")S.farmerAuto=!wAuto(k);else S.helperOn=!wAuto(k);save();helperUI();updateCrewUI()};
-    const st=document.createElement("button");st.className="cw-mini";st.type="button";st.textContent="Ihinto";st.title="Burahin ang lahat ng utos";
+    const st=document.createElement("button");st.className="cw-mini";st.type="button";st.textContent="Stop";st.title="Clear all orders";
     st.onclick=()=>{const W=CREW[k];W.o.queue.forEach(x=>{if(x.weed)x.weed.claim=false});W.o.queue.length=0;updateCrewUI()};
-    const rs=document.createElement("button");rs.className="cw-mini";rs.type="button";rs.textContent="Pahinga";rs.title="Pauwiin sa kamalig";
+    const rs=document.createElement("button");rs.className="cw-mini";rs.type="button";rs.textContent="Rest";rs.title="Send to the barn";
     rs.onclick=()=>{const W=CREW[k];W.o.queue.length=0;W.o.queue.push({type:"rest"});if(k==="farmer")S.farmerAuto=false;else S.helperOn=false;save();helperUI();updateCrewUI()};
     d.append(sel,au,st,rs);box.append(d)});
   renderCrewSel();updateCrewUI()}
@@ -2032,7 +2074,7 @@ function renderCrewSel(){document.querySelectorAll(".crewc").forEach(d=>{const o
 function updateCrewUI(){document.querySelectorAll(".crewc").forEach(d=>{const k=d.dataset.w,W=CREW[k];if(!W)return;
   d.querySelector("i").style.background="#"+(k==="farmer"?farmerColor:0x3f8f2c).toString(16).padStart(6,"0");
   d.querySelector("b").textContent=wName(k);d.querySelector("small").textContent=wStatus(k);
-  const au=d.querySelectorAll(".cw-mini")[0];au.textContent=wAuto(k)?"Kusa":"Utos lang";au.classList.toggle("off",!wAuto(k));au.title=wAuto(k)?"Kusang kumikilos kapag walang utos":"Gagawa lang kapag inutusan"})}
+  const au=d.querySelectorAll(".cw-mini")[0];au.textContent=wAuto(k)?"Auto":"Orders only";au.classList.toggle("off",!wAuto(k));au.title=wAuto(k)?"Works on their own when there are no orders":"Works only when ordered"})}
 let crewT=0;
 function stepCrew(dt,t){const W=SEL&&CREW[SEL];
   if(W&&W.g.visible){SELRING.visible=true;SELRING.position.set(W.g.position.x,.04,W.g.position.z);SELRING.material.color.setHex(W.ringColor);SELRING.scale.setScalar(1+.08*Math.sin(t*5))}else SELRING.visible=false;
@@ -2040,15 +2082,15 @@ function stepCrew(dt,t){const W=SEL&&CREW[SEL];
 
 /* ================= SHOP: buildings, boats, island farm ================= */
 const BUILDS=[
-  {id:"kubo",n:"Bahay Kubo",cost:800,lv:2,r:1.5,inc:6,d:"Bahay na kawayan at nipa sa ibabaw ng mga haligi."},
-  {id:"bodega",n:"Bodega",cost:1200,lv:3,r:1.7,inc:8,d:"Imbakan ng ani at mga gamit sa bukid."},
-  {id:"kamalig",n:"Malaking Kamalig",cost:2500,lv:4,r:2.3,inc:15,d:"Pulang kamalig na may dalawang pinto at silid ng dayami."},
-  {id:"kiskisan",n:"Kiskisan",cost:2000,lv:5,r:1.4,inc:12,d:"Gilingan na umiikot ang elisi sa hangin."},
-  {id:"bato",n:"Bahay na Bato",cost:3500,lv:6,r:2.1,inc:22,d:"Bahay na bato at kahoy na may capiz na bintana at balkonahe."}];
-const BOATS=[{id:"bangka",n:"Bangka",cost:600,lv:2,speed:3.6,d:"Bangkang de-sagwan na may katig. Mabagal pero maaasahan."},
-  {id:"speed",n:"Speed Boat",cost:2500,lv:5,speed:10,d:"Bangkang de-motor. Ilang segundo lang papunta sa isla."}];
-const ISLEITEMS=[{id:"isla",n:"Lihim na Taniman",cost:2000,lv:3,d:"6×6 na lote sa isla para sa mga lihim na tanim. Kailangan ng bangka."},
-  {id:"guard",n:"Bantay sa Isla",cost:1500,lv:4,d:"May magbabantay sa taniman, kaya mas bihirang dumaan ang patrolya."}];
+  {id:"kubo",n:"Nipa Hut",cost:800,lv:2,r:1.5,inc:6,d:"Bamboo and nipa house on stilts."},
+  {id:"bodega",n:"Warehouse",cost:1200,lv:3,r:1.7,inc:8,d:"Storage for crops and farm tools."},
+  {id:"kamalig",n:"Big Barn",cost:2500,lv:4,r:2.3,inc:15,d:"Red barn with two doors and a hayloft."},
+  {id:"kiskisan",n:"Windmill",cost:2000,lv:5,r:1.4,inc:12,d:"Mill whose blades turn in the wind."},
+  {id:"bato",n:"Stone House",cost:3500,lv:6,r:2.1,inc:22,d:"Stone and wood house with capiz windows and a balcony."}];
+const BOATS=[{id:"bangka",n:"Rowboat",cost:600,lv:2,speed:3.6,d:"Rowboat with outriggers. Slow but reliable."},
+  {id:"speed",n:"Speed Boat",cost:2500,lv:5,speed:10,d:"Motorboat. Just a few seconds to the island."}];
+const ISLEITEMS=[{id:"isla",n:"Secret Field",cost:2000,lv:3,d:"6×6 plot on the island for secret crops. Needs a boat."},
+  {id:"guard",n:"Island Guard",cost:1500,lv:4,d:"Someone guards the field, so patrols come less often."}];
 const FARM_DOCK={x:23.2,z:1.35},ISLE_DOCK={x:42.2,z:3.2};
 const ownBoat=()=>{const b=(S.boats||[]);return b.includes("speed")?BOATS[1]:b.includes("bangka")?BOATS[0]:null};
 const ownIsle=()=>(S.plots||[]).includes("isla");
@@ -2098,18 +2140,18 @@ function validPlace(x,z,r){
   for(const o of S.builds||[]){const d=BUILDS.find(q=>q.id===o.id);if(Math.hypot(x-o.x,z-o.z)<r+(d?d.r:1.5)+.3)return false}
   return true}
 let PLACE=null;const GHOSTMAT=new THREE.MeshBasicMaterial({color:0x7fe08a,transparent:true,opacity:.45,depthWrite:false});
-function startPlace(id,fromInv){const d=BUILDS.find(q=>q.id===id);if(!d)return;if(fromInv){if(!((S.decor||{})[id]>0))return}else{if(S.lv<d.lv)return toast(d.n+" ay mabibili sa Antas "+d.lv+".");if(S.coins<d.cost)return toast("Kailangan ng "+d.cost.toLocaleString()+" barya para sa "+d.n+".")}
+function startPlace(id,fromInv){const d=BUILDS.find(q=>q.id===id);if(!d)return;if(fromInv){if(!((S.decor||{})[id]>0))return}else{if(S.lv<d.lv)return toast(d.n+" unlocks at Level "+d.lv+".");if(S.coins<d.cost)return toast("You need "+d.cost.toLocaleString()+" coins for "+d.n+".")}
   cancelPlace();const g=makeBuild(id);g.traverse(o=>{if(o.isMesh)o.material=GHOSTMAT});const ring=new THREE.Mesh(new THREE.RingGeometry(d.r-.08,d.r,32),GHOSTMAT);ring.rotation.x=-Math.PI/2;ring.position.y=.05;g.add(ring);
   g.position.set(cam.tx,0,cam.tz);scene.add(g);PLACE={d,g,r:0,ok:false,fromInv:!!fromInv};updateGhost(cam.tx,cam.tz);
-  $("placeBar").hidden=false;$("placeTxt").textContent="Itayo: "+d.n+" · pindutin kung saan ilalagay";setTool("move");document.querySelector(".stage").scrollIntoView({block:"nearest",behavior:"smooth"})}
+  $("placeBar").hidden=false;$("placeTxt").textContent="Build: "+d.n+" · tap where to place it";setTool("move");document.querySelector(".stage").scrollIntoView({block:"nearest",behavior:"smooth"})}
 function updateGhost(x,z){if(!PLACE)return;PLACE.x=x;PLACE.z=z;PLACE.g.position.set(x,0,z);PLACE.ok=validPlace(x,z,PLACE.d.r);GHOSTMAT.color.setHex(PLACE.ok?0x7fe08a:0xff6a5a);$("placeOk").disabled=!PLACE.ok}
 function cancelPlace(){if(PLACE){scene.remove(PLACE.g);PLACE=null}$("placeBar").hidden=true}
-function confirmPlace(){if(!PLACE||!PLACE.ok)return toast("Hindi puwede rito. Pumili ng bakanteng damuhan.");const d=PLACE.d,p={x:PLACE.x,z:PLACE.z};
-  if(PLACE.fromInv){S.decor[d.id]--}else{if(S.coins<d.cost)return toast("Kulang ang barya.");S.coins-=d.cost}S.builds=(S.builds||[]).concat({id:d.id,x:+p.x.toFixed(2),z:+p.z.toFixed(2),r:PLACE.r});
-  burst(p.x,.5,p.z,0xc98a4b,18);gain(0,Math.round(d.cost/100),null);cancelPlace();renderBuilds();after();shopUI(true);toast(d.inc?"Naitayo ang "+d.n+"! +"+d.inc+" barya kada minuto.":"Nailagay ang "+d.n+".",3000);townUI(true)}
+function confirmPlace(){if(!PLACE||!PLACE.ok)return toast("Can't build here. Pick an empty grassy spot.");const d=PLACE.d,p={x:PLACE.x,z:PLACE.z};
+  if(PLACE.fromInv){S.decor[d.id]--}else{if(S.coins<d.cost)return toast("Not enough coins.");S.coins-=d.cost}S.builds=(S.builds||[]).concat({id:d.id,x:+p.x.toFixed(2),z:+p.z.toFixed(2),r:PLACE.r});
+  burst(p.x,.5,p.z,0xc98a4b,18);gain(0,Math.round(d.cost/100),null);cancelPlace();renderBuilds();after();shopUI(true);toast(d.inc?"Built: "+d.n+"! +"+d.inc+" coins per minute.":"Placed: "+d.n+".",3000);townUI(true)}
 function placePointer(e,click){const gp=groundPoint(e);if(!gp||!PLACE)return;updateGhost(gp.x,gp.z);if(click&&e.pointerType==="mouse"&&PLACE.ok)confirmPlace()}
 /* -- passive income -- */
-let incT=0;function stepIncome(dt){incT+=dt;if(incT<60)return;incT=0;let v=0;(S.builds||[]).forEach(o=>{const d=BUILDS.find(q=>q.id===o.id);if(d)v+=d.inc});if(v>0){S.coins+=v;save();ui();toast("+"+v+" barya mula sa mga gusali mo",2200)}}
+let incT=0;function stepIncome(dt){incT+=dt;if(incT<60)return;incT=0;let v=0;(S.builds||[]).forEach(o=>{const d=BUILDS.find(q=>q.id===o.id);if(d)v+=d.inc});if(v>0){S.coins+=v;save();ui();toast("+"+v+" coins from your buildings",2200)}}
 /* -- piers -- */
 (function piers(){const b=new Builder(),r=rnd(12);
   const pier=(x0,x1,z,w)=>{for(let x=x0;x<x1;x+=.36)b.add("box",r()<.5?0xb98a55:0xa87a48,x+.18,.45,z,.32,.1,w);
@@ -2117,7 +2159,7 @@ let incT=0;function stepIncome(dt){incT+=dt;if(incT<60)return;incT=0;let v=0;(S.
     for(let x=x0+.4;x<=x1;x+=1.8)[-1,1].forEach(s=>b.add("cyl",0x6b4a2c,x,-1,z+s*(w/2+.04),.13,2.9,.13));
     b.add("cyl",0x2b3640,x1-.5,.62,z-w/2+.2,.1,.24,.1)};
   pier(17.4,23.8,2.6,1.8);pier(41.6,48.2,IZ_+.5,1.8);
-  const l1=labelSprite("Pantalan papuntang Isla");l1.position.set(19.6,1.5,2.6);scene.add(l1);
+  const l1=labelSprite("Pier to the Island");l1.position.set(19.6,1.5,2.6);scene.add(l1);
   b.add("box",0xc9a46a,52.6,1.22,IZ_+3,.9,.02,4.3);b.add("box",0xc9a46a,50.2,1.21,IZ_+.6,4.4,.02,.9);
   scene.add(b.mesh())})();
 /* -- player boat -- */
@@ -2133,17 +2175,17 @@ function buildBoat(){while(MYBOAT.children.length)MYBOAT.remove(MYBOAT.children[
   MYBOAT.add(b.mesh());if(w.p.length)MYBOAT.add(new THREE.Mesh(w.geo(),new THREE.MeshBasicMaterial({color:0xbfe6f5,transparent:true,opacity:.7})));
   const d=S.boatAt==="isla"?ISLE_DOCK:FARM_DOCK;MYBOAT.position.set(d.x,0,d.z);MYBOAT.rotation.y=S.boatAt==="isla"?Math.PI:0}
 const TRIP={on:false,t:0,T:1,from:null,to:null};let wakeT=0;
-function startTrip(){if(S.inTown)return toast("Nasa bayan ka pa. Umuwi muna sa bukid bago sumakay ng bangka.",3200);const bt=ownBoat();if(!bt)return toast("Kailangan mo ng bangka. Bilhin ito sa Tindahan.",3000);if(TRIP.on)return;
+function startTrip(){if(S.inTown)return toast("You're still in town. Go back to the farm before taking the boat.",3200);const bt=ownBoat();if(!bt)return toast("You need a boat. Buy one at the Shop.",3000);if(TRIP.on)return;
   const toIsle=S.boatAt!=="isla";TRIP.from=toIsle?FARM_DOCK:ISLE_DOCK;TRIP.to=toIsle?ISLE_DOCK:FARM_DOCK;TRIP.T=Math.hypot(TRIP.to.x-TRIP.from.x,TRIP.to.z-TRIP.from.z)/bt.speed+1.2;TRIP.t=0;TRIP.on=true;TRIP.toIsle=toIsle;
-  cancelPlace();cam.follow=true;cam.followFn=v=>MYBOAT.getWorldPosition(v);Object.assign(camT,{dist:16,pol:1.0});toast(toIsle?"Sumakay ka sa "+bt.n+" papunta sa isla…":"Pauwi na sa bukid…",2200);ui()}
+  cancelPlace();cam.follow=true;cam.followFn=v=>MYBOAT.getWorldPosition(v);Object.assign(camT,{dist:16,pol:1.0});toast(toIsle?"You board the "+bt.n+" to the island…":"Heading home to the farm…",2200);ui()}
 function stepTrip(dt,t){if(!MYBOAT.visible)return;let x,z,yaw;
   if(TRIP.on){TRIP.t+=dt;let u=Math.min(1,TRIP.t/TRIP.T);const e=u<.5?2*u*u:1-2*(1-u)*(1-u);const f=TRIP.from,to=TRIP.to;
     x=f.x+(to.x-f.x)*e;z=f.z+(to.z-f.z)*e+Math.sin(e*Math.PI)*3*(TRIP.toIsle?1:-1);yaw=Math.atan2(-((to.z-f.z)+Math.cos(e*Math.PI)*3*Math.PI*(TRIP.toIsle?1:-1)),to.x-f.x);
     MYBOAT.position.x=x;MYBOAT.position.z=z;let dy=yaw-MYBOAT.rotation.y;dy=Math.atan2(Math.sin(dy),Math.cos(dy));MYBOAT.rotation.y+=dy*Math.min(1,dt*5);
     wakeT-=dt;if(wakeT<=0&&u<.97){wakeT=MYBOAT_ID==="speed"?.04:.12;const c=Math.cos(MYBOAT.rotation.y),s=Math.sin(MYBOAT.rotation.y);burst(x-1.5*c,.05,z+1.5*s,0xffffff,MYBOAT_ID==="speed"?2:1,.35)}
     if(u>=1){TRIP.on=false;S.boatAt=TRIP.toIsle?"isla":"farm";save();cam.follow=false;cam.followFn=null;
-      if(TRIP.toIsle){Object.assign(camT,{tx:54,ty:1.4,tz:IZ_+4,dist:17,pol:.92});toast(ownIsle()?"Nasa isla ka na. Alagaan ang lihim na taniman!":"Nasa isla ka na. Bilhin ang Lihim na Taniman sa Tindahan para makapagtanim dito.",3600)}
-      else{Object.assign(camT,{tx:-3,ty:.6,tz:-1.5,dist:32,pol:.85});toast("Nakabalik ka sa bukid.",2000)}ui()}}
+      if(TRIP.toIsle){Object.assign(camT,{tx:54,ty:1.4,tz:IZ_+4,dist:17,pol:.92});toast(ownIsle()?"You're on the island. Tend the secret field!":"You're on the island. Buy the Secret Field at the Shop to plant here.",3600)}
+      else{Object.assign(camT,{tx:-3,ty:.6,tz:-1.5,dist:32,pol:.85});toast("You're back at the farm.",2000)}ui()}}
   MYBOAT.position.y=Math.sin(t*1.6+MYBOAT.position.x*.3)*.06-.02;MYBOAT.rotation.z=Math.sin(t*1.3)*.04;MYBOAT.rotation.x=Math.sin(t*1.1+1)*.03;
   if(MYBOAT_ID==="speed"&&TRIP.on&&Math.random()<.3)burst(MYBOAT.position.x,.6,MYBOAT.position.z,0xdddddd,1,.2)}
 /* -- patrol raids on the island field -- */
@@ -2160,41 +2202,41 @@ function stepRaid(dt,t){
     PATROL.position.set(a[0]+(b2[0]-a[0])*e,Math.sin(t*1.5)*.05,a[1]+(b2[1]-a[1])*e);PATROL.rotation.y=Math.atan2(-(b2[1]-a[1]),b2[0]-a[0]);
     const on=Math.sin(t*12)>0;PATROL.userData.lr.visible=on;PATROL.userData.lb.visible=!on;
     if(!RAID.done&&u>.45){RAID.done=true;const c=isleCropIdx().sort(()=>Math.random()-.5).slice(0,3);c.forEach(i=>{S.tiles[i]={k:"soil"};burstTile(i,0x5a4a3a,10,.4)});after();
-      toast(c.length?"Dumaan ang patrolya at nakumpiska ang "+c.length+" lihim na tanim!":"Dumaan ang patrolya pero wala silang nakita.",4200)}
+      toast(c.length?"A patrol came by and seized "+c.length+" secret crops!":"A patrol came by but found nothing.",4200)}
     if(u>=1){RAID.on=false;PATROL.visible=false}return}
   if(!ownIsle())return;RAID.t-=dt;if(RAID.t>0)return;RAID.t=45;
-  if(isleCropIdx().length&&Math.random()<(S.guard?.06:.2)){RAID.on=true;RAID.u=0;RAID.done=false;PATROL.visible=true;toast("May paparating na patrolya sa isla!",3200)}}
+  if(isleCropIdx().length&&Math.random()<(S.guard?.06:.2)){RAID.on=true;RAID.u=0;RAID.done=false;PATROL.visible=true;toast("A patrol is heading to the island!",3200)}}
 /* -- shop UI -- */
-function card(it,status,btn,cls){return `<div class="sc ${cls||""}"><b>${it.n}</b><small>${it.d}</small><div class="scRow"><span class="price">${it.cost.toLocaleString()} barya${S.lv<it.lv?" · Antas "+it.lv:""}</span>${btn}</div>${status?`<em>${status}</em>`:""}</div>`}
+function card(it,status,btn,cls){return `<div class="sc ${cls||""}"><b>${it.n}</b><small>${it.d}</small><div class="scRow"><span class="price">${it.cost.toLocaleString()} coins${S.lv<it.lv?" · Level "+it.lv:""}</span>${btn}</div>${status?`<em>${status}</em>`:""}</div>`}
 let _shopKey="";
 function shopUI(force){const key=[S.lv,(S.boats||[]).join(","),(S.plots||[]).join(","),S.guard,(S.builds||[]).length].join("|");if(!force&&key===_shopKey)return;_shopKey=key;
   const cnt=id=>(S.builds||[]).filter(o=>o.id===id).length;
-  $("shopB").innerHTML=BUILDS.filter(d=>!d.decor).map(d=>card(d,cnt(d.id)?"Mayroon kang "+cnt(d.id):"",`<button class="btn sm" data-b="${d.id}">Itayo</button>`,S.lv<d.lv?"lock":"")).join("");
-  $("shopV").innerHTML=BOATS.map(d=>{const own=(S.boats||[]).includes(d.id);return card(d,own?"Nabili na":"",own?"":`<button class="btn sm" data-v="${d.id}">Bilhin</button>`,S.lv<d.lv&&!own?"lock":own?"own":"")}).join("");
-  $("shopI").innerHTML=ISLEITEMS.map(d=>{const own=d.id==="isla"?ownIsle():!!S.guard;return card(d,own?"Nabili na":"",own?"":`<button class="btn sm" data-i="${d.id}">Bilhin</button>`,S.lv<d.lv&&!own?"lock":own?"own":"")}).join("");
+  $("shopB").innerHTML=BUILDS.filter(d=>!d.decor).map(d=>card(d,cnt(d.id)?"You have "+cnt(d.id):"",`<button class="btn sm" data-b="${d.id}">Build</button>`,S.lv<d.lv?"lock":"")).join("");
+  $("shopV").innerHTML=BOATS.map(d=>{const own=(S.boats||[]).includes(d.id);return card(d,own?"Owned":"",own?"":`<button class="btn sm" data-v="${d.id}">Buy</button>`,S.lv<d.lv&&!own?"lock":own?"own":"")}).join("");
+  $("shopI").innerHTML=ISLEITEMS.map(d=>{const own=d.id==="isla"?ownIsle():!!S.guard;return card(d,own?"Owned":"",own?"":`<button class="btn sm" data-i="${d.id}">Buy</button>`,S.lv<d.lv&&!own?"lock":own?"own":"")}).join("");
   document.querySelectorAll("#shopB [data-b]").forEach(b=>b.onclick=()=>startPlace(b.dataset.b));
   document.querySelectorAll("#shopV [data-v]").forEach(b=>b.onclick=()=>buyBoat(b.dataset.v));
   document.querySelectorAll("#shopI [data-i]").forEach(b=>b.onclick=()=>buyIsle(b.dataset.i))}
-function buyBoat(id){const d=BOATS.find(q=>q.id===id);if(S.lv<d.lv)return toast(d.n+" ay mabibili sa Antas "+d.lv+".");if(S.coins<d.cost)return toast("Kailangan ng "+d.cost.toLocaleString()+" barya.");
-  S.coins-=d.cost;S.boats=(S.boats||[]).concat(id);if(!S.boatAt)S.boatAt="farm";buildBoat();after();shopUI(true);toast("Nabili mo ang "+d.n+"! Nakadaong ito sa pantalan sa silangan ng bukid.",3400);Object.assign(camT,{tx:20,ty:.6,tz:2,dist:14,pol:.95})}
-function buyIsle(id){const d=ISLEITEMS.find(q=>q.id===id);if(S.lv<d.lv)return toast(d.n+" ay mabibili sa Antas "+d.lv+".");if(S.coins<d.cost)return toast("Kailangan ng "+d.cost.toLocaleString()+" barya.");
-  if(id==="isla"){if(!ownBoat())return toast("Bumili muna ng bangka para makarating sa isla.");S.coins-=d.cost;S.plots=(S.plots||[]).concat("isla");for(let k=0;k<36;k++)S.tiles.push({k:"grass"});hovered=null;buildField();toast("Nabili mo ang Lihim na Taniman sa isla!",3000)}
-  else{S.coins-=d.cost;S.guard=true;toast("May bantay na sa isla.",2400)}
+function buyBoat(id){const d=BOATS.find(q=>q.id===id);if(S.lv<d.lv)return toast(d.n+" unlocks at Level "+d.lv+".");if(S.coins<d.cost)return toast("You need "+d.cost.toLocaleString()+" coins.");
+  S.coins-=d.cost;S.boats=(S.boats||[]).concat(id);if(!S.boatAt)S.boatAt="farm";buildBoat();after();shopUI(true);toast("You bought "+d.n+"! It's docked at the pier east of the farm.",3400);Object.assign(camT,{tx:20,ty:.6,tz:2,dist:14,pol:.95})}
+function buyIsle(id){const d=ISLEITEMS.find(q=>q.id===id);if(S.lv<d.lv)return toast(d.n+" unlocks at Level "+d.lv+".");if(S.coins<d.cost)return toast("You need "+d.cost.toLocaleString()+" coins.");
+  if(id==="isla"){if(!ownBoat())return toast("Buy a boat first to reach the island.");S.coins-=d.cost;S.plots=(S.plots||[]).concat("isla");for(let k=0;k<36;k++)S.tiles.push({k:"grass"});hovered=null;buildField();toast("You bought the Secret Field on the island!",3000)}
+  else{S.coins-=d.cost;S.guard=true;toast("The island already has a guard.",2400)}
   after();shopUI(true)}
 
 /* ================= STORAGE & MARKET STALL ================= */
 const AITEM={manok:"itlog",bibe:"itlog_bibe",pato:"itlog_pato",kambing:"gatas_kambing",baka:"gatas_baka",kalabaw:"gatas_kalabaw"};
-const ITEMS={itlog:{n:"Itlog ng Manok",p:25,ic:"egg",col:"#fff3d6"},itlog_bibe:{n:"Itlog ng Bibe",p:35,ic:"egg",col:"#e6efdc"},itlog_pato:{n:"Itlog ng Pato",p:45,ic:"egg",col:"#d4e4ef"},
-  gatas_kambing:{n:"Gatas ng Kambing",p:80,ic:"milk",col:"#3fb04a"},gatas_baka:{n:"Gatas ng Baka",p:150,ic:"milk",col:"#2f7fb8"},gatas_kalabaw:{n:"Gatas ng Kalabaw",p:260,ic:"milk",col:"#8a4ac0"}};
+const ITEMS={itlog:{n:"Chicken Eggs",p:25,ic:"egg",col:"#fff3d6"},itlog_bibe:{n:"Duck Eggs",p:35,ic:"egg",col:"#e6efdc"},itlog_pato:{n:"Mallard Eggs",p:45,ic:"egg",col:"#d4e4ef"},
+  gatas_kambing:{n:"Goat Milk",p:80,ic:"milk",col:"#3fb04a"},gatas_baka:{n:"Cow Milk",p:150,ic:"milk",col:"#2f7fb8"},gatas_kalabaw:{n:"Carabao Milk",p:260,ic:"milk",col:"#8a4ac0"}};
 CROPS.forEach(c=>{ITEMS[c.id]={n:c.n,p:c.s,crop:true,isl:!!c.island}});
 const invCount=()=>Object.values(S.inv||{}).reduce((a,b)=>a+(b|0),0);
 const invCap=()=>{const b=S.builds||[];return 40*(S.basket||0)+60+80*b.filter(o=>o.id==="bodega").length+150*b.filter(o=>o.id==="kamalig").length};
 const invFull=()=>invCount()>=invCap();
 let fullT=0;
 function addItem(id,q,x,y){if(!ITEMS[id])return false;S.inv=S.inv||{};
-  if(invCount()+q>invCap()){if(performance.now()-fullT>4000){fullT=performance.now();toast("Puno na ang imbakan! Magbenta muna sa puwesto o magtayo ng Bodega.",3600)}return false}
+  if(invCount()+q>invCap()){if(performance.now()-fullT>4000){fullT=performance.now();toast("Storage is full! Sell at the stall or build a Warehouse.",3600)}return false}
   S.inv[id]=(S.inv[id]||0)+q;if(x!=null)floatText("+"+q+" "+ITEMS[id].n,x,y);return true}
-function harvestItem(st,x,y){const q=st.w>.5?0:1;if(q&&!addItem(st.c.id,q,x,y))return false;gain(0,st.c.xp,null);if(!q)toast("Bulok na ang "+st.c.n+", wala nang maibebenta.",2200);return true}
+function harvestItem(st,x,y){const q=st.w>.5?0:1;if(q&&!addItem(st.c.id,q,x,y))return false;gain(0,st.c.xp,null);if(!q)toast("Spoiled: "+st.c.n+", nothing left to sell.",2200);return true}
 /* market prices change every 3 minutes */
 const DAYLEN=180;
 function hsh(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0)/4294967295}
@@ -2203,9 +2245,9 @@ const multOf=(id,d)=>.78+.55*hsh(id+":"+d);
 const priceOf=id=>Math.max(1,Math.round(ITEMS[id].p*multOf(id,mktDay())));
 const trendOf=id=>{const d=mktDay(),a=multOf(id,d),b=multOf(id,d-1);return a>b+.04?1:a<b-.04?-1:0};
 function sell(id,q,x,y){const have=(S.inv||{})[id]|0;q=Math.min(q,have);if(q<=0)return;const v=priceOf(id)*q;S.inv[id]=have-q;if(!S.inv[id])delete S.inv[id];
-  gain(v,0,x,y);toast("Naibenta: "+q+" "+ITEMS[id].n+" · +"+v.toLocaleString()+" barya",2200);after();invUI(true)}
-function sellAll(){let v=0,n=0;Object.keys(S.inv||{}).forEach(id=>{const q=S.inv[id]|0;if(q>0&&ITEMS[id]){v+=priceOf(id)*q;n+=q}});if(!n)return toast("Wala ka pang paninda sa imbakan.");
-  S.inv={};const r=$("sellAll").getBoundingClientRect();gain(v,Math.round(n/4),r.left+r.width/2,r.top);toast("Naibenta ang "+n+" paninda · +"+v.toLocaleString()+" barya",3000);after();invUI(true)}
+  gain(v,0,x,y);toast("Sold: "+q+" "+ITEMS[id].n+" · +"+v.toLocaleString()+" coins",2200);after();invUI(true)}
+function sellAll(){let v=0,n=0;Object.keys(S.inv||{}).forEach(id=>{const q=S.inv[id]|0;if(q>0&&ITEMS[id]){v+=priceOf(id)*q;n+=q}});if(!n)return toast("You have nothing to sell in storage.");
+  S.inv={};const r=$("sellAll").getBoundingClientRect();gain(v,Math.round(n/4),r.left+r.width/2,r.top);toast("Sold "+n+" goods · +"+v.toLocaleString()+" coins",3000);after();invUI(true)}
 /* icons for eggs and milk */
 const ITEMIC={};
 function itemIcon(id){const it=ITEMS[id];if(it.crop)return ICONS[id]||"";if(ITEMIC[id])return ITEMIC[id];
@@ -2217,25 +2259,25 @@ function itemIcon(id){const it=ITEMS[id];if(it.crop)return ICONS[id]||"";if(ITEM
 let _invKey="";
 function invUI(force){const d=mktDay(),key=JSON.stringify(S.inv||{})+"|"+d+"|"+invCap()+"|"+S.shopOpen;if(!force&&key===_invKey)return;_invKey=key;
   const n=invCount(),cap=invCap();$("invCap").textContent=n+" / "+cap;$("invBar").style.width=Math.min(100,n/cap*100)+"%";$("invBar").classList.toggle("full",n>=cap);
-  $("shopOpen").textContent=S.shopOpen!==false?"Bukas ang Puwesto":"Sarado ang Puwesto";$("shopOpen").classList.toggle("alt",S.shopOpen===false);
-  const left=DAYLEN-Math.floor(Date.now()/1000)%DAYLEN;$("mktT").textContent="Magbabago ang presyo sa loob ng "+fmt(left);
+  $("shopOpen").textContent=S.shopOpen!==false?"Stall Open":"Stall Closed";$("shopOpen").classList.toggle("alt",S.shopOpen===false);
+  const left=DAYLEN-Math.floor(Date.now()/1000)%DAYLEN;$("mktT").textContent="Prices change in "+fmt(left);
   const ids=Object.keys(S.inv||{}).filter(id=>(S.inv[id]|0)>0&&ITEMS[id]);
   const g=$("inv");g.textContent="";
-  if(!ids.length){const e=document.createElement("p");e.className="invEmpty";e.textContent="Wala pang laman ang imbakan. Mag-ani ng gulay at prutas, o kunin ang itlog at gatas ng mga hayop.";g.append(e);return}
+  if(!ids.length){const e=document.createElement("p");e.className="invEmpty";e.textContent="Storage is empty. Harvest vegetables and fruit, or collect eggs and milk from the animals.";g.append(e);return}
   ids.sort((a,b)=>priceOf(b)*S.inv[b]-priceOf(a)*S.inv[a]).forEach(id=>{const it=ITEMS[id],q=S.inv[id],p=priceOf(id),tr=trendOf(id);
     const c=document.createElement("div");c.className="ic"+(it.isl?" isl":"");
     const img=document.createElement("img");img.alt="";img.src=itemIcon(id);
     const t=document.createElement("div");t.className="icT";const b=document.createElement("b");b.textContent=it.n;const sm=document.createElement("small");
-    sm.textContent="×"+q+" · "+p+" barya bawat isa";const tg=document.createElement("span");tg.className="tr "+(tr>0?"up":tr<0?"dn":"");tg.textContent=tr>0?"▲ Mataas":tr<0?"▼ Mababa":"• Karaniwan";t.append(b,sm,tg);
-    const r=document.createElement("div");r.className="icB";const b1=document.createElement("button");b1.className="btn sm alt";b1.textContent="Ibenta 1";b1.onclick=e=>sell(id,1,e.clientX,e.clientY-20);
-    const b2=document.createElement("button");b2.className="btn sm";b2.textContent="Lahat · "+(p*q).toLocaleString();b2.onclick=e=>sell(id,q,e.clientX,e.clientY-20);r.append(b1,b2);
+    sm.textContent="×"+q+" · "+p+" coins each";const tg=document.createElement("span");tg.className="tr "+(tr>0?"up":tr<0?"dn":"");tg.textContent=tr>0?"▲ High":tr<0?"▼ Low":"• Normal";t.append(b,sm,tg);
+    const r=document.createElement("div");r.className="icB";const b1=document.createElement("button");b1.className="btn sm alt";b1.textContent="Sell 1";b1.onclick=e=>sell(id,1,e.clientX,e.clientY-20);
+    const b2=document.createElement("button");b2.className="btn sm";b2.textContent="All · "+(p*q).toLocaleString();b2.onclick=e=>sell(id,q,e.clientX,e.clientY-20);r.append(b1,b2);
     c.append(img,t,r);g.append(c)})}
 function openMarket(){const el=$("mktHead");if(el)el.scrollIntoView({behavior:"smooth",block:"start"});invUI(true)}
 /* stall: stock on display, hit box, sign */
 const STALLHIT=new THREE.Mesh(new THREE.BoxGeometry(1.6,2.4,4.8),new THREE.MeshBasicMaterial({visible:false}));STALLHIT.position.set(7.6,1.1,-.7);STALLHIT.userData.stall=true;scene.add(STALLHIT);
 const STOCK=new THREE.Group();scene.add(STOCK);
 (function(){const r=rnd(77),cols=[0xe2402f,0xf5c732,0x7ccf4a,0xf08a24,0xfff3d6,0x7a3f9c];for(let k=0;k<3;k++)for(let j=0;j<16;j++){const m=new THREE.Mesh(new THREE.SphereGeometry(.085,8,6),am(cols[(k*3+j)%cols.length]));m.position.set(7.6+(r()-.5)*.7,.74+Math.floor(j/8)*.09,-2.2+k*1.5+(r()-.5)*1);m.castShadow=true;STOCK.add(m)}})();
-const STALLSIGN=labelSprite("Puwesto ng Paninda");STALLSIGN.position.set(7.6,2.6,-.7);scene.add(STALLSIGN);
+const STALLSIGN=labelSprite("Market Stall");STALLSIGN.position.set(7.6,2.6,-.7);scene.add(STALLSIGN);
 let _stockN=-1;function stockUI(){const n=invCount(),cap=invCap(),show=Math.round(Math.min(1,n/Math.max(20,cap*.5))*STOCK.children.length);if(show===_stockN)return;_stockN=show;STOCK.children.forEach((m,i)=>m.visible=i<show)}
 /* customers that walk up and buy */
 const BUYERS=[],BNAMES=["Aling Nena","Mang Kanor","Ate Joy","Kuya Ben","Lola Sita","Tito Boy","Ate Grace","Mang Lito"];
@@ -2252,10 +2294,10 @@ function stepBuyers(dt,t){
     else if(B.st==="look"){B.t-=dt;armR=B.t<1?1.4:0;if(B.t<=0){buyFrom(B);B.st="leave";B.tx=16+Math.random()*2;B.tz=g.position.z+(Math.random()-.5)*6}}
     else if(B.st==="leave"){if(walkTo(B.tx,B.tz,1.2)||isBad()&&g.position.x>14){scene.remove(g);BUYERS.splice(k,1);continue}}
     animWorker(B,B.o,dt,t,walking,0,0,armR,B.st==="look"?Math.sin(t*1.5)*.4:0)}}
-function buyFrom(B){const ids=Object.keys(S.inv||{}).filter(id=>(S.inv[id]|0)>0&&ITEMS[id]);if(!ids.length){floatSpot(B,"Ubos na pala…");return}
+function buyFrom(B){const ids=Object.keys(S.inv||{}).filter(id=>(S.inv[id]|0)>0&&ITEMS[id]);if(!ids.length){floatSpot(B,"Oh, sold out…");return}
   const id=ids[Math.floor(Math.random()*ids.length)],q=Math.min(S.inv[id],1+Math.floor(Math.random()*3)),v=Math.round(priceOf(id)*1.15)*q;
   S.inv[id]-=q;if(!S.inv[id])delete S.inv[id];S.coins+=v;const sc=toScreen(B.g.position.x,2,B.g.position.z);floatText("+"+v,sc.x,sc.y);
-  toast(B.nm+" ay bumili ng "+q+" "+ITEMS[id].n+" · +"+v+" barya",2600);after();invUI(true)}
+  toast(B.nm+" bought "+q+" "+ITEMS[id].n+" · +"+v+" coins",2600);after();invUI(true)}
 function floatSpot(B,txt){const sc=toScreen(B.g.position.x,2,B.g.position.z);floatText(txt,sc.x,sc.y)}
 
 /* ================= LIFE CYCLE: death from sickness, genders, breeding ================= */
@@ -2268,28 +2310,28 @@ function normalizePens(){(S.pens||[]).forEach((p,i)=>{if(!p.g)p.g=i%2?"F":"M";if
 function rebuildAnimals(){animalObjs.forEach(o=>animalGroup.remove(o.g));animalObjs=[];syncAnimals();
   Object.values(CREW).forEach(W=>{if(W&&W.o&&W.o.queue)W.o.queue=W.o.queue.filter(q=>q.type!=="animal")})}
 function killAnimals(list){list.sort((a,b)=>b-a).forEach(i=>{const p=S.pens[i],a=animal(p.id),o=animalObjs[i];
-    if(o)burst(o.g.position.x,.8,o.g.position.z,0x6b6b6b,16);S.pens.splice(i,1);toast("Namatay ang "+a.n+" "+(p.g==="F"?"(babae)":"(lalaki)")+" dahil hindi nagamot sa loob ng 5 minuto.",4500)});
+    if(o)burst(o.g.position.x,.8,o.g.position.z,0x6b6b6b,16);S.pens.splice(i,1);toast("Died: "+a.n+" "+(p.g==="F"?"(female)":"(male)")+" because it wasn't treated within 5 minutes.",4500)});
   hovered=null;rebuildAnimals();save();ui()}
 function tryBreed(){let birth=false;
   S.pens.forEach((p,i)=>{if(!p.preg||now()-p.preg<PREG_T)return;
     if(zoneCount(p.id)<zoneLimit(p.id)){const a=animal(p.id),g=Math.random()<.5?"M":"F";S.pens.push({id:p.id,at:now(),g,born:now()});delete p.preg;delete p.pw;birth=true;pendingBirth.push([i,S.pens.length-1]);
-      toast("Nanganak ang "+a.n+"! Isang "+(g==="F"?"babaeng":"lalaking")+" anak.",3800)}
-    else if(!p.pw){p.pw=1;toast("Handa nang manganak ang "+animal(p.id).n+" pero puno na. Magbenta o palakihin muna ang kulungan.",4200)}});
+      toast("Gave birth: "+a.n+"! A baby "+(g==="F"?"girl":"boy")+".",3800)}
+    else if(!p.pw){p.pw=1;toast("Ready to give birth: "+animal(p.id).n+", but the pen is full. Sell or expand the pen first.",4200)}});
   [...new Set(S.pens.map(p=>p.id))].forEach(id=>{const grp=S.pens.filter(p=>p.id===id&&adultOk(p));if(!grp.some(p=>p.g==="M"))return;
-    grp.filter(p=>p.g==="F"&&!p.preg).forEach(f=>{if(Math.random()<.12){f.preg=now();toast("Nabuntis ang "+animal(id).n+"! Manganganak sa loob ng 30 minuto.",3600);const o=animalObjs[S.pens.indexOf(f)];if(o)burst(o.g.position.x,1,o.g.position.z,0xff7bb0,10)}})});
+    grp.filter(p=>p.g==="F"&&!p.preg).forEach(f=>{if(Math.random()<.12){f.preg=now();toast("Pregnant: "+animal(id).n+"! Gives birth in 30 minutes.",3600);const o=animalObjs[S.pens.indexOf(f)];if(o)burst(o.g.position.x,1,o.g.position.z,0xff7bb0,10)}})});
   if(birth){syncAnimals();pendingBirth.forEach(([mi,bi])=>{const m=animalObjs[mi],b=animalObjs[bi];if(m&&b){b.g.position.set(m.g.position.x+.4,0,m.g.position.z+.3);b.tx=b.g.position.x;b.tz=b.g.position.z;burst(m.g.position.x,.8,m.g.position.z,0xffd84a,12)}});pendingBirth.length=0}
   save();ui()}
 
 /* ================= BAYAN: the town (travel by jeep) ================= */
 const TOWN={x:-64,z:-8},JEEP_FARM={x:-5,z:-8},JEEP_TOWN={x:-54,z:-8};
 const TOWNSEEDS=[{id:"sili",cost:200,lv:2},{id:"pakwan",cost:300,lv:2},{id:"presa",cost:600,lv:3},{id:"ubas",cost:1200,lv:5}];
-const TTOOLS=[{id:"pataba",n:"Pataba ×10",cost:300,lv:1,d:"Dobleng bilis ng paglaki ng susunod na 10 tanim mo."},
-  {id:"pandilig",n:"Pandilig",cost:800,lv:2,d:"Mas mabilis nang 20% ang paglaki ng lahat ng tanim. Isang beses lang bibilhin."},
-  {id:"basket",n:"Malaking Basket",cost:600,lv:2,d:"+40 na espasyo sa imbakan. Hanggang 3."},
-  {id:"tricycle",n:"Sariling Tricycle",cost:1500,lv:3,d:"Libre at mas mabilis na biyahe papunta at pauwi mula sa bayan."}];
-const DECOR=[{id:"mesa",n:"Mesa at Upuan",cost:250,lv:1,r:1,d:"Kainan sa labas ng bahay."},{id:"bangko",n:"Bangkong Kahoy",cost:150,lv:1,r:.8,d:"Upuang kahoy para sa pahinga."},
-  {id:"paso",n:"Paso ng Bulaklak",cost:120,lv:1,r:.5,d:"Makukulay na bulaklak sa paso."},{id:"ilaw",n:"Ilaw sa Poste",cost:180,lv:2,r:.4,d:"Poste ng ilaw para sa daanan."},
-  {id:"duyan",n:"Duyan",cost:400,lv:3,r:1.2,d:"Duyang nakasabit sa dalawang poste."},{id:"poso",n:"Poso",cost:500,lv:3,r:.7,d:"Bombang-tubig na de-hila."}];
+const TTOOLS=[{id:"pataba",n:"Fertilizer ×10",cost:300,lv:1,d:"Your next 10 crops grow twice as fast."},
+  {id:"pandilig",n:"Watering Can",cost:800,lv:2,d:"All crops grow 20% faster. One-time purchase."},
+  {id:"basket",n:"Big Basket",cost:600,lv:2,d:"+40 storage space. Up to 3."},
+  {id:"tricycle",n:"Own Tricycle",cost:1500,lv:3,d:"Free and faster trips to and from town."}];
+const DECOR=[{id:"mesa",n:"Table and Chairs",cost:250,lv:1,r:1,d:"Outdoor dining set."},{id:"bangko",n:"Wooden Bench",cost:150,lv:1,r:.8,d:"Wooden seat for resting."},
+  {id:"paso",n:"Flower Pot",cost:120,lv:1,r:.5,d:"Colorful potted flowers."},{id:"ilaw",n:"Lamp Post",cost:180,lv:2,r:.4,d:"Street light for the path."},
+  {id:"duyan",n:"Hammock",cost:400,lv:3,r:1.2,d:"Hammock hung between two posts."},{id:"poso",n:"Water Pump",cost:500,lv:3,r:.7,d:"Hand-operated water pump."}];
 DECOR.forEach(d=>{if(!BUILDS.find(b=>b.id===d.id))BUILDS.push({...d,inc:0,decor:true})});
 const ownTri=()=>(S.tools||[]).includes("tricycle");
 const seedOwned=id=>(S.seeds||[]).includes(id);
@@ -2325,25 +2367,25 @@ var TOWNFLAG=null,lamps_=[];
     [[-w/2+.7],[w/2-.7]].forEach(([dx])=>{const [wx,wz]=P(dx,d/2+.03);b.add("box",0x9fd8f0,wx,1.3,wz,.8,.7,.04,0,ry,0)});
     SNOWB.add("box",0xffffff,x,h+.27,z,w+.1,.08,d+.1,0,ry,0);
     const lab=labelSprite(name);lab.position.set(...[P(0,d/2+.3)[0]]);lab.position.set(P(0,d/2+.3)[0],h+.75,P(0,d/2+.3)[1]);lab.scale.set(2.2,.55,1);scene.add(lab)};
-  shop(T.x+9,T.z-10,4.2,3,2.8,0xf2d36b,0x3f8f2c,"Tindahan ng Binhi");
-  shop(T.x,T.z-11,4.6,3.2,3,0x9fc8e8,0x2f7fb8,"Gamit Pambahay");
+  shop(T.x+9,T.z-10,4.2,3,2.8,0xf2d36b,0x3f8f2c,"Seed Shop");
+  shop(T.x,T.z-11,4.6,3.2,3,0x9fc8e8,0x2f7fb8,"Home Goods");
   shop(T.x-9,T.z-10,3.8,3,2.6,0xf0a3b8,0xe2402f,"Sari-sari Store");
-  shop(T.x-11,T.z+1,4,3,2.8,0xd8e8c8,0xe8622a,"Ferreteria",Math.PI/2);
+  shop(T.x-11,T.z+1,4,3,2.8,0xd8e8c8,0xe8622a,"Hardware Store",Math.PI/2);
   // church
   {const cx=T.x,cz=T.z-21;b.add("box",0xf0e6d2,cx,3,cz,6,6,8);b.add("cone4",0x8a4a2a,cx,7.2,cz,4.6,2.6,6,0,Math.PI/4,0);
     b.add("box",0xf4ecdc,cx,4.2,cz+4.05,7,8.4,.3);[-1,1].forEach(s=>{b.add("box",0xece0c8,cx+s*2.9,5.5,cz+4,1.6,11,1.6);b.add("cone4",0x8a4a2a,cx+s*2.9,11.8,cz+4,1.2,1.6,1.2,0,Math.PI/4,0)});
     b.add("box",0x5a3a1a,cx,1.3,cz+4.22,1.6,2.6,.05);b.add("cyl",0x9fd8f0,cx,5.6,cz+4.22,.7,.05,.7,Math.PI/2,0,0);b.add("box",0xd9b450,cx,9.2,cz+4.2,.18,1.2,.1);b.add("box",0xd9b450,cx,9.4,cz+4.2,.7,.18,.1);
-    SNOWB.add("cone4",0xffffff,cx,7.6,cz,4.1,1.9,5.4,0,Math.PI/4,0);const l=labelSprite("Simbahan");l.position.set(cx,3.2,cz+4.6);scene.add(l)}
+    SNOWB.add("cone4",0xffffff,cx,7.6,cz,4.1,1.9,5.4,0,Math.PI/4,0);const l=labelSprite("Church");l.position.set(cx,3.2,cz+4.6);scene.add(l)}
   // municipal hall
   {const mx=T.x-1,mz=T.z+12;b.add("box",0xf4f2ec,mx,1.8,mz,8,3.6,4);b.add("prism",0xf4f2ec,mx,4.25,mz+1.6,1.2,6,1.3,-Math.PI/2,0,Math.PI/2);
     for(let k=0;k<6;k++)b.add("cyl",0xffffff,mx-3+k*1.2,1.7,mz-2.3,.18,3.4,.18);b.add("box",0xe6e2d8,mx,3.5,mz-2.3,8,.3,.6);b.add("box",0x5a3a1a,mx,1.1,mz-2.02,1.4,2.2,.05);
     b.add("cyl",0x8a939b,mx+5,2.5,mz-3,.05,5,.05);const fl=new THREE.Mesh(new THREE.PlaneGeometry(1.4,.8),new THREE.MeshBasicMaterial({color:0x3f8f2c,side:THREE.DoubleSide}));fl.position.set(mx+5.7,4.6,mz-3);scene.add(fl);TOWNFLAG=fl;
-    SNOWB.add("box",0xffffff,mx,3.7,mz,8,.08,4);const l=labelSprite("Munisipyo");l.position.set(mx,4.4,mz-2.6);scene.add(l)}
+    SNOWB.add("box",0xffffff,mx,3.7,mz,8,.08,4);const l=labelSprite("Town Hall");l.position.set(mx,4.4,mz-2.6);scene.add(l)}
   // terminal
   b.add("box",0x9aa3ab,JEEP_TOWN.x,.08,-6.2,4,.12,1.6);[-1.6,1.6].forEach(dx=>b.add("cyl",0x2b3640,JEEP_TOWN.x+dx,1.2,-5.6,.07,2.4,.07));b.add("box",0x2f7fb8,JEEP_TOWN.x,2.45,-6,4.2,.12,1.8);
-  {const l=labelSprite("Terminal ng Jeep");l.position.set(JEEP_TOWN.x,3.1,-6);scene.add(l)}
+  {const l=labelSprite("Jeep Terminal");l.position.set(JEEP_TOWN.x,3.1,-6);scene.add(l)}
   b.add("box",0x9aa3ab,JEEP_FARM.x-1.5,.08,-9.8,3,.12,1.2);[-1.2,1.2].forEach(dx=>b.add("cyl",0x2b3640,JEEP_FARM.x-1.5+dx,1.1,-10.2,.06,2.2,.06));b.add("box",0x3f8f2c,JEEP_FARM.x-1.5,2.25,-10,3.2,.1,1.4);
-  {const l=labelSprite("Sakayan papuntang Bayan");l.position.set(JEEP_FARM.x-1.5,2.9,-10);scene.add(l)}
+  {const l=labelSprite("Ride to Town");l.position.set(JEEP_FARM.x-1.5,2.9,-10);scene.add(l)}
   // trees, lamps, benches
   for(let k=0;k<14;k++){const a=k/14*Math.PI*2,R=k%2?13.5:15.5,x=T.x+Math.cos(a)*R,z=T.z+Math.sin(a)*R;if(Math.abs(z+8)<2.4&&x>T.x)continue;if(z<T.z-8&&Math.abs(x-T.x)<13)continue;if(z>T.z+8&&Math.abs(x-T.x+1)<6)continue;tree(b,x,z,k%3?null:0xf08a24,k*7+400)}
   for(let k=0;k<6;k++){const a=k/6*Math.PI*2+.3,x=T.x+Math.cos(a)*6.3,z=T.z+Math.sin(a)*6.3;b.add("cyl",0x2b3640,x,1.1,z,.05,2.2,.05);lamps_.push([x,z]);
@@ -2372,104 +2414,146 @@ function buildJeep(){while(JEEP.children.length)JEEP.remove(JEEP.children[0]);co
   wp.forEach(([x,z])=>{const m=new THREE.Mesh(new THREE.CylinderGeometry(.3,.3,.2,12),am(0x1a1a1a));m.rotation.x=Math.PI/2;m.position.set(x,.3,z);JEEP.add(m);wheels.push(m)});
   JEEP.userData.wheels=wheels;const p=S.inTown?JEEP_TOWN:JEEP_FARM;JEEP.position.set(p.x,0,p.z+(S.inTown?1.6:-1.6));JEEP.rotation.y=S.inTown?0:Math.PI}
 const JTRIP={on:false,t:0,T:1};
-function startJeep(){if(JTRIP.on||TRIP.on)return;if(S.boatAt==="isla")return toast("Nasa isla ka pa. Umuwi muna sa bukid bago pumunta sa bayan.",3200);
-  const fare=ownTri()?0:20;if(fare&&S.coins<fare)return toast("Kailangan ng "+fare+" barya para sa pamasahe sa jeep.");S.coins-=fare;
+function startJeep(){if(JTRIP.on||TRIP.on)return;if(S.boatAt==="isla")return toast("You're still on the island. Go back to the farm before going to town.",3200);
+  const fare=ownTri()?0:20;if(fare&&S.coins<fare)return toast("You need "+fare+" coins for the jeep fare.");S.coins-=fare;
   JTRIP.toTown=!S.inTown;JTRIP.from=JTRIP.toTown?{x:JEEP_FARM.x,z:-9.6}:{x:JEEP_TOWN.x,z:-6.4};JTRIP.to=JTRIP.toTown?{x:JEEP_TOWN.x,z:-6.4}:{x:JEEP_FARM.x,z:-9.6};
   JTRIP.T=Math.hypot(JTRIP.to.x-JTRIP.from.x,JTRIP.to.z-JTRIP.from.z)/(ownTri()?14:8)+1.2;JTRIP.t=0;JTRIP.on=true;cancelPlace();
-  cam.follow=true;cam.followFn=v=>JEEP.getWorldPosition(v);Object.assign(camT,{dist:15,pol:1.0});toast(JTRIP.toTown?(ownTri()?"Nagmamaneho ka ng tricycle papuntang bayan…":"Sumakay ka ng jeep papuntang bayan · −20 barya"):"Pauwi na sa bukid…",2400);after()}
+  cam.follow=true;cam.followFn=v=>JEEP.getWorldPosition(v);Object.assign(camT,{dist:15,pol:1.0});toast(JTRIP.toTown?(ownTri()?"Driving your tricycle to town…":"You ride the jeep to town · −20 coins"):"Heading home to the farm…",2400);after()}
 function stepJeep(dt,t){if(!JTRIP.on){JEEP.position.y=0;return}JTRIP.t+=dt;const u=Math.min(1,JTRIP.t/JTRIP.T),e=u<.5?2*u*u:1-2*(1-u)*(1-u),f=JTRIP.from,to=JTRIP.to;
   JEEP.position.set(f.x+(to.x-f.x)*e,Math.abs(Math.sin(t*14))*.03,f.z+(to.z-f.z)*e);JEEP.rotation.y=Math.atan2(-(to.z-f.z),to.x-f.x);
   JEEP.userData.wheels.forEach(w=>w.rotation.y+=dt*12);if(Math.random()<.25)burst(JEEP.position.x-Math.cos(JEEP.rotation.y)*1.8,.3,JEEP.position.z+Math.sin(JEEP.rotation.y)*1.8,0xbbbbbb,1,.2);
   if(u>=1){JTRIP.on=false;S.inTown=JTRIP.toTown;cam.follow=false;cam.followFn=null;save();townUI(true);
-    if(S.inTown){Object.assign(camT,{tx:TOWN.x+2,ty:1,tz:TOWN.z-3,dist:26,pol:.95});toast("Nasa Bayan ka na! Mamili sa Tindahan ng Binhi at Gamit Pambahay sa ibaba.",4200);setTimeout(()=>{const h=$("townHead");if(h)h.scrollIntoView({behavior:"smooth",block:"start"})},900)}
-    else{Object.assign(camT,{tx:-3,ty:.6,tz:-1.5,dist:32,pol:.85});toast("Nakauwi ka na sa bukid.",2200)}ui()}}
+    if(S.inTown){Object.assign(camT,{tx:TOWN.x+2,ty:1,tz:TOWN.z-3,dist:26,pol:.95});toast("You're in Town! Shop at the Seed Shop and Home Goods below.",4200);setTimeout(()=>{const h=$("townHead");if(h)h.scrollIntoView({behavior:"smooth",block:"start"})},900)}
+    else{Object.assign(camT,{tx:-3,ty:.6,tz:-1.5,dist:32,pol:.85});toast("You're home at the farm.",2200)}ui()}}
 /* town shop */
-function townBuy(kind,id){if(!S.inTown)return toast("Pumunta muna sa Bayan para mamili rito.",2600);
-  if(kind==="seed"){const d=TOWNSEEDS.find(q=>q.id===id),c=crop(id);if(seedOwned(id))return;if(S.lv<d.lv)return toast("Antas "+d.lv+" ang kailangan.");if(S.coins<d.cost)return toast("Kulang ang barya.");S.coins-=d.cost;S.seeds=(S.seeds||[]).concat(id);toast("Nabili mo ang binhi ng "+c.n+"! Puwede mo na itong itanim sa bukid.",3200);document.getElementById("seeds")._lv=-1}
-  else if(kind==="tool"){const d=TTOOLS.find(q=>q.id===id);if(S.lv<d.lv)return toast("Antas "+d.lv+" ang kailangan.");if(S.coins<d.cost)return toast("Kulang ang barya.");
-    if(id==="pataba"){S.fert=(S.fert||0)+10}else if(id==="basket"){if((S.basket||0)>=3)return toast("Tatlo na ang basket mo.");S.basket=(S.basket||0)+1}else{if((S.tools||[]).includes(id))return;S.tools=(S.tools||[]).concat(id)}
-    S.coins-=d.cost;if(id==="tricycle")buildJeep();toast("Nabili: "+d.n,2400)}
-  else if(kind==="decor"){const d=DECOR.find(q=>q.id===id);if(S.lv<d.lv)return toast("Antas "+d.lv+" ang kailangan.");if(S.coins<d.cost)return toast("Kulang ang barya.");S.coins-=d.cost;S.decor=S.decor||{};S.decor[id]=(S.decor[id]||0)+1;toast("Nabili: "+d.n+". Ilagay ito sa bukid mula sa 'Mga Gamit Mo'.",3200)}
+function townBuy(kind,id){if(!S.inTown)return toast("Go to Town first to shop here.",2600);
+  if(kind==="seed"){const d=TOWNSEEDS.find(q=>q.id===id),c=crop(id);if(seedOwned(id))return;if(S.lv<d.lv)return toast("Level "+d.lv+" needed.");if(S.coins<d.cost)return toast("Not enough coins.");S.coins-=d.cost;S.seeds=(S.seeds||[]).concat(id);toast("You bought seeds for "+c.n+"! You can plant it on the farm now.",3200);document.getElementById("seeds")._lv=-1}
+  else if(kind==="tool"){const d=TTOOLS.find(q=>q.id===id);if(S.lv<d.lv)return toast("Level "+d.lv+" needed.");if(S.coins<d.cost)return toast("Not enough coins.");
+    if(id==="pataba"){S.fert=(S.fert||0)+10}else if(id==="basket"){if((S.basket||0)>=3)return toast("You already have three baskets.");S.basket=(S.basket||0)+1}else{if((S.tools||[]).includes(id))return;S.tools=(S.tools||[]).concat(id)}
+    S.coins-=d.cost;if(id==="tricycle")buildJeep();toast("Bought: "+d.n,2400)}
+  else if(kind==="decor"){const d=DECOR.find(q=>q.id===id);if(S.lv<d.lv)return toast("Level "+d.lv+" needed.");if(S.coins<d.cost)return toast("Not enough coins.");S.coins-=d.cost;S.decor=S.decor||{};S.decor[id]=(S.decor[id]||0)+1;toast("Bought: "+d.n+". Place it on the farm from 'My Items'.",3200)}
   after();townUI(true)}
 let _townKey="";
 function townUI(force){const key=JSON.stringify([S.inTown,S.lv,S.seeds,S.tools,S.fert,S.basket,S.decor,Math.floor(S.coins/50)]);if(!force&&key===_townKey)return;_townKey=key;
-  const here=!!S.inTown,dis=here?"":" disabled";$("townWhere").textContent=here?"Nasa Bayan ka ngayon. Mamili na!":"Nasa bukid ka. Sumakay ng jeep para makapamili.";
-  $("tTown").textContent=JTRIP.on?"Bumibiyahe…":here?"Umuwi sa Bukid":(ownTri()?"Mag-tricycle papuntang Bayan":"Sumakay ng Jeep papuntang Bayan · 20");
-  $("townSeeds").innerHTML=TOWNSEEDS.map(d=>{const c=crop(d.id),own=seedOwned(d.id);return card({n:"Binhi ng "+c.n,d:"Gastos sa pagtanim "+c.c+" · Benta "+c.s+" · Tumutubo sa "+fmt(c.t),cost:d.cost,lv:d.lv},own?"Nabili na":"",own?"":`<button class="btn sm" data-k="seed" data-id="${d.id}"${dis}>Bilhin</button>`,own?"own":S.lv<d.lv?"lock":"")}).join("");
-  $("townTools").innerHTML=TTOOLS.map(d=>{const own=(d.id==="pandilig"||d.id==="tricycle")&&(S.tools||[]).includes(d.id);const st=d.id==="pataba"?(S.fert?"Natitira: "+S.fert:""):d.id==="basket"?(S.basket?"Mayroon kang "+S.basket:""):own?"Nabili na":"";
-    return card(d,st,own?"":`<button class="btn sm" data-k="tool" data-id="${d.id}"${dis}>Bilhin</button>`,own?"own":S.lv<d.lv?"lock":"")}).join("");
-  $("townDecor").innerHTML=DECOR.map(d=>card(d,"",`<button class="btn sm" data-k="decor" data-id="${d.id}"${dis}>Bilhin</button>`,S.lv<d.lv?"lock":"")).join("");
+  const here=!!S.inTown,dis=here?"":" disabled";$("townWhere").textContent=here?"You're in Town now. Go shopping!":"You're on the farm. Ride the jeep to go shopping.";
+  $("tTown").textContent=JTRIP.on?"Traveling…":here?"Go Home to the Farm":(ownTri()?"Ride Tricycle to Town":"Ride the Jeep to Town · 20");
+  $("townSeeds").innerHTML=TOWNSEEDS.map(d=>{const c=crop(d.id),own=seedOwned(d.id);return card({n:"Seeds: "+c.n,d:"Planting cost "+c.c+" · Benta "+c.s+" · Grows in "+fmt(c.t),cost:d.cost,lv:d.lv},own?"Owned":"",own?"":`<button class="btn sm" data-k="seed" data-id="${d.id}"${dis}>Buy</button>`,own?"own":S.lv<d.lv?"lock":"")}).join("");
+  $("townTools").innerHTML=TTOOLS.map(d=>{const own=(d.id==="pandilig"||d.id==="tricycle")&&(S.tools||[]).includes(d.id);const st=d.id==="pataba"?(S.fert?"Left: "+S.fert:""):d.id==="basket"?(S.basket?"You have "+S.basket:""):own?"Owned":"";
+    return card(d,st,own?"":`<button class="btn sm" data-k="tool" data-id="${d.id}"${dis}>Buy</button>`,own?"own":S.lv<d.lv?"lock":"")}).join("");
+  $("townDecor").innerHTML=DECOR.map(d=>card(d,"",`<button class="btn sm" data-k="decor" data-id="${d.id}"${dis}>Buy</button>`,S.lv<d.lv?"lock":"")).join("");
   const inv=Object.entries(S.decor||{}).filter(([,q])=>q>0);
-  $("myDecor").innerHTML=inv.length?inv.map(([id,q])=>{const d=DECOR.find(x=>x.id===id);return `<div class="abuy"><b>${d.n}</b><small>×${q}</small><button class="btn sm" data-place="${id}">Ilagay sa Bukid</button></div>`}).join(""):'<p class="invEmpty">Wala ka pang biniling gamit pambahay.</p>';
+  $("myDecor").innerHTML=inv.length?inv.map(([id,q])=>{const d=DECOR.find(x=>x.id===id);return `<div class="abuy"><b>${d.n}</b><small>×${q}</small><button class="btn sm" data-place="${id}">Place on Farm</button></div>`}).join(""):'<p class="invEmpty">You haven\'t bought any home goods yet.</p>';
   document.querySelectorAll("#townP [data-k]").forEach(b=>b.onclick=()=>townBuy(b.dataset.k,b.dataset.id));
-  document.querySelectorAll("#myDecor [data-place]").forEach(b=>b.onclick=()=>{if(S.inTown)return toast("Umuwi muna sa bukid para mailagay ito.",2600);startPlace(b.dataset.place,true)})}
+  document.querySelectorAll("#myDecor [data-place]").forEach(b=>b.onclick=()=>{if(S.inTown)return toast("Go home to the farm to place it.",2600);startPlace(b.dataset.place,true)})}
 
 /* ================= ACCOUNTS: sign up, one farm per player ================= */
 var CLOUD={db:null,user:null,id:null,profile:null,dirty:false,busy:false,lastPub:""};
 const SHIRTS=[0xd94a3a,0x2f7fb8,0x3f8f2c,0xe8a82a,0x8a4ac0];
 let farmerTag=null,farmerColor=0xd94a3a,SU_SHIRT=0;
-function applyProfile(){const p=CLOUD.profile||CLOUD.local;$("logo").textContent="Farming";$("acct").textContent=p?(p.farmer+" · "+p.farm):"Bisita · Mag-sign up";if(p)setFarmerLook(p)}
+function applyProfile(){const p=CLOUD.profile||CLOUD.local;$("logo").textContent="Farming";$("acct").textContent=p?(p.farmer+" · "+p.farm):"Guest · Sign up";if(p)setFarmerLook(p)}
 function setFarmerLook(p){if(!farmer)return;const c=SHIRTS[p.shirt|0]||SHIRTS[0],from=am(farmerColor),to=am(c);if(from!==to)farmer.g.traverse(o=>{if(o.isMesh&&o.material===from)o.material=to});farmerColor=c;
   if(farmerTag)farmer.g.remove(farmerTag);farmerTag=labelSprite(String(p.farmer||"").slice(0,16));farmerTag.position.y=1.8;farmerTag.scale.set(1.2,.3,1);farmer.g.add(farmerTag)}
 function loadState(st){const n=Object.assign(fresh(),st);if(!SIZES[n.size]||!Array.isArray(n.tiles)||n.tiles.length!==expectTiles(n)||!Array.isArray(n.pens))return false;
-  S=n;normalizePens();hovered=null;if(typeof renderBuilds==="function"){renderBuilds();buildBoat();buildJeep();shopUI(true);townUI(true)}if(typeof helperUI==="function")helperUI();animalObjs.forEach(o=>animalGroup.remove(o.g));animalObjs=[];buildField();syncAnimals();ui();try{localStorage.setItem("bukid-v1",JSON.stringify(S))}catch(e){}return true}
+  S=n;normalizePens();hovered=null;if(typeof renderBuilds==="function"){renderBuilds();buildBoat();buildJeep();shopUI(true);townUI(true)}if(typeof helperUI==="function")helperUI();animalObjs.forEach(o=>animalGroup.remove(o.g));animalObjs=[];buildField();syncAnimals();ui();save();return true}
 async function cloudSave(force){
   if(!CLOUD.id||CLOUD.readonly||!CLOUD.profile||CLOUD.busy||(!CLOUD.dirty&&!force))return;CLOUD.busy=true;CLOUD.dirty=false;
   try{await CLOUD.db.doc("data/users/"+CLOUD.id+"/save").set({state:JSON.stringify(S),ts:Date.now()});
     const pub=JSON.stringify([S.lv,Math.round(S.coins),S.pens.length]);
     if(pub!==CLOUD.lastPub){CLOUD.lastPub=pub;await CLOUD.db.doc("players/"+CLOUD.id).update({lv:S.lv,coins:Math.round(S.coins),animals:S.pens.length,ts:Date.now()})}
-    $("acctSave").textContent="Naka-save sa account mo"}
-  catch(e){CLOUD.dirty=true;$("acctSave").textContent="Hindi na-save, susubukan ulit"}
+    $("acctSave").textContent="Saved to your account"}
+  catch(e){CLOUD.dirty=true;$("acctSave").textContent="Not saved, will retry"}
   CLOUD.busy=false}
-function renderBoard(docs,ps){const ol=$("lb");ol.textContent="";$("lbHint").textContent=docs.length?docs.length+" magsasaka ang naglalaro":"";
-  if(!docs.length){const li=document.createElement("li");li.className="lbEmpty";li.textContent="Wala pang nag-sign up. Ikaw ang mauna!";ol.append(li);return}
+function renderBoard(docs,ps){const ol=$("lb");ol.textContent="";$("lbHint").textContent=docs.length?docs.length+" farmers playing":"";
+  if(!docs.length){const li=document.createElement("li");li.className="lbEmpty";li.textContent="Nobody has signed up yet. Be the first!";ol.append(li);return}
   docs.forEach((d,i)=>{const li=document.createElement("li");if(d.id===CLOUD.id)li.className="me";
     const rk=document.createElement("span");rk.className="rk";rk.textContent="#"+(i+1);
     const img=document.createElement("img");img.alt="";img.src=(ps&&ps[d.id]&&ps[d.id].avatarUrl)||"";
     const t=document.createElement("div"),b=document.createElement("b"),sm=document.createElement("small");
-    b.textContent=String(d.farm||"Bukid").slice(0,40);sm.textContent=String(d.farmer||"Magsasaka").slice(0,24)+" · Antas "+(Number(d.lv)||1)+" · "+(Number(d.coins)||0).toLocaleString()+" barya · "+(Number(d.animals)||0)+" hayop";
+    b.textContent=String(d.farm||"Farm").slice(0,40);sm.textContent=String(d.farmer||"Farmer").slice(0,24)+" · Level "+(Number(d.lv)||1)+" · "+(Number(d.coins)||0).toLocaleString()+" coins · "+(Number(d.animals)||0)+" animals";
     t.append(b,sm);li.append(rk,img,t);ol.append(li)})}
 function watchBoard(){CLOUD.db.collection("players").orderBy("lv","desc").limit(30).onSnapshot(async snap=>{const docs=snap.docs.map(d=>Object.assign({id:d.id},d.data()));let ps=null;try{ps=await CLOUD.user.profiles(docs.map(d=>d.id))}catch(e){}renderBoard(docs,ps)},()=>{})}
 function openSignup(edit){
-  const p=CLOUD.profile||CLOUD.local;$("suTitle").textContent=edit?"Ayusin ang Bukid Mo":"Gumawa ng Sariling Bukid";$("suGo").textContent=edit?"I-save":"Simulan ang Bukid";
+  const p=CLOUD.profile||CLOUD.local;$("suTitle").textContent=edit?"Edit Your Farm":"Create Your Own Farm";$("suGo").textContent=edit?"Save":"Start Farming";
   $("suFarm").value=p?p.farm:"";$("suName").value=p?p.farmer:"";SU_SHIRT=p?(p.shirt|0):0;paintSwatches();
-  const hasProgress=S.lv>1||S.pens.length>0||S.coins!==80;$("suKeepRow").hidden=!!edit||!hasProgress;$("suKeep").checked=true;$("suErr").textContent="";$("suGo").disabled=false;$("suLater").hidden=!!edit;
+  const hasProgress=S.lv>1||S.pens.length>0||S.coins!==80;$("suKeepRow").hidden=!!edit||!hasProgress;$("suKeep").checked=true;$("suErr").textContent="";$("suGo").disabled=false;$("suLater").hidden=true;$("logoutBtn").hidden=!(edit&&LOCAL.user);$("suClose").hidden=!edit;
   $("signup").hidden=false;setTimeout(()=>$("suFarm").focus(),50)}
 function paintSwatches(){document.querySelectorAll("#suShirts button").forEach((b,i)=>{b.classList.toggle("on",i===SU_SHIRT);b.setAttribute("aria-pressed",i===SU_SHIRT)})}
 (function signupUI(){
-  const box=$("suShirts");SHIRTS.forEach((c,i)=>{const b=document.createElement("button");b.type="button";b.style.background="#"+c.toString(16).padStart(6,"0");b.setAttribute("aria-label","Kulay "+(i+1));b.onclick=()=>{SU_SHIRT=i;paintSwatches()};box.append(b)});
-  $("suLater").onclick=()=>{$("signup").hidden=true;toast("Naglalaro ka bilang bisita. Sa browser na ito lang naka-save ang progreso.",3500)};
-  const saveLocal=(farm,name,edit,msg)=>{if(!edit&&!$("suKeep").checked)loadState(fresh());const prof={farm,farmer:name,shirt:SU_SHIRT};try{localStorage.setItem("bukid-profile",JSON.stringify(prof))}catch(e){}
-    CLOUD.local=prof;$("signup").hidden=true;applyProfile();$("acctSave").textContent="Naka-save sa device na ito";toast(msg||(edit?"Na-save ang bukid mo.":"Handa na ang "+farm+"! Magsimula nang magtanim."),3600)};
+  const box=$("suShirts");SHIRTS.forEach((c,i)=>{const b=document.createElement("button");b.type="button";b.style.background="#"+c.toString(16).padStart(6,"0");b.setAttribute("aria-label","Color "+(i+1));b.onclick=()=>{SU_SHIRT=i;paintSwatches()};box.append(b)});
+  $("suClose").onclick=()=>{$("signup").hidden=true};
+  $("suLater").onclick=()=>{$("signup").hidden=true;toast("You're playing as a guest. Progress is saved only in this browser.",3500)};
+  const saveLocal=(farm,name,edit,msg)=>{if(!edit&&!$("suKeep").checked)loadState(fresh());const prof={farm,farmer:name,shirt:SU_SHIRT};if(LOCAL.user){const all=accts();if(all[LOCAL.user]){Object.assign(all[LOCAL.user],prof);saveAccts(all)}}
+    CLOUD.local=prof;$("signup").hidden=true;applyProfile();$("acctSave").textContent="Saved on this device";toast(msg||(edit?"Your farm was saved.":"Ready: "+farm+"! Start planting."),3600)};
   $("suForm").onsubmit=async e=>{e.preventDefault();
-    const farm=$("suFarm").value.trim().slice(0,40)||"Aking Bukid",name=$("suName").value.trim().slice(0,24)||"Magsasaka",edit=!!(CLOUD.profile||CLOUD.local);
-    if(!CLOUD.id||CLOUD.readonly)return saveLocal(farm,name,edit);
+    const farm=$("suFarm").value.trim().slice(0,40)||"My Farm",name=$("suName").value.trim().slice(0,24)||"Farmer",edit=!!(CLOUD.profile||CLOUD.local);
+    if(!CLOUD.id||CLOUD.readonly){if(!LOCAL.user){$("signup").hidden=true;return openAuth("signup")}return saveLocal(farm,name,true)}
     $("suGo").disabled=true;$("suErr").textContent="";
     try{
-      if(edit){await CLOUD.db.doc("players/"+CLOUD.id).update({farm,farmer:name,shirt:SU_SHIRT,ts:Date.now()});Object.assign(CLOUD.profile,{farm,farmer:name,shirt:SU_SHIRT});$("signup").hidden=true;applyProfile();toast("Na-save ang bukid mo.");return}
+      if(edit){await CLOUD.db.doc("players/"+CLOUD.id).update({farm,farmer:name,shirt:SU_SHIRT,ts:Date.now()});Object.assign(CLOUD.profile,{farm,farmer:name,shirt:SU_SHIRT});$("signup").hidden=true;applyProfile();toast("Your farm was saved.");return}
       if(!$("suKeep").checked||$("suKeepRow").hidden&&S.lv===1&&!S.pens.length)loadState(fresh());
       const prof={farm,farmer:name,shirt:SU_SHIRT,lv:S.lv,coins:Math.round(S.coins),animals:S.pens.length,joined:Date.now(),ts:Date.now()};
       await CLOUD.db.doc("players/"+CLOUD.id).set(prof);CLOUD.profile=prof;CLOUD.lastPub=JSON.stringify([S.lv,Math.round(S.coins),S.pens.length]);
-      CLOUD.dirty=true;await cloudSave(true);$("signup").hidden=true;applyProfile();toast("Handa na ang "+farm+"! Magsimula nang magtanim.",3200)
-    }catch(err){CLOUD.readonly=true;$("suGo").disabled=false;saveLocal(farm,name,false,"Handa na ang "+farm+"! Naka-save ito sa device na ito. Para lumabas ka sa listahan ng mga magsasaka, kailangan ng Contributor access sa laro.")}};
-  $("acct").onclick=()=>openSignup(!!(CLOUD.profile||CLOUD.local));
+      CLOUD.dirty=true;await cloudSave(true);$("signup").hidden=true;applyProfile();toast("Ready: "+farm+"! Start planting.",3200)
+    }catch(err){CLOUD.readonly=true;$("suGo").disabled=false;$("signup").hidden=true;openAuth("signup","Create a username and password to save your farm on this device. To join the farmers list you need Contributor access to the game.")}};
+  $("acct").onclick=()=>{if(CLOUD.profile||LOCAL.user)openSignup(true);else if(CLOUD.id&&!CLOUD.readonly)openSignup(false);else openAuth("login")};
 })();
-function noBoard(){const ol=$("lb");ol.textContent="";const li=document.createElement("li");li.className="lbEmpty";li.textContent="Makikita rito ang ibang magsasaka kapag naka-sign in ka sa Claude.";ol.append(li)}
+function noBoard(){const ol=$("lb");ol.textContent="";const li=document.createElement("li");li.className="lbEmpty";li.textContent="Other farmers show up here when you're signed in to Claude.";ol.append(li)}
 function guestStart(){let lp=null;try{lp=JSON.parse(localStorage.getItem("bukid-profile")||"null")}catch(e){}
-  if(lp&&lp.farm){CLOUD.local=lp;applyProfile();toast("Maligayang pagbabalik, "+lp.farmer+"!",2400)}else openSignup(false)}
+  if(lp&&lp.farm){CLOUD.local=lp;applyProfile();toast("Welcome back, "+lp.farmer+"!",2400)}else openSignup(false)}
+/* ================= LOCAL ACCOUNTS: sign up / log in on this device ================= */
+const ACCT_KEY="farming-accounts",SESS_KEY="farming-session";
+var LOCAL={user:null};
+function accts(){try{return JSON.parse(localStorage.getItem(ACCT_KEY)||"{}")||{}}catch(e){return{}}}
+function saveAccts(a){try{localStorage.setItem(ACCT_KEY,JSON.stringify(a))}catch(e){}}
+async function hashPw(pw,salt){const data=new TextEncoder().encode(salt+":"+pw);
+  try{if(window.crypto&&crypto.subtle){const h=await crypto.subtle.digest("SHA-256",data);return[...new Uint8Array(h)].map(b=>b.toString(16).padStart(2,"0")).join("")}}catch(e){}
+  let h=5381,h2=52711;for(const b of data){h=((h<<5)+h+b)|0;h2=((h2<<5)+h2^b)|0}return"x"+(h>>>0).toString(16)+(h2>>>0).toString(16)}
+function oldSave(){try{const r=localStorage.getItem("bukid-v1");return r?JSON.parse(r):null}catch(e){return null}}
+function loginLocal(u){const a=accts()[u];if(!a)return;LOCAL.user=u;try{localStorage.setItem(SESS_KEY,u)}catch(e){}
+  CLOUD.local={farm:a.farm,farmer:a.farmer,shirt:a.shirt|0};
+  let st=null;try{st=JSON.parse(localStorage.getItem("farming-save-"+u)||"null")}catch(e){}
+  if(!(st&&loadState(st)))loadState(fresh());
+  applyProfile();$("auth").hidden=true;$("acctSave").textContent="Saved on this device";}
+function logoutLocal(){save();LOCAL.user=null;CLOUD.local=null;try{localStorage.removeItem(SESS_KEY)}catch(e){}$("signup").hidden=true;loadState(fresh());applyProfile();openAuth("login")}
+function openAuth(tab,msg){$("auth").hidden=false;authTab(tab||"signup");$("auErr").textContent=msg||"";$("liErr").textContent="";
+  $("auImportRow").hidden=!oldSave()||Object.keys(accts()).length>0;}
+function authTab(t){$("auSignup").hidden=t!=="signup";$("auLogin").hidden=t!=="login";$("tabSu").classList.toggle("on",t==="signup");$("tabLi").classList.toggle("on",t==="login");
+  setTimeout(()=>{const f=t==="signup"?$("auUser"):$("liUser");if(f)f.focus()},60)}
+function localAuthStart(){$("lbHead").hidden=true;$("lbPanel").hidden=true;let u=null;try{u=localStorage.getItem(SESS_KEY)}catch(e){}
+  if(u&&accts()[u]){loginLocal(u);toast("Welcome back, "+accts()[u].farmer+"!",2400)}else openAuth(Object.keys(accts()).length?"login":"signup")}
+(function authUI(){
+  const box=$("auShirts");SHIRTS.forEach((c,i)=>{const b=document.createElement("button");b.type="button";b.style.background="#"+c.toString(16).padStart(6,"0");b.setAttribute("aria-label","Color "+(i+1));
+    b.onclick=()=>{SU_SHIRT=i;box.querySelectorAll("button").forEach((x,j)=>{x.classList.toggle("on",j===i);x.setAttribute("aria-pressed",j===i)})};box.append(b)});
+  box.querySelector("button").classList.add("on");
+  $("tabSu").onclick=()=>authTab("signup");$("tabLi").onclick=()=>authTab("login");
+  $("auSignup").onsubmit=async e=>{e.preventDefault();const u=$("auUser").value.trim().toLowerCase(),p1=$("auPw").value,p2=$("auPw2").value,farm=$("auFarm").value.trim().slice(0,40),name=$("auName").value.trim().slice(0,24);
+    if(!/^[a-z0-9_]{3,20}$/.test(u))return $("auErr").textContent="Username must be 3 to 20 letters, numbers or underscores.";
+    if(p1.length<4)return $("auErr").textContent="Password must be at least 4 characters.";
+    if(p1!==p2)return $("auErr").textContent="The two passwords don't match.";
+    if(!farm||!name)return $("auErr").textContent="Enter a farm name and your farmer name.";
+    const all=accts();if(all[u])return $("auErr").textContent="That username is already taken on this device. Choose another or log in.";
+    const salt=Math.random().toString(36).slice(2)+Date.now().toString(36);all[u]={salt,hash:await hashPw(p1,salt),farm,farmer:name,shirt:SU_SHIRT,created:Date.now()};saveAccts(all);
+    if($("auImport").checked&&!$("auImportRow").hidden){const o=oldSave();if(o)try{localStorage.setItem("farming-save-"+u,JSON.stringify(o))}catch(e){}}
+    ["auPw","auPw2"].forEach(k=>$(k).value="");loginLocal(u);toast(farm+" is ready! Start planting.",3200)};
+  $("auLogin").onsubmit=async e=>{e.preventDefault();const u=$("liUser").value.trim().toLowerCase(),p=$("liPw").value,a=accts()[u];
+    if(!a||await hashPw(p,a.salt)!==a.hash)return $("liErr").textContent="Wrong username or password.";
+    $("liPw").value="";loginLocal(u);toast("Welcome back, "+a.farmer+"!",2400)};
+  $("logoutBtn").onclick=()=>{if(LOCAL.user)logoutLocal()};
+})();
+
 async function initCloud(){
-  if(!window.claude||!window.claude.use){$("lbHead").hidden=true;$("lbPanel").hidden=true;$("acctSave").textContent="Naka-save sa device na ito";guestStart();return}
+  if(!window.claude||!window.claude.use){$("lbHead").hidden=true;$("lbPanel").hidden=true;localAuthStart();return}
   let db=null,user=null;
   try{[db,user]=await Promise.all([window.claude?.use?.("db"),window.claude?.use?.("user")])}catch(e){}
   if(user){try{if(await user.isOwner())["tCheat","tLvl"].forEach(k=>{$(k).hidden=false})}catch(e){}}
-  if(!db||!user){$("acctSave").textContent="Naka-save sa device na ito";$("lbHint").textContent="Mag-sign in sa Claude para makita ang ibang magsasaka";noBoard();guestStart();return}
-  const id=await user.id();if(!id){$("acctSave").textContent="Naka-save sa device na ito";$("lbHint").textContent="Mag-sign in sa Claude para makita ang ibang magsasaka";noBoard();guestStart();return}
+  if(!db||!user){$("acctSave").textContent="Saved on this device";$("lbHint").textContent="Sign in to Claude to see other farmers";noBoard();localAuthStart();return}
+  const id=await user.id();if(!id){$("acctSave").textContent="Saved on this device";$("lbHint").textContent="Sign in to Claude to see other farmers";noBoard();localAuthStart();return}
   CLOUD.db=db;CLOUD.user=user;CLOUD.id=id;
   let pd=null,sd=null;try{[pd,sd]=await Promise.all([db.doc("players/"+id).get(),db.doc("data/users/"+id+"/save").get()])}catch(e){}
   if(pd&&pd.exists){CLOUD.profile=Object.assign({},pd.data());const d=CLOUD.profile;CLOUD.lastPub=JSON.stringify([d.lv,d.coins,d.animals]);
     if(sd&&sd.exists){try{loadState(JSON.parse(sd.data().state))}catch(e){}}
-    applyProfile();$("acctSave").textContent="Naka-save sa account mo";toast("Maligayang pagbabalik, "+d.farmer+"!",2600)}
-  else{$("acct").textContent="Bisita · Mag-sign up";openSignup(false)}
+    applyProfile();$("acctSave").textContent="Saved to your account";toast("Welcome back, "+d.farmer+"!",2600)}
+  else{$("acct").textContent="Guest · Sign up";openSignup(false)}
   watchBoard();
   setInterval(()=>cloudSave(false),6000);
   document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")cloudSave(false)});
@@ -2477,7 +2561,7 @@ async function initCloud(){
 
 /* ================= LOOP ================= */
 function resize(){const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.fov=w<520?52:40;camera.updateProjectionMatrix();if(w<520&&camT.dist===DEF.dist){camT.dist=cam.dist=40}}
-window.addEventListener("resize",resize);
+window.addEventListener("resize",relayout);
 let last=performance.now(),acc=0;
 function loop(t){
   const dt=Math.min(.05,(t-last)/1000);last=t;const ts=t/1000;

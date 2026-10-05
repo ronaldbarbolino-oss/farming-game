@@ -1,14 +1,15 @@
 {
+ "id": "/",
  "name": "Farming",
  "short_name": "Farming",
- "description": "Larong pagsasaka: magtanim, mag-alaga ng hayop, magtayo ng bahay at maglayag sa isla.",
+ "description": "Farming game: plant crops, raise animals, build houses and sail to the island.",
  "start_url": "./",
  "scope": "./",
- "display": "standalone",
+ "display": "fullscreen",
  "orientation": "landscape",
  "background_color": "#3f8a26",
  "theme_color": "#3f8a26",
- "lang": "tl",
+ "lang": "en",
  "icons": [
   {
    "src": "icon-192.png",
@@ -28,5 +29,9 @@
    "type": "image/png",
    "purpose": "maskable"
   }
+ ],
+ "display_override": [
+  "fullscreen",
+  "standalone"
  ]
 }
