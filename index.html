@@ -412,6 +412,13 @@ body.land .stage{width:100vw;height:100vh;height:100dvh}
     <div class="suRow" style="justify-content:center"><button class="btn alt" type="button" id="gpStay">Stay in the game</button><button class="btn" type="button" id="gpNow">Go to GoPyesta.com</button></div>
   </div>
 </div>
+<div class="modal" id="tshopM" hidden>
+  <div class="suBox" role="dialog" aria-labelledby="tsT" style="width:min(640px,100%)">
+    <h3 id="tsT">Seed Shop</h3><p class="suLead" id="tsLead"></p>
+    <div class="scs" id="tsList" style="max-height:52vh;overflow:auto"></div>
+    <div class="suRow"><button class="btn alt" type="button" id="tsJeep"></button><button class="btn" type="button" id="tsClose">Close</button></div>
+  </div>
+</div>
 <div class="modal" id="redeem" hidden>
   <form class="suBox" id="rdForm" autocomplete="off">
     <h3>Redeem a Gift Code</h3>
@@ -2068,8 +2075,8 @@ const ray=new THREE.Raycaster(),ndc=new THREE.Vector2();
 let hovered=null;   // {tile:i} or {pen:i}
 function pickAt(e){
   const r=cv.getBoundingClientRect();ndc.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(ndc,camera);
-  const hits=ray.intersectObjects([...(AD.hit&&AD.on?[AD.hit]:[]),...FTREES.map(t=>t.hit),...BUILDG.children.map(g=>g.userData.hit).filter(Boolean),STALLHIT,...WHITS,...ISLE.hits,...weeds.filter(w=>w.state==="ground").map(w=>w.m),...animalGroup.children,...tileObjs.map(o=>o.hit)],true);
-  for(const h of hits){if(h.object.userData.drop)return{drop:true};if(h.object.userData.ftree!=null)return{ftree:h.object.userData.ftree};if(h.object.userData.build!=null)return{build:h.object.userData.build};if(h.object.userData.stall)return{stall:true};if(h.object.userData.worker){const W=CREW[h.object.userData.worker];if(W&&W.g.visible)return{worker:h.object.userData.worker};continue}if(h.object.userData.isle!=null)return{isle:h.object.userData.isle};const pi=h.object.userData.pen;if(pi!=null&&animalObjs[pi]&&!animalObjs[pi].g.visible)continue;if(h.object.userData.weed)return{weed:h.object.userData.weed};if(h.object.userData.pen!=null&&!h.object.isSprite)return{pen:h.object.userData.pen};if(h.object.isSprite&&h.object.userData.pen!=null)return{pen:h.object.userData.pen};if(h.object.userData.tile!=null)return{tile:h.object.userData.tile}}
+  const hits=ray.intersectObjects([...TSHOPHITS,...(AD.hit&&AD.on?[AD.hit]:[]),...FTREES.map(t=>t.hit),...BUILDG.children.map(g=>g.userData.hit).filter(Boolean),STALLHIT,...WHITS,...ISLE.hits,...weeds.filter(w=>w.state==="ground").map(w=>w.m),...animalGroup.children,...tileObjs.map(o=>o.hit)],true);
+  for(const h of hits){if(h.object.userData.tshop)return{tshop:h.object.userData.tshop};if(h.object.userData.drop)return{drop:true};if(h.object.userData.ftree!=null)return{ftree:h.object.userData.ftree};if(h.object.userData.build!=null)return{build:h.object.userData.build};if(h.object.userData.stall)return{stall:true};if(h.object.userData.worker){const W=CREW[h.object.userData.worker];if(W&&W.g.visible)return{worker:h.object.userData.worker};continue}if(h.object.userData.isle!=null)return{isle:h.object.userData.isle};const pi=h.object.userData.pen;if(pi!=null&&animalObjs[pi]&&!animalObjs[pi].g.visible)continue;if(h.object.userData.weed)return{weed:h.object.userData.weed};if(h.object.userData.pen!=null&&!h.object.isSprite)return{pen:h.object.userData.pen};if(h.object.isSprite&&h.object.userData.pen!=null)return{pen:h.object.userData.pen};if(h.object.userData.tile!=null)return{tile:h.object.userData.tile}}
   return null;
 }
 function hoverAt(e){if(PLACE){placePointer(e,false);hovered=null;return}const p=pickAt(e);hovered=p&&p.worker?null:p;cv.dataset.worker=p&&p.worker?"1":""}
@@ -2080,6 +2087,7 @@ function clickAt(e){
   const x=e.clientX,y=e.clientY-24;
   if(p&&p.stall){openMarket();return}
   if(p&&p.drop){openDrop(x,y);return}
+  if(p&&p.tshop){openTownShop(p.tshop);return}
   if(p&&p.build!=null&&!SEL){editBuild(p.build);return}
   if(p&&p.worker){selectWorker(SEL===p.worker?null:p.worker);return}
   if(SEL&&!(p&&p.isle!=null)){commandAt(e,p);return}
@@ -2101,6 +2109,7 @@ function updateTag(){
   let txt,prog=null,wp;
   if(hovered.stall){wp=_p.set(7.6,2.9,-.7);txt="Market Stall · "+invCount()+" goods · tap"}
   else if(hovered.build!=null){const o=(S.builds||[])[hovered.build];if(!o){hovered=null;return}const d=BUILDS.find(q=>q.id===o.id);wp=_p.set(o.x,2.9,o.z);txt=(d?d.n:"Item")+" · tap to rotate or move"}
+  else if(hovered.tshop){const nm={seed:"Seed Shop",home:"Home Goods",hard:"Hardware Store"}[hovered.tshop];const m=TSHOPHITS.find(q=>q.userData.tshop===hovered.tshop);wp=_p.set(m.position.x,6,m.position.z);txt=nm+" · tap to shop"}
   else if(hovered.drop){if(!AD.on){hovered=null;return}wp=_p.set(AD.g.position.x,AD.g.position.y+1.3,AD.g.position.z);txt="Airdrop · tap to open"}
   else if(hovered.ftree!=null){const k=hovered.ftree,T=FTREES[k];if(!T){hovered=null;return}const l=treeLeft(k),gr=treeGrow(k);wp=_p.set(T.x,(.6+2.8*(T.born!=null?.3+.7*gr:1))*T.s,T.z);
     if(TOOL==="chop")txt="Chop down "+treeName(T)+" · +"+(gr>=1?5:1)+" Wood";else if(!T.kind)txt="Tree · use Chop to cut it";else if(gr<1){txt="Young "+treeName(T)+" · grows up in "+fmt(l);prog=gr}else if(l<=0)txt=treeName(T)+" · Ripe · tap with Harvest";else{txt=treeName(T)+" · fruit in "+fmt(l);prog=1-l/FTREE_T}}
@@ -2841,6 +2850,7 @@ makeBuild=function(id){if(!DECOR.some(d=>d.id===id))return _mkB(id);const g=new 
   g.add(b.mesh());g.add(new THREE.Mesh(sn.geo(),SNOWMAT));return g};
 /* town scenery */
 var TOWNFLAG=null,lamps_=[];
+const TSHOPHITS=[];
 (function buildTown(){const b=new Builder(),r=rnd(321),T=TOWN;
   // road from farm to town with dashed line
   b.add("box",0x5a5f63,(JEEP_FARM.x+T.x-6)/2,.02,-8,Math.abs(JEEP_FARM.x-(T.x-6))+2,.03,2.2);for(let x=JEEP_FARM.x-1;x>T.x;x-=1.6)b.add("box",0xf5c732,x,.04,-8,.8,.01,.12);
@@ -2865,6 +2875,7 @@ var TOWNFLAG=null,lamps_=[];
     const lab=labelSprite(name);lab.position.set(...[P(0,d/2+.3)[0]]);lab.position.set(P(0,d/2+.3)[0],h-.25,P(0,d/2+.3)[1]);lab.scale.set(2.2,.55,1);scene.add(lab)};
   shop(T.x+9,T.z-10,4.2,3,2.8,0xf2d36b,0x3f8f2c,"Seed Shop");
   shop(T.x,T.z-11,4.6,3.2,3,0x9fc8e8,0x2f7fb8,"Home Goods");
+  [[T.x+9,T.z-10,4.4,3.4,"seed"],[T.x,T.z-11,4.8,3.6,"home"],[T.x-11,T.z+1,3.4,4.4,"hard"]].forEach(([x,z,w,d,k])=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,5.6,d),new THREE.MeshBasicMaterial({visible:false}));m.position.set(x,2.8,z);m.userData.tshop=k;scene.add(m);TSHOPHITS.push(m)});
   shop(T.x-9,T.z-10,3.8,3,2.6,0xf0a3b8,0xe2402f,"Sari-sari Store");
   shop(T.x-11,T.z+1,4,3,2.8,0xd8e8c8,0xe8622a,"Hardware Store",Math.PI/2);
   // church
@@ -3015,7 +3026,7 @@ function townBuy(kind,id){if(!S.inTown)return toast("Go to Town first to shop he
   else if(kind==="tool"){const d=TTOOLS.find(q=>q.id===id);if(S.lv<d.lv)return toast("Level "+d.lv+" needed.");if(S.coins<d.cost)return toast("Not enough coins.");
     if(id==="pataba"){S.fert=(S.fert||0)+10}else if(id==="basket"){if((S.basket||0)>=3)return toast("You already have three baskets.");S.basket=(S.basket||0)+1}else{if((S.tools||[]).includes(id))return;S.tools=(S.tools||[]).concat(id)}
     S.coins-=d.cost;if(id==="tricycle")buildJeep();toast("Bought: "+d.n,2400)}
-  else if(kind==="decor"){const d=DECOR.find(q=>q.id===id);if(S.lv<d.lv)return toast("Level "+d.lv+" needed.");if(S.coins<d.cost)return toast("Not enough coins.");S.coins-=d.cost;S.decor=S.decor||{};S.decor[id]=(S.decor[id]||0)+1;toast("Bought: "+d.n+". Place it on the farm from 'My Items'.",3200)}
+  else if(kind==="decor"){const d=DECOR.find(q=>q.id===id);if(S.lv<d.lv)return toast("Level "+d.lv+" needed.");if(S.coins<d.cost)return toast("Not enough coins.");S.coins-=d.cost;S.decor=S.decor||{};S.decor[id]=(S.decor[id]||0)+1;toast(d.tree?"Bought: "+d.n+". Go home and plant it from 'My Items' (Town → Place on Farm).":"Bought: "+d.n+". Place it on the farm from 'My Items'.",3600)}
   after();townUI(true)}
 let _townKey="";
 function townUI(force){const key=JSON.stringify([S.inTown,S.lv,S.seeds,S.tools,S.fert,S.basket,S.decor,Math.floor(S.coins/50)]);if(!force&&key===_townKey)return;_townKey=key;
@@ -3267,6 +3278,23 @@ const GP_URL="https://gopyesta.com/";let gpT=null;
 function gpLeave(){clearInterval(gpT);save();if(myUser()&&typeof netSend==="function")netSend(true);setTimeout(()=>{location.href=GP_URL},300)}
 function gpRedirect(){if(VISIT)return;$("gpImg").src=GP_FULL;let n=5;$("gpN").textContent=n;$("gpGo").hidden=false;clearInterval(gpT);gpT=setInterval(()=>{n--;$("gpN").textContent=n;if(n<=0)gpLeave()},1000)}
 $("gpNow").onclick=gpLeave;$("gpBtn").onclick=()=>{toast("🎡 Going to GoPyesta.com… your farm is saved.",2000);gpLeave()};$("gpStay").onclick=()=>{clearInterval(gpT);$("gpGo").hidden=true};
+/* walk-in town shops: tap the Seed Shop, Home Goods or Hardware Store building */
+let TSHOP=null;
+function openTownShop(k){TSHOP=k;$("tshopM").hidden=false;renderTownShop()}
+function renderTownShop(){if(!TSHOP)return;const here=!!S.inTown,dis=here?"":" disabled",k=TSHOP;
+  $("tsT").textContent={seed:"🌱 Seed Shop",home:"🏠 Home Goods",hard:"🔧 Hardware Store"}[k];
+  $("tsLead").textContent=(here?"":"You're on the farm. Ride the jeep to town to buy. ")+({seed:"Tree seeds, crop seeds, fertilizer and a watering can for planting.",home:"Decorations for your farm.",hard:"Farm tools and storage."}[k])+" Coins: "+Math.floor(S.coins).toLocaleString();
+  let h="";
+  if(k==="seed"){const mine=DECOR.filter(d=>d.tree&&(S.decor||{})[d.id]>0);if(mine.length)h+=`<div class="sc own" style="grid-column:1/-1"><b>🌳 Your tree seeds</b><small>Plant them on your farm. They grow into fruit trees in 10 minutes.</small><div class="scRow" style="flex-wrap:wrap;gap:6px">${mine.map(d=>`<button class="btn sm" data-plant="${d.id}">Plant ${d.n.replace(" Tree Seed","")} ×${S.decor[d.id]}</button>`).join("")}</div></div>`;
+    h+=DECOR.filter(d=>d.tree).map(d=>card(d,(S.decor||{})[d.id]?"You have "+S.decor[d.id]:"",`<button class="btn sm" data-k="decor" data-id="${d.id}"${dis}>Buy</button>`,S.lv<d.lv?"lock":"")).join("");
+    h+=TOWNSEEDS.map(d=>{const c=crop(d.id),own=seedOwned(d.id);return card({n:"Seeds: "+c.n,d:"Planting cost "+c.c+" · Sells "+c.s+" · Grows in "+fmt(c.t),cost:d.cost,lv:d.lv},own?"Owned":"",own?"":`<button class="btn sm" data-k="seed" data-id="${d.id}"${dis}>Buy</button>`,own?"own":S.lv<d.lv?"lock":"")}).join("");
+    h+=TTOOLS.filter(d=>d.id==="pataba"||d.id==="pandilig").map(d=>{const own=d.id==="pandilig"&&(S.tools||[]).includes(d.id);return card(d,d.id==="pataba"&&S.fert?"Left: "+S.fert:own?"Owned":"",own?"":`<button class="btn sm" data-k="tool" data-id="${d.id}"${dis}>Buy</button>`,own?"own":S.lv<d.lv?"lock":"")}).join("")}
+  else if(k==="home")h+=DECOR.filter(d=>!d.tree).map(d=>card(d,(S.decor||{})[d.id]?"You have "+S.decor[d.id]:"",`<button class="btn sm" data-k="decor" data-id="${d.id}"${dis}>Buy</button>`,S.lv<d.lv?"lock":"")).join("");
+  else h+=TTOOLS.map(d=>{const own=(d.id==="pandilig"||d.id==="tricycle")&&(S.tools||[]).includes(d.id);const st=d.id==="pataba"?(S.fert?"Left: "+S.fert:""):d.id==="basket"?(S.basket?"You have "+S.basket:""):own?"Owned":"";return card(d,st,own?"":`<button class="btn sm" data-k="tool" data-id="${d.id}"${dis}>Buy</button>`,own?"own":S.lv<d.lv?"lock":"")}).join("");
+  $("tsList").innerHTML=h;$("tsList").querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{townBuy(b.dataset.k,b.dataset.id);renderTownShop()});
+  $("tsList").querySelectorAll("[data-plant]").forEach(b=>b.onclick=()=>{if(S.inTown)return toast("Go home to the farm first, then plant it. Use the jeep or tricycle.",3200);$("tshopM").hidden=true;TSHOP=null;startPlace(b.dataset.plant,true)});
+  const jb=$("tsJeep");jb.hidden=here;jb.textContent=ownTri()?"🛺 Ride Tricycle to Town":"🚌 Ride the Jeep to Town · 20";jb.onclick=()=>{$("tshopM").hidden=true;TSHOP=null;startJeep()}}
+$("tsClose").onclick=()=>{$("tshopM").hidden=true;TSHOP=null};
 /* collapsible menu sections: tap a title to hide or show it */
 let SECS={};try{SECS=JSON.parse(localStorage.getItem("farming-sections")||"null")||{weather:1,farmers:1}}catch(e){SECS={weather:1,farmers:1}}
 const secKey=h=>(h.querySelector("h2")||{}).textContent.toLowerCase().split(" ")[0];
