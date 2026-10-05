@@ -11,7 +11,8 @@ const pub = m => ({ u: m.u, farm: m.farm, farmer: m.farmer, shirt: m.shirt, lv: 
 
 export default async (req) => {
   const url = new URL(req.url);
-  const path = url.pathname.replace(/^\/api\/?/, "").replace(/\/$/, "");
+  const path = url.pathname.replace(/^.*?\/api\/?/, "").replace(/^\.netlify\/functions\/api\/?/, "").replace(/\/$/, "");
+  if (path === "health" || path === "") return J({ ok: true, service: "farming-api", path: url.pathname });
   const meta = getStore({ name: "meta", consistency: "strong" });
   const farms = getStore({ name: "farms", consistency: "strong" });
   try {
