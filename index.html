@@ -260,7 +260,7 @@ body.land .stage{width:100vw;height:100vh;height:100dvh}
   <div class="stage" id="stage">
     <canvas id="cv" aria-label="3D farm: drag to rotate, tap a plot to plow, plant or harvest"></canvas>
     <div class="loading" id="loading">Preparing the farm…</div>
-    <div class="sbtns"><button class="sb" id="menuBtn" type="button">☰ Menu</button><button class="sb" id="mapBtn" type="button">🗺️ Map</button><button class="sb" id="hideBtn" type="button" aria-pressed="false">Hide</button><button class="sb" id="rotBtn" type="button">↻ Landscape</button></div>
+    <div class="sbtns"><button class="sb" id="menuBtn" type="button">☰ Menu</button><button class="sb" id="mapBtn" type="button">🗺️ Map</button><button class="sb" id="sndBtn" type="button" aria-pressed="false">🔇 Sound</button><button class="sb" id="hideBtn" type="button" aria-pressed="false">Hide</button><button class="sb" id="rotBtn" type="button">↻ Landscape</button></div>
     <div class="crew" id="crew" role="group" aria-label="Workers"></div>
     <div class="modeTag" id="modeTag">Move: rotate and pan the view only</div>
     <div class="tip" id="tip">Slide to move the view · two fingers to rotate and zoom · right-click or Shift to rotate · scroll to zoom</div>
@@ -273,7 +273,7 @@ body.land .stage{width:100vw;height:100vh;height:100dvh}
       <button class="cbtn" data-v="falls">Waterfall</button>
       <button class="cbtn" data-v="bayan">Town</button>
       <button class="cbtn" data-v="isla">Island</button>
-      <button class="cbtn" data-v="lab">Inside the Lab</button>
+      
       <button class="cbtn" data-v="tug">Tugboat</button>
     </div>
     <div class="toolbar" role="toolbar" aria-label="Farm tools">
@@ -334,7 +334,7 @@ body.land .stage{width:100vw;height:100vh;height:100dvh}
       <div class="cap"><span>Storage</span><div class="capbar"><i id="invBar"></i></div><b id="invCap">0 / 60</b></div>
       <div class="mktBtns"><button class="btn" id="sellAll">Sell All</button><button class="btn" id="shopOpen">Stall Open</button><button class="btn alt" id="goMkt">View the Stall</button></div>
     </div>
-    <p class="mktNote">Everything you harvest goes here: vegetables, fruit, eggs and milk. Sell them here, or let passing buyers purchase at the stall. They pay 15% more. Prices change every 3 minutes, so sell when ▲ high.</p>
+    <p class="mktNote">Everything you harvest goes here: vegetables, fruit, eggs, milk, fur, horsehair and wood. Sell them here, or let passing buyers purchase at the stall. They pay 15% more. Prices change every 3 minutes, so sell when ▲ high.</p>
     <div class="invG" id="inv"></div>
   </div>
 
@@ -443,15 +443,15 @@ const CROPS=[
  {id:"pinya",n:"Pineapple",t:120,c:8,s:20,xp:18,lv:8,col:0xf0b62a,shape:"pine"}
 ];
 const ANIMALS=[
- {id:"manok",n:"Chicken",item:"Eggs",t:60,cost:120,s:25,xp:2,lv:2},
- {id:"kambing",n:"Goat",item:"Milk",t:180,cost:350,s:80,xp:5,lv:4},
- {id:"bibe",n:"Duck",item:"Eggs",t:75,cost:150,s:35,xp:2,lv:2,zone:"pond"},
- {id:"pato",n:"Mallard",item:"Mallard eggs",t:90,cost:220,s:45,xp:3,lv:3,zone:"pond"},
- {id:"pusa",n:"Cat",item:"Cuddles",t:60,cost:180,s:4,xp:4,lv:3,zone:"farm"},
- {id:"aso",n:"Dog",item:"Cuddles",t:60,cost:200,s:5,xp:4,lv:3,zone:"farm"},
- {id:"baka",n:"Cow",item:"Milk",t:300,cost:700,s:150,xp:9,lv:6},
- {id:"kabayo",n:"Horse",item:"Ride",t:240,cost:900,s:30,xp:11,lv:7},
- {id:"kalabaw",n:"Carabao",item:"Carabao milk",t:360,cost:1100,s:260,xp:14,lv:7}
+ {id:"manok",n:"Chicken",item:"Eggs",t:300,cost:120,s:25,xp:2,lv:2},
+ {id:"kambing",n:"Goat",item:"Milk",t:480,cost:350,s:80,xp:5,lv:4},
+ {id:"bibe",n:"Duck",item:"Eggs",t:360,cost:150,s:35,xp:2,lv:2,zone:"pond"},
+ {id:"pato",n:"Mallard",item:"Mallard eggs",t:420,cost:220,s:45,xp:3,lv:3,zone:"pond"},
+ {id:"pusa",n:"Cat",item:"Cat Fur",t:300,cost:180,s:4,xp:4,lv:3,zone:"farm"},
+ {id:"aso",n:"Dog",item:"Dog Fur",t:300,cost:200,s:5,xp:4,lv:3,zone:"farm"},
+ {id:"baka",n:"Cow",item:"Milk",t:540,cost:700,s:150,xp:9,lv:6},
+ {id:"kabayo",n:"Horse",item:"Horsehair",t:480,cost:900,s:30,xp:11,lv:7},
+ {id:"kalabaw",n:"Carabao",item:"Carabao milk",t:600,cost:1100,s:260,xp:14,lv:7}
 ];
 const ZLIM={pen:12,pond:8,farm:4};const zoneOf=id=>(ANIMALS.find(a=>a.id===id)||{}).zone||"pen";
 const RIPE=600,WILT=60,GQ=20,WQ=10;
@@ -561,8 +561,9 @@ function plotDecor(b){
 const RIVER=[[12,-16.9],[12.3,-13],[11.4,-9],[11.2,-5],[11.6,-1],[11.1,3],[10.2,5.6],[9.4,6.5]];
 const _sm=t=>{t=Math.max(0,Math.min(1,t));return t*t*(3-2*t)};const _c2=new THREE.Color();
 function segDist(px,pz,ax,az,bx,bz){const dx=bx-ax,dz=bz-az,l=dx*dx+dz*dz;let t=l?((px-ax)*dx+(pz-az)*dz)/l:0;t=Math.max(0,Math.min(1,t));return Math.hypot(px-ax-t*dx,pz-az-t*dz)}
+var PONDS={s:1,x:9,z:8};
 function farmH(x,z){let h=0;
-  const pd=Math.hypot((x-9)/2.6,(z-8)/2.0);if(pd<1.05)h=Math.min(h,-.72*(1-_sm((pd-.35)/.7)));
+  const pd=Math.hypot((x-PONDS.x)/(2.6*PONDS.s),(z-PONDS.z)/(2.0*PONDS.s));if(pd<1.05)h=Math.min(h,-.72*(1-_sm((pd-.35)/.7)));
   let rd=1e9;for(let i=0;i<RIVER.length-1;i++)rd=Math.min(rd,segDist(x,z,RIVER[i][0],RIVER[i][1],RIVER[i+1][0],RIVER[i+1][1]));
   if(rd<.9)h=Math.min(h,-.42*(1-_sm((rd-.3)/.6)));
   const qd=Math.hypot((x-12)/1.95,(z+17.5)/1.45);if(qd<1.1)h=Math.min(h,-.65*(1-_sm((qd-.3)/.8)));
@@ -609,15 +610,16 @@ function shelterSpot(o,i){const z=o.g.userData.zone,id=o.id;
 
 /* -------- ground & landscape -------- */
 const world=new THREE.Group();scene.add(world);
+var GROUND_G=null,paintGround=()=>{},landDeco=()=>{},pondDeco=()=>{},LANDM=null,PONDM=null;
 (function landscape(){
   const r=rnd(11);
   const gg=new THREE.PlaneGeometry(150,150,300,300),gc=[],gp=gg.attributes.position,c1=new THREE.Color(0x4ca42b),c2=new THREE.Color(0x6fcc3e),cc=new THREE.Color();
-  for(let i=0;i<gp.count;i++){const x=gp.getX(i),y=gp.getY(i),n=(Math.sin(x*.35)+Math.sin(y*.29+1.7)+Math.sin((x+y)*.17)*1.3+Math.sin(x*1.3+y*.9)*.35)/4+.5;cc.copy(c1).lerp(c2,Math.max(0,Math.min(1,n)));const fh=farmH(x,-y);gp.setZ(i,fh);if(fh<-.02){if(x>17.5)cc.set(fh>-.6?0xe6d29a:0xc9b07a);else cc.set(0xcdb27a).lerp(_c2.set(0x8a7450),Math.min(1,-fh/.7))}else if(x>16.8)cc.lerp(_c2.set(0xf0dca8),_sm((x-16.8)/1.7));gc.push(cc.r,cc.g,cc.b)}
-  gg.setAttribute("color",new THREE.Float32BufferAttribute(gc,3));gg.computeVertexNormals();
+  GROUND_G=gg;paintGround=()=>{const gc=[];for(let i=0;i<gp.count;i++){const x=gp.getX(i),y=gp.getY(i),n=(Math.sin(x*.35)+Math.sin(y*.29+1.7)+Math.sin((x+y)*.17)*1.3+Math.sin(x*1.3+y*.9)*.35)/4+.5;cc.copy(c1).lerp(c2,Math.max(0,Math.min(1,n)));const fh=farmH(x,-y);gp.setZ(i,fh);if(fh<-.02){if(x>17.5)cc.set(fh>-.6?0xe6d29a:0xc9b07a);else cc.set(0xcdb27a).lerp(_c2.set(0x8a7450),Math.min(1,-fh/.7))}else if(x>16.8)cc.lerp(_c2.set(0xf0dca8),_sm((x-16.8)/1.7));gc.push(cc.r,cc.g,cc.b)}
+  gg.setAttribute("color",new THREE.Float32BufferAttribute(gc,3));gp.needsUpdate=true;gg.computeVertexNormals();if(gg.boundingSphere)gg.computeBoundingSphere()};paintGround();
   GROUNDMAT=new THREE.MeshLambertMaterial({vertexColors:true});const ground=new THREE.Mesh(gg,GROUNDMAT);
   ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;world.add(ground);
   const sbed=new THREE.Mesh(new THREE.PlaneGeometry(500,500),new THREE.MeshBasicMaterial({color:0xb79e6c}));sbed.rotation.x=-Math.PI/2;sbed.position.set(324,-3.45,0);world.add(sbed);
-  const b=new Builder();
+  landDeco=()=>{const r=rnd(11);if(LANDM)world.remove(LANDM);const b=new Builder();
   // grass tufts & flowers
   for(let i=0;i<900;i++){
     const a=r()*Math.PI*2,d=Math.sqrt(r())*26,x=Math.cos(a)*d,z=Math.sin(a)*d;
@@ -638,18 +640,21 @@ const world=new THREE.Group();scene.add(world);
   // distant tree clusters
   for(let i=0;i<70;i++){const a=r()*Math.PI*2,d=24+r()*12,x=Math.cos(a)*d,z=Math.sin(a)*d,s=.8+r()*.8;if(x>15||inPlotArea(x,z,2))continue;if(x<-20&&Math.abs(z+8)<7)continue;
     b.add("cyl",0x7a4a24,x,.5*s,z,.12*s,1*s,.12*s);b.add("sph",r()<.5?0x2f8a28:0x3fa033,x,1.6*s,z,.9*s,1.1*s,.9*s,0,r()*3,0)}
-  world.add(b.mesh(false,true,false));
+  LANDM=b.mesh(false,true,false);world.add(LANDM)};landDeco();
   // pond
   const pgeo=new THREE.RingGeometry(.001,1,44,9);pgeo.rotateX(-Math.PI/2);
   const pond=new THREE.Mesh(pgeo,(()=>{const m=new THREE.MeshPhongMaterial({color:0x4fc3e8,flatShading:true,transparent:true,opacity:.8,shininess:110,specular:0xbfefff});WATERMATS.push(m);return m})());
   pond.position.set(9,-.1,8);pond.scale.set(2.5,1,1.92);world.add(pond);POND_MESH=pond;
+  pondDeco=()=>{const r=rnd(29),PX=PONDS.x,PZ=PONDS.z,K=PONDS.s;pond.position.set(PX,-.1,PZ);pond.scale.set(2.5*K,1,1.92*K);if(PONDM)world.remove(PONDM);
   const pb=new Builder();
-  for(let i=0;i<22;i++){const a=i/22*Math.PI*2,x=9+Math.cos(a)*2.55,z=8+Math.sin(a)*1.95;pb.add("ico",[0x7d8589,0x949ca0,0x6f777b][i%3],x+(i%2?.08:-.05),.04,z,.24+(i%4)*.05,.16+(i%3)*.03,.21,0,a*2.3,0)}
-  for(let i=0;i<12;i++){const a=r()*Math.PI*2,rr=r()*.8,x=9+Math.cos(a)*2.4*rr,z=8+Math.sin(a)*1.8*rr;pb.add("ico",0x8a9a8a,x,farmH(x,z)+.05,z,.14,.08,.12,0,a,0)}
-  for(let i=0;i<9;i++){const a=r()*Math.PI*2,x=9+Math.cos(a)*2.2,z=8+Math.sin(a)*1.6;pb.add("cyl",0x4f8f2a,x,.25,z,.025,.85,.025,(r()-.5)*.3,0,(r()-.5)*.3);pb.add("cyl",0x7a4a24,x,.62,z,.045,.16,.045)}
-  [[8.4,7.4],[9.8,8.6],[8.9,9.1],[10.3,7.3]].forEach(([x,z],k)=>{pb.add("cyl",0x4fa834,x,-.085,z,.3,.02,.3);pb.add("cyl",0x7fd05a,x+.04,-.072,z,.2,.01,.2);if(k%2===0){pb.add("sph",0xff8fb8,x+.08,-.03,z+.05,.08,.06,.08);pb.add("sph",0xffd84a,x+.08,0,z+.05,.03,.03,.03)}});
-  world.add(pb.mesh());
+  for(let i=0;i<Math.round(22*K);i++){const a=i/Math.round(22*K)*Math.PI*2,x=PX+Math.cos(a)*2.55*K,z=PZ+Math.sin(a)*1.95*K;pb.add("ico",[0x7d8589,0x949ca0,0x6f777b][i%3],x+(i%2?.08:-.05),.04,z,.24+(i%4)*.05,.16+(i%3)*.03,.21,0,a*2.3,0)}
+  for(let i=0;i<12;i++){const a=r()*Math.PI*2,rr=r()*.8,x=PX+Math.cos(a)*2.4*K*rr,z=PZ+Math.sin(a)*1.8*K*rr;pb.add("ico",0x8a9a8a,x,farmH(x,z)+.05,z,.14,.08,.12,0,a,0)}
+  for(let i=0;i<Math.round(9*K);i++){const a=r()*Math.PI*2,x=PX+Math.cos(a)*2.2*K,z=PZ+Math.sin(a)*1.6*K;pb.add("cyl",0x4f8f2a,x,.25,z,.025,.85,.025,(r()-.5)*.3,0,(r()-.5)*.3);pb.add("cyl",0x7a4a24,x,.62,z,.045,.16,.045)}
+  [[8.4,7.4],[9.8,8.6],[8.9,9.1],[10.3,7.3]].map(([x,z])=>[PX+(x-9)*K,PZ+(z-8)*K]).forEach(([x,z],k)=>{pb.add("cyl",0x4fa834,x,-.085,z,.3,.02,.3);pb.add("cyl",0x7fd05a,x+.04,-.072,z,.2,.01,.2);if(k%2===0){pb.add("sph",0xff8fb8,x+.08,-.03,z+.05,.08,.06,.08);pb.add("sph",0xffd84a,x+.08,0,z+.05,.03,.03,.03)}});
+  PONDM=pb.mesh();world.add(PONDM)};pondDeco();
 })();
+function setPondSize(lv){const k=1+.2*Math.max(0,Math.min(3,lv|0));if(Math.abs(k-PONDS.s)<.001)return;PONDS.s=k;PONDS.x=9+(k-1);PONDS.z=8+(k-1)*1.33;
+  if(typeof POND!=="undefined"){POND.x=PONDS.x;POND.z=PONDS.z;POND.rx=2.47*k;POND.rz=1.9*k}paintGround();landDeco();pondDeco()}
 
 /* -------- mountains, waterfall & river -------- */
 let wfTex,rvTex,foamT=0;const WF={x:12,z:-18.4,top:6.2,w:1.6};
@@ -1126,10 +1131,20 @@ function zonePos(zone,r,id){
   if(zone==="farm"){if(id==="aso"&&farmer&&r()<.55){const p=farmer.g.position;return[p.x+(r()-.5)*1.6,p.z+(r()-.5)*1.6]}return[-5.5+r()*12,-5.5+r()*12.5]}
   return randPen(r,id)}
 function randPen(r,id){const P=PENS[id]||PENS.kambing,lx=P.x0+(id==="manok"?1.7:2.1);return[lx+.3+r()*(P.x1-lx-.9),P.z0+.6+r()*(P.z1-P.z0-1.2)]}
+/* every animal gets its own coat colour and a slightly different size */
+const COATS={baka:[0xffffff,0x6b4422,0xd8a868,0x3a3330,0xb5652f,0xf2e2c0],kambing:[0xefe7da,0x5a3a22,0x3a3330,0xc98a4b,0x9a9a9a,0xf2d0a0],kalabaw:[null,0x5a5550,0x3a3330,0x6b5a4a,0x7a7068,0x4a4038],
+  kabayo:[null,0x3a2615,0xf2f2ee,0xd8a24a,0x7a7068,0xb5652f],manok:[null,0xb5652f,0x3a3330,0xd8a24a,0xf2f2ee,0x9a6a3a],bibe:[null,0xf2e8d0,0xd8b880,0x9a8a7a,0xffffff,0xc9b48a],
+  pato:[null,0x6b4a2c,0x3a5a3a,0x8a7a6a,0x5a4a3a,0x2f5a7a],aso:[null,0x3a2615,0xf2f2ee,0xd8a24a,0x6b6b6b,0x8a5a2a],pusa:[null,0x3a3330,0xf2f2ee,0xe08a3a,0x9a9a9a,0xc9a46a]};
+const _ca2=new THREE.Color();
+function paintAnimal(g,id,v){const pal=COATS[id];v=v|0;const cnt=new Map();g.traverse(m=>{if(m.isMesh&&m.material&&m.material.isMeshToonMaterial&&m.material!==OUTU){const h=m.material.color.getHex();cnt.set(h,(cnt.get(h)||0)+1)}});
+  const order=[...cnt.entries()].sort((a,b)=>b[1]-a[1]).map(e=>e[0]);const coat=order[0],pat=order[1];
+  const nc=pal&&pal[v%pal.length]!=null?pal[v%pal.length]:coat;if(nc!==coat||v){const lum=_ca2.setHex(nc).getHSL({}).l,np=v%3===1&&pat!=null?_ca2.setHex(nc).offsetHSL(0,0,lum>.5?-.35:.3).getHex():pat;
+    g.traverse(m=>{if(!m.isMesh||!m.material||m.material===OUTU||!m.material.isMeshToonMaterial)return;const h=m.material.color.getHex();if(h===coat)m.material=am(nc);else if(h===pat&&np!=null)m.material=am(np)})}
+  const sc=.92+((v*37)%17)/100;g.scale.setScalar(sc)}
 function syncAnimals(){
   while(animalObjs.length>S.pens.length){animalGroup.remove(animalObjs.pop().g)}
   for(let i=animalObjs.length;i<S.pens.length;i++){
-    const p=S.pens[i],g=makeAnimal(p.id),r=rnd(i*97+11),[x,z]=zonePos(g.userData.zone,r,p.id);
+    const p=S.pens[i],g=makeAnimal(p.id),r=rnd(i*97+11),[x,z]=zonePos(g.userData.zone,r,p.id);if(p.v==null)p.v=Math.floor(Math.random()*6);paintAnimal(g,p.id,p.v);
     g.position.set(x,0,z);g.rotation.y=r()*6;animalGroup.add(g);
     const sk=new THREE.Sprite(new THREE.SpriteMaterial({map:sickTex(),depthTest:false}));sk.scale.set(.55,.55,1);sk.renderOrder=12;sk.visible=false;sk.position.y=g.userData.h+.15;g.add(sk);
     animalObjs.push({g,id:p.id,tx:x,tz:z,wait:r()*3,r,phase:r()*6,sickB:sk});
@@ -1159,7 +1174,8 @@ function stepAnimals(dt,t){
     if(bad&&!o.shelter){o.shelter=true;o.sheltered=false;const sp=shelterSpot(o,i);o.hide=sp[2];o.state="walk";o.tx=sp[0];o.tz=sp[1];U.moo.visible=false}
     if(!bad&&o.shelter){o.shelter=false;o.sheltered=false;g.visible=true;o.state="idle";o.st=.3+Math.random()}
     if(roll&&!p.sick){const ch=(U.pet?.4:1)*(bad?(o.sheltered?.025:.14):.012);if(Math.random()<ch){p.sick=true;p.sickAt=now();toast("Got sick: "+a.n+"! Treat it within 5 minutes or it will die.",4200);save()}}
-    if(p.sick&&now()-(p.sickAt||now())>SICK_DIE)dead.push(i);
+    if(p.sick&&p.heal&&now()>=p.heal&&!VISIT){p.sick=false;delete p.sickAt;delete p.heal;burst(g.position.x,.8,g.position.z,0x7fe08a,16);toast(a.n+" is healthy again!",2600);save()}
+    if(p.sick&&!p.heal&&now()-(p.sickAt||now())>SICK_DIE)dead.push(i);
     o.sick=!!p.sick;if(p.sick)p.at+=dt;
     if(o.sickB){o.sickB.visible=o.sick&&g.visible;if(o.sick)o.sickB.position.y=U.h+.15+Math.sin(t*4+i)*.06}
     const ready=!p.sick&&!isBaby(p)&&now()-p.at>=a.t;
@@ -1281,11 +1297,18 @@ function makeFarmer(op={}){
   const arm=(z)=>{const p=new THREE.Group();p.position.set(0,.4,z);torso.add(p);part(p,gBox,SH,0,-.1,0,.11,.2,.11);part(p,gBox,SK,0,-.27,0,.09,.16,.09);part(p,gSph,SK,0,-.38,0,.055,.055,.055);return p};
   const armL=arm(.21),armR=arm(-.21);
   const axe=new THREE.Group();armR.add(axe);part(axe,gBox,0x8a5a2a,.02,-.56,0,.045,.44,.045);part(axe,gBox,0x9aa3ab,-.06,-.74,0,.15,.11,.035);part(axe,gBox,0xe6eaee,-.135,-.74,0,.02,.13,.04);axe.visible=false;
+  const rod=new THREE.Group();armR.add(rod);part(rod,gCyl,0x5a3a22,0,-.5,0,.03,.3,.03);part(rod,gCyl,0x2b3640,0,-1.25,0,.012,1.3,.012);part(rod,gCyl,0x9aa3ab,.05,-.48,0,.045,.04,.045,0,0,Math.PI/2);const rodTip=new THREE.Object3D();rodTip.position.set(0,-1.9,0);rod.add(rodTip);rod.visible=false;
+  const hoe=new THREE.Group();armR.add(hoe);part(hoe,gBox,0x8a5a2a,.02,-.6,0,.04,.62,.04);part(hoe,gBox,0x7d8589,.1,-.9,0,.2,.04,.16);hoe.visible=false;
+  const pouch=new THREE.Group();armR.add(pouch);part(pouch,gSph,0xc9a46a,0,-.48,0,.09,.11,.09);part(pouch,gSph,0x7ccf4a,0,-.38,0,.04,.03,.04);pouch.visible=false;
+  const brush=new THREE.Group();armR.add(brush);part(brush,gBox,0x8a5a2a,0,-.47,0,.05,.12,.05);part(brush,gBox,0xe8c66a,.04,-.55,0,.1,.05,.08);brush.visible=false;
+  const basket=new THREE.Group();armL.add(basket);part(basket,gCyl,0xb07a3e,0,-.46,0,.12,.13,.12);part(basket,gCyl,0x8a5a2a,0,-.4,0,.13,.02,.13);basket.visible=false;
+  const TOOLS3={axe,rod,hoe,pouch,brush,basket};
   // basket
   const bk=new THREE.Group();bk.position.set(-.1,0,.45);
   g.traverse(o=>{if(o.isMesh&&o.material!==OUTU)o.castShadow=true});
-  return{g,hips,legL,legR,torso,head,armL,armR,axe};
+  return{g,hips,legL,legR,torso,head,armL,armR,axe,rod,rodTip,TOOLS3};
 }
+function showTool3D(f,name){if(!f.TOOLS3)return;for(const k in f.TOOLS3)f.TOOLS3[k].visible=k===name}
 function initFarmer(){
   const f=makeFarmer();f.g.position.set(.5,0,-3.8);scene.add(f.g);
   farmer={...f,o:{state:"idle",st:1.5,cr:0,target:null,tx:.5,tz:-3.8,carry:null}};
@@ -1333,6 +1356,7 @@ function stepFarmer(dt,t){
   f.armR.rotation.x=o.state==="wipe"?-.5:0;
   f.head.rotation.y=o.state==="idle"?Math.sin(t*1.3)*.4:0;
   f.torso.position.y=Math.sin(t*2)*.004;
+  showTool3D(f,null);
 }
 
 
@@ -1439,16 +1463,15 @@ function glowTex(stops){const k=document.createElement("canvas");k.width=k.heigh
 const WINMAT=new THREE.MeshBasicMaterial({color:0x2a4a66}),LAMPMAT=new THREE.MeshBasicMaterial({color:0xd9dde0}),SCREENMAT=new THREE.MeshBasicMaterial({color:0x39d4b0}),REDMAT=new THREE.MeshBasicMaterial({color:0xff3b30});
 function islandR(a){return 17+2.5*Math.sin(3*a)+1.6*Math.sin(5*a+1)+1*Math.sin(8*a+2)}
 const HILL={x:-11,z:-9};
-function H(x,z){
-  const a=Math.atan2(z,x),R=islandR(a),d=Math.hypot(x,z)/R;
-  let h;
-  if(d<.82)h=1.2+.06*Math.sin(x*1.3)*Math.sin(z*1.1);
-  else if(d<1)h=1.2-1.12*sm((d-.82)/.18);
-  else h=.08-3.3*sm((d-1)/.38);
-  const hd=(x-HILL.x)**2+(z-HILL.z)**2;
-  h+=5.2*Math.exp(-hd/20)*(1-sm((d-.92)/.3));
-  return h;
-}
+const TRIL={"nx":41,"nz":29,"x0":-20,"z0":-14,"st":1.0,"land":"AAAAAAAAAAAAAAAAAAABBAsSGh0aFBIWHSEiHBQJAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgkWJTRAREA3NTlESEpCNB8NAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAILIUBfeIqQin16gZCXmo13VTIZCQMAAAAAAAAAAAAAAAIHDhEOBwICCyROfqbAzdHNxcPH0dbYz7uabkYiDQIAAAAAAAAAAAACCx40PjkrICAxVom63O309vTw7/H2+Pn16tazhk4hBwAAAAAAAAAAAgskTHWIgWtbW2+VweT3/f/////////////79eK5ejgPAAAAAAAAAAAHHkyFtcrHuK6uutDn9/3/////////////////+dmcTRkBAAAAAAAAARE5erjj8vHq5OTq8vn9///////////////////94qtZHwIAAAAAAAAFIVmi2vf9///////////////////////////////ouG0yDwcDAQAAAQ01d77s/f///////////////////////////////+7Ii1k1IxIHAQADFkaOz/T/////////////////////////////////9uG8mXdaNxoHAQQbT5rX9//////////////////////////////////78+PSvJxrNxIEAxtQntr5///////////////////////////////////9+vXrz5xaIwsBG1Gi3fv///////////////////////////////////////zouHAvDwQhXK3j/f///////////////////////////////////////+7BdzMRDi9xvOz////////////////////////////////////////85rRpKwwcQo3P9f///////////////////////////////////Pn08ObJk08dBilSot37///////////////////////////////////47drKtZNiLw4BMlyu5P////////////////////////////////////LZsI1tTy8TBQAzW6rh/P//////////////////////////////////7caIVTAdDgUBACdNmNb3//////////////////////////////////zksmgvDQQBAAAAGDuAxvD///////////////////z37+fj4+Tl5OPi3sSQTBsDAAAAAAALK2u46v////////////////357tvFtKysrrCurKmji2AvDgEAAAAAAAYjX6/k/f///Pj09Pj8//v16tvDon5kWFhbXltYVVBDLBMFAAAAAAAAAxtOmc/t8fPu4tPQ2eTq4tK6oIBcOyYeHiAiIB4cGhQMBQEAAAAAAAABETdyosDHy8Owl5CdsLitk3FTOSMQBQEBAgMCAQAAAAAAAAAAAAAAAAAHGz5geIGHgG5SSVFja2FLMR0PBwIAAAAAAAAAAAAAAAAAAAAAAAAAAAIJGCc0OT05Lx4YHCYrJRkLAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEGDBIWGRcSCQQECQsJBAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==","h":"AAAAAAAAAAAAAAAAAAADDRcdISQnKCUfGhcWEwwCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAkUHSMmKiwtKiQfGxkWDwcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHEx0lKy8yNDQyLSgkIBsVDggCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQ0YIyoxNjk7Ozk1MSwmIRsWEAoEAAAAAAAAAAAAAAAAAAAAAQEAAAAEDhgiKzM6PkBAPzw5NC4oIhwWEQsDAAAAAAAAAAAAAAAAAAACAgIBAgUMFSArNT5ERkdGREE9ODEqIxwXEQkAAAAAAAAAAAAAAAAAAAEBAgMEBgsTHio3QUhMTU1MSkdDPTYtJR4YEAUAAAAAAAAAAAAAAAAAAAEDBAUIDBQfLDlES1BRUlJRT0xIQTguJR4VCQAAAAAAAAAAAAAAAAAAAQQGCQwRGSQxPUdOUlRVVVVUUk9JQDUsIhgLAAAAAAAAAAAAAAAAAAACBQkNEhcfKjZBSU5SVFVVVVVUUkxEOi8kGQ4EAAAAAAAAAAAAAAAAAQQHDRMZHycxPEVLTlFSU1NUVFRRTEQ6MCUaDwcBAAAAAAAAAAAAAAEDBgsSGSAnLjdAR0xOT1BQUVFRUE5KQzswJRoRCgUAAAAAAAAAAAAAAwYKEBcgJy41PERJTE1NTU5OT05MSkdCOzEmGxILBgIAAAAAAAAAAAEFCQ4VHSUtMzpARUpLS0pKSktMS0lGREI8MyccEwwHAwAAAAAAAAAAAwcNExoiKjA2O0FFSElIR0ZGR0hHRUNCQT00KBwTDAcEAAAAAAAAAAMHCxEYHyYsMTY7P0NFRURCQUJDRERDQUA/PDMnGxELBgMAAAAAAAEECAwRFh0jKC0xNDg7PkBAPz09PT4/Pz89PTw5MSYaEAkFAwAAAAAAAwcMERccISUpLC4xMzY4OTk4Nzc4ODk5ODc3NjQuJBgOBwMAAAAAAAIFCQ8VGyEkJygpKistLzEyMjIxMDExMTAvLi4uLSghFgwEAAAAAAABAwYLERgfIyYnJiUkJCUnKiwsKykoKCgoJyUkJCQjIRwUCgEAAAAAAAEDBw0TGSAkJiUjIB0bHB4iJSYkISAgICAfHhwcGxsaFxIJAAAAAAAAAQQJDhMaHyMjIh8aFRISFBkdHx0aGBgZGhoZGBcWFRUUDwgAAAAAAAAABAkOExgdIB8dGRQOCggKDxUXFxQSEhQWFxcWFRMTExENBAAAAAAAAAADCQ4SFhobGhcTDQYCAAEGDBARDw0MDRATFRMRDw4ODAcAAAAAAAAAAAMJDhEUFhYVEgwGAAAAAAADCQwLCAQECAsODAoHBwYEAAAAAAAAAAAAAgkNEBITExAMBQAAAAAAAAAABQUBAAAAAAMBAAAAAAAAAAAAAAAAAAABBwwODw8ODAYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAECg0MCwkHAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIJDAoIBgUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==","props":[[7,-1.65,-21.12,1.8,0.0],[7,-1.65,-26.45,2.89,0.0],[7,-1.65,-29.06,3.83,0.0],[1,0.45,-25.83,2.39,0.0],[7,-1.65,-23.79,2.1,0.0],[14,-0.57,-26.09,2.54,0.0],[7,-1.65,-22.37,1.26,0.0],[7,-1.65,-18.41,1.8,0.0],[7,-1.65,-15.69,1.8,0.0],[7,-1.65,-12.98,1.8,0.0],[7,-1.65,-10.26,1.8,0.0],[7,-1.65,-7.55,1.8,0.0],[7,-1.65,-4.84,1.8,0.0],[7,-1.65,-2.12,1.8,0.0],[7,-1.65,0.59,1.8,0.0],[7,-1.65,3.31,1.8,0.0],[7,-1.65,6.02,1.8,0.0],[7,-1.65,8.74,1.8,0.0],[7,-1.65,11.45,1.8,0.0],[7,-1.65,14.16,1.8,0.0],[7,-1.65,16.88,1.8,0.0],[7,-1.65,19.59,1.8,0.0],[7,-1.65,22.31,1.8,0.0],[7,-1.65,25.0,1.61,0.0],[7,-1.31,-22.37,1.26,0.0],[7,-1.99,-22.37,1.26,0.0],[7,-1.31,23.62,1.24,0.0],[7,-1.98,23.62,1.24,0.0],[7,-1.98,20.93,1.24,0.0],[7,-1.32,20.93,1.24,0.0],[13,-1.82,26.57,1.43,0.0],[13,-1.52,26.57,1.43,0.0],[1,-2.71,26.73,1.39,4.7],[1,-3.35,26.65,1.32,4.7],[3,-3.61,25.81,1.29,1.36],[3,-2.73,25.61,1.28,1.35],[1,-3.96,26.62,1.35,4.71],[1,0.67,26.78,1.36,4.69],[1,0.02,26.75,1.34,3.1],[1,-0.73,26.74,1.36,4.24],[3,-3.05,25.88,1.28,5.19],[3,0.57,26.09,1.28,5.16],[3,-0.62,26.23,1.32,0.24],[3,0.1,25.88,1.26,1.42],[1,-2.29,28.13,1.35,3.73],[1,-1.55,28.09,1.35,6.12],[1,-0.8,28.16,1.35,5.15],[1,0.05,28.25,1.35,3.85],[1,-3.19,28.02,1.35,0.3],[3,-2.57,-30.35,4.3,0.0],[3,-3.18,-30.98,4.4,5.12],[3,-0.72,-30.62,4.15,4.59],[3,-0.21,-31.09,4.02,3.59],[5,-1.67,-33.2,4.15,0.0],[1,-0.98,-30.88,4.23,0.0],[1,-0.96,-31.31,4.02,5.0],[1,-2.36,-30.8,4.42,5.0],[1,-2.4,-31.31,4.13,4.0],[1,-0.99,-30.33,4.14,0.0],[1,-2.31,-30.34,4.32,4.05],[13,-1.51,-31.25,4.31,3.14],[13,-1.8,-31.25,4.31,3.14],[2,-1.65,-30.68,3.79,0.0],[13,-1.51,-31.62,4.11,3.14],[13,-1.8,-31.62,4.11,3.14],[1,10.35,1.63,1.68,0.0],[1,-12.81,1.55,1.61,6.28],[1,-11.12,8.4,2.14,0.0],[1,-18.28,27.64,1.35,0.0],[14,-13.25,-3.39,1.32,0.0],[14,-5.66,-3.52,0.74,0.0],[14,0.7,-3.55,1.94,0.0],[1,-0.04,-1.7,2.85,0.0],[14,-1.92,-5.02,3.07,5.23],[14,-8.46,0.39,2.06,0.52],[14,-8.47,5.86,2.03,0.52],[14,0.92,1.21,2.07,5.24],[14,-5.54,3.74,2.07,0.52],[1,-2.76,4.21,2.19,6.28],[1,-1.33,6.0,1.07,0.0],[1,-4.25,4.21,2.19,6.28],[1,1.85,-0.79,3.0,3.14],[1,3.35,-0.79,3.0,3.14],[1,4.84,-0.79,3.0,3.14],[14,-2.84,1.95,2.1,0.0],[1,8.76,1.52,2.28,3.14],[14,-12.96,7.91,2.0,0.0],[14,-4.95,7.58,1.36,0.0],[1,4.86,-1.53,3.0,4.71],[1,0.36,2.2,3.0,0.0],[1,-1.14,2.2,3.01,6.28],[1,-2.64,2.2,2.92,6.28],[1,-4.13,2.2,2.74,6.28],[1,-5.62,2.2,2.55,6.28],[1,-7.11,2.2,2.36,0.0],[1,-8.61,2.2,2.18,6.28],[1,-9.65,4.41,2.17,0.0],[1,-11.14,4.41,2.17,0.0],[1,-11.85,3.54,2.12,4.71],[14,-11.05,4.11,2.06,0.0],[14,-14.16,4.11,2.0,0.0],[14,-9.36,-1.32,1.57,6.26],[1,-9.77,-0.7,1.59,0.0],[1,-8.16,4.41,2.19,0.0],[1,-6.67,4.41,2.2,0.0],[1,-14.29,1.55,1.31,0.0],[14,-9.51,-0.83,1.47,1.27],[14,-8.52,4.52,2.07,4.7],[4,-11.63,1.16,1.61,1.57],[4,-5.38,2.27,2.11,0.0],[2,-12.26,0.89,0.93,0.0],[2,-12.74,2.74,1.2,0.01],[2,-13.25,2.74,1.2,0.0],[14,-0.17,4.18,2.08,0.0],[14,1.45,-0.76,2.89,0.0],[4,-8.76,2.3,2.08,0.0],[14,-6.24,4.51,2.06,4.71],[14,-2.56,4.5,2.06,0.0],[14,-4.19,4.65,2.06,4.71],[14,-0.32,1.15,2.9,1.58],[4,4.07,1.2,2.89,4.7],[4,3.57,-1.11,2.89,0.0],[4,4.08,2.4,2.89,4.7],[1,1.39,-4.66,2.95,4.74],[1,0.95,-5.48,2.95,0.0],[1,-3.77,-1.95,3.03,5.56],[1,-3.54,-4.38,2.91,4.16],[14,10.59,-1.7,2.79,2.37],[14,5.62,-1.23,2.91,0.0],[1,6.33,-0.79,3.0,3.14],[1,7.07,1.12,3.0,1.57],[1,7.07,-0.37,3.0,1.57],[1,6.3,-1.54,3.01,1.57],[1,-3.03,-1.51,2.85,0.0],[14,-11.81,7.31,2.02,3.14],[14,-7.26,2.54,2.09,0.0],[1,4.51,-2.65,3.01,1.57],[14,7.68,0.53,2.91,3.14],[1,4.62,-4.14,3.01,1.57],[1,4.57,-5.67,2.95,3.32],[1,3.7,-2.32,2.85,0.0],[1,1.45,-2.04,2.85,0.0],[1,6.22,-5.63,3.0,1.57],[4,8.07,-5.68,2.9,4.7],[1,8.26,-4.88,3.01,0.0],[1,6.77,-4.88,3.0,0.0],[1,5.27,-4.88,3.0,0.0],[1,3.78,-4.88,2.99,0.0],[1,2.29,-4.88,2.99,0.0],[1,0.8,-4.88,3.0,6.28],[1,3.77,-4.87,2.97,1.59],[1,3.73,-2.32,2.95,1.56],[1,1.22,-1.96,3.09,1.23],[1,-0.33,-1.63,3.09,1.59],[1,-0.16,-3.55,1.07,0.0],[14,-6.24,2.19,2.26,0.0],[14,-6.24,2.19,2.16,0.0],[1,-0.7,-4.88,3.0,0.0],[1,-1.54,-1.51,2.85,0.0],[14,8.13,-7.68,2.91,0.0],[14,5.67,-7.74,2.9,4.71],[14,3.69,-6.03,2.88,0.0],[14,-5.19,-0.87,2.5,1.55],[14,1.48,1.26,2.89,1.58],[14,-6.17,-0.83,2.36,0.0],[4,-4.22,2.74,2.11,0.0],[4,-8.77,-0.92,2.15,0.0],[4,-10.49,2.46,2.09,5.91],[4,1.62,2.46,2.91,0.0],[14,-6.12,1.58,2.32,0.0],[14,-6.36,-0.55,2.33,0.0],[14,-8.54,0.57,2.07,0.0],[14,-8.24,-0.58,2.26,0.0],[14,-7.61,-0.34,2.14,0.0],[14,-8.03,0.45,2.0,0.0],[14,-4.68,1.22,2.57,0.0],[14,-4.29,2.0,2.58,0.0],[14,-4.87,0.98,2.53,0.0],[4,-3.68,0.6,2.65,0.0],[14,0.89,0.62,2.86,0.0],[14,1.99,0.84,2.79,0.0],[1,-9.43,2.88,2.07,0.0],[1,-9.52,2.19,2.07,0.0],[3,-4.65,-0.36,2.53,0.0],[3,-3.98,0.53,2.64,0.0],[4,-3.39,-0.31,2.71,0.0],[14,-3.37,-0.25,2.72,0.0],[4,2.38,-7.86,2.89,1.57],[4,-0.8,-8.83,3.49,0.0],[14,-1.05,-7.79,2.91,1.57],[1,-2.19,-4.88,3.0,0.0],[4,5.55,-5.43,2.89,4.71],[14,9.3,-0.71,2.9,0.0],[14,1.61,-5.64,2.9,6.27],[14,7.87,-2.05,2.89,1.58],[4,-0.69,4.51,2.07,0.0],[1,-2.95,-4.13,2.89,1.57],[1,-1.79,-1.57,3.09,1.59],[1,-3.13,-1.47,3.02,1.19],[1,-3.62,-7.54,1.03,3.79],[1,-2.37,-0.84,2.47,2.12],[1,-3.06,-1.21,2.58,2.04],[1,-4.52,-3.12,2.28,0.08],[1,-4.29,-1.9,2.02,3.53],[1,-3.82,-1.77,2.02,2.23],[1,-4.76,-1.58,2.17,0.0],[1,-3.9,-4.7,2.37,0.96],[1,-3.07,-4.76,2.02,4.61],[1,-4.49,-4.75,1.54,0.0],[1,5.63,4.42,1.84,1.04],[1,-4.42,-3.88,2.34,0.09],[1,-4.58,-3.84,1.94,0.16],[14,-9.31,-0.65,1.94,0.0],[14,-4.56,-2.6,2.22,2.0],[14,-4.53,-2.95,1.81,3.87],[14,-4.48,-3.27,2.18,5.08],[1,-5.27,-3.16,1.58,3.17],[14,-10.76,-1.94,0.9,5.27],[1,-5.76,-2.06,2.05,1.87],[1,-7.48,-1.96,2.01,1.85],[1,-8.89,-2.04,1.9,1.97],[1,-9.67,-4.57,1.78,4.57],[1,-10.02,-2.12,1.82,2.35],[1,-9.05,-5.97,1.6,4.58],[1,-10.23,-5.67,1.54,4.6],[1,-11.7,-5.32,1.23,0.02],[1,-11.39,-6.04,1.44,1.99],[1,-12.92,-6.53,1.36,1.78],[1,-14.04,-6.1,1.37,0.77],[1,-14.9,-4.76,1.2,0.47],[1,-13.66,-5.23,1.11,1.34],[1,-11.64,-4.64,1.41,1.76],[1,-13.1,-4.99,1.3,4.42],[1,-11.65,-4.18,0.67,5.07],[4,-11.81,2.21,2.07,1.15],[14,-10.62,-2.91,0.94,2.82],[14,-15.23,1.03,1.18,2.16],[14,-10.97,-2.45,1.14,1.65],[14,-10.76,-4.06,1.2,0.55],[14,-10.57,-3.52,0.9,2.67],[1,-14.35,-4.2,1.1,0.69],[1,-7.59,-5.99,1.74,4.83],[1,-8.64,-3.9,1.69,5.87],[1,-5.7,-6.25,1.74,4.52],[1,-3.88,-6.17,1.79,5.36],[1,-3.48,-6.03,2.5,0.0],[1,-2.94,-5.94,3.01,0.0],[1,-3.5,-7.5,2.39,0.0],[1,-2.94,-7.13,3.01,0.0],[1,-2.99,-8.06,3.01,3.17],[1,-2.07,-8.73,3.02,4.85],[1,-1.26,-9.0,3.09,4.85],[1,-5.61,-7.24,1.06,1.21],[1,-4.56,-7.22,0.39,3.1],[1,-4.21,-6.95,0.92,3.1],[1,-2.03,-8.51,2.5,3.07],[1,-1.27,-8.94,2.34,0.08],[1,-2.06,-8.61,2.14,3.34],[14,-2.95,-8.97,2.99,3.11],[1,-3.08,-9.74,2.32,1.79],[1,-3.26,-8.61,2.16,1.4],[1,-3.28,-8.04,1.77,1.47],[1,-2.85,-10.01,1.3,2.49],[1,-3.77,-8.77,1.5,1.46],[1,-3.65,-8.18,1.22,1.22],[1,-4.2,-7.61,0.51,0.0],[1,-4.46,-8.6,1.25,0.0],[1,-3.69,-9.39,1.68,1.09],[1,-6.07,-6.97,0.96,0.0],[1,-4.22,-8.04,0.51,0.0],[4,-4.07,-6.87,1.64,0.0],[1,-0.17,-10.04,1.1,3.03],[1,-0.23,-9.91,2.05,0.0],[1,-0.31,-9.1,2.34,0.0],[1,-0.32,-10.13,1.08,0.19],[1,0.85,-9.81,1.4,2.7],[1,1.14,-8.84,3.0,0.0],[1,0.47,-9.67,2.54,0.0],[1,0.53,-9.14,2.4,5.85],[1,2.02,-9.47,2.21,2.45],[1,2.45,-8.76,3.06,4.58],[1,3.77,-8.88,2.3,1.36],[1,4.4,-8.88,2.3,1.59],[1,5.0,-8.91,2.11,1.6],[1,5.69,-8.89,1.98,1.61],[1,6.42,-8.89,1.98,1.62],[1,3.37,-9.44,2.26,1.33],[1,6.23,-9.7,1.96,0.29],[1,8.43,-9.3,1.24,1.72],[1,5.37,-8.83,1.92,1.76],[1,4.87,-9.01,2.16,1.36],[1,1.52,-9.54,0.91,3.21],[4,3.68,-8.96,3.66,0.0],[4,1.24,-9.34,3.09,0.0],[2,-12.26,1.59,0.93,0.0],[1,-7.45,-7.04,0.79,0.76],[1,-9.19,-6.75,0.67,0.58],[1,-10.91,-6.76,0.79,1.84],[1,-12.53,-7.22,0.46,2.42],[2,-12.73,1.89,0.89,0.0],[2,-13.25,1.89,0.89,0.0],[1,-14.08,-6.76,0.82,0.71],[1,2.21,-9.16,1.03,3.11],[1,2.39,-9.33,0.7,2.75],[1,-14.97,-5.77,0.79,0.76],[1,-15.36,-4.81,0.66,0.79],[1,7.89,-9.12,2.48,1.84],[1,7.08,-8.9,1.99,1.63],[1,6.74,-9.02,2.01,2.44],[1,6.55,-9.37,1.73,1.96],[1,6.06,-9.55,1.46,1.79],[1,-0.13,2.45,1.54,6.24],[14,-12.77,-1.36,1.49,0.0],[1,-6.39,10.13,-0.5,6.11],[1,7.62,-9.72,1.1,0.0],[1,6.99,-9.88,1.1,4.58],[1,7.24,-10.35,0.86,2.0],[1,9.39,-8.09,2.43,3.21],[1,9.11,-8.98,2.12,0.48],[1,9.78,-7.16,2.49,2.71],[1,10.4,-5.8,2.67,3.5],[1,10.05,-4.29,1.9,6.01],[1,9.94,-5.5,3.24,6.04],[1,9.4,-6.86,3.17,2.4],[1,9.05,-4.12,2.02,5.28],[1,9.15,-4.66,3.24,1.39],[1,8.14,-4.13,3.21,3.38],[1,2.21,1.3,2.52,0.07],[1,0.3,1.1,1.55,4.49],[1,0.33,0.0,1.55,4.56],[1,1.04,2.66,0.75,6.22],[1,-2.01,5.24,2.17,1.57],[7,2.55,5.61,2.3,1.57],[7,5.25,5.61,2.46,1.57],[1,9.19,-2.69,2.36,1.91],[1,15.09,-2.47,0.62,2.4],[1,12.57,1.49,0.89,0.67],[1,10.83,4.91,1.96,2.76],[1,10.89,3.48,2.12,2.86],[1,10.72,1.24,3.16,0.16],[1,10.67,-0.51,3.14,6.28],[1,10.81,-0.37,2.61,0.0],[1,10.61,-1.44,2.61,6.28],[1,10.78,1.19,2.61,0.0],[1,10.81,-1.8,1.67,0.0],[1,10.14,-2.62,2.36,2.32],[1,11.29,-2.07,1.78,5.11],[1,11.44,-2.41,1.98,4.55],[1,10.24,1.29,2.19,0.22],[1,11.18,-2.33,1.38,3.12],[1,11.16,2.29,2.25,3.69],[7,8.48,2.27,2.79,1.57],[7,10.13,3.97,2.69,0.0],[1,10.15,6.24,1.17,6.22],[14,-6.7,3.07,2.1,0.0],[4,7.72,-9.55,2.46,0.0],[1,10.86,6.21,1.4,5.41],[1,10.54,5.94,1.14,3.11],[1,10.47,5.95,1.14,4.91],[1,8.79,6.06,1.07,3.07],[1,8.61,6.56,0.57,3.09],[1,8.13,5.74,1.27,6.06],[14,8.06,5.16,1.48,6.28],[14,6.34,5.16,1.48,6.27],[14,7.21,5.16,1.48,0.0],[1,8.94,6.09,0.63,0.71],[1,5.55,6.29,1.11,0.0],[1,6.29,6.02,1.07,3.2],[1,8.86,1.63,1.68,0.0],[1,7.37,1.63,1.68,0.0],[1,5.88,1.63,1.68,0.0],[14,8.45,4.49,2.18,0.0],[1,5.65,6.06,1.3,0.0],[1,5.6,6.93,0.9,5.88],[7,9.21,5.61,2.47,4.71],[1,4.77,6.25,1.18,6.14],[7,3.05,4.84,1.7,1.57],[7,4.57,4.77,1.36,0.0],[7,2.88,5.62,1.3,1.57],[7,2.88,4.06,1.3,1.57],[1,5.14,0.88,1.68,4.71],[1,5.14,-0.61,1.68,4.71],[1,5.14,-2.1,1.68,4.71],[1,11.84,1.63,1.68,0.0],[1,13.34,1.63,1.61,6.28],[1,14.83,1.63,1.45,6.28],[1,15.61,-1.12,1.55,0.0],[1,15.6,0.68,1.55,0.27],[1,11.88,2.28,0.51,0.0],[1,11.85,1.4,1.91,4.61],[1,13.59,1.57,1.77,1.41],[1,13.28,2.24,0.51,6.11],[1,14.3,2.25,0.14,0.0],[1,15.03,1.52,1.53,1.41],[1,15.5,1.93,1.07,4.47],[1,16.33,0.43,0.9,3.46],[1,16.37,-1.04,0.8,3.16],[1,13.35,-2.56,0.93,2.03],[1,13.09,-2.08,1.86,4.61],[1,14.66,-2.03,1.58,4.61],[1,11.06,-2.08,1.58,3.37],[1,3.48,6.46,1.19,6.18],[1,2.39,6.5,1.16,6.1],[1,1.17,6.66,0.94,5.9],[1,0.83,6.18,2.32,1.35],[1,0.34,6.35,1.33,6.13],[1,-1.14,6.68,1.22,2.93],[1,-1.81,6.34,3.27,3.14],[1,-2.46,6.28,2.35,0.0],[1,-2.43,6.39,1.5,6.19],[1,-2.41,6.94,1.5,6.19],[1,-2.48,6.9,2.52,3.14],[1,-1.59,6.8,3.33,3.14],[1,-0.87,7.28,1.43,2.09],[1,-2.49,7.46,1.43,0.77],[1,-0.54,6.57,1.82,0.94],[1,-0.19,6.82,0.94,0.94],[1,-0.71,7.38,0.67,0.55],[4,-0.09,6.61,2.46,0.0],[4,-2.6,7.03,2.82,0.0],[1,0.01,7.46,0.87,4.02],[1,-1.72,8.14,1.3,4.78],[1,0.1,6.9,0.67,3.13],[1,-0.12,7.15,0.61,3.59],[1,-1.22,7.93,0.51,3.62],[1,-11.85,5.03,2.12,4.71],[1,-14.06,5.77,2.11,3.14],[14,-13.83,6.1,2.0,0.0],[1,-12.56,5.77,2.11,3.14],[4,0.3,-0.9,2.89,1.57],[14,-0.61,-6.36,2.9,0.0],[6,-10.76,6.27,2.02,0.0],[6,-12.21,4.91,2.02,0.0],[7,2.38,1.49,1.69,1.57],[8,6.59,-0.02,1.62,1.57],[8,6.59,-0.62,1.62,1.57],[8,6.59,-0.93,1.62,1.57],[4,11.93,-2.72,1.52,0.0],[1,11.62,-2.24,1.16,3.13],[4,12.3,1.88,2.05,0.0],[1,9.47,4.69,2.12,0.27],[1,9.43,3.4,2.17,0.44],[1,7.86,4.38,1.61,0.0],[1,7.73,3.1,1.61,0.0],[14,8.45,3.25,2.18,0.0],[1,8.65,1.47,1.46,3.0],[1,6.9,1.62,1.46,2.9],[14,8.14,1.77,2.18,0.0],[1,2.03,2.22,0.51,6.27],[1,3.17,2.16,0.29,6.18],[1,9.6,-1.88,1.47,6.11],[1,8.39,-1.83,1.5,6.18],[1,-9.64,4.41,2.16,3.14],[1,-8.9,5.33,1.84,4.71],[1,-5.16,5.32,1.84,4.71],[1,-3.02,6.15,2.32,4.67],[1,-4.18,6.14,2.07,4.66],[1,-8.72,6.19,2.07,4.62],[1,-7.29,6.19,2.07,4.64],[1,-5.65,6.17,2.04,4.72],[2,-9.81,6.45,1.42,0.0],[2,-9.81,5.81,1.4,6.28],[1,-3.47,7.29,2.07,0.0],[1,-2.88,6.77,1.87,3.2],[1,-4.27,6.71,1.62,4.9],[1,-5.76,6.66,1.62,4.74],[1,-6.88,6.63,1.62,4.75],[2,-10.2,5.81,1.4,6.28],[2,-10.34,6.45,1.42,0.0],[2,-9.81,7.16,1.42,0.0],[2,-10.34,7.16,1.42,0.0],[2,-9.29,7.16,1.42,0.0],[1,-8.19,6.61,0.53,6.14],[1,-7.77,7.41,1.47,1.57],[1,-4.11,7.51,1.68,0.0],[1,-7.78,8.9,1.26,1.57],[1,-8.18,4.41,1.8,3.14],[1,-7.78,9.84,0.02,1.58],[1,-9.12,8.72,0.77,6.21],[1,-2.4,-7.17,1.51,6.19],[1,-9.22,8.16,1.38,3.08],[1,-8.2,8.54,0.58,0.0],[1,-9.55,8.24,2.26,1.59],[1,-7.63,8.17,1.59,1.61],[1,-3.98,9.07,1.25,6.28],[4,-14.11,7.69,2.0,0.0],[14,9.13,1.36,2.9,1.57],[1,-10.21,8.66,0.77,5.97],[1,-10.98,8.39,2.26,1.38],[1,-10.09,2.94,1.98,0.0],[1,-11.58,2.94,1.78,0.0],[1,-7.73,9.18,1.07,0.0],[1,-4.82,10.11,-0.48,6.11],[1,-12.18,10.44,1.11,6.27],[1,-11.37,8.53,1.19,0.0],[1,-11.82,9.1,1.1,0.0],[1,-14.36,9.31,1.48,0.0],[1,-12.76,9.39,1.48,0.0],[1,-11.96,9.39,1.51,1.52],[1,-12.34,9.33,1.51,2.01],[1,-13.82,9.55,1.41,2.49],[1,-11.19,9.35,0.83,0.0],[1,-11.9,9.58,0.88,0.83],[1,-11.74,9.97,0.05,1.3],[1,-13.53,10.27,0.89,6.27],[1,-14.69,10.09,0.83,6.27],[1,-14.89,9.14,1.44,0.4],[1,-15.34,9.56,0.83,5.85],[1,-15.36,8.4,1.74,0.0],[1,-15.3,7.14,1.72,0.0],[1,-15.47,6.35,1.81,5.88],[1,-16.33,4.48,1.81,0.05],[14,-14.76,6.93,1.99,0.0],[14,-14.74,6.79,1.99,0.0],[6,-14.74,6.46,1.99,0.0],[6,-14.88,6.06,1.99,0.0],[1,-15.29,5.13,1.25,0.0],[1,-15.29,4.55,1.25,0.0],[1,-15.26,3.96,1.25,0.0],[1,-15.26,3.2,1.25,0.0],[1,-13.29,-2.16,0.94,1.74],[1,-15.47,5.81,1.13,1.13],[1,-16.26,4.75,1.08,0.0],[1,-15.58,6.08,0.87,1.05],[1,-16.16,4.87,0.93,4.57],[1,-17.17,4.84,0.55,0.0],[1,-16.46,3.26,0.59,4.68],[1,-16.8,3.77,0.36,3.43],[1,-16.72,4.33,0.25,2.73],[1,-14.47,2.5,2.06,1.5],[1,-15.1,2.57,1.22,0.0],[1,-14.99,1.2,1.28,1.44],[1,-13.33,1.16,0.76,0.0],[1,4.97,-9.58,1.61,2.12],[1,4.46,-9.49,1.8,1.86],[1,4.5,-9.63,1.73,1.47],[1,4.74,-10.52,0.22,2.9],[1,-10.64,-1.27,1.67,1.75],[1,-11.5,-1.26,1.47,1.89],[1,-14.3,1.7,0.97,0.0],[1,-14.82,2.22,0.97,0.95],[1,-16.17,2.46,1.53,0.18],[1,-15.52,1.1,0.18,0.0],[1,-14.39,1.03,1.34,0.0],[1,-12.53,-2.27,0.91,1.63],[1,-13.88,-2.05,0.64,1.25],[1,-12.97,-2.73,0.52,4.89],[1,-13.54,-2.82,0.52,4.98],[1,-14.75,-2.69,0.97,1.39],[1,-13.68,-3.39,0.91,1.38],[1,-12.38,-4.2,0.91,5.82],[1,-11.63,-3.11,0.86,1.38],[1,-12.54,-2.7,0.75,1.37],[1,-11.5,-1.74,0.83,1.36],[14,5.04,-3.73,2.58,0.0],[1,10.95,-2.03,3.06,0.0],[3,10.3,6.06,2.43,0.0],[2,11.11,1.23,1.58,0.0],[2,11.27,0.92,2.9,1.03],[2,11.2,0.35,2.9,1.3],[2,11.39,-0.18,2.91,4.75],[2,11.32,-0.84,2.89,4.3],[2,11.26,-1.19,2.96,4.4],[2,11.08,-1.7,2.88,5.34],[2,-1.61,-9.58,2.89,6.09],[2,-1.31,-9.49,2.73,0.0],[1,-2.17,-9.45,2.09,2.37],[2,-2.14,-9.5,2.69,3.51],[13,26.72,5.77,1.16,4.93],[13,26.79,5.48,1.16,4.93],[4,10.56,6.85,1.62,6.28],[1,-12.43,-1.48,0.74,1.36],[1,-12.15,-1.4,0.84,3.07],[4,1.98,-0.43,2.87,0.0],[14,-1.88,-0.29,2.86,0.0],[4,3.01,-2.12,2.89,0.0],[4,1.03,-7.27,2.9,0.0],[3,0.5,-6.35,2.9,0.0],[3,6.2,-6.16,2.87,0.0],[1,5.68,1.62,1.45,2.95],[1,4.89,1.62,1.45,2.95],[1,6.66,2.07,2.5,0.0],[1,5.4,2.21,2.53,3.15],[14,-12.27,6.12,2.03,0.0],[4,-9.16,7.75,2.06,0.0],[4,-10.66,7.87,2.05,0.0],[4,-9.2,6.54,2.06,0.0],[2,-8.82,7.16,1.39,0.0],[2,-8.4,7.16,1.27,0.0],[2,-7.91,7.16,1.08,0.0],[2,-7.41,7.16,0.89,0.0],[2,-6.85,7.16,0.74,0.0],[14,-6.17,7.25,1.37,0.0],[14,-5.74,7.24,1.37,0.0],[2,-2.2,-7.83,2.92,6.28],[1,-2.58,-5.4,2.89,6.28],[1,-2.06,-5.36,2.89,6.28],[1,-1.32,-5.38,2.89,6.28],[1,-2.98,8.45,1.3,4.67],[1,-3.43,8.01,1.06,3.1],[1,-2.54,7.68,1.25,1.41],[1,-2.78,7.52,1.78,2.18],[4,6.01,-6.35,2.89,0.0],[1,-3.49,8.84,0.68,3.2],[1,-8.31,9.07,0.38,0.71],[1,8.88,-8.68,1.53,3.13],[1,9.21,-8.18,1.09,3.11],[1,9.59,-7.08,1.13,2.43],[1,9.74,-6.79,1.13,3.05],[1,10.0,-6.36,1.13,3.0],[1,9.89,-6.22,1.5,4.24],[1,10.82,-7.59,0.92,2.82],[1,10.22,-8.87,1.12,2.73],[1,9.28,-9.05,0.34,4.33],[1,11.06,-5.89,1.08,3.87],[1,10.65,-4.42,1.24,3.7],[4,10.52,-6.11,2.25,0.0],[4,10.03,-8.6,1.61,0.0],[1,8.77,-2.92,2.08,0.7],[1,8.37,-3.64,2.01,0.0],[1,8.73,-3.68,2.09,5.35],[1,9.14,-4.57,2.09,5.74],[1,9.59,-3.73,0.99,1.57],[1,9.28,-3.96,1.36,4.56],[1,9.17,-3.45,1.48,4.51],[1,10.11,-3.53,1.36,3.69],[4,9.52,-4.26,2.28,0.0],[4,8.74,-3.23,3.2,0.0],[1,-1.16,2.36,1.86,0.0],[1,-16.11,8.9,0.93,0.32],[1,-15.93,7.64,0.87,0.0],[1,-16.12,6.25,0.86,0.0],[1,-14.33,-2.0,1.21,4.67],[1,-15.11,-0.81,1.12,3.31],[1,-15.17,-3.28,1.03,3.44],[1,-16.02,-3.15,0.25,0.2],[1,-15.93,-1.13,0.41,0.11],[1,-15.85,0.49,0.25,0.39],[1,-14.86,0.98,0.44,0.27],[4,-6.11,2.36,2.11,0.0],[4,-3.52,3.9,2.07,0.0],[1,-2.15,0.66,1.75,0.0],[2,-9.53,1.22,2.11,6.11],[2,-8.81,1.22,2.13,6.11],[2,-7.87,1.18,2.19,6.11],[4,3.06,-6.31,2.89,0.0],[2,-1.58,-7.61,2.91,6.28],[2,-1.36,-8.01,2.92,6.28],[1,1.7,-3.31,3.01,0.0],[3,-6.35,1.54,2.33,0.0],[1,-3.8,-5.19,1.65,2.97],[1,5.16,5.31,2.04,6.26],[1,5.86,5.17,1.57,3.12],[1,5.79,5.36,1.26,1.55],[1,5.5,4.49,0.48,0.12],[1,5.93,4.1,0.87,0.25],[1,1.42,6.13,1.22,0.0],[1,-2.15,-6.83,1.76,1.08],[1,0.63,2.67,2.08,0.0],[1,7.32,2.83,2.12,3.14],[1,6.1,3.04,1.7,6.12],[1,5.17,2.98,1.63,6.2],[1,4.16,2.32,2.5,0.0],[1,2.94,2.25,2.5,0.0],[14,1.18,2.45,2.8,6.1],[1,6.21,2.87,3.09,1.72],[1,5.3,3.05,2.99,1.53],[2,4.75,2.75,2.65,0.0],[1,4.17,3.2,3.06,1.64],[1,2.89,3.14,3.12,1.51],[1,0.63,2.11,2.08,0.0],[1,0.63,1.54,2.08,0.0],[1,0.63,0.98,2.08,0.0],[1,0.86,-0.34,1.47,6.28],[1,8.01,1.28,0.8,3.07],[1,6.0,-1.78,2.52,0.11],[1,7.17,-1.84,1.5,6.18],[2,5.98,-4.8,2.87,2.94],[14,-1.47,-3.47,2.76,5.21],[14,-1.22,-3.16,2.76,5.21],[14,-1.71,-2.44,2.76,5.21],[2,-12.12,2.02,0.94,1.57],[2,-11.58,2.02,0.99,1.57],[1,-9.67,-6.58,0.63,0.0],[1,-11.58,-6.68,0.68,0.57],[1,0.4,-2.59,2.74,1.79],[1,-8.14,-2.72,1.63,1.81],[1,-8.27,-2.45,1.62,0.0],[2,-8.45,-6.22,1.58,0.0],[1,-6.78,-2.32,1.62,0.0],[1,-5.29,-2.26,1.62,0.0],[1,-1.16,-1.39,1.76,3.14],[1,-1.16,-5.13,1.77,6.28],[1,4.07,2.85,1.84,0.0],[1,2.06,2.5,2.5,1.47],[2,-13.25,-1.08,0.8,1.57],[2,-13.25,-1.6,0.8,1.57],[2,-3.72,1.66,2.04,1.57],[2,-4.37,1.66,1.91,1.57],[2,-3.72,1.14,2.04,1.57],[1,4.15,1.71,1.45,2.95],[1,3.51,2.34,1.23,4.48],[1,3.46,2.41,1.51,3.24],[1,3.42,1.82,1.37,0.0],[1,3.88,2.28,0.63,0.0],[1,1.56,2.15,0.34,0.0],[1,1.28,2.24,1.17,4.67],[2,9.27,-6.72,2.22,0.0],[2,10.09,2.27,2.28,0.0],[2,10.62,2.27,2.28,0.0],[4,10.6,2.91,2.81,0.0],[2,-3.72,2.07,2.64,0.0],[2,6.79,3.05,2.81,0.0],[2,6.28,3.1,2.81,0.0],[2,5.1,3.17,2.86,0.12],[2,4.54,3.27,2.85,0.0],[2,3.9,3.29,2.8,0.13],[2,3.31,3.29,2.73,0.36],[2,2.66,3.22,2.73,0.36],[2,1.36,2.93,2.81,0.36],[14,1.77,2.87,2.8,4.87],[2,2.0,3.13,2.73,0.55],[2,0.97,2.46,2.8,1.62],[4,5.7,2.27,2.9,0.0],[3,-3.49,-4.21,2.87,0.0],[1,4.94,0.93,2.88,6.28],[1,5.03,1.29,2.88,6.28],[1,5.02,1.66,2.88,6.28],[1,4.92,2.28,2.88,6.28],[1,5.6,2.26,2.88,6.28],[1,5.58,1.59,2.88,6.28],[1,5.45,0.99,2.88,6.28],[1,6.51,1.71,2.88,6.28],[1,6.25,1.69,2.88,6.28],[1,6.04,2.21,2.88,6.28],[1,6.54,2.36,2.88,6.28],[1,4.32,-0.77,2.88,6.28],[1,3.7,-0.77,2.88,6.28],[1,4.3,-1.47,2.88,6.28],[1,3.62,-1.61,2.89,6.28],[1,3.05,-1.88,2.89,6.28],[14,1.49,1.94,2.9,0.0],[14,2.81,1.46,2.9,0.0],[14,3.88,-8.73,3.5,0.0],[14,-4.68,-2.34,3.17,0.0],[6,-3.75,0.66,2.68,0.0],[6,-12.01,2.83,2.01,5.93],[6,-9.45,6.37,2.08,0.0],[6,-9.46,6.53,2.08,0.0],[6,-9.56,6.69,2.07,4.96],[6,-9.43,6.24,2.08,0.0],[6,-9.44,6.13,2.08,0.0],[6,-9.45,6.0,2.08,0.0],[2,-1.44,4.81,2.08,6.05],[2,-1.4,4.29,2.09,6.05],[1,-2.1,3.75,2.18,1.57],[2,-0.04,4.28,2.09,6.05],[2,-0.93,4.37,2.09,6.05],[2,-0.26,5.06,2.08,6.05],[2,0.19,4.87,2.06,5.04],[2,-5.46,8.52,0.68,0.0],[2,-4.94,8.52,0.68,0.0],[2,-4.41,8.52,0.68,0.0],[2,-10.87,7.72,2.06,0.0],[2,-10.91,6.78,2.05,0.0],[2,-11.23,6.46,2.05,6.04],[2,-11.78,6.48,2.04,6.04],[2,-12.2,4.53,2.03,4.52],[2,-12.35,3.74,2.03,4.52],[2,-13.7,5.63,2.01,6.0],[2,-14.76,5.56,2.01,6.0],[2,-13.86,6.71,2.02,0.0],[2,-13.74,7.6,2.02,1.37],[2,-14.18,8.81,2.02,6.09],[2,-13.36,8.87,2.01,6.09],[2,-12.68,8.73,2.02,6.09],[2,-11.83,8.23,2.04,5.19],[2,-15.33,4.73,2.0,1.3],[2,-15.3,3.78,2.0,1.3],[2,-7.38,1.19,2.24,6.07],[2,-6.78,1.14,2.31,6.17],[2,-6.21,0.93,2.39,5.96],[4,6.01,6.28,2.56,0.0],[4,-3.31,7.81,2.45,0.0],[4,-3.82,8.55,1.19,0.0],[4,-15.3,9.3,2.12,0.0],[2,-6.18,8.84,1.19,6.07],[2,-6.8,8.76,1.21,6.08],[2,-6.84,9.32,1.04,6.08],[1,-5.7,9.04,1.1,6.07],[1,-4.75,9.15,1.07,6.09],[1,-6.47,-1.47,2.66,4.71],[1,-7.79,1.87,2.35,1.57],[1,-6.41,1.92,2.56,1.57],[2,-5.46,1.0,2.48,5.96],[1,-8.42,0.68,2.29,1.57],[1,-9.83,0.68,2.26,1.57],[2,-14.07,-1.31,1.28,6.09],[2,-14.28,-0.59,1.22,6.09],[2,-14.19,0.29,1.25,6.08],[2,-14.09,0.2,1.29,1.34],[2,-13.97,-0.53,1.31,1.35],[2,11.76,0.58,1.6,6.03],[2,11.89,-0.12,1.6,6.03],[2,11.65,-1.05,1.6,6.03],[2,11.37,-0.26,1.6,6.03],[2,10.8,0.49,1.6,6.03],[2,10.67,-0.26,1.6,6.03],[2,10.7,-0.93,1.6,6.03],[2,12.01,-0.91,1.6,6.03],[2,13.2,0.32,1.54,6.03],[2,13.2,-0.49,1.54,6.03],[2,13.16,-1.16,1.54,6.03],[2,11.98,-1.19,1.61,1.32],[2,12.18,0.5,1.59,4.49],[2,14.7,0.44,1.38,4.47],[2,14.7,-1.04,1.37,1.39],[2,14.68,-0.58,1.37,1.39],[1,13.48,0.26,1.48,6.19],[1,13.51,-0.72,1.48,6.19],[2,7.57,-4.59,2.92,1.37],[2,7.55,-3.57,2.91,1.37],[2,7.56,-2.95,2.92,2.84],[2,5.89,-4.09,2.92,1.31],[2,6.04,-3.38,2.92,1.31],[2,6.0,-2.68,2.92,6.07],[1,5.13,-2.42,2.91,0.0],[1,1.43,6.14,1.06,1.59],[1,-0.46,6.19,2.06,1.05],[4,2.95,-4.8,2.9,0.0],[4,3.04,-5.81,2.9,0.0],[4,-2.32,7.99,2.27,0.0],[4,-0.79,7.73,1.99,0.0],[4,-15.83,10.23,1.65,0.0],[4,-15.33,1.99,2.18,0.0],[4,-12.0,-1.7,2.15,0.0],[2,-3.18,4.88,1.39,0.0],[2,-3.18,4.18,1.41,0.0],[1,-13.69,0.67,1.36,0.62],[3,-4.57,-2.07,3.27,0.0],[4,-4.19,-2.2,2.96,0.0],[4,-3.68,-5.22,2.96,0.0],[14,-4.41,-1.83,3.09,0.0],[14,-0.83,-8.01,2.91,6.28],[14,-0.32,-7.91,2.9,6.28],[2,0.64,-5.96,2.92,2.94],[2,0.42,-5.51,2.92,2.94],[2,-0.3,-5.47,2.92,2.94],[1,-1.73,-5.87,2.89,6.28],[1,-1.07,-5.97,2.89,6.28],[1,-0.39,-6.05,2.89,6.28],[1,0.06,-7.66,2.88,0.0],[1,3.35,-7.64,2.88,6.2],[1,3.77,-8.12,2.88,6.2],[1,4.04,-7.65,2.88,6.2],[1,6.82,-7.69,2.88,0.0],[1,6.82,-8.16,2.88,0.0],[1,8.59,-6.55,2.89,0.0],[1,8.99,-5.9,2.89,0.0],[1,9.19,-5.46,2.89,0.0],[1,7.21,-1.17,2.89,6.2],[1,7.71,-1.19,2.89,6.2],[1,8.37,-1.18,2.89,6.2],[1,9.38,-2.22,3.16,4.81],[1,8.4,-1.95,2.89,6.2],[1,8.63,-0.62,2.89,1.44],[1,8.63,-0.25,2.89,1.44],[1,8.69,0.14,2.89,1.44],[7,1.15,2.37,2.41,0.0],[1,0.63,0.42,2.08,0.0],[14,0.68,1.14,2.08,0.0],[14,1.03,0.71,2.07,4.71],[14,1.03,0.01,2.07,4.71],[1,1.36,0.29,1.46,3.56],[7,0.26,-0.34,2.53,0.0],[1,0.16,-0.41,2.05,5.09],[1,0.63,-0.14,2.08,0.0],[7,0.26,1.11,2.53,0.0],[1,0.15,1.14,2.05,5.09],[1,0.16,2.13,2.1,0.5],[14,1.98,4.05,1.29,0.0],[4,-7.46,0.72,2.18,0.0],[1,-10.91,2.41,2.06,0.0],[1,-11.36,2.39,2.06,0.0],[2,-10.65,1.18,1.45,0.0],[1,1.0,4.78,2.06,0.0],[1,1.01,4.02,2.07,0.0],[1,1.01,3.59,2.07,0.0],[1,1.28,2.79,1.17,5.1],[14,8.4,-0.78,1.59,5.09],[14,3.0,-0.74,1.58,5.09],[14,3.0,0.16,1.58,5.09],[14,8.37,0.12,1.59,5.09],[1,-0.31,2.56,0.22,0.01],[14,-10.01,0.51,1.92,0.0],[6,-8.84,-0.6,2.04,0.0],[6,-8.31,-0.58,2.09,0.0],[6,-8.88,-1.06,2.05,0.0],[6,-8.5,-1.11,2.15,0.0],[6,-7.89,-0.58,2.16,5.42],[1,-7.16,-1.35,1.68,0.0],[1,-8.53,-1.05,1.61,3.13],[1,-2.46,-1.16,2.84,2.56],[1,-3.46,-5.46,1.79,0.0],[6,-6.83,-0.5,2.28,0.0],[6,-6.99,-0.5,2.28,0.0],[6,-7.16,-0.5,2.25,0.0],[6,-7.33,-0.49,2.23,0.0],[6,-7.56,-0.49,2.2,0.0],[3,-6.5,-0.36,2.3,6.27],[3,-1.71,0.94,2.87,6.28],[14,-1.61,-0.36,2.86,0.0],[14,5.83,0.67,2.88,0.0],[2,-2.0,-0.32,2.86,0.0],[2,-3.05,-0.29,2.76,0.0],[14,-8.5,-0.25,2.07,0.14],[14,-13.49,2.1,1.55,1.61],[6,-10.79,1.9,2.16,0.0],[14,-9.25,1.65,2.18,0.0],[14,-8.31,2.24,2.18,0.0],[3,-6.17,2.14,2.42,0.0],[3,-3.78,3.97,2.18,0.0],[3,-4.13,3.97,2.18,0.0],[3,-4.47,3.98,2.19,0.0],[1,-5.17,4.41,2.19,0.0],[1,-1.57,-0.82,2.89,0.0],[1,-0.96,-0.76,2.89,0.0],[1,-1.94,1.19,2.89,0.0],[1,-2.0,1.68,2.89,0.0],[1,-1.4,1.66,2.89,0.0],[1,-0.55,1.66,2.89,0.0],[1,0.23,1.67,2.89,0.0],[1,1.01,1.87,2.88,0.0],[1,1.73,2.17,2.88,0.0],[1,1.76,1.29,2.88,0.0],[1,2.31,1.72,2.88,0.0],[1,2.37,2.36,2.88,0.0],[2,2.79,2.71,2.9,0.0],[2,2.38,2.76,2.89,0.0],[2,2.91,1.69,2.9,1.5],[6,7.37,-2.48,2.99,6.02],[3,-2.54,-0.33,2.92,0.24],[3,1.64,2.16,2.93,0.0],[3,1.92,2.45,2.93,0.0],[3,2.88,2.59,2.93,0.0],[3,2.6,2.61,2.93,0.0],[3,2.22,2.54,2.92,0.0],[14,4.43,-2.09,2.93,0.0],[14,4.19,-1.96,2.93,0.0],[14,4.22,-1.61,2.92,0.0],[14,6.06,-6.14,2.92,0.0],[14,5.82,-6.16,2.92,0.0],[14,5.38,-6.13,2.92,0.0],[3,7.42,-3.35,2.88,0.0],[3,5.95,-3.34,2.88,0.0],[14,5.62,2.24,2.88,0.0],[14,6.1,2.45,2.89,0.0],[2,7.39,-4.79,2.91,0.0],[2,7.79,-4.87,2.91,0.0],[2,8.18,-4.86,2.91,0.0],[2,8.7,-4.89,2.91,6.02],[2,10.12,0.1,2.87,4.49],[2,10.74,0.23,2.93,0.0],[2,10.16,-0.1,2.89,1.0],[4,10.94,-0.02,3.12,0.0],[1,1.52,-1.48,2.13,4.08],[1,1.62,-2.96,1.94,3.86],[1,2.06,-2.52,2.46,0.11],[1,6.04,-1.89,1.5,6.22],[1,2.68,-2.56,1.48,6.12],[1,4.97,-1.78,2.52,0.11],[1,3.89,-1.98,2.47,4.84],[4,0.85,6.85,1.39,0.0],[1,1.81,0.64,2.88,0.0],[1,3.06,-0.43,2.9,0.0],[2,1.57,-1.79,2.91,0.0],[2,1.1,-1.52,2.89,4.68],[1,2.53,-2.58,2.88,0.0],[1,2.53,-3.14,2.88,0.0],[1,2.53,-3.71,2.88,0.0],[1,2.53,-4.27,2.88,0.0],[1,2.53,-4.84,2.88,0.0],[2,-0.26,3.06,2.11,0.0],[2,-0.93,3.05,2.11,0.0],[2,0.19,2.74,2.11,4.67],[1,0.69,-4.79,2.98,6.06],[1,3.88,-2.76,1.31,6.26],[1,4.76,-2.14,1.31,0.45],[4,-12.5,-2.22,2.3,0.0],[4,-15.99,1.28,1.37,0.0],[1,-12.76,-6.68,0.7,5.22],[1,-13.28,-6.67,0.7,4.85],[4,-13.2,-7.01,1.84,0.0],[4,-12.28,-6.95,1.64,0.0],[4,-6.79,-6.64,1.38,0.0],[3,-4.22,-9.16,2.66,0.0],[3,-6.48,-7.13,1.18,0.0],[3,-12.97,-6.76,1.33,0.0],[4,-7.01,-6.94,1.3,0.0],[4,-12.65,-7.44,1.6,0.0],[4,-3.81,-10.09,1.41,0.0],[2,0.66,-9.83,2.72,0.0],[2,1.58,-9.55,2.83,0.0],[2,1.72,-9.38,2.88,1.08],[2,1.46,-9.51,3.02,2.82],[1,1.72,-9.05,2.9,5.96],[2,1.43,-9.36,2.99,2.82],[2,0.77,-9.6,2.85,0.0],[4,6.03,-10.21,1.94,0.0],[4,5.23,-8.84,3.26,0.0],[4,-0.06,-9.85,3.32,0.0],[4,4.48,-9.65,2.88,0.0],[2,4.14,-9.31,2.81,0.0],[4,5.39,-9.55,2.67,0.0],[1,-1.1,-10.06,2.04,0.0],[3,-9.99,-6.74,1.63,0.0],[2,-9.81,-0.32,1.91,0.0],[2,-10.41,-0.3,1.83,0.0],[2,-11.01,-0.3,1.74,0.0],[2,-11.68,-0.3,1.63,0.0],[14,-12.15,3.52,1.98,0.0],[2,-12.12,2.55,1.35,1.57],[2,-11.63,2.64,1.39,0.0],[6,-11.11,2.93,2.16,0.0],[6,-10.88,2.91,2.16,0.0],[6,-10.6,2.92,2.16,0.23],[2,-12.73,1.18,0.89,0.0],[2,-13.25,1.18,0.89,0.0],[14,-12.8,0.61,1.49,3.14],[14,-13.1,0.61,1.49,3.14],[2,-13.43,0.45,1.41,1.55],[3,-11.85,3.6,2.04,1.57],[1,-13.05,-0.22,1.45,1.58],[1,-13.05,-0.74,1.45,1.58],[3,-13.48,0.08,1.49,0.0],[3,-13.58,-0.78,1.48,0.0],[6,-13.46,-0.46,1.38,0.0],[3,-6.03,-0.4,2.48,0.25],[1,-5.87,-0.89,2.39,6.28],[1,-4.37,0.95,2.58,6.28],[1,-4.83,0.91,2.53,6.28],[3,0.12,-0.28,2.9,0.0],[3,5.11,0.56,2.89,4.76],[4,4.79,-0.32,2.89,0.0],[3,8.53,0.42,2.88,0.0],[3,9.17,0.44,2.88,0.0],[3,9.44,0.37,2.87,0.14],[2,8.62,0.63,2.9,0.0],[2,9.19,0.61,2.9,0.0],[2,9.56,0.6,2.9,0.0],[3,8.48,1.6,2.91,4.73],[3,8.47,1.0,2.91,4.73],[3,10.01,1.88,2.9,0.0],[3,10.48,1.94,2.9,0.31],[3,9.89,1.67,2.98,0.0],[3,10.21,1.68,2.98,0.0],[3,9.92,1.5,2.98,0.0],[3,10.17,1.46,2.98,1.25],[3,9.74,1.06,2.9,1.47],[3,9.45,0.77,2.9,6.27],[3,8.81,0.77,2.9,6.27],[3,9.94,1.27,2.98,0.85],[3,2.61,6.09,2.28,0.0],[3,13.96,-1.15,1.44,0.0],[3,13.52,-1.39,1.44,1.08],[2,14.3,1.11,1.37,0.0],[2,14.21,0.78,1.37,4.62],[2,12.82,1.15,1.5,0.0],[2,12.87,0.93,1.5,0.0],[3,14.97,-0.63,1.39,4.68],[3,14.89,0.82,1.41,4.68],[3,14.76,1.08,1.43,0.0],[3,14.45,0.93,1.46,0.0],[3,14.25,-1.41,1.49,1.41],[2,13.89,-1.54,1.44,0.0],[2,13.93,-1.32,1.44,0.0],[2,12.66,-1.52,1.56,0.0],[2,12.01,-1.47,1.58,5.92],[2,10.98,-1.56,1.58,0.07],[2,11.6,1.13,1.56,0.29],[2,13.62,1.16,1.45,0.0],[3,13.81,0.93,1.54,0.0],[3,13.39,0.9,1.59,0.0],[3,13.12,1.09,1.6,0.63],[3,12.91,0.72,1.62,0.0],[2,14.57,-1.55,1.39,0.0],[2,15.58,-0.34,1.3,0.0],[3,7.96,-3.22,2.9,0.65],[6,6.05,-2.17,2.99,0.0],[6,5.79,-2.24,2.99,0.0],[6,5.65,-2.15,2.99,0.0],[1,1.22,-1.49,2.89,0.0],[1,1.7,-1.49,2.89,0.0],[1,0.68,-0.75,2.89,0.0],[1,0.0,-0.71,2.89,0.0],[1,-0.59,-0.76,2.89,0.0],[1,4.43,-5.48,2.89,0.0],[1,4.83,-6.0,2.89,0.0],[1,5.38,-5.7,2.88,0.0],[1,5.91,-5.59,2.88,0.0],[3,5.57,-6.33,2.87,0.0],[3,4.44,-7.2,2.87,0.22],[3,3.59,-7.23,2.87,0.12],[3,1.18,-7.27,2.87,0.0],[2,5.69,-6.08,2.88,0.0],[2,4.84,-4.73,2.88,0.0],[2,5.38,-4.71,2.91,0.0],[4,1.08,4.48,2.09,0.0],[6,-10.76,6.6,2.02,0.0],[6,-10.76,6.94,2.02,0.0],[6,-10.22,7.68,2.05,0.0],[6,-9.89,7.68,2.05,0.0],[6,-9.55,7.68,2.05,0.0],[6,-6.29,0.65,2.3,0.0],[6,-6.66,0.65,2.29,0.0],[6,-7.04,0.65,2.25,0.0],[1,-7.05,0.65,2.36,0.0],[4,-6.68,0.66,2.37,0.0],[3,-5.32,-0.34,2.46,0.0],[6,-4.87,0.65,2.51,0.0],[4,-4.9,0.66,2.62,0.0],[4,-6.32,0.66,2.41,0.0],[14,-3.63,-0.92,2.9,0.62],[14,1.2,3.74,2.08,0.14],[14,4.44,-4.8,2.74,0.0],[14,-1.35,2.0,2.9,4.76],[14,-1.87,2.01,2.9,4.73],[14,-0.89,2.02,2.9,4.76],[1,8.7,2.0,2.18,3.14],[1,9.34,2.4,2.18,4.23],[1,8.03,2.05,2.18,1.4],[14,8.13,1.79,2.46,1.62],[2,8.25,1.72,2.67,0.0],[2,8.37,2.55,2.19,0.0],[3,8.61,2.59,2.26,0.0],[3,8.91,2.73,2.26,0.68],[3,9.37,2.72,2.26,1.51],[6,4.57,-1.91,2.98,0.0],[4,2.81,-9.95,1.59,0.0],[4,-4.37,-9.69,1.4,0.0],[2,2.11,-1.88,2.9,4.7],[3,2.1,-2.47,2.96,1.51],[3,2.14,-4.26,3.0,1.51],[3,2.1,-3.75,2.98,1.51],[2,0.71,-3.83,2.76,1.58],[4,3.83,-10.29,1.82,0.0],[4,-10.42,-6.43,1.62,0.0],[2,-13.02,-7.28,1.67,0.0],[2,-9.59,-6.51,1.15,0.0],[2,-10.92,-6.42,1.24,0.0],[2,-6.77,-6.68,1.37,0.0],[2,-4.03,-8.12,1.99,0.0],[2,-2.71,-9.25,2.89,0.0],[2,0.65,-8.48,2.92,0.0],[2,1.16,-8.46,2.92,0.0],[2,1.04,-8.64,3.03,0.0],[9,-6.6,7.54,1.36,0.0],[9,-13.65,-1.5,1.35,1.55],[9,-13.64,-1.26,1.36,1.55],[9,-6.86,7.54,1.36,0.0],[9,0.29,-4.87,2.89,0.0],[9,0.12,-4.87,2.89,0.0],[14,7.43,-4.5,2.9,0.0],[14,4.56,2.25,2.9,0.0],[14,4.56,2.04,2.9,0.0],[14,-12.81,8.44,2.05,0.0],[4,-10.76,6.61,2.13,0.0],[4,-9.88,7.69,2.17,0.0],[6,-10.65,0.91,2.13,0.0],[6,-10.57,0.91,2.13,0.0],[6,-10.45,0.99,2.13,1.03],[6,-14.17,-0.53,1.23,1.58],[6,-0.18,-4.7,2.86,0.0],[14,-7.37,0.52,2.22,3.19],[14,-13.35,1.07,1.57,4.71],[14,-13.35,1.52,1.57,4.71],[14,-11.57,5.19,2.05,0.0],[2,-5.28,4.36,1.42,1.57],[2,-7.57,4.28,1.42,1.57],[2,-1.65,2.83,1.36,1.57],[2,-1.65,6.26,1.32,1.57],[14,1.36,4.41,2.07,0.0],[14,-4.55,2.94,2.1,0.0],[14,-10.61,2.08,2.08,0.0],[1,-8.59,1.68,2.1,0.0],[14,-1.97,-1.01,2.9,0.0],[14,3.25,-2.86,2.75,2.9],[14,3.26,-4.37,2.75,2.92],[14,2.1,1.52,2.9,0.0],[14,2.6,1.83,2.9,4.7],[14,2.42,1.84,2.9,4.7],[14,2.23,1.84,2.9,4.7],[4,-17.65,5.04,1.71,0.0],[4,-8.01,2.72,2.1,0.0],[14,-6.79,2.19,2.16,0.0],[14,-6.79,2.19,2.26,0.0],[14,7.27,-1.42,2.91,0.0],[14,-1.69,0.69,2.91,3.15],[3,-1.85,1.54,2.87,4.72],[2,-0.39,2.26,2.82,0.0],[2,-0.98,2.22,2.77,0.11],[2,-1.62,2.17,2.89,0.11],[2,-2.02,2.14,2.87,0.11],[3,-1.17,2.21,2.62,3.14],[7,0.24,2.11,2.53,0.0],[3,0.78,-0.56,2.98,4.66],[3,0.51,-0.58,2.98,0.43],[14,-1.22,-1.23,2.88,1.42],[4,-1.75,-1.38,2.88,0.0],[4,-3.33,-0.96,3.84,0.0],[3,-6.51,2.14,2.38,0.0],[2,-6.44,2.72,1.43,0.0],[14,-6.52,2.29,2.11,0.0],[14,-4.15,1.51,2.63,0.0],[14,-4.15,1.67,2.63,0.0],[14,-4.09,1.59,2.68,0.0],[6,-4.02,1.4,2.72,0.0],[6,-3.93,1.4,2.72,0.03],[6,-3.81,1.69,2.72,2.49],[6,-3.9,1.74,2.72,2.67],[6,-4.02,1.77,2.72,3.08],[6,-3.84,0.66,2.66,0.0],[6,-3.96,0.72,2.64,0.0],[6,-4.83,0.83,2.55,0.0],[6,-4.81,1.06,2.55,0.0],[6,-4.97,1.06,2.53,0.0],[6,-4.97,0.86,2.53,0.0],[6,-4.02,-0.51,2.64,0.0],[6,-4.18,-0.52,2.61,0.0],[6,-4.33,-0.53,2.59,0.0],[6,-4.48,-0.53,2.57,0.0],[6,-4.59,-0.56,2.56,0.0],[6,-4.61,-0.72,2.56,0.0],[6,-4.62,-0.9,2.56,0.0],[6,-4.68,-1.09,2.56,0.0],[6,-5.26,-0.54,2.49,0.0],[6,-5.42,-0.53,2.46,0.0],[2,-5.26,-0.82,1.81,1.57],[2,-5.26,-1.34,1.81,1.57],[1,-11.31,-2.17,1.32,3.35],[4,-10.04,-6.16,1.76,0.0],[4,-13.49,-2.81,1.93,0.0],[3,-12.88,-2.86,1.86,0.0],[3,-13.4,-2.31,2.28,3.31],[3,-13.4,-2.34,2.31,0.0],[4,-7.01,-6.94,1.27,0.0],[4,-0.83,-10.17,2.17,0.0],[4,-12.17,9.62,2.84,0.0],[4,-11.62,10.35,1.29,0.0],[2,-14.04,-0.03,1.29,1.55],[2,-14.32,-0.11,1.19,3.08],[3,-13.74,-0.01,1.43,0.0],[3,-13.61,0.36,1.48,5.9],[6,-13.45,-0.33,1.38,0.0],[6,-14.0,-0.95,1.27,1.58],[6,-14.01,-1.03,1.27,1.58],[6,-11.98,3.0,2.0,0.0],[6,-11.98,3.2,2.0,0.0],[6,-12.09,3.27,2.0,0.0],[6,-12.24,3.17,2.0,0.0],[6,-12.33,2.89,2.0,0.0],[6,-12.27,3.01,2.0,0.0],[6,-12.16,2.91,2.01,0.0],[6,-12.12,3.06,2.0,0.0],[2,-11.25,2.02,1.41,1.57],[6,-12.16,2.82,2.01,5.93],[6,-12.29,2.82,2.01,5.93],[3,-11.89,3.28,2.04,1.57],[6,-11.7,1.76,2.07,0.0],[6,-11.69,1.87,2.08,0.0],[6,-11.7,1.99,2.08,0.0],[6,-11.58,2.19,2.07,1.64],[6,-11.78,2.27,2.07,2.94],[6,-11.77,2.18,2.07,2.94],[6,-11.76,1.98,2.07,2.94],[2,-11.98,4.38,1.39,0.0],[14,-11.79,4.85,2.01,1.58],[14,-11.8,5.08,2.01,1.58],[6,-11.86,4.75,2.02,0.0],[6,-11.85,4.91,2.02,0.0],[6,-11.86,5.04,2.03,0.0],[6,-12.26,5.12,2.01,0.0],[6,-12.12,5.14,2.01,0.0],[6,-12.41,4.9,2.01,0.0],[6,-12.43,4.78,2.02,0.0],[6,-12.35,4.66,2.02,0.0],[6,-11.85,4.0,2.05,0.0],[6,-11.95,3.96,2.0,0.0],[6,-11.93,3.85,2.0,0.0],[6,-10.58,1.87,2.08,0.0],[6,-10.44,1.9,2.08,0.0],[6,-10.43,1.78,2.08,0.0],[6,-10.43,1.68,2.08,0.0],[6,-10.44,1.57,2.09,0.0],[6,-10.57,1.59,2.08,0.0],[6,-10.57,1.74,2.08,0.0],[6,-6.27,8.63,1.27,0.0],[6,3.3,-7.9,2.93,5.72],[6,3.29,-7.8,2.93,3.98],[14,1.63,-1.25,2.9,3.2],[6,-6.38,2.51,2.12,0.0],[6,-6.26,2.55,2.12,0.67],[6,-6.23,2.77,2.12,2.12],[14,9.19,-1.45,2.9,2.5],[14,9.06,-1.43,2.9,3.51],[14,-4.0,0.99,2.72,0.0],[14,-3.84,1.41,2.72,0.0],[14,-14.08,-1.17,1.26,1.6],[6,-14.08,-1.23,1.24,1.5],[6,-14.08,-1.39,1.26,1.55],[6,-14.09,-1.49,1.26,1.34],[9,-5.07,0.8,2.51,1.55],[9,5.99,1.0,2.9,1.55],[14,5.86,0.91,2.9,0.0],[14,7.47,-4.07,2.9,0.0],[4,7.12,-3.36,2.91,0.0],[4,7.13,-4.64,2.91,0.0],[4,7.8,-4.05,2.91,0.0],[14,7.71,-4.28,2.9,1.64],[14,7.69,-3.84,2.9,1.64],[14,7.43,-3.62,2.9,3.16],[14,7.4,-4.12,2.9,0.0],[14,7.39,-4.04,2.9,0.0],[14,7.32,-4.08,2.9,0.0],[6,7.82,-4.16,2.91,0.0],[6,7.21,-4.74,2.91,0.0],[6,7.21,-3.64,2.91,0.0],[6,7.14,-4.1,2.89,0.0],[6,7.15,-3.96,2.89,0.0],[6,7.17,-4.23,2.89,0.0],[6,7.35,-4.71,2.89,0.0],[2,7.86,-4.5,2.89,1.37],[2,7.92,-3.58,2.89,4.59],[6,7.68,-4.63,2.91,0.0],[6,7.48,-4.71,2.89,0.0],[6,7.62,-4.72,2.89,0.0],[6,7.7,-4.64,2.89,0.0],[6,7.83,-3.98,2.89,0.0],[6,7.86,-4.22,2.89,0.0],[6,7.64,-3.49,2.89,0.0],[6,7.49,-3.45,2.89,0.0],[6,7.34,-3.45,2.89,0.0],[9,5.73,1.0,2.9,4.7],[14,6.21,1.09,2.88,1.65],[6,4.75,-0.43,2.89,0.0],[6,4.75,-0.58,2.89,0.0],[6,4.75,-0.7,2.89,0.0],[6,4.75,-0.83,2.89,0.0],[6,4.26,-0.8,2.88,0.0],[6,4.39,-0.79,2.89,0.0],[6,4.05,-1.77,2.89,0.0],[6,4.37,-1.77,2.89,0.0],[6,4.19,-1.45,2.89,0.0],[3,3.69,-2.06,2.87,6.28],[14,2.01,-0.65,2.85,4.58],[14,2.0,-0.94,2.85,4.58],[5,-9.4,-4.55,1.66,0.0],[5,-7.67,-1.36,2.7,0.0],[5,-10.6,-2.52,1.88,0.0],[14,3.23,-3.62,2.75,2.9],[1,4.6,-2.58,2.79,0.0],[6,4.66,-2.14,2.98,1.41],[6,4.83,-2.43,2.98,2.31],[5,5.01,-5.56,2.88,0.0],[5,6.25,-2.28,2.9,0.0],[5,6.16,-4.77,2.85,0.0],[5,10.16,-1.16,3.05,0.0],[5,8.67,6.14,2.37,0.0],[5,5.74,6.9,2.04,0.0],[5,-1.34,6.63,3.3,0.0],[5,-6.64,8.13,1.35,0.0],[5,-11.57,9.29,2.43,0.0],[5,-14.22,9.82,2.58,0.0],[5,-15.77,5.33,2.43,0.0],[5,-13.81,1.27,1.9,0.0],[5,-14.03,-2.11,1.95,0.0],[5,-16.78,3.51,1.68,0.0],[5,4.68,-8.92,3.45,0.0],[5,-3.8,-8.51,2.69,0.0],[5,-3.8,-5.0,2.87,0.0],[4,-15.63,2.64,2.35,0.0],[3,-16.26,5.67,1.92,0.0],[1,-15.92,9.73,1.56,0.0],[1,-16.27,6.03,1.46,0.0],[1,-16.56,5.54,1.67,0.0],[1,-16.85,3.98,1.57,0.0],[4,-16.02,4.29,2.14,0.0],[4,-15.66,3.02,2.28,0.0],[1,-13.76,-2.52,1.73,0.0],[1,-13.52,-7.08,1.36,0.0],[1,-10.17,-6.73,1.62,0.0],[1,-6.79,-7.07,1.42,0.0],[1,9.52,-6.32,2.9,0.0],[1,15.34,-1.77,1.46,0.0],[1,15.01,1.09,1.28,0.0],[5,11.18,5.82,1.58,0.0],[4,8.88,6.58,1.73,0.0],[4,6.21,6.96,1.88,0.0],[4,-13.7,9.8,1.88,0.0],[14,-12.72,9.68,2.74,0.0],[14,-1.29,6.11,3.26,0.0],[14,9.21,6.47,1.9,0.0],[4,8.48,6.6,1.89,0.0],[4,5.96,7.11,2.05,0.0],[4,10.56,-7.19,1.54,0.0],[4,3.94,-8.45,2.89,0.0],[4,0.19,-8.62,3.24,0.0],[2,-0.47,-8.44,2.92,0.0],[2,-1.29,-8.44,2.92,0.0],[2,-1.9,-8.65,3.01,0.0],[2,-1.84,-8.48,2.92,0.0],[6,-6.79,8.48,1.27,0.0],[6,-6.88,8.47,1.27,0.0],[6,-6.96,8.51,1.26,0.0],[6,0.08,-4.71,2.86,0.0],[14,-2.22,-7.94,2.94,0.0],[14,-2.28,-7.83,2.93,0.0],[14,-0.86,-0.3,2.9,0.0],[14,0.7,-6.38,2.89,0.0],[14,0.07,-6.38,2.89,0.0],[14,1.32,0.56,2.9,0.0],[14,0.54,0.56,2.9,0.0],[14,1.79,0.55,2.9,0.71],[3,-7.31,-0.29,2.33,0.0],[3,-7.77,-0.28,2.29,0.0],[3,-8.25,-0.27,2.26,0.0],[3,-13.54,-0.05,1.52,4.72],[6,-13.47,-0.52,1.38,0.0],[3,-12.49,3.45,2.1,4.74],[3,-12.5,3.92,2.1,4.74],[3,-11.2,6.07,2.12,0.0],[3,-11.68,6.09,2.12,0.0],[3,-12.15,6.1,2.12,0.0],[3,-1.98,4.75,2.17,1.6],[3,-1.98,4.26,2.17,1.57],[3,-1.99,3.8,2.17,1.57],[14,-10.68,1.44,2.14,0.0],[14,-12.17,4.44,2.09,1.57],[14,-0.81,-0.3,2.9,0.0],[14,-4.07,3.04,2.1,0.0],[14,-2.05,3.98,2.05,1.47],[14,-2.05,4.31,2.05,1.47],[14,-2.05,4.7,2.05,1.47],[3,-1.37,4.84,2.07,1.55],[3,-1.4,4.18,2.07,1.55],[4,-1.3,5.21,2.05,0.0],[4,-1.27,2.4,1.96,0.0],[4,-3.07,6.0,2.04,0.0],[4,-4.88,6.05,2.06,0.0],[4,-6.35,6.05,2.05,0.0],[4,-8.79,6.03,2.05,0.0],[4,-10.69,6.05,2.04,0.0],[4,-12.38,5.07,2.01,0.76],[4,-12.47,2.96,2.01,0.0],[4,-3.62,3.88,2.09,0.0],[4,-6.65,3.1,2.1,0.0],[4,-9.35,2.99,2.07,0.0],[4,-9.51,1.58,2.09,0.0],[4,-5.74,1.23,2.42,0.0],[4,-6.77,-0.31,2.29,0.0],[4,-9.34,-0.23,1.98,0.0],[4,-12.04,-0.32,1.6,0.0],[4,-13.29,0.76,1.43,0.0],[4,-1.95,0.64,2.89,0.0],[4,2.08,-0.66,2.89,0.0],[4,4.88,0.52,2.89,0.0],[3,6.1,0.67,2.89,5.4],[4,5.58,1.94,2.89,0.0],[4,7.05,-0.89,2.89,0.0],[4,6.3,-2.83,2.89,0.0],[4,6.26,-4.64,2.89,0.0],[4,7.06,-7.26,2.89,0.0],[4,3.9,-7.16,2.89,0.0],[6,-6.34,8.62,1.27,0.0],[6,-14.13,-0.79,1.29,0.0],[6,-14.06,-0.71,1.31,1.63],[6,-14.1,-0.64,1.29,2.7],[14,-14.13,-0.72,1.26,0.0],[14,-6.13,8.12,1.37,0.0],[6,-6.44,8.07,1.36,6.28],[6,-6.34,8.06,1.36,0.41],[14,-6.09,-3.1,1.37,0.23],[1,-7.01,-3.52,1.49,0.0],[1,-5.37,-4.48,1.52,0.0],[2,-8.1,-4.85,1.54,0.0],[2,-6.97,-4.72,1.54,0.0],[2,-6.0,-4.0,1.54,0.0],[1,-0.13,-4.42,2.81,6.28],[1,-0.05,-3.59,2.74,0.0],[1,-0.77,-4.35,2.81,0.0],[1,-1.62,-4.33,2.8,0.01],[14,0.99,5.71,2.14,1.56],[14,0.99,5.42,2.14,1.56],[14,1.51,4.67,2.07,1.56],[14,1.52,4.97,2.07,1.56],[2,-4.11,2.1,2.55,0.0],[2,-4.5,2.06,2.54,0.0],[14,0.37,-4.64,2.83,0.0],[14,0.11,-4.64,2.84,0.0],[14,-14.13,-1.3,1.22,0.0],[14,-14.04,-0.74,1.23,0.0],[6,-5.96,8.46,1.27,0.01],[6,-6.04,8.47,1.27,0.01],[6,-6.12,8.46,1.27,0.01],[14,-6.31,8.57,1.21,0.0],[3,-6.96,7.81,1.39,0.0],[3,-6.68,7.95,1.39,0.0],[3,-7.21,7.7,1.39,0.0],[3,-7.42,7.71,1.39,0.0],[3,-7.71,7.67,1.47,0.0],[3,-7.99,7.67,1.61,0.0],[3,-8.26,7.62,1.75,0.0],[2,-8.05,6.74,1.67,0.2],[2,-8.66,6.75,1.89,0.13],[2,-8.69,7.68,1.87,0.0],[2,-8.03,7.93,1.53,0.0],[2,-8.59,6.57,1.89,0.13],[3,-9.33,6.59,2.08,0.0],[3,-9.08,6.57,2.08,0.0],[3,-9.24,6.61,2.08,0.0],[6,-9.09,6.56,2.07,4.96],[6,-0.01,-4.69,2.86,5.98],[1,-2.42,-7.52,1.48,0.15],[1,-1.71,-10.1,0.92,1.81],[14,-11.98,4.44,2.07,0.0],[14,8.08,1.42,2.03,4.7],[14,8.34,1.16,1.84,6.28],[1,-3.54,-3.12,2.71,3.25],[1,-3.99,-2.56,2.55,0.0],[14,-14.14,-0.72,1.26,0.0],[6,4.92,-1.35,2.94,1.55],[6,4.91,-1.26,2.94,2.26],[1,11.13,2.03,1.09,3.14],[1,3.29,-2.31,2.49,4.84],[4,-12.21,4.9,2.15,0.0],[4,-3.56,-9.09,3.09,0.0],[4,-0.36,-10.01,2.51,0.0],[4,1.62,-10.29,1.9,0.0],[4,5.27,-10.48,1.86,0.0],[4,6.91,-10.34,2.01,0.0],[4,-2.51,-0.89,3.16,0.0],[2,-12.16,-0.58,1.52,4.08],[2,-11.97,-0.77,1.6,3.43],[14,-1.82,-5.74,2.91,4.7],[1,-2.05,-3.74,2.83,0.0],[1,-2.69,-6.46,2.88,6.28],[1,-2.68,-7.02,2.88,0.0],[1,-4.21,2.56,2.08,0.0],[1,-4.83,2.62,2.09,0.0],[2,-4.5,2.21,2.11,0.0],[2,-3.98,2.22,2.11,5.92],[3,-9.48,1.95,2.06,1.59],[3,-9.47,2.58,2.06,1.4],[6,-9.55,2.29,2.08,0.0],[6,-9.44,2.95,2.08,0.0],[1,-2.8,-4.41,2.81,0.0],[1,-2.3,-4.41,2.82,0.0],[1,-1.08,-4.44,2.81,0.0],[1,-1.71,-4.37,2.96,4.94],[6,-5.97,2.9,2.1,1.09],[6,-5.98,2.79,2.1,1.09],[6,-5.98,2.63,2.1,1.09],[6,-5.98,2.44,2.1,1.09],[6,-5.98,2.25,2.1,1.09],[6,-6.16,2.23,2.1,1.09],[6,-6.26,2.23,2.1,1.09],[6,-6.56,2.27,2.1,1.51],[8,6.59,-0.32,1.62,1.57],[8,6.59,0.28,1.62,1.57],[8,7.04,0.28,1.62,4.71],[8,7.04,-0.02,1.62,4.71],[8,7.04,-0.32,1.62,4.71],[8,7.04,-0.62,1.62,4.71],[8,7.04,-0.93,1.62,4.71],[14,4.68,3.66,1.52,4.67],[7,0.17,5.62,1.14,1.57],[14,3.85,4.38,1.37,0.0],[14,3.11,4.38,1.37,0.0],[14,4.61,5.44,2.62,0.0],[14,4.29,5.46,2.62,0.0],[14,4.81,4.02,1.53,0.0],[1,-8.61,2.58,2.08,0.0],[1,-8.04,2.61,2.08,0.0],[14,-0.42,-5.56,2.9,0.0],[14,-0.05,-5.57,2.9,0.0],[14,0.33,-5.57,2.9,0.0],[9,-0.49,-4.86,2.89,0.0],[9,-0.66,-4.86,2.89,0.0],[14,1.0,0.72,2.14,4.71],[14,1.01,-0.0,2.14,4.71],[14,0.83,-0.18,2.1,0.0],[14,0.95,-0.03,2.14,1.59],[10,-13.75,5.02,2.08,0.17],[10,-5.44,5.0,2.14,0.0],[10,4.78,1.4,2.98,1.01],[11,1.7,-8.06,2.95,4.17],[11,1.64,-7.63,2.97,5.68],[11,-11.31,5.94,2.14,4.69],[11,-7.73,4.83,2.12,1.77],[11,4.78,0.85,2.95,1.48],[11,6.49,-7.92,2.95,1.82],[11,-12.99,-0.97,1.53,0.63],[11,-5.72,7.49,1.42,1.13],[11,2.83,-1.59,1.7,2.29],[11,3.83,-1.81,1.7,2.46],[11,9.15,1.4,3.22,4.7],[11,8.37,3.3,2.47,4.66],[11,-2.04,-6.63,3.01,1.52],[11,6.05,-3.71,2.96,4.82],[11,6.08,-4.02,2.96,4.78],[11,6.03,-5.84,2.93,1.51],[11,9.28,-5.7,2.98,0.06],[11,-0.1,-0.57,2.96,1.57],[11,-8.37,2.83,2.16,6.15],[11,-0.27,5.04,2.11,5.99],[11,-2.52,5.09,2.14,1.43],[11,-0.61,4.94,1.2,1.34],[11,-0.46,3.01,1.05,0.25],[11,-2.55,2.78,2.14,6.09],[11,-2.95,2.85,2.12,0.01],[11,2.34,-0.23,1.74,1.55],[11,5.5,-0.52,2.96,3.09],[11,5.79,-0.54,2.96,0.0],[11,6.08,-0.55,2.96,0.0],[11,7.39,-0.59,2.98,6.28],[11,4.04,-0.64,2.95,0.01],[11,2.26,1.16,2.95,0.24],[12,-6.19,8.13,1.47,2.03],[12,-6.01,8.14,1.47,4.02],[12,-6.14,8.24,1.44,0.0],[12,-0.1,-4.06,2.87,6.28],[12,-0.11,-4.15,2.89,3.18],[12,-0.38,-3.55,2.85,4.12],[12,-0.42,-3.45,2.85,0.0],[12,-0.47,-3.54,2.85,2.45],[12,-3.91,-3.25,2.97,4.88],[12,8.98,-5.73,3.01,0.88],[12,8.95,-5.84,3.01,2.33],[12,8.98,-5.5,3.01,1.34],[12,-0.49,-3.45,2.85,0.55],[12,-4.76,-3.16,1.76,4.83],[12,-6.11,8.02,1.47,2.48],[12,5.98,-3.87,3.0,1.56],[12,6.07,-3.81,3.0,0.0],[12,6.25,-5.28,3.03,1.32],[12,7.65,-4.36,3.0,3.99],[12,7.57,-4.16,3.0,0.68],[12,7.5,-4.18,3.0,0.81],[12,7.44,-4.22,3.0,0.65],[12,-0.52,-3.5,2.85,2.14],[12,-5.1,-0.1,2.6,0.0],[12,-5.17,-0.2,2.59,3.46],[12,5.49,1.55,3.0,0.31],[12,-1.59,-5.03,3.42,2.92],[12,-11.77,1.97,1.75,4.36],[12,-1.43,5.14,2.16,3.78],[12,-11.79,5.8,2.13,1.01],[12,-11.67,5.77,2.13,5.69],[12,-15.01,5.15,2.1,4.25],[12,3.71,-2.02,1.68,6.25],[12,3.46,0.55,1.68,0.0],[12,-11.52,5.76,2.13,1.32],[12,-11.57,5.73,2.13,6.27],[12,-9.63,6.7,2.2,1.22],[12,-8.46,3.88,2.18,6.27],[12,-8.54,3.86,2.18,0.67]]};
+const TRL=(()=>{const dec=b=>Uint8Array.from(atob(b),c=>c.charCodeAt(0));return{land:dec(TRIL.land),h:dec(TRIL.h)}})();
+function trSample(arr,x,z){const fx=(x-TRIL.x0)/TRIL.st,fz=(z-TRIL.z0)/TRIL.st;if(fx<0||fz<0||fx>TRIL.nx-1||fz>TRIL.nz-1)return 0;
+  const i=Math.floor(fx),j=Math.floor(fz),u=fx-i,v=fz-j,i1=Math.min(TRIL.nx-1,i+1),j1=Math.min(TRIL.nz-1,j+1),N=TRIL.nx,g=(a,b)=>arr[b*N+a]/255;
+  return g(i,j)*(1-u)*(1-v)+g(i1,j)*u*(1-v)+g(i,j1)*(1-u)*v+g(i1,j1)*u*v}
+const inSecret=(x,z,m=0)=>x>-13.6-m&&x<-6.4+m&&z>.4-m&&z<7.6+m;
+function H(x,z){let l=trSample(TRL.land,x,z);if(inSecret(x,z,1.2)||(x>-17.5&&x<-12&&z>-1.2&&z<2.2))l=Math.max(l,1);
+  let h;if(l>.62)h=1.2+trSample(TRL.h,x,z)*4.8;else if(l>.38)h=1.2-1.12*sm((.62-l)/.24);else h=.08-3.3*sm((.38-l)/.3);
+  if(inSecret(x,z,.6))h=1.2;return h}
 
 (function terrain(){
   const TS=80,TN=140,g=new THREE.PlaneGeometry(TS,TS,TN,TN);g.rotateX(-Math.PI/2);
@@ -1718,7 +1741,7 @@ const SPOTS=[
   {n:"Tugboat",d:"Small but strong boat that tows a barge and carries supplies. Tap Sail to send it around the island.",obj:boat,box:[0,1.2,0,6.4,3.4,2.6],v:"boat"}
 ];
 const hitBoxes=[],hitMat=new THREE.MeshBasicMaterial({visible:false});
-SPOTS.forEach((s,i)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(s.box[3],s.box[4],s.box[5]),hitMat);m.position.set(s.box[0],s.box[1],s.box[2]);m.userData.spot=i;m.userData.isle=i;(s.obj||root).add(m);hitBoxes.push(m)});
+SPOTS.forEach((s,i)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(s.box[3],s.box[4],s.box[5]),hitMat);m.position.set(s.box[0],s.box[1],s.box[2]);m.userData.spot=i;m.userData.isle=i;s._m=m;(s.obj||root).add(m);hitBoxes.push(m)});
 
 let puffT=0,foamT=0;const _tan=new THREE.Vector3();
 function stepBoat(dt,t){
@@ -1736,12 +1759,64 @@ function stepBoat(dt,t){
 }
 
 
+
+/* ================= TRAIL ISLAND (rebuilt from the uploaded tril.xml map) ================= */
+(function trailIsland(){
+  const keep=new Set([sea,far,boat,...gulls]);root.children.forEach(c=>{if(c.isMesh&&c.material===GROUNDMAT)keep.add(c)});
+  root.children.slice().forEach(c=>{if(!keep.has(c))root.remove(c)});
+  const tug=SPOTS.findIndex(q=>q.v==="boat");for(let i=hitBoxes.length-1;i>=0;i--)if(hitBoxes[i].userData.isle!==tug)hitBoxes.splice(i,1);
+  const b=new Builder(),r=rnd(77),T=new THREE.Group();root.add(T);
+  const far2=z=>Math.abs(z)>11?Math.sign(z)*(11+(Math.abs(z)-11)*.6):z;
+  const blocked=(x,z)=>inSecret(x,z,1)||(x>-17.5&&x<-12&&z>-1.4&&z<2.4)||(x>14&&Math.abs(z-3)<2);
+  const P=TRIL.props.map(([c,x,z,y,ry])=>[c,x,far2(z),y,ry]);
+  // causeway bridge north-south with pillars and rails
+  const BR=P.filter(p=>p[0]===7||p[0]===5&&Math.abs(p[1]+1.6)<1.5).sort((a,b)=>a[2]-b[2]);
+  const bx=-1.65,deckY=z=>{let best=null,bd=1e9;BR.forEach(p=>{const d=Math.abs(p[2]-z);if(d<bd){bd=d;best=p}});return Math.max(H(bx,z)+.15,best?Math.min(4.2,best[3]):1.4)};
+  const z0=Math.min(...BR.map(p=>p[2]),-20),z1=Math.max(...BR.map(p=>p[2]),20);
+  for(let z=z0;z<z1;z+=.5){const y=deckY(z),land=H(bx,z)>.9;if(land&&Math.abs(z)<9)continue;
+    b.add("box",(Math.round(z*2)%2)?0x9a8a7a:0x8a7a6a,bx,y,z+.25,1.6,.14,.52);
+    [-1,1].forEach(s=>{b.add("box",0xd9483b,bx+s*.78,y+.32,z+.25,.06,.06,.52)});
+    if(Math.round(z*2)%6===0){[-1,1].forEach(s=>b.add("cyl",0xc9ced2,bx+s*.78,y+.18,z,.03,.34,.03));if(!land)b.add("cyl",0x7d8589,bx,(y-3.3)/2,z,.22,y+3.3,.22)}}
+  [z0,z1].forEach(z=>{const y=deckY(z);b.add("box",0xb98a55,bx,y,z,5,.16,4);for(let k=0;k<6;k++)b.add("box",0xa87a48,bx-2.2+k*.88,y+.1,z,.1,.04,3.8)});
+  // ATV dirt trail looping through the vehicles
+  const V=P.filter(p=>(p[0]===10||p[0]===11)&&Math.abs(p[2])<11);const cx=V.reduce((a,p)=>a+p[1],0)/V.length,cz=V.reduce((a,p)=>a+p[2],0)/V.length;
+  const loop=V.slice().sort((a,b)=>Math.atan2(a[2]-cz,a[1]-cx)-Math.atan2(b[2]-cz,b[1]-cx));
+  for(let i=0;i<loop.length;i++){const a=loop[i],q=loop[(i+1)%loop.length],n=Math.ceil(Math.hypot(q[1]-a[1],q[2]-a[2])/.45);
+    for(let k=0;k<n;k++){const t=k/n,x=a[1]+(q[1]-a[1])*t,z=a[2]+(q[2]-a[2])*t;if(blocked(x,z)||H(x,z)<.9)continue;b.add("cyl",k%2?0xb8915a:0xa8814a,x,H(x,z)+.02,z,.55,.04,.55)}}
+  const ROCKC=[0x8d9497,0xa08a70,0x7d8589,0xb09a7a];
+  P.forEach(([c,x,z,y,ry],i)=>{if(Math.abs(x)>21||blocked(x,z))return;const g=H(x,z),onL=g>.9;
+    if(c===1){if(i%2||!onL)return;const sz=.35+r()*.55;b.add("ico",ROCKC[i%4],x,g+sz*.25,z,sz,sz*.7,sz*.85,r(),ry,r())}
+    else if(c===2&&onL){const s=.75+r()*.4;b.add("cyl",0x7a4a24,x,g+.55*s,z,.1*s,1.1*s,.1*s);b.add("sph",i%3?0x3f9f35:0x2e8a2a,x,g+1.35*s,z,.62*s,.7*s,.62*s);b.add("sph",0x5fbf45,x+.18*s,g+1.65*s,z-.1*s,.38*s,.36*s,.38*s);b.add("sph",0x2f8a28,x-.25*s,g+1.15*s,z+.2*s,.42*s,.4*s,.42*s)}
+    else if(c===3&&onL){const s=.5+r()*.35;b.add("sph",0x3fa833,x,g+.25*s,z,.5*s,.42*s,.5*s);b.add("sph",0x6ccf45,x+.12*s,g+.45*s,z,.3*s,.25*s,.3*s)}
+    else if(c===4&&onL){palm(b,x,z,i*31+5)}
+    else if(c===5){const yy=Math.abs(x+1.65)<1.5&&Math.abs(z)>8?deckY(z)+.07:g;b.add("cyl",0x3a4652,x+.9,yy+1.1,z,.05,2.2,.05);b.add("box",0x3a4652,x+.75,yy+2.2,z,.36,.05,.08);b.add("box",0xfff2b0,x+.6,yy+2.12,z,.18,.08,.14)}
+    else if(c===6&&onL){b.add("box",i%2?0xe8622a:0xf2f2ee,x,g+.22,z,.75,.38,.12,0,ry,0);b.add("box",0x5a3a22,x,g+.04,z,.8,.08,.24,0,ry,0)}
+    else if(c===8){b.add("box",0xb98a55,x,.5,z,1.2,.1,.5,0,ry,0);b.add("cyl",0x6b4a2c,x,-.6,z,.08,2.2,.08)}
+    else if(c===9&&onL){b.add("box",0x9b6a3a,x,g+.32,z,.9,.08,.3,0,ry,0);b.add("box",0x7a4a24,x,g+.16,z,.08,.32,.28,0,ry,0)}
+    else if(c===10&&onL){const C=[0x2f6fb0,0x3a7a3a,0xd9d9d9][i%3];b.add("box",C,x,g+.42,z,1.5,.42,.78,0,ry,0);b.add("box",0x2b3640,x-.05,g+.74,z,.75,.3,.7,0,ry,0);
+      for(const[dx,dz]of[[.5,.4],[-.5,.4],[.5,-.4],[-.5,-.4]]){const ca=Math.cos(ry),sa=Math.sin(ry);b.add("cyl",0x1f1f1f,x+dx*ca+dz*sa,g+.2,z-dx*sa+dz*ca,.2,.14,.2,Math.PI/2,ry,0)}}
+    else if(c===11&&onL){const C=[0xe2402f,0xf5c732,0x3fa8e8,0x7ccf4a][i%4];b.add("box",C,x,g+.35,z,.7,.22,.42,0,ry,0);b.add("box",0x2b3640,x,g+.5,z,.25,.12,.3,0,ry,0);
+      for(const[dx,dz]of[[.28,.24],[-.28,.24],[.28,-.24],[-.28,-.24]]){const ca=Math.cos(ry),sa=Math.sin(ry);b.add("cyl",0x1f1f1f,x+dx*ca+dz*sa,g+.15,z-dx*sa+dz*ca,.15,.12,.15,Math.PI/2,ry,0)}}
+    else if(c===12&&onL){const sh=[0xe86a9a,0x3fa8e8,0xf2b632,0x8a4ac0,0x2fb08a][i%5],sk=[0xe0a878,0xc68a5a,0xa8724a][i%3];
+      b.add("box",0x3a3a4a,x,g+.2,z,.14,.4,.24,0,ry,0);b.add("box",sh,x,g+.55,z,.18,.34,.3,0,ry,0);b.add("sph",sk,x,g+.82,z,.11,.12,.11);b.add("cyl",0xd8b860,x,g+.94,z,.17,.03,.17)}
+    else if(c===13){b.add("sph",0xe8622a,x,.12,z,.25,.25,.25);b.add("cyl",0xf2f2ee,x,.35,z,.04,.3,.04)}
+    else if(c===14&&onL&&i%2===0){if(i%4)b.add("box",0xb07a3e,x,g+.25,z,.5,.5,.5,0,ry,0);else{b.add("cyl",[0x2f6fb0,0xd9342b,0x3a7a3a][i%3],x,g+.32,z,.24,.64,.24);b.add("cyl",0x2b3640,x,g+.65,z,.25,.03,.25)}}
+  });
+  // tugboat pier on the east shore (kept from before)
+  for(let x=PIER.x0;x<PIER.x1;x+=.36)b.add("box",r()<.5?0xb98a55:0xa87a48,x+.18,PIER.y,PIER.z,.32,.1,PIER.w);
+  [-1,1].forEach(s=>b.add("box",0x7a5432,(PIER.x0+PIER.x1)/2,PIER.y-.15,PIER.z+s*(PIER.w/2-.15),PIER.x1-PIER.x0,.18,.18));
+  for(let x=PIER.x0+.5;x<=PIER.x1;x+=2.4)[-1,1].forEach(s=>b.add("cyl",0x6b4a2c,x,PIER.y-2.1,PIER.z+s*(PIER.w/2+.05),.16,4.4,.16));
+  b.add("box",0xa87a48,PIER.x0-.6,H(PIER.x0-1.2,PIER.z)+.15,PIER.z,1.6,.1,PIER.w,0,0,-.1);
+  // welcome sign
+  b.add("cyl",0x7a4a24,-14.6,H(-14.6,-1.6)+.7,-1.6,.06,1.4,.06);b.add("cyl",0x7a4a24,-13.2,H(-13.2,-1.6)+.7,-1.6,.06,1.4,.06);b.add("box",0xc98a4b,-13.9,H(-13.9,-1.6)+1.3,-1.6,1.8,.55,.08);
+  T.add(b.mesh());const sign=labelSprite("Trail Island");sign.position.set(-13.9,H(-13.9,-1.6)+2.2,-1.6);sign.scale.set(2.2,.55,1);T.add(sign);
+})();
 const SEAC={spring:0x2a9fd6,summer:0x22b4de,rainy:0x2f6f8c,winter:0x6a9cb8},SAMP={spring:1,summer:.8,rainy:2,winter:.55};
 const _sc=new THREE.Color();
 return{root,spots:SPOTS,hits:hitBoxes,boat,
   sail(){if(!VOY.on){VOY.on=true;VOY.t=0}},sailing:()=>VOY.on,
   setRoof(on){roofGroup.visible=on},
-  spotWorld(i,v){hitBoxes[i].getWorldPosition(v);v.y+=SPOTS[i].box[4]/2+.3;return v},
+  spotWorld(i,v){(SPOTS[i]._m||hitBoxes[0]).getWorldPosition(v);v.y+=SPOTS[i].box[4]/2+.3;return v},
   boatWorld(v){return boat.getWorldPosition(v)},
   weather(key,dt){SEAMAT.color.lerp(_sc.set(SEAC[key]||SEAC.spring),Math.min(1,dt*.7));ampT=SAMP[key]||1;AMP+=(ampT-AMP)*Math.min(1,dt*.5)},
   step(dt,t){stepSea(t);const blink=Math.sin(t*3)>.4?1:.2;REDMAT.color.setRGB(1,.23*blink,.19*blink);spotHead.rotation.y=t*.45;radar.rotation.y=t*1.4;stepBoat(dt,t);stepGulls(t);stepFx(dt,t)}};
@@ -1847,7 +1922,7 @@ function updateTag(){
     txt=t.k==="grass"?"Plow · "+PLOW+" coins":t.k==="soil"?"Plant: "+crop(S.sel).n:st.dead?"Dead · tap to clear":st.w>0?st.c.n+" · Wilting! Harvest now":st.left<=0?st.c.n+" · Ripe · "+fmt(ripeWin(t)-(now()-t.at-st.c.t*(t.f?.5:1)*(S.tools&&S.tools.includes("pandilig")?.8:1)))+" before it wilts"+(WX.key==="summer"?" ☀️":""):st.c.n+" · growing "+Math.round(st.p*100)+"%";
     if(st&&st.left>0)prog=st.p}
   else{const o=animalObjs[hovered.pen],p=S.pens[hovered.pen];if(!o||!p||!o.g.visible)return;const a=animal(p.id),left=a.t-(now()-p.at);
-    wp=_p.copy(o.g.position);wp.y+=o.g.userData.h+.45;const gs=p.g==="F"?" ♀":" ♂";if(p.sick)txt=a.n+gs+" · Sick! Dies in "+fmt(Math.max(0,SICK_DIE-(now()-(p.sickAt||now()))))+" · Treat: "+cureCost(a);else if(isBaby(p)){txt="Baby "+a.n+gs+" · grows up in "+fmt(GROW_T-(now()-p.born));prog=(now()-p.born)/GROW_T}else{txt=a.n+gs+(p.preg?" · Pregnant, gives birth in "+fmt(Math.max(0,PREG_T-(now()-p.preg))):"")+" · "+(left<=0?"Collect: "+a.item:a.item+" in "+fmt(left));if(left>0)prog=1-left/a.t}}
+    wp=_p.copy(o.g.position);wp.y+=o.g.userData.h+.45;const gs=p.g==="F"?" ♀":" ♂";if(p.sick&&p.heal){txt=a.n+gs+" · 💊 Getting better · healthy in "+fmt(p.heal-now());prog=1-(p.heal-now())/150}else if(p.sick)txt=a.n+gs+" · Sick! Dies in "+fmt(Math.max(0,SICK_DIE-(now()-(p.sickAt||now()))))+" · Treat: "+cureCost(a);else if(isBaby(p)){txt="Baby "+a.n+gs+" · grows up in "+fmt(GROW_T-(now()-p.born));prog=(now()-p.born)/GROW_T}else{txt=a.n+gs+(p.preg?" · Pregnant, gives birth in "+fmt(Math.max(0,PREG_T-(now()-p.preg))):"")+" · "+(left<=0?"Collect: "+a.item:a.item+" in "+fmt(left));if(left>0)prog=1-left/a.t}}
   wp.project(camera);if(wp.z>1)return;
   const w=stage.clientWidth,h=stage.clientHeight;
   tag.hidden=false;tag.innerHTML=txt+(prog!=null?`<i><b style="width:${(prog*100).toFixed(1)}%"></b></i>`:"");
@@ -1893,9 +1968,9 @@ function tap(i,x,y){
 }
 function tapPen(i,x,y){const p=S.pens[i],a=animal(p.id);
   if(!p.sick&&isBaby(p))return toast("Still young: "+a.n+". It grows up in "+fmt(GROW_T-(now()-p.born))+".");
-  if(p.sick){const c=cureCost(a);if(S.coins<c)return toast("You need "+c+" coins for medicine.");S.coins-=c;p.sick=false;delete p.sickAt;floatText("Healed! −"+c,x,y);const o=animalObjs[i];if(o)burst(o.g.position.x,.7,o.g.position.z,0x7fe08a,14);toast(a.n+" is healthy now.");after();return}
+  if(p.sick){if(p.heal)return toast(a.n+" is getting medicine. Healthy in "+fmt(p.heal-now())+".");const c=cureCost(a);if(S.coins<c)return toast("You need "+c+" coins for medicine.");S.coins-=c;startHeal(p);floatText("Medicine given −"+c,x,y);const o=animalObjs[i];if(o)burst(o.g.position.x,.7,o.g.position.z,0x7fe08a,14);toast(a.n+" got medicine. It will be healthy in "+fmt(p.heal-now())+".",3200);after();return}
   const left=a.t-(now()-p.at);if(left>0)return toast(a.item+" in "+fmt(left));const it=AITEM[a.id];if(it){if(!addItem(it,1,x,y))return;gain(0,a.xp,null)}else gain(a.s,a.xp,x,y);p.at=now();after()}
-function harvestAll(){if(cdLeft("harv")>0)return toast("Harvest All is ready again in "+fmt(cdLeft("harv"))+".");
+function harvestAll(){if(!isOwner())return;if(cdLeft("harv")>0)return toast("Harvest All is ready again in "+fmt(cdLeft("harv"))+".");
   let xp=0,n=0,cash=0,stop=false;
   S.tiles.forEach((t,i)=>{if(stop)return;const st=tileState(t);if(st&&!st.dead&&st.left<=0){const q=st.w>.5?0:1;if(q&&!addItem(st.c.id,q,null)){stop=true;return}xp+=st.c.xp;n++;S.tiles[i]={k:"soil"};burstTile(i,st.c.col,8,.4)}});
   S.pens.forEach(p=>{if(stop)return;const a=animal(p.id);if(!p.sick&&!isBaby(p)&&now()-p.at>=a.t){const it=AITEM[a.id];if(it){if(!addItem(it,1,null)){stop=true;return}}else cash+=a.s;xp+=a.xp;n++;p.at=now()}});
@@ -1934,8 +2009,8 @@ function buildPenX(){const key=JSON.stringify(S.penLv||{});if(key===_penxK)retur
     if(lv>=3){lantern(midx+1.2,fz);lantern(midx-1.6,fz);for(let k=0;k<4;k++)b.add("ico",0xc4b8a4,midx+.6,.03,(P.gate==="n"?P.z1+.5:P.z0-.5)+(P.gate==="n"?1:-1)*k*.45,.22,.04,.2,0,k,0)}
     for(let k=0;k<lv;k++){const z=P.z0+.6+k*((P.z1-P.z0-1.2)/2);shed(P.x0-.62,z,id==="manok"?0xd8a25a:0x9b6a3a,0xb5452f,Math.PI)}
     if(lv){const t=labelSprite("Lv "+(lv+1));t.scale.set(.9,.24,1);t.position.set(P.x0-.62,1.7,(P.z0+P.z1)/2);PENX.add(t)}});
-  if(L.pond){flowers(6.3,7.6,6.2);if(L.pond>=3){lantern(6.6,10.3);lantern(11.4,10.2)}}
-  for(let k=0;k<(L.pond|0);k++){const a=-.6+k*.9;shed(9+Math.cos(a)*3.3,8+Math.sin(a)*2.6,0xe8e0c8,0x2f7fb8,Math.PI-a)}
+  setPondSize(L.pond|0);if(L.pond){flowers(POND.x-POND.rx-.4,POND.x-POND.rx+.9,POND.z-POND.rz-.5);if(L.pond>=3){lantern(POND.x-POND.rx-.2,POND.z+POND.rz+.4);lantern(POND.x+POND.rx-.6,POND.z+POND.rz+.6)}}
+  for(let k=0;k<(L.pond|0);k++){const a=1.2+k*.8;shed(POND.x+Math.cos(a)*(POND.rx+.9),POND.z+Math.sin(a)*(POND.rz+.9),0xe8e0c8,0x2f7fb8,Math.PI-a)}
   if(L.farm>=2)flag(-2.4,0,-11.6,0xf2b632);for(let k=0;k<(L.farm|0);k++)shed(-1.6+k*1.3,-11.6,0xc98a4b,0x8f3a2a,Math.PI/2);
   PENX.add(b.mesh());PENX.add(new THREE.Mesh(sn.geo(),SNOWMAT))}
 function expandHouse(k,n){S.penLv=S.penLv||{};const lv=S.penLv[k]|0;if(lv>=PENUP.length)return;const c=PENUP[lv];if(S.coins<c)return toast("You need "+c+" coins to expand the "+n+".");
@@ -1968,7 +2043,7 @@ function ui(){
   const shop=$("shop");
   if(shop._lv!==S.lv){shop._lv=S.lv;shop.innerHTML=ANIMALS.map(a=>S.lv<a.lv?`<div class="abuy lock"><b>${a.n}</b><small>Level ${a.lv}</small></div>`:`<div class="abuy"><b>${a.n}</b><small>${a.cost} coins</small><button class="btn sm" data-id="${a.id}" data-g="M">♂ Male</button><button class="btn sm" data-id="${a.id}" data-g="F" style="background:#d9568a;box-shadow:0 4px 0 #9a2f5a">♀ Female</button></div>`).join("");
     shop.querySelectorAll("button[data-id]").forEach(b=>b.onclick=()=>buyAnimal(animal(b.dataset.id),b.dataset.g))}
-  {const pu=$("penUp"),HS=[...Object.keys(PENS).map(id=>({k:id,n:PENS[id].n,ids:[id]})),{k:"pond",n:"Duck Pond",ids:["bibe","pato"]},{k:"farm",n:"Dog & Cat Yard",ids:["aso","pusa"]}];
+  {const pu=$("penUp"),HS=[...Object.keys(PENS).map(id=>({k:id,n:PENS[id].n,ids:[id]})),{k:"pond",n:"Duck Pond (grows bigger)",ids:["bibe","pato"]},{k:"farm",n:"Dog & Cat Yard",ids:["aso","pusa"]}];
     const key=JSON.stringify([S.penLv||{},S.pens.length,Math.floor(S.coins/50)]);if(pu&&pu._k!==key){pu._k=key;
     pu.innerHTML=HS.map(h=>{const lv=(S.penLv||{})[h.k]|0,cap=zoneLimit(h.ids[0]),have=h.k==="pond"||h.k==="farm"?S.pens.filter(p=>zoneOf(p.id)===h.k).length:S.pens.filter(p=>p.id===h.k).length,c=PENUP[lv];
       return `<div class="abuy"><b>${h.n}</b><small>${have} / ${cap} · Level ${lv+1}</small>${lv>=PENUP.length?`<small>Max size</small>`:`<button class="btn sm" data-h="${h.k}"${S.coins<c?" disabled":""}>Level up · ${c}</button>`}</div>`}).join("");
@@ -1997,10 +2072,11 @@ $("tTown").onclick=startJeep;
 $("sellAll").onclick=sellAll;$("shopOpen").onclick=()=>{S.shopOpen=S.shopOpen===false;save();invUI(true);toast(S.shopOpen?"The stall is open. Buyers will come.":"The stall is closed. No buyers will come.",2600)};$("goMkt").onclick=()=>{goView("market")};
 $("placeRot").onclick=()=>{if(PLACE){PLACE.r=(PLACE.r+Math.PI/2)%(Math.PI*2);PLACE.g.rotation.y=PLACE.r}};$("placeOk").onclick=confirmPlace;$("placeX").onclick=cancelPlace;
 const CD_HARV=300,CD_TREAT=600;const cdLeft=k=>Math.max(0,(k==="harv"?CD_HARV:CD_TREAT)-(now()-((S.cd||{})[k]||0)));
-function cdUI(){const h=cdLeft("harv"),c=cdLeft("treat"),a=$("tAll"),b=$("tCure");if(!a||!b)return;
+const OWNERS=[];const isOwner=()=>!OWNERS.length||OWNERS.includes(String((typeof LOCAL!=="undefined"&&LOCAL.user)||"").toLowerCase());
+function cdUI(){const h=cdLeft("harv"),c=cdLeft("treat"),a=$("tAll"),b=$("tCure");if(!a||!b)return;a.hidden=b.hidden=!isOwner();
   a.textContent=h>0?"Harvest All · "+fmt(h):"Harvest All";a.disabled=h>0;b.textContent=c>0?"Treat All · "+fmt(c):"Treat All";b.disabled=c>0}
 setInterval(cdUI,1000);
-$("tCure").onclick=()=>{if(cdLeft("treat")>0)return toast("Treat All is ready again in "+fmt(cdLeft("treat"))+".");const sick=S.pens.map((p,i)=>[p,i]).filter(([p])=>p.sick);if(!sick.length)return toast("No sick animals.");const cost=sick.reduce((s2,[p])=>s2+cureCost(animal(p.id)),0);if(S.coins<cost)return toast("You need "+cost+" coins to treat all.");S.coins-=cost;sick.forEach(([p,i])=>{p.sick=false;delete p.sickAt;const o=animalObjs[i];if(o)burst(o.g.position.x,.7,o.g.position.z,0x7fe08a,10)});toast(sick.length+" animals healed · −"+cost+" coins");S.cd=S.cd||{};S.cd.treat=now();cdUI();after()};
+$("tCure").onclick=()=>{if(!isOwner())return;if(cdLeft("treat")>0)return toast("Treat All is ready again in "+fmt(cdLeft("treat"))+".");const sick=S.pens.map((p,i)=>[p,i]).filter(([p])=>p.sick&&!p.heal);if(!sick.length)return toast(S.pens.some(p=>p.heal)?"The sick animals already got medicine.":"No sick animals.");const cost=sick.reduce((s2,[p])=>s2+cureCost(animal(p.id)),0);if(S.coins<cost)return toast("You need "+cost+" coins to treat all.");S.coins-=cost;sick.forEach(([p,i])=>{startHeal(p);const o=animalObjs[i];if(o)burst(o.g.position.x,.7,o.g.position.z,0x7fe08a,10)});toast(sick.length+" animals got medicine · −"+cost+" coins. They'll be healthy in 2–3 minutes.",3600);S.cd=S.cd||{};S.cd.treat=now();cdUI();after()};
 $("tIsle").onclick=()=>{if(ownBoat())startTrip();else if(onIsle)goView("all");else toast("Buy a boat at the Shop first to reach the island. You can still look at it with the Island view.",4200)};
 $("tCheat").onclick=e=>{S.coins+=100000;const r=e.currentTarget.getBoundingClientRect();floatText("+100,000",r.left+r.width/2,r.top);save();ui()};
 $("tLvl").onclick=()=>{if(S.lv<10){S.lv=10;S.xp=0}save();ui();toast("Level 10: all crops and animals unlocked")};
@@ -2068,13 +2144,14 @@ function stepHelper(dt,t){
   f.legL.rotation.z=sw*.6+1.0*o.cr;f.legR.rotation.z=-sw*.6-.9*o.cr;
   f.armL.rotation.z=lerp(f.armL.rotation.z,armL||(walking?-sw*.5:0),Math.min(1,dt*12));f.armR.rotation.z=lerp(f.armR.rotation.z,armR||(walking?sw*.5:0),Math.min(1,dt*12));
   f.head.rotation.y=o.state==="look"?Math.sin(t*1.6)*.5:0;
+  showTool3D(f,o.state==="goP"||o.state==="plantP"?"pouch":o.state==="pickT"?"basket":null);
 }
 
 /* ================= CREW: you command the farmers ================= */
 const CREW={},WHITS=[];let SEL=null;
 const GPLANE=new THREE.Plane(new THREE.Vector3(0,1,0),0),_gpv=new THREE.Vector3();
-const TASKT={walk:0,plow:1.1,plant:.8,harvest:.8,weed:1.4,animal:.9,rest:0,chop:2.6,pick:1};
-const TASKN={walk:"Walking",plow:"Plowing",plant:"Planting",harvest:"Harvesting",weed:"Pulling weeds",animal:"Tending animals",rest:"Resting",chop:"Chopping a tree",pick:"Picking fruit"};
+const TASKT={walk:0,plow:1.1,plant:.8,harvest:.8,weed:1.4,animal:.9,rest:0,chop:2.6,pick:1,fish:7};
+const TASKN={walk:"Walking",plow:"Plowing",plant:"Planting",harvest:"Harvesting",weed:"Pulling weeds",animal:"Tending animals",rest:"Resting",chop:"Chopping a tree",pick:"Picking fruit",fish:"Fishing"};
 function wName(k){return k==="farmer"?((typeof CLOUD!=="undefined"&&((CLOUD.profile&&CLOUD.profile.farmer)||(CLOUD.local&&CLOUD.local.farmer)))||"Juan"):k==="helper2"?"Helper 2":"Helper"}
 function wAuto(k){return k==="farmer"?S.farmerAuto!==false:k==="helper2"?S.helper2On!==false:S.helperOn!==false}
 function regWorker(k,W,c){W.key=k;W.o.queue=W.o.queue||[];W.ringColor=c;
@@ -2096,6 +2173,7 @@ function taskTarget(q){
   if(q.type==="weed")return q.weed&&q.weed.state==="ground"?[q.weed.x,q.weed.z]:null;
   if(q.type==="animal"){const a=animalObjs[q.pen];return a&&a.g.visible?[a.g.position.x,a.g.position.z]:null}
   if(q.tree){const T=FTREES.find(x=>x.id===q.tree);return T?[T.x,T.z]:null}
+  if(q.type==="fish")return[q.x,q.z];
   return null}
 function commandAt(e,p){
   const W=CREW[SEL];if(!W)return;const q=W.o.queue;if(q.length>=16)return toast("Order list is full for "+wName(SEL)+".");
@@ -2134,13 +2212,14 @@ function doTask(W,q){const tg=taskTarget(q),sc=tg?toScreen(tg[0],1.3,tg[1]):{x:0
   else if(q.type==="rest"){W.o.resting=true;W.g.visible=false}
   else if(q.type==="chop")doChop(q.tree,sc.x,sc.y);
   else if(q.type==="pick"){const k=FTREES.findIndex(x=>x.id===q.tree);if(k>=0)pickTree(k,sc.x,sc.y)}
+  else if(q.type==="fish")catchFish(q,W);
 }
 function animWorker(f,o,dt,t,walking,crT,armL,armR,look){
   o.cr=lerp(o.cr||0,crT,Math.min(1,dt*8));const sw=walking?Math.sin(t*11):0;
   f.hips.position.y=.55-.3*o.cr+(walking?Math.abs(Math.sin(t*11))*.025:0);f.torso.rotation.z=-.65*o.cr;
   f.legL.rotation.z=sw*.6+1.0*o.cr;f.legR.rotation.z=-sw*.6-.9*o.cr;
   f.armL.rotation.z=lerp(f.armL.rotation.z,armL||(walking?-sw*.5:0),Math.min(1,dt*12));f.armR.rotation.z=lerp(f.armR.rotation.z,armR||(walking?sw*.5:0),Math.min(1,dt*12));
-  f.armR.rotation.x=0;f.head.rotation.y=look||0;if(f.axe)f.axe.visible=!!o.axeOn;o.axeOn=false}
+  f.armR.rotation.x=0;f.head.rotation.y=look||0;showTool3D(f,o.axeOn?"axe":o.tool||null);o.axeOn=false;o.tool=null}
 function runQueue(W,dt,t){
   const o=W.o;if(!o.queue)return false;
   const auto=wAuto(W.key);
@@ -2157,20 +2236,22 @@ function runQueue(W,dt,t){
   const tg=taskTarget(q);
   if(!tg){if(q.type==="animal")toast("Can't reach the animal right now.");o.queue.shift();updateCrewUI();animWorker(W,o,dt,t,false,0,0,0,0);return true}
   if(q.phase==="go"){const p=g.position,dx=tg[0]-p.x,dz=tg[1]-p.z,d=Math.hypot(dx,dz);let stop=q.type==="walk"||q.type==="rest"?0:(q.type==="animal"?.75:.42);
-    if(q.tree)stop=1.0;
-    if(d>stop+.03)walkTo(tg[0]-(d?dx/d:0)*stop,tg[1]-(d?dz/d:0)*stop,1.55*spdOf(W));else{q.phase="work";q.tm=TASKT[q.type];if(d>.01)g.rotation.y=Math.atan2(-dz,dx)}}
+    if(q.tree)stop=1.0;if(q.type==="fish")stop=0;
+    if(d>stop+.03)walkTo(tg[0]-(d?dx/d:0)*stop,tg[1]-(d?dz/d:0)*stop,1.55*spdOf(W));else{q.phase="work";q.tm=TASKT[q.type];if(q.type==="fish"){q.tm=q.T=5+Math.random()*4;g.rotation.y=Math.atan2(-(q.wz-q.z),q.wx-q.x)}else if(d>.01)g.rotation.y=Math.atan2(-dz,dx)}}
   else{
     if(q.type==="harvest"){const st=tileState(S.tiles[q.tile]);if(st&&st.p<1){q.wait+=dt;look=Math.sin(t*1.5)*.4;if(q.wait<40){animWorker(W,o,dt,t,false,0,0,0,look);updateMarkers();return true}}}
     q.tm-=dt*spdOf(W);
-    if(q.type==="plow"){crT=.45;armL=armR=1.3+Math.sin(t*9)*1.1}
-    else if(q.type==="plant"){crT=1;armR=.9+Math.sin(t*10)*.35}
-    else if(q.type==="harvest"){crT=1;armL=armR=.95+Math.sin(t*14)*.25}
-    else if(q.type==="weed"){crT=1;armL=armR=1+Math.sin(t*14)*.25;if(q.weed&&q.weed.m)q.weed.m.rotation.z=Math.sin(t*14)*.15}
-    else if(q.type==="animal"){armR=1.5+Math.sin(t*6)*.2}
+    if(q.type==="plow"){o.tool="hoe";crT=.45;armL=armR=1.3+Math.sin(t*9)*1.1}
+    else if(q.type==="plant"){o.tool="pouch";crT=1;armR=.9+Math.sin(t*10)*.35}
+    else if(q.type==="harvest"){o.tool="basket";crT=1;armL=armR=.95+Math.sin(t*14)*.25}
+    else if(q.type==="fish"){o.tool="rod";const e=(q.T||7)-q.tm;if(e<.9){armR=2.7-e*1.6;armL=0}else if(q.tm>.8){armR=1.25+Math.sin(t*2)*.04;look=Math.sin(t*.8)*.15}else{armR=1.25+Math.sin(t*18)*.25+(.8-q.tm)*1.4}
+      fishFx(W,q,e,t)}
+    else if(q.type==="weed"){o.tool=null;crT=1;armL=armR=1+Math.sin(t*14)*.25;if(q.weed&&q.weed.m)q.weed.m.rotation.z=Math.sin(t*14)*.15}
+    else if(q.type==="animal"){o.tool="brush";armR=1.5+Math.sin(t*6)*.5}
     else if(q.type==="chop"){o.axeOn=true;const ph=(t*1.6)%1,sw=ph<.6?ph/.6:1-(ph-.6)/.4;armR=1.1+sw*1.9;armL=armR*.9;crT=.15;
       const T=FTREES.find(x=>x.id===q.tree);if(T){const hitNow=ph>.92||ph<.04;T.g.rotation.z=hitNow?.05:T.g.rotation.z*.8;if(hitNow&&!q.hitF){q.hitF=1;burst(T.x-.3,.7,T.z,0xc98a4b,5,.25)}if(ph>.2)q.hitF=0}}
-    else if(q.type==="pick"){crT=0;armL=armR=2.6+Math.sin(t*12)*.25}
-    if(q.tm<=0){doTask(W,q);o.queue.shift();updateCrewUI()}
+    else if(q.type==="pick"){o.tool="basket";crT=0;armR=2.6+Math.sin(t*12)*.25;armL=.6}
+    if(q.tm<=0){doTask(W,q);if(q.type==="fish")fishFx(W,null);o.queue.shift();updateCrewUI()}
   }
   animWorker(W,o,dt,t,walking,crT,armL,armR,look);
   return true}
@@ -2202,6 +2283,7 @@ function renderCrew(){const box=$("crew");box.textContent="";
     const job=(ic,lbl,tool,tip)=>{const b=document.createElement("button");b.className="cw-mini cw-job";b.type="button";b.textContent=ic+" "+lbl;b.title=tip;
       b.onclick=()=>{selectWorker(k);setTool(tool);const m=$("modeTag");m.textContent=wName(k)+": "+tip;m.style.opacity=1};return b};
     const jr=document.createElement("div");jr.className="cw-jobs";jr.append(job("🪓","Chop","chop","tap a tree to chop it down"),job("🌱","Plant","plant","tap plowed soil to plant your selected seed"),job("🍎","Pick","harvest","tap a fruit tree or ripe crop to pick it"));
+    const fb=document.createElement("button");fb.className="cw-mini cw-job";fb.type="button";fb.textContent="🎣 Fish";fb.title="Go fishing at the pond";fb.onclick=()=>{const W=CREW[k];if(!W)return;if(W.o.queue.length>=16)return;W.o.resting=false;W.o.queue.push(fishTask(W));updateCrewUI();toast(wName(k)+" grabs a fishing rod and heads to the pond.",2600)};jr.append(fb);
     d.append(sel,au,st,rs,jr);box.append(d)});
   renderCrewSel();updateCrewUI()}
 function renderCrewSel(){document.querySelectorAll(".crewc").forEach(d=>{const on=d.dataset.w===SEL;d.classList.toggle("on",on);d.querySelector(".cw-sel").setAttribute("aria-pressed",on)})}
@@ -2275,7 +2357,7 @@ function validPlace(x,z,r){
   for(const a of layout())if(!(a.p&&a.p.island)&&x>a.x0-r-.4&&x<a.x0+a.n+r+.4&&z>a.z0-r-.4&&z<a.z0+a.n+r+.4)return false;
   for(const p of PLOTS)if(!p.island&&x>p.x0-r-.3&&x<p.x0+(p.sz||PN)+r+.3&&z>p.z0-r-.3&&z<p.z0+(p.sz||PN)+r+.3)return false;
   if(inAnyPen(x,z,r+.3))return false;
-  if(Math.hypot(x-9,z-8)<3.2+r||Math.hypot(x-12,z+17.5)<2.6+r)return false;
+  if(((x-POND.x)/(POND.rx+.8+r))**2+((z-POND.z)/(POND.rz+.8+r))**2<1||Math.hypot(x-12,z+17.5)<2.6+r)return false;
   for(let i=0;i<RIVER.length-1;i++)if(segDist(x,z,RIVER[i][0],RIVER[i][1],RIVER[i+1][0],RIVER[i+1][1])<r+.9)return false;
   if(x>-2-r&&x<6.4+r&&z>-11-r&&z<-6.2+r)return false;
   if(x>6.6-r&&x<8.6+r&&z>-3.2-r&&z<1.6+r)return false;
@@ -2372,10 +2454,10 @@ function buyIsle(id){const d=ISLEITEMS.find(q=>q.id===id);if(S.lv<d.lv)return to
   after();shopUI(true)}
 
 /* ================= STORAGE & MARKET STALL ================= */
-const AITEM={manok:"itlog",bibe:"itlog_bibe",pato:"itlog_pato",kambing:"gatas_kambing",baka:"gatas_baka",kalabaw:"gatas_kalabaw"};
+const AITEM={manok:"itlog",bibe:"itlog_bibe",pato:"itlog_pato",kambing:"gatas_kambing",baka:"gatas_baka",kalabaw:"gatas_kalabaw",pusa:"fur_cat",aso:"fur_dog",kabayo:"horsehair"};
 const ITEMS={itlog:{n:"Chicken Eggs",p:6,ic:"egg",col:"#fff3d6"},itlog_bibe:{n:"Duck Eggs",p:8,ic:"egg",col:"#e6efdc"},itlog_pato:{n:"Mallard Eggs",p:9,ic:"egg",col:"#d4e4ef"},
   gatas_kambing:{n:"Goat Milk",p:15,ic:"milk",col:"#3fb04a"},gatas_baka:{n:"Cow Milk",p:22,ic:"milk",col:"#2f7fb8"},gatas_kalabaw:{n:"Carabao Milk",p:28,ic:"milk",col:"#8a4ac0"},
-  apple:{n:"Apple",p:10,ic:"fruit",col:"#e2402f"},orange:{n:"Orange",p:12,ic:"fruit",col:"#f08a24"},mango:{n:"Mango",p:16,ic:"fruit",col:"#f5c732"},wood:{n:"Wood",p:8,ic:"wood",col:"#8a5a2a"}};
+  apple:{n:"Apple",p:10,ic:"fruit",col:"#e2402f"},orange:{n:"Orange",p:12,ic:"fruit",col:"#f08a24"},mango:{n:"Mango",p:16,ic:"fruit",col:"#f5c732"},wood:{n:"Wood",p:8,ic:"wood",col:"#8a5a2a"},fur_cat:{n:"Cat Fur",p:4,ic:"fur",col:"#f0b65a"},fur_dog:{n:"Dog Fur",p:5,ic:"fur",col:"#c98a4b"},horsehair:{n:"Horsehair",p:30,ic:"fur",col:"#6b4422"}};
 CROPS.forEach(c=>{ITEMS[c.id]={n:c.n,p:c.s,crop:true,isl:!!c.island}});
 const invCount=()=>Object.values(S.inv||{}).reduce((a,b)=>a+(b|0),0);
 const invCap=()=>{const b=S.builds||[];return 40*(S.basket||0)+60+80*b.filter(o=>o.id==="bodega").length+150*b.filter(o=>o.id==="kamalig").length};
@@ -2401,6 +2483,8 @@ const ITEMIC={};
 function itemIcon(id){const it=ITEMS[id];if(it.crop)return ICONS[id]||"";if(ITEMIC[id])return ITEMIC[id];
   const c=document.createElement("canvas");c.width=c.height=96;const x=c.getContext("2d");x.fillStyle="#f3e6c8";x.beginPath();x.arc(48,50,42,0,Math.PI*2);x.fill();
   if(it.ic==="fruit"){[[34,58],[60,58],[47,40]].forEach(([fx,fy])=>{x.fillStyle=it.col;x.strokeStyle="rgba(0,0,0,.35)";x.lineWidth=2.5;x.beginPath();x.arc(fx,fy,15,0,Math.PI*2);x.fill();x.stroke();x.fillStyle="#3f8f2c";x.beginPath();x.ellipse(fx+5,fy-15,6,3,-.5,0,Math.PI*2);x.fill();x.fillStyle="rgba(255,255,255,.6)";x.beginPath();x.arc(fx-5,fy-5,4,0,Math.PI*2);x.fill()})}
+  else if(it.ic==="fish"){x.fillStyle=it.col;x.strokeStyle="rgba(0,0,0,.35)";x.lineWidth=3;x.beginPath();x.ellipse(44,52,26,13,0,0,Math.PI*2);x.fill();x.stroke();x.beginPath();x.moveTo(66,52);x.lineTo(84,38);x.lineTo(84,66);x.closePath();x.fill();x.stroke();x.fillStyle="#111";x.beginPath();x.arc(30,48,3,0,Math.PI*2);x.fill()}
+  else if(it.ic==="fur"){x.fillStyle=it.col;x.strokeStyle="rgba(0,0,0,.3)";x.lineWidth=3;x.beginPath();x.ellipse(48,56,30,20,0,0,Math.PI*2);x.fill();x.stroke();x.strokeStyle="rgba(255,255,255,.55)";x.lineWidth=2.5;for(let k=0;k<6;k++){x.beginPath();x.moveTo(26+k*9,48);x.quadraticCurveTo(30+k*9,58,26+k*9,68);x.stroke()}}
   else if(it.ic==="wood"){[[48,64],[36,46],[60,46]].forEach(([lx,ly])=>{x.fillStyle="#8a5a2a";x.strokeStyle="#5a3a1a";x.lineWidth=3;x.beginPath();x.ellipse(lx,ly,14,12,0,0,Math.PI*2);x.fill();x.stroke();x.fillStyle="#d9b878";x.beginPath();x.ellipse(lx,ly,9,7.5,0,0,Math.PI*2);x.fill();x.strokeStyle="#a8763f";x.lineWidth=1.5;x.beginPath();x.ellipse(lx,ly,4.5,3.5,0,0,Math.PI*2);x.stroke()})}
   else if(it.ic==="egg"){x.fillStyle="#c49a5a";x.beginPath();x.ellipse(48,72,30,9,0,0,Math.PI*2);x.fill();[[34,56],[60,58],[47,46]].forEach(([ex,ey])=>{x.fillStyle=it.col;x.strokeStyle="#b8905a";x.lineWidth=2.5;x.beginPath();x.ellipse(ex,ey,11,15,0,0,Math.PI*2);x.fill();x.stroke()})}
   else{x.fillStyle="#fff";x.strokeStyle="#5a6a7a";x.lineWidth=3;x.beginPath();x.moveTo(36,34);x.lineTo(60,34);x.lineTo(64,46);x.lineTo(64,80);x.lineTo(32,80);x.lineTo(32,46);x.closePath();x.fill();x.stroke();
@@ -2459,6 +2543,7 @@ function floatSpot(B,txt){const sc=toScreen(B.g.position.x,2,B.g.position.z);flo
 const SICK_DIE=300,PREG_T=1800,GROW_T=600;let breedT=8;const pendingBirth=[];
 const isBaby=p=>!!p.born&&now()-p.born<GROW_T;
 const adultOk=p=>!p.sick&&!isBaby(p);
+function startHeal(p){p.heal=now()+120+Math.floor(Math.random()*61)}
 function zoneCount(id){const z=zoneOf(id);return z==="pen"?S.pens.filter(p=>p.id===id).length:S.pens.filter(p=>zoneOf(p.id)===z).length}
 const houseKey=id=>{const z=zoneOf(id);return z==="pen"?id:z};
 const PENUP=[150,400,900],PENADD=3;
@@ -2779,6 +2864,60 @@ async function visitFarm(u){$("wmErr").textContent="";if(S.inTown||TRIP.on||JTRI
 function goHome(){if(!VISIT)return;VISIT=null;document.body.classList.remove("visiting");$("visitBar").hidden=true;if(SELF){showState(SELF);SELF=null}save();Object.assign(camT,{tx:-3,ty:.6,tz:-1.5,dist:32,pol:.85});toast("You're back on your farm.",2200)}
 (function(){const vb=document.createElement("div");vb.className="visitBar";vb.id="visitBar";vb.hidden=true;vb.innerHTML='<span id="visitTxt"></span><button class="btn sm alt" type="button" id="visitMap">🗺️ Map</button><button class="btn sm" type="button" id="visitHome">Go Home</button>';stage.appendChild(vb);
   $("visitHome").onclick=goHome;$("visitMap").onclick=()=>{$("worldMap").hidden=false;loadMap()}})();
+
+/* ================= AMBIENT SOUND: birds, breeze, farm animals, rain (all generated, no files) ================= */
+const SND={ctx:null,on:false,master:null,wind:null,rain:null,t:{bird:2,cluck:6,moo:14,quack:9}};
+function sndInit(){if(SND.ctx)return true;const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return false;const c=new AC();SND.ctx=c;
+  const m=c.createGain();m.gain.value=0;m.connect(c.destination);SND.master=m;
+  const len=c.sampleRate*2,nb=c.createBuffer(1,len,c.sampleRate),d=nb.getChannelData(0);let last=0;for(let i=0;i<len;i++){const w=Math.random()*2-1;last=(last+.02*w)/1.02;d[i]=last*3.5}
+  const mk=(f,q,g)=>{const src=c.createBufferSource();src.buffer=nb;src.loop=true;const bf=c.createBiquadFilter();bf.type="lowpass";bf.frequency.value=f;bf.Q.value=q;const gg=c.createGain();gg.gain.value=g;src.connect(bf);bf.connect(gg);gg.connect(m);src.start();return{f:bf,g:gg}};
+  SND.wind=mk(500,.4,.12);
+  const rs=c.createBufferSource(),rb=c.createBuffer(1,len,c.sampleRate),rd=rb.getChannelData(0);for(let i=0;i<len;i++)rd[i]=(Math.random()*2-1)*.5;rs.buffer=rb;rs.loop=true;const hp=c.createBiquadFilter();hp.type="highpass";hp.frequency.value=1200;const rg=c.createGain();rg.gain.value=0;rs.connect(hp);hp.connect(rg);rg.connect(m);rs.start();SND.rain={g:rg};
+  return true}
+function tone(type,f0,f1,dur,vol,at){const c=SND.ctx,o=c.createOscillator(),g=c.createGain(),t=c.currentTime+(at||0);o.type=type;o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(Math.max(30,f1),t+dur);
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+Math.min(.03,dur/4));g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g);g.connect(SND.master);o.start(t);o.stop(t+dur+.05)}
+const SFX={bird(){const b=2600+Math.random()*1800,n=2+Math.floor(Math.random()*4);for(let i=0;i<n;i++)tone("sine",b*(1+Math.random()*.2),b*(.7+Math.random()*.6),.09+Math.random()*.06,.05,i*.13)},
+  cluck(){for(let i=0;i<2+Math.floor(Math.random()*2);i++)tone("square",520,300,.07,.025,i*.16)},
+  moo(){tone("sawtooth",150,105,1.1,.035);tone("sine",300,210,1.1,.02)},
+  quack(){for(let i=0;i<2;i++)tone("sawtooth",700,420,.12,.03,i*.2)}};
+function sndSet(on){if(on&&!sndInit()){toast("Sound isn't supported on this device.");return}SND.on=on;const b=$("sndBtn");b.textContent=on?"🔊 Sound":"🔇 Sound";b.setAttribute("aria-pressed",on);
+  try{localStorage.setItem("farming-sound",on?"1":"0")}catch(e){}if(SND.ctx){if(on&&SND.ctx.state==="suspended")SND.ctx.resume();SND.master.gain.setTargetAtTime(on?.9:0,SND.ctx.currentTime,.4)}}
+$("sndBtn").onclick=()=>sndSet(!SND.on);
+let sndWant=false;try{sndWant=localStorage.getItem("farming-sound")==="1"}catch(e){}
+if(sndWant){const go=()=>{window.removeEventListener("pointerdown",go);if(!SND.on)sndSet(true)};window.addEventListener("pointerdown",go)}
+function stepSound(dt){if(!SND.on||!SND.ctx)return;const k=WX.key,rain=k==="rainy",snow=k==="winter",night=false,c=SND.ctx.currentTime;
+  SND.rain.g.gain.setTargetAtTime(rain?.22:0,c,1);SND.wind.g.gain.setTargetAtTime(snow?.3:rain?.18:.1,c,1.5);SND.wind.f.frequency.setTargetAtTime(snow?900:500+Math.sin(c*.2)*150,c,2);
+  const T=SND.t,has=id=>S.pens.some(p=>p.id===id);
+  if((T.bird-=dt)<=0){T.bird=rain||snow?9+Math.random()*10:2+Math.random()*5;if(!rain)SFX.bird()}
+  if((T.cluck-=dt)<=0){T.cluck=6+Math.random()*10;if(has("manok"))SFX.cluck()}
+  if((T.moo-=dt)<=0){T.moo=16+Math.random()*20;if(has("baka")||has("kalabaw"))SFX.moo()}
+  if((T.quack-=dt)<=0){T.quack=10+Math.random()*14;if(has("bibe")||has("pato"))SFX.quack()}}
+/* auto-refresh when a new version is published */
+const BUILD="8";
+if(API&&!BUILD.startsWith("__")){let vT=null;const chk=async()=>{try{const r=await fetch("version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const v=await r.json();
+  if(v&&v.b&&String(v.b)!==BUILD){clearInterval(vT);if(!VISIT)save();if(!VISIT&&myUser())await netSend(true);toast("🔄 New update! Reloading the game…",3000);setTimeout(()=>location.reload(),1800)}}catch(e){}};
+  vT=setInterval(chk,60000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)chk()});setTimeout(chk,15000)}
+
+/* ================= FISH: pond fish and fishing with a rod ================= */
+const FISHES=[],FISHK=[{id:"tilapia",n:"Tilapia",p:10,col:0x9aa3ab},{id:"bangus",n:"Milkfish",p:14,col:0xc9d6de},{id:"hito",n:"Catfish",p:12,col:0x4a4038}];
+FISHK.forEach(f=>{ITEMS[f.id]={n:f.n,p:f.p,ic:"fish",col:"#"+f.col.toString(16).padStart(6,"0")}});
+(function(){for(let i=0;i<7;i++){const g=new THREE.Group(),k=FISHK[i%3],c=[0xf08a24,0xe2402f,0xf5c732,0x9aa3ab,0xffffff,0x4a4038,0xf08a24][i];
+  const b=new THREE.Mesh(new THREE.SphereGeometry(.16,10,8),am(c));b.scale.set(1.3,.55,.5);g.add(b);const tl=new THREE.Mesh(new THREE.ConeGeometry(.09,.16,4),am(c));tl.rotation.z=Math.PI/2;tl.position.x=-.25;g.add(tl);
+  const e=new THREE.Mesh(new THREE.SphereGeometry(.025,6,4),am(0x111111));e.position.set(.13,.03,.05);g.add(e);g.userData={a:i*.9,r:.25+(i%4)*.17,sp:(.25+i*.04)*(i%2?1:-1),tl,jump:-1,ph:i};scene.add(g);FISHES.push(g)}})();
+function stepFish(dt,t){FISHES.forEach(f=>{const u=f.userData;u.a+=u.sp*dt;const x=POND.x+Math.cos(u.a)*POND.rx*u.r*1.6,z=POND.z+Math.sin(u.a)*POND.rz*u.r*1.6;
+  let y=-.22+Math.sin(t*1.3+u.ph)*.03;if(u.jump<0&&Math.random()<dt*.04)u.jump=0;if(u.jump>=0){u.jump+=dt;const k=u.jump/.9;y=-.2+Math.sin(Math.min(1,k)*Math.PI)*.7;f.rotation.z=(.5-k)*1.4*Math.sign(u.sp);if(k>=1){u.jump=-1;f.rotation.z=0;burst(x,0,z,0xbfefff,8,.2)}}
+  f.position.set(x,y,z);f.rotation.y=-u.a-(u.sp>0?Math.PI/2:-Math.PI/2);u.tl.rotation.y=Math.sin(t*12+u.ph)*.5})}
+function fishTask(W){const p=W.g.position,a=Math.atan2((p.z-POND.z)/POND.rz,(p.x-POND.x)/POND.rx)+(Math.random()-.5)*.6,ex=POND.x+Math.cos(a)*(POND.rx+.55),ez=POND.z+Math.sin(a)*(POND.rz+.55);
+  return{type:"fish",x:ex,z:ez,wx:POND.x+Math.cos(a)*POND.rx*.45,wz:POND.z+Math.sin(a)*POND.rz*.45}}
+const _rt=new THREE.Vector3();
+function fishFx(W,q,e,t){if(!W.fx){const line=new THREE.Mesh(new THREE.CylinderGeometry(.006,.006,1,4),new THREE.MeshBasicMaterial({color:0xf4f4f4}));const bob=new THREE.Mesh(new THREE.SphereGeometry(.06,8,6),new THREE.MeshBasicMaterial({color:0xe2402f}));scene.add(line,bob);W.fx={line,bob}}
+  const {line,bob}=W.fx;if(!q){line.visible=bob.visible=false;return}
+  if(!W.rodTip){line.visible=bob.visible=false;return}W.rodTip.getWorldPosition(_rt);
+  const k=Math.min(1,Math.max(0,(e-.5)/.5)),bx=q.x+(q.wx-q.x)*k,bz=q.z+(q.wz-q.z)*k,bite=q.tm<.8,by=k<1?_rt.y*(1-k)+(-.05)*k+Math.sin(k*Math.PI)*.8:-.06+(bite?Math.sin(t*25)*.06-.05:Math.sin(t*3)*.02);
+  bob.position.set(bx,by,bz);bob.visible=true;const dx=bx-_rt.x,dy=by-_rt.y,dz=bz-_rt.z,L=Math.hypot(dx,dy,dz);line.visible=true;line.position.set((bx+_rt.x)/2,(by+_rt.y)/2,(bz+_rt.z)/2);line.scale.set(1,L,1);line.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),new THREE.Vector3(dx/L,dy/L,dz/L));
+  if(bite&&!q.splash){q.splash=1;burst(bx,0,bz,0xbfefff,10,.25)}}
+function catchFish(q,W){const sc=toScreen(q.wx,1,q.wz);if(Math.random()<.25){floatText("Got away!",sc.x,sc.y);return}const k=FISHK[Math.floor(Math.random()*FISHK.length)];
+  if(addItem(k.id,1,sc.x,sc.y)){gain(0,2,null);burst(q.wx,.2,q.wz,0xbfefff,14,.4);toast(wName(W.key)+" caught a "+k.n+"! 🐟",2400)}}
 /* collapsible menu sections: tap a title to hide or show it */
 let SECS={};try{SECS=JSON.parse(localStorage.getItem("farming-sections")||"null")||{weather:1,farmers:1}}catch(e){SECS={weather:1,farmers:1}}
 const secKey=h=>(h.querySelector("h2")||{}).textContent.toLowerCase().split(" ")[0];
@@ -2884,7 +3023,7 @@ function stepFarm2(dt,t){
 
 function loop(t){
   const dt=Math.min(.05,(t-last)/1000);last=t;const ts=t/1000;
-  applyCam(dt);stepAnimals(dt,ts);stepExtras(dt,ts);stepFarm2(dt,ts);stepNet(dt);ISLE.step(dt,ts);checkIsle();
+  applyCam(dt);stepAnimals(dt,ts);stepExtras(dt,ts);stepFarm2(dt,ts);stepNet(dt);stepSound(dt);stepFish(dt,ts);ISLE.step(dt,ts);checkIsle();
   clouds.forEach(c=>{c.position.x+=c.userData.v*dt;if(c.position.x>130)c.position.x=-60});
   tileObjs.forEach((o,i)=>{if(o.sp.visible){o.sp.rotation.y=ts*2+i;o.sp.position.y=.95+Math.sin(ts*3+i)*.08}});
   acc+=dt;if(acc>.2){acc=0;syncField()}
