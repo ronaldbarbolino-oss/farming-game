@@ -467,13 +467,17 @@ let S=fresh();
 
 if(window.claude?.hot?.data?.S)S=window.claude.hot.data.S;
 window.claude?.hot?.snapshot?.(()=>({S}));
-var VISIT=null;const save=()=>{if(VISIT)return;try{if(typeof LOCAL!=="undefined"&&LOCAL.user)localStorage.setItem("farming-save-"+LOCAL.user,JSON.stringify(S))}catch(e){}if(typeof CLOUD!=="undefined"&&CLOUD)CLOUD.dirty=true};
+var VISIT=null;const save=()=>{if(VISIT)return;if(typeof S!=="undefined"&&S)S.seen=Date.now()/1000;try{if(typeof LOCAL!=="undefined"&&LOCAL.user)localStorage.setItem("farming-save-"+LOCAL.user,JSON.stringify(S))}catch(e){}if(typeof CLOUD!=="undefined"&&CLOUD)CLOUD.dirty=true};
 const $=id=>document.getElementById(id);
 const crop=id=>CROPS.find(c=>c.id===id);
 const animal=id=>ANIMALS.find(a=>a.id===id);
 const fmt=s=>{s=Math.max(0,Math.ceil(s));if(s<60)return s+"s";const m=Math.floor(s/60),r=s%60;return m<60?m+"m"+(r?" "+r+"s":""):Math.floor(m/60)+"h "+(m%60)+"m"};
 const now=()=>Date.now()/1000;
-function ripeWin(t){if(typeof WX!=="undefined"&&WX.key==="summer"){let h=2166136261;const k=String(t.at);for(let i=0;i<k.length;i++){h^=k.charCodeAt(i);h=Math.imul(h,16777619)}return 420+180*((h>>>0)/4294967295)}return RIPE}
+function ripeWin(t){if(t.rw==null)t.rw=Math.random();return typeof WX!=="undefined"&&WX.key==="summer"?1200+240*t.rw:1200+600*t.rw}
+/* crops don't wilt while the player is away: ripe time is frozen for the offline gap */
+function cropT(t){const c=crop(t.c);return c?c.t*(t.f?.5:1)*((S.tools&&S.tools.includes("pandilig"))?.8:1):0}
+function freezeOffline(st,since){if(!st||!since||!Array.isArray(st.tiles))return;const nw=now(),gap=nw-since;if(gap<20)return;const S0=S;S=st;
+  st.tiles.forEach(t=>{if(!t||t.k!=="crop")return;const T=cropT(t),ripeAt=t.at+T;if(ripeAt<=since)t.at+=gap;else if(ripeAt<nw)t.at=nw-T});S=S0}
 function tileState(t){
   if(!t||t.k!=="crop")return null;
   const c=crop(t.c),el=now()-t.at,T=c.t*(t.f?.5:1)*((typeof S!=="undefined"&&S.tools&&S.tools.includes("pandilig"))?.8:1),p=Math.min(1,el/T),over=el-T;
@@ -1988,7 +1992,7 @@ function tapPen(i,x,y){const p=S.pens[i],a=animal(p.id);
   if(!p.sick&&isBaby(p))return toast("Still young: "+a.n+". It grows up in "+fmt(GROW_T-(now()-p.born))+".");
   if(p.sick){if(p.heal)return toast(a.n+" is getting medicine. Healthy in "+fmt(p.heal-now())+".");const c=cureCost(a);if(S.coins<c)return toast("You need "+c+" coins for medicine.");S.coins-=c;startHeal(p);floatText("Medicine given −"+c,x,y);const o=animalObjs[i];if(o)burst(o.g.position.x,.7,o.g.position.z,0x7fe08a,14);toast(a.n+" got medicine. It will be healthy in "+fmt(p.heal-now())+".",3200);after();return}
   const left=a.t-(now()-p.at);if(left>0)return toast(a.item+" in "+fmt(left));const it=AITEM[a.id];if(it){if(!addItem(it,1,x,y))return;gain(0,a.xp,null)}else gain(a.s,a.xp,x,y);p.at=now();after()}
-function harvestAll(){if(!isOwner())return;if(cdLeft("harv")>0)return toast("Harvest All is ready again in "+fmt(cdLeft("harv"))+".");
+function harvestAll(){if(cdLeft("harv")>0)return toast("Harvest All is ready again in "+fmt(cdLeft("harv"))+".");
   let xp=0,n=0,cash=0,stop=false;
   S.tiles.forEach((t,i)=>{if(stop)return;const st=tileState(t);if(st&&!st.dead&&st.left<=0){const q=st.w>.5?0:1;if(q&&!addItem(st.c.id,q,null)){stop=true;return}xp+=st.c.xp;n++;S.tiles[i]={k:"soil"};burstTile(i,st.c.col,8,.4)}});
   S.pens.forEach(p=>{if(stop)return;const a=animal(p.id);if(!p.sick&&!isBaby(p)&&now()-p.at>=a.t){const it=AITEM[a.id];if(it){if(!addItem(it,1,null)){stop=true;return}}else cash+=a.s;xp+=a.xp;n++;p.at=now()}});
@@ -2089,9 +2093,9 @@ window.addEventListener("orientationchange",relayout);document.addEventListener(
 $("tTown").onclick=startJeep;
 $("sellAll").onclick=sellAll;$("shopOpen").onclick=()=>{S.shopOpen=S.shopOpen===false;save();invUI(true);toast(S.shopOpen?"The stall is open. Buyers will come.":"The stall is closed. No buyers will come.",2600)};$("goMkt").onclick=()=>{goView("market")};
 $("placeRot").onclick=()=>{if(PLACE){PLACE.r=(PLACE.r+Math.PI/2)%(Math.PI*2);PLACE.g.rotation.y=PLACE.r}};$("placeOk").onclick=confirmPlace;$("placeX").onclick=cancelPlace;
-const CD_HARV=300,CD_TREAT=120;const cdLeft=k=>Math.max(0,(k==="harv"?CD_HARV:CD_TREAT)-(now()-((S.cd||{})[k]||0)));
+const CD_HARV=600,CD_TREAT=120;const cdLeft=k=>Math.max(0,(k==="harv"?CD_HARV:CD_TREAT)-(now()-((S.cd||{})[k]||0)));
 const OWNER_KEY="ronfarm";const isOwner=()=>{const n=v=>String(v||"").toLowerCase().replace(/[^a-z0-9]/g,"");const p=(typeof CLOUD!=="undefined"&&(CLOUD.local||CLOUD.profile))||{};return[typeof LOCAL!=="undefined"&&LOCAL.user,p.farm,p.farmer].some(v=>n(v)===OWNER_KEY)};
-function cdUI(){const h=cdLeft("harv"),c=cdLeft("treat"),a=$("tAll"),b=$("tCure");if(!a||!b)return;a.hidden=b.hidden=!isOwner();
+function cdUI(){const h=cdLeft("harv"),c=cdLeft("treat"),a=$("tAll"),b=$("tCure");if(!a||!b)return;a.hidden=false;b.hidden=!isOwner();
   a.textContent=h>0?"Harvest All · "+fmt(h):"Harvest All";a.disabled=h>0;b.textContent=c>0?"Treat All · "+fmt(c):"Treat All";b.disabled=c>0}
 setInterval(cdUI,1000);
 $("tRest").onclick=()=>{const n=restAnimals(S.pens);if(!n)return toast(S.pens.length?"Your animals are already resting or protected.":"You don't have animals yet.");
@@ -2736,7 +2740,7 @@ let farmerTag=null,farmerColor=0xd94a3a,SU_SHIRT=0;
 function applyProfile(){const p=CLOUD.profile||CLOUD.local;$("logo").textContent="Farming";$("acct").textContent=p?(p.farmer+" · "+p.farm):"Guest · Sign up";if(p)setFarmerLook(p)}
 function setFarmerLook(p){if(!farmer)return;const c=SHIRTS[p.shirt|0]||SHIRTS[0],from=am(farmerColor),to=am(c);if(from!==to)farmer.g.traverse(o=>{if(o.isMesh&&o.material===from)o.material=to});farmerColor=c;
   if(farmerTag)farmer.g.remove(farmerTag);farmerTag=labelSprite(String(p.farmer||"").slice(0,16));farmerTag.position.y=1.8;farmerTag.scale.set(1.2,.3,1);farmer.g.add(farmerTag)}
-function loadState(st){const n=Object.assign(fresh(),st);if(!SIZES[n.size]||!Array.isArray(n.tiles)||n.tiles.length!==expectTiles(n)||!Array.isArray(n.pens))return false;
+function loadState(st){const n=Object.assign(fresh(),st);if(!VISIT)freezeOffline(n,n.seen);if(!SIZES[n.size]||!Array.isArray(n.tiles)||n.tiles.length!==expectTiles(n)||!Array.isArray(n.pens))return false;
   S=n;normalizePens();hovered=null;if(typeof renderBuilds==="function"){renderBuilds();buildBoat();buildJeep();shopUI(true);townUI(true)}if(typeof helperUI==="function")helperUI();animalObjs.forEach(o=>animalGroup.remove(o.g));animalObjs=[];buildField();syncAnimals();ui();save();return true}
 async function cloudSave(force){
   if(!CLOUD.id||CLOUD.readonly||!CLOUD.profile||CLOUD.busy||(!CLOUD.dirty&&!force))return;CLOUD.busy=true;CLOUD.dirty=false;
@@ -2955,6 +2959,8 @@ function fishFx(W,q,e,t){if(!W.fx){const line=new THREE.Mesh(new THREE.CylinderG
   if(bite&&!q.splash){q.splash=1;burst(bx,0,bz,0xbfefff,10,.25)}}
 function catchFish(q,W){const sc=toScreen(q.wx,1,q.wz);if(Math.random()<.25){floatText("Got away!",sc.x,sc.y);return}const k=FISHK[Math.floor(Math.random()*FISHK.length)];
   if(addItem(k.id,1,sc.x,sc.y)){gain(0,2,null);burst(q.wx,.2,q.wz,0xbfefff,14,.4);toast(wName(W.key)+" caught a "+k.n+"! 🐟",2400)}}
+let hiddenAt=0;setInterval(()=>{if(!VISIT&&!document.hidden){S.seen=now();if(Math.random()<.2)save()}},5000);
+document.addEventListener("visibilitychange",()=>{if(VISIT)return;if(document.hidden){hiddenAt=now();save()}else if(hiddenAt){freezeOffline(S,hiddenAt);hiddenAt=0;S.seen=now();save()}});
 /* collapsible menu sections: tap a title to hide or show it */
 let SECS={};try{SECS=JSON.parse(localStorage.getItem("farming-sections")||"null")||{weather:1,farmers:1}}catch(e){SECS={weather:1,farmers:1}}
 const secKey=h=>(h.querySelector("h2")||{}).textContent.toLowerCase().split(" ")[0];
