@@ -2412,7 +2412,8 @@ const BUILDS=[
   {id:"bodega",n:"Warehouse",cost:1200,lv:3,r:1.7,inc:8,d:"Storage for crops and farm tools."},
   {id:"kamalig",n:"Big Barn",cost:2500,lv:4,r:2.3,inc:15,d:"Red barn with two doors and a hayloft."},
   {id:"kiskisan",n:"Windmill",cost:2000,lv:5,r:1.4,inc:12,d:"Mill whose blades turn in the wind."},
-  {id:"bato",n:"Stone House",cost:3500,lv:6,r:2.1,inc:22,d:"Stone and wood house with capiz windows and a balcony."}];
+  {id:"bato",n:"Stone House",cost:3500,lv:6,r:2.1,inc:22,d:"Stone and wood house with capiz windows and a balcony."},
+  {id:"mansyon",n:"Mansion",cost:9000,lv:7,r:3.4,inc:45,d:"Grand two-storey white mansion with columns, a balcony, a big front door and a garden."}];
 const BOATS=[{id:"bangka",n:"Rowboat",cost:600,lv:2,speed:3.6,d:"Rowboat with outriggers. Slow but reliable."},
   {id:"speed",n:"Speed Boat",cost:2500,lv:5,speed:10,d:"Motorboat. Just a few seconds to the island."}];
 const ISLEITEMS=[{id:"isla",n:"Secret Field",cost:2000,lv:3,d:"6×6 plot on the island for secret crops. Needs a boat."},
@@ -2434,13 +2435,16 @@ function makeBuild(id){if(String(id).startsWith("sap_")){const o=makeTreeG(0,0,n
     for(let k=0;k<4;k++)b.add("box",0x8a6a34,1.15+k*.12,.12+k*.17,0,.1,.03,.5);
     sn.add("cone4",0xffffff,0,2.62,0,1.45,.75,1.45,0,Math.PI/4,0)}
   else if(id==="bodega"){b.add("box",0x8a9aa8,0,.85,0,2.6,1.7,2);for(let k=0;k<12;k++)b.add("box",0x74848f,-1.2+k*.22,.85,1.01,.06,1.6,.02);
-    b.add("box",0x5d6870,1.31,.75,0,.04,1.4,1.2);b.add("box",0xe8622a,1.33,1.55,0,.03,.12,1.25);
+    b.add("box",0x3a4652,1.31,.72,0,.05,1.44,1.3);[-.31,.31].forEach(z=>{b.add("box",0x5d6870,1.33,.7,z,.04,1.34,.58);for(let k=0;k<5;k++)b.add("box",0x4d5860,1.355,.2+k*.25,z,.02,.04,.56);b.add("box",0xd9d9d9,1.36,.72,z+(z<0?.24:-.24),.03,.2,.04)});b.add("box",0xe8622a,1.33,1.55,0,.03,.12,1.35);
     b.add("box",0x6b7880,0,1.85,0,2.9,.12,2.3,0,0,-.12);sn.add("box",0xffffff,0,1.95,0,2.7,.07,2.1,0,0,-.12)}
   else if(id==="kamalig"){const W=3.4,D=2.6,H=2,rh=1.3,hw=W/2,ang=Math.atan2(rh,hw),len=Math.hypot(hw,rh)+.2;
     b.add("box",0xc8382b,0,H/2,0,W,H,D);b.add("prism",0xc8382b,0,H+rh/2/1.5*1.5*.5,0,hw/.866,D,rh/1.5,-Math.PI/2,0,0);
     [-1,1].forEach(sd=>{b.add("box",0x5a3a30,sd*(hw/2+.04),H+rh/2+.06,0,len,.12,D+.3,0,0,-sd*ang);sn.add("box",0xffffff,sd*(hw/2+.04)+sd*Math.sin(ang)*.1,H+rh/2+.06+Math.cos(ang)*.1,0,len*.85,.08,D+.15,0,0,-sd*ang)});
-    [-.75,.75].forEach(z=>{b.add("box",0x8e1f17,hw+.02,.8,z,.04,1.6,1.1);b.add("box",0xffffff,hw+.04,.8,z,.03,.1,1.1);b.add("box",0xffffff,hw+.04,.8,z,.03,1.6,.08)});
-    b.add("box",0xf2d36b,hw+.02,H+.45,0,.04,.5,.6);[[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([a,c])=>b.add("box",0xffffff,a*hw,H/2,c*D/2,.1,H,.1))}
+    b.add("box",0xffffff,hw+.03,1.68,0,.06,.12,2.36);[-1.17,1.17].forEach(z=>b.add("box",0xffffff,hw+.03,.84,z,.06,1.68,.12));
+    [-.56,.56].forEach(z=>{b.add("box",0x8e1f17,hw+.02,.82,z,.05,1.6,1.08);b.add("box",0xffffff,hw+.06,.82,z,.03,1.6,.08);b.add("box",0xffffff,hw+.06,1.58,z,.03,.08,1.08);b.add("box",0xffffff,hw+.06,.06,z,.03,.08,1.08);
+      const dg=Math.hypot(1.5,.98),aa=Math.atan2(1.5,.98);b.add("box",0xffffff,hw+.065,.82,z,.025,.07,dg,aa,0,0);b.add("box",0xffffff,hw+.065,.82,z,.025,.07,dg,-aa,0,0);b.add("box",0x2b2b2b,hw+.08,.82,z+(z<0?.42:-.42),.03,.18,.05)});
+    b.add("box",0xffffff,hw+.02,H+.45,0,.05,.66,.76);b.add("box",0x8e1f17,hw+.03,H+.45,0,.05,.54,.64);b.add("box",0xffffff,hw+.06,H+.45,0,.025,.05,.62);b.add("box",0xffffff,hw+.06,H+.45,0,.025,.52,.05);
+    [-1,1].forEach(z=>{b.add("box",0xffffff,0,1.2,z*(D/2+.02),.8,.7,.04);b.add("box",0x3a4a5a,0,1.2,z*(D/2+.03),.64,.54,.03);b.add("box",0xffffff,0,1.2,z*(D/2+.045),.03,.54,.02)});[[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([a,c])=>b.add("box",0xffffff,a*hw,H/2,c*D/2,.1,H,.1))}
   else if(id==="kiskisan"){b.add("cyl",0xe8dcc4,0,1.2,0,.75,2.4,.75);b.add("cyl",0xd8cbb0,0,2.5,0,.6,.3,.6);b.add("cone",0x8a4a2a,0,3.05,0,.75,.9,.75);
     b.add("box",0x5a3a1a,.76,.5,0,.04,.9,.5);b.add("box",0x3a4a5a,.6,1.6,.25,.04,.3,.25);sn.add("cone",0xffffff,0,3.18,0,.6,.55,.6);
     const hub=new THREE.Group();hub.position.set(.85,2.6,0);const bb=new Builder();bb.add("cyl",0x5a3a1a,0,0,0,.1,.2,.1,0,0,Math.PI/2);
@@ -2450,6 +2454,19 @@ function makeBuild(id){if(String(id).startsWith("sap_")){const o=makeTreeG(0,0,n
     b.add("box",0xc98a4b,0,1.9,0,3.2,1.2,2.6);for(let k=0;k<4;k++)b.add("box",0xf4ead2,-1.15+k*.77,1.95,1.31,.5,.6,.03);
     b.add("box",0x8a5a2a,0,1.35,1.55,3.2,.08,.6);for(let k=0;k<9;k++)b.add("box",0x6b4422,-1.5+k*.375,1.6,1.83,.04,.4,.04);b.add("box",0x6b4422,0,1.8,1.83,3.2,.05,.05);
     b.add("box",0x5a3a1a,1.51,.6,0,.03,1,.6);b.add("cone4",0xb5452f,0,3.05,0,2.6,1.1,2.1,0,Math.PI/4,0);sn.add("cone4",0xffffff,0,3.22,0,2.1,.7,1.7,0,Math.PI/4,0)}
+  else if(id==="mansyon"){const W=4.2,D=3.4,F=1.5,WH=0xf6f1e6,TR=0xd8cfbf,RF=0x2f4f7a,GD=0xe6b84a;
+    b.add("box",0xc9c2b4,0,.12,0,W+.6,.24,D+.6);b.add("box",WH,0,.24+F/2,0,W,F,D);b.add("box",TR,0,.24+F+.06,0,W+.14,.12,D+.14);b.add("box",WH,0,.36+F*1.5,0,W,F,D);b.add("box",TR,0,.42+F*2,0,W+.2,.14,D+.2);
+    b.add("cone4",RF,0,.5+F*2+.75,0,W*.78,1.5,D*.78,0,Math.PI/4,0);sn.add("cone4",0xffffff,0,.5+F*2+.92,0,W*.62,1.0,D*.62,0,Math.PI/4,0);
+    b.add("box",0xa8a29a,-1.2,.5+F*2+1.1,.7,.36,1.2,.36);b.add("box",0x7d7870,-1.2,.5+F*2+1.72,.7,.42,.08,.42);
+    for(let fl=0;fl<2;fl++){const y=.24+F/2+fl*(F+.12);for(let k=0;k<4;k++){const z=-1.2+k*.8;if(fl===0&&Math.abs(z)<.5)continue;b.add("box",0xffffff,W/2+.02,y+.05,z,.04,.78,.46);b.add("box",0x3a5a7a,W/2+.03,y+.05,z,.03,.64,.34);b.add("box",0x2f4f7a,W/2+.04,y+.05,z+.28,.03,.66,.1);b.add("box",0x2f4f7a,W/2+.04,y+.05,z-.28,.03,.66,.1)}
+      for(let k=0;k<5;k++){const x=-1.6+k*.8;[-1,1].forEach(sd=>{b.add("box",0xffffff,x,y+.05,sd*(D/2+.02),.46,.78,.04);b.add("box",0x3a5a7a,x,y+.05,sd*(D/2+.03),.34,.64,.03)})}}
+    b.add("box",0x5a2a1a,W/2+.03,.24+.62,0,.05,1.24,.84);b.add("box",GD,W/2+.06,.24+.62,0,.03,1.24,.04);b.add("sph",GD,W/2+.07,.84,.12,.03,.03,.03);b.add("sph",GD,W/2+.07,.84,-.12,.03,.03,.03);b.add("box",GD,W/2+.05,1.5,0,.04,.12,.9);
+    [-1.1,-.4,.4,1.1].forEach(z=>{b.add("cyl",0xffffff,W/2+.75,.24+F/2+.06,z,.1,F+.12,.1);b.add("box",TR,W/2+.75,.3,z,.26,.12,.26);b.add("box",TR,W/2+.75,.24+F+.06,z,.26,.1,.26)});
+    b.add("box",WH,W/2+.62,.24+F+.14,0,1.4,.14,2.7);for(let k=0;k<10;k++)b.add("cyl",0xffffff,W/2+1.26,.24+F+.38,-1.25+k*.28,.03,.34,.03);b.add("box",0xffffff,W/2+1.26,.24+F+.56,0,.06,.05,2.7);
+    sn.add("box",0xffffff,W/2+.62,.24+F+.24,0,1.36,.05,2.6);
+    for(let k=0;k<3;k++)b.add("box",0xd8d2c6,W/2+1.0+k*.28,.06+k*.06,0,.3,.12+k*.12,1.4-k*.1);
+    [[W/2+1.7,-1.5],[W/2+1.7,1.5]].forEach(([x,z])=>{b.add("cyl",0xc9c2b4,x,.2,z,.28,.4,.28);b.add("sph",0x3fa833,x,.62,z,.32,.3,.32);b.add("sph",0xff7bb0,x+.1,.82,z,.08,.08,.08)});
+    [[-W/2-.1,-1.5],[-W/2-.1,1.5],[0,D/2+.35],[0,-D/2-.35]].forEach(([x,z])=>{b.add("sph",0x2f9029,x,.4,z,.42,.4,.42);b.add("sph",0x6ccf45,x+.1,.58,z,.24,.2,.24)})}
   const m=b.mesh();g.add(m);const s=new THREE.Mesh(sn.geo(),SNOWMAT);g.add(s);return g}
 /* -- placed buildings -- */
 const BUILDG=new THREE.Group();scene.add(BUILDG);
