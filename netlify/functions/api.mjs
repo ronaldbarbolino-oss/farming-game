@@ -7,6 +7,12 @@ async function sha(t) {
   const d = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(t));
   return [...new Uint8Array(d)].map(b => b.toString(16).padStart(2, "0")).join("");
 }
+const ADMIN_KEY = {"kty": "EC", "crv": "P-256", "x": "9Nf6dApAv7FNUSXvwWd5dVdozkL4NAkO6u-nGl5mtDc", "y": "bn8Ey4cZU7kJDB3t2cbDNrFyZMJDNijYlcg1E9Lq_vE"};
+const b64u = t => { t = t.replace(/-/g, "+").replace(/_/g, "/"); while (t.length % 4) t += "="; return Uint8Array.from(atob(t), c => c.charCodeAt(0)) };
+async function adminOk(msg, sig) {
+  try { const k = await crypto.subtle.importKey("jwk", ADMIN_KEY, { name: "ECDSA", namedCurve: "P-256" }, false, ["verify"]);
+    return await crypto.subtle.verify({ name: "ECDSA", hash: "SHA-256" }, k, b64u(sig), new TextEncoder().encode(msg)) } catch { return false }
+}
 const pub = m => ({ u: m.u, farm: m.farm, farmer: m.farmer, shirt: m.shirt, lv: m.lv, size: m.size, seen: m.seen });
 
 export default async (req) => {
@@ -16,6 +22,19 @@ export default async (req) => {
   const meta = getStore({ name: "meta", consistency: "strong" });
   const farms = getStore({ name: "farms", consistency: "strong" });
   try {
+    const ctl = getStore({ name: "control", consistency: "strong" });
+    if (req.method === "GET" && path === "restart") {
+      const r = await ctl.get("restart", { type: "json" });
+      return J({ at: r ? r.at : 0, now: Date.now() });
+    }
+    if (req.method === "POST" && path === "restart") {
+      let b; try { b = await req.json() } catch { return J({ error: "bad json" }, 400) }
+      const at = Number(b.at) || 0;
+      if (Math.abs(Date.now() - at) > 5 * 60000) return J({ error: "expired" }, 400);
+      if (!(typeof b.sig === "string" && await adminOk("restart:" + at, b.sig))) return J({ error: "not allowed" }, 403);
+      await ctl.setJSON("restart", { at });
+      return J({ ok: true, at });
+    }
     if (req.method === "GET" && path === "farms") {
       const { blobs } = await meta.list();
       const all = await Promise.all(blobs.slice(0, 400).map(b => meta.get(b.key, { type: "json" }).catch(() => null)));

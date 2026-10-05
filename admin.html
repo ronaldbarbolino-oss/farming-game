@@ -35,6 +35,10 @@ ul{padding-left:18px;margin:6px 0 0}li{margin:4px 0;word-break:break-all;font-si
     <p class="note">Send this to the player. In the game they tap <b>🎁 Redeem Code</b> and paste it. It works once, only for that player.</p>
   </div>
   <label>Made this session</label><ul id="hist"><li>None yet.</li></ul>
+  <hr style="border:0;border-top:3px dashed var(--wood);margin:18px 0 6px">
+  <label>Restart the game for everyone</label>
+  <p class="note">Every player's game saves their farm and reloads within about 20 seconds. Use it after you publish an update.</p>
+  <button type="button" id="restartB" style="background:#c8382b">🔄 Restart all players</button><p class="err" id="rsMsg" role="status"></p>
   <button type="button" class="alt" id="lockB">Lock</button>
 </section>
 </main>
@@ -59,5 +63,10 @@ $("giftF").onsubmit=async e=>{e.preventDefault();$("giftErr").textContent="";con
   $("code").value=code;$("out").hidden=false;hist.unshift(c.toLocaleString()+" coins → "+u);$("hist").innerHTML="";hist.forEach(t=>{const li=document.createElement("li");li.textContent=t;$("hist").append(li)})};
 $("copyB").onclick=async()=>{try{await navigator.clipboard.writeText($("code").value);$("copyB").textContent="Copied!"}catch(e){$("code").select();document.execCommand("copy");$("copyB").textContent="Copied!"}setTimeout(()=>$("copyB").textContent="Copy code",1600)};
 $("shareB").onclick=async()=>{const t="Your Farming gift code (open the game, tap 🎁 Redeem Code):\n"+$("code").value;if(navigator.share){try{await navigator.share({text:t})}catch(e){}}else{try{await navigator.clipboard.writeText(t)}catch(e){}$("shareB").textContent="Copied!";setTimeout(()=>$("shareB").textContent="Share",1600)}};
+$("restartB").onclick=async()=>{const m=$("rsMsg");m.style.color="";m.textContent="Sending…";$("restartB").disabled=true;
+  try{const at=Date.now(),sig=new Uint8Array(await crypto.subtle.sign({name:"ECDSA",hash:"SHA-256"},SK,new TextEncoder().encode("restart:"+at)));
+    const r=await fetch("/api/restart",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({at,sig:b64u(sig)})});const d=await r.json().catch(()=>({}));
+    if(!r.ok)throw new Error(d.error||("Error "+r.status));m.style.color="#3f8f2c";m.textContent="Done! Players' games will reload within about 20 seconds."}
+  catch(e){m.style.color="";m.textContent="Couldn't restart: "+e.message}$("restartB").disabled=false};
 $("lockB").onclick=()=>{SK=null;$("gift").hidden=true;$("out").hidden=true;$("lock").hidden=false;$("pw").focus()};
 </script></body></html>

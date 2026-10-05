@@ -359,6 +359,7 @@ body.land .stage{width:100vw;height:100vh;height:100dvh}
 
   <div class="tray-head"><h2>Animals</h2><span class="hint">Buy a male and a female to breed: the female gets pregnant on her own and gives birth after 30 minutes. Each species has its own pen. They shelter on their own when it rains or snows. They can get sick: treat any with a red cross within 5 minutes or it will die.</span></div>
   <div class="panel"><div class="tools" id="shop"></div>
+    <div class="tools" style="margin-top:8px"><button class="btn" id="tRest" style="background:#6a5acd;box-shadow:0 4px 0 #463a9a">😴 Rest All Animals</button><span class="mktNote" id="restNote" style="margin:0">Resting animals go inside for 3 minutes. After that they can't get sick for 20 minutes.</span></div>
     <h4 class="penH">Animal Houses</h4><p class="mktNote">Level up a house to keep more animals (+3 space) and give it a makeover: new roof, flowers, a flag, then lanterns and a stone path.</p><div class="tools" id="penUp"></div></div>
   </div>
 </div>
@@ -1171,9 +1172,11 @@ function stepAnimals(dt,t){
   animalObjs.forEach((o,i)=>{
     const p=S.pens[i];if(!p)return;const a=animal(p.id),g=o.g,U=g.userData;
     if(!o.state){o.state="idle";o.st=o.wait||1;o.nk=0;o.yaw=0;o.wl=0}
-    if(bad&&!o.shelter){o.shelter=true;o.sheltered=false;const sp=shelterSpot(o,i);o.hide=sp[2];o.state="walk";o.tx=sp[0];o.tz=sp[1];U.moo.visible=false}
-    if(!bad&&o.shelter){o.shelter=false;o.sheltered=false;g.visible=true;o.state="idle";o.st=.3+Math.random()}
-    if(roll&&!p.sick){const ch=(U.pet?.4:1)*(bad?(o.sheltered?.025:.14):.012);if(Math.random()<ch){p.sick=true;p.sickAt=now();toast("Got sick: "+a.n+"! Treat it within 5 minutes or it will die.",4200);save()}}
+    const resting=!!(p.restUntil&&now()<p.restUntil),sh=bad||resting;if(p.restUntil&&!resting&&!VISIT){delete p.restUntil;if(!p.sick)toast(a.n+" is rested and protected from sickness for 20 minutes.",2600)}
+    if(sh&&!o.shelter){o.shelter=true;o.sheltered=false;const sp=shelterSpot(o,i);o.hide=sp[2];o.state="walk";o.tx=sp[0];o.tz=sp[1];U.moo.visible=false}
+    if(!sh&&o.shelter){o.shelter=false;o.sheltered=false;g.visible=true;o.state="idle";o.st=.3+Math.random()}
+    if(resting)p.at+=dt;
+    if(roll&&!p.sick&&!resting&&!(p.restedUntil&&now()<p.restedUntil)){const ch=(U.pet?.4:1)*(bad?(o.sheltered?.025:.14):.012);if(Math.random()<ch){p.sick=true;p.sickAt=now();toast("Got sick: "+a.n+"! Treat it within 5 minutes or it will die.",4200);save()}}
     if(p.sick&&p.heal&&now()>=p.heal&&!VISIT){p.sick=false;delete p.sickAt;delete p.heal;burst(g.position.x,.8,g.position.z,0x7fe08a,16);toast(a.n+" is healthy again!",2600);save()}
     if(p.sick&&!p.heal&&now()-(p.sickAt||now())>SICK_DIE)dead.push(i);
     o.sick=!!p.sick;if(p.sick)p.at+=dt;
@@ -1922,7 +1925,7 @@ function updateTag(){
     txt=t.k==="grass"?"Plow · "+PLOW+" coins":t.k==="soil"?"Plant: "+crop(S.sel).n:st.dead?"Dead · tap to clear":st.w>0?st.c.n+" · Wilting! Harvest now":st.left<=0?st.c.n+" · Ripe · "+fmt(ripeWin(t)-(now()-t.at-st.c.t*(t.f?.5:1)*(S.tools&&S.tools.includes("pandilig")?.8:1)))+" before it wilts"+(WX.key==="summer"?" ☀️":""):st.c.n+" · growing "+Math.round(st.p*100)+"%";
     if(st&&st.left>0)prog=st.p}
   else{const o=animalObjs[hovered.pen],p=S.pens[hovered.pen];if(!o||!p||!o.g.visible)return;const a=animal(p.id),left=a.t-(now()-p.at);
-    wp=_p.copy(o.g.position);wp.y+=o.g.userData.h+.45;const gs=p.g==="F"?" ♀":" ♂";if(p.sick&&p.heal){txt=a.n+gs+" · 💊 Getting better · healthy in "+fmt(p.heal-now());prog=1-(p.heal-now())/150}else if(p.sick)txt=a.n+gs+" · Sick! Dies in "+fmt(Math.max(0,SICK_DIE-(now()-(p.sickAt||now()))))+" · Treat: "+cureCost(a);else if(isBaby(p)){txt="Baby "+a.n+gs+" · grows up in "+fmt(GROW_T-(now()-p.born));prog=(now()-p.born)/GROW_T}else{txt=a.n+gs+(p.preg?" · Pregnant, gives birth in "+fmt(Math.max(0,PREG_T-(now()-p.preg))):"")+" · "+(left<=0?"Collect: "+a.item:a.item+" in "+fmt(left));if(left>0)prog=1-left/a.t}}
+    wp=_p.copy(o.g.position);wp.y+=o.g.userData.h+.45;const gs=p.g==="F"?" ♀":" ♂";if(!p.sick&&p.restUntil&&now()<p.restUntil){txt=a.n+gs+" · 😴 Resting · "+fmt(p.restUntil-now());prog=1-(p.restUntil-now())/REST_T}else if(p.sick&&p.heal){txt=a.n+gs+" · 💊 Getting better · healthy in "+fmt(p.heal-now());prog=1-(p.heal-now())/150}else if(p.sick)txt=a.n+gs+" · Sick! Dies in "+fmt(Math.max(0,SICK_DIE-(now()-(p.sickAt||now()))))+" · Treat: "+cureCost(a);else if(isBaby(p)){txt="Baby "+a.n+gs+" · grows up in "+fmt(GROW_T-(now()-p.born));prog=(now()-p.born)/GROW_T}else{txt=a.n+gs+(p.preg?" · Pregnant, gives birth in "+fmt(Math.max(0,PREG_T-(now()-p.preg))):"")+" · "+(left<=0?"Collect: "+a.item:a.item+" in "+fmt(left));if(left>0)prog=1-left/a.t}}
   wp.project(camera);if(wp.z>1)return;
   const w=stage.clientWidth,h=stage.clientHeight;
   tag.hidden=false;tag.innerHTML=txt+(prog!=null?`<i><b style="width:${(prog*100).toFixed(1)}%"></b></i>`:"");
@@ -2072,10 +2075,15 @@ $("tTown").onclick=startJeep;
 $("sellAll").onclick=sellAll;$("shopOpen").onclick=()=>{S.shopOpen=S.shopOpen===false;save();invUI(true);toast(S.shopOpen?"The stall is open. Buyers will come.":"The stall is closed. No buyers will come.",2600)};$("goMkt").onclick=()=>{goView("market")};
 $("placeRot").onclick=()=>{if(PLACE){PLACE.r=(PLACE.r+Math.PI/2)%(Math.PI*2);PLACE.g.rotation.y=PLACE.r}};$("placeOk").onclick=confirmPlace;$("placeX").onclick=cancelPlace;
 const CD_HARV=300,CD_TREAT=600;const cdLeft=k=>Math.max(0,(k==="harv"?CD_HARV:CD_TREAT)-(now()-((S.cd||{})[k]||0)));
-const OWNERS=[];const isOwner=()=>!OWNERS.length||OWNERS.includes(String((typeof LOCAL!=="undefined"&&LOCAL.user)||"").toLowerCase());
+const OWNER_KEY="ronfarm";const isOwner=()=>{const n=v=>String(v||"").toLowerCase().replace(/[^a-z0-9]/g,"");const p=(typeof CLOUD!=="undefined"&&(CLOUD.local||CLOUD.profile))||{};return[typeof LOCAL!=="undefined"&&LOCAL.user,p.farm,p.farmer].some(v=>n(v)===OWNER_KEY)};
 function cdUI(){const h=cdLeft("harv"),c=cdLeft("treat"),a=$("tAll"),b=$("tCure");if(!a||!b)return;a.hidden=b.hidden=!isOwner();
   a.textContent=h>0?"Harvest All · "+fmt(h):"Harvest All";a.disabled=h>0;b.textContent=c>0?"Treat All · "+fmt(c):"Treat All";b.disabled=c>0}
 setInterval(cdUI,1000);
+$("tRest").onclick=()=>{const n=restAnimals(S.pens);if(!n)return toast(S.pens.length?"Your animals are already resting or protected.":"You don't have animals yet.");
+  rebuildRestUI();toast(n+" animals went inside to rest. They'll be protected from sickness for 20 minutes after.",3600);save()};
+function rebuildRestUI(){const el=$("restNote");if(!el)return;const safe=S.pens.filter(p=>p.restedUntil&&now()<p.restedUntil).length,rest=S.pens.filter(p=>p.restUntil&&now()<p.restUntil).length;
+  el.textContent=rest?rest+" resting now · "+safe+" protected":safe?safe+" of "+S.pens.length+" animals protected from sickness":"Resting animals go inside for 3 minutes. After that they can't get sick for 20 minutes."}
+setInterval(rebuildRestUI,2000);
 $("tCure").onclick=()=>{if(!isOwner())return;if(cdLeft("treat")>0)return toast("Treat All is ready again in "+fmt(cdLeft("treat"))+".");const sick=S.pens.map((p,i)=>[p,i]).filter(([p])=>p.sick&&!p.heal);if(!sick.length)return toast(S.pens.some(p=>p.heal)?"The sick animals already got medicine.":"No sick animals.");const cost=sick.reduce((s2,[p])=>s2+cureCost(animal(p.id)),0);if(S.coins<cost)return toast("You need "+cost+" coins to treat all.");S.coins-=cost;sick.forEach(([p,i])=>{startHeal(p);const o=animalObjs[i];if(o)burst(o.g.position.x,.7,o.g.position.z,0x7fe08a,10)});toast(sick.length+" animals got medicine · −"+cost+" coins. They'll be healthy in 2–3 minutes.",3600);S.cd=S.cd||{};S.cd.treat=now();cdUI();after()};
 $("tIsle").onclick=()=>{if(ownBoat())startTrip();else if(onIsle)goView("all");else toast("Buy a boat at the Shop first to reach the island. You can still look at it with the Island view.",4200)};
 $("tCheat").onclick=e=>{S.coins+=100000;const r=e.currentTarget.getBoundingClientRect();floatText("+100,000",r.left+r.width/2,r.top);save();ui()};
@@ -2543,6 +2551,8 @@ function floatSpot(B,txt){const sc=toScreen(B.g.position.x,2,B.g.position.z);flo
 const SICK_DIE=300,PREG_T=1800,GROW_T=600;let breedT=8;const pendingBirth=[];
 const isBaby=p=>!!p.born&&now()-p.born<GROW_T;
 const adultOk=p=>!p.sick&&!isBaby(p);
+const REST_T=180,SAFE_T=1200;
+function restAnimals(list){let n=0;list.forEach(p=>{if(p.sick||isBaby(p)||(p.restUntil&&now()<p.restUntil))return;p.restUntil=now()+REST_T;p.restedUntil=p.restUntil+SAFE_T;n++});return n}
 function startHeal(p){p.heal=now()+120+Math.floor(Math.random()*61)}
 function zoneCount(id){const z=zoneOf(id);return z==="pen"?S.pens.filter(p=>p.id===id).length:S.pens.filter(p=>zoneOf(p.id)===z).length}
 const houseKey=id=>{const z=zoneOf(id);return z==="pen"?id:z};
@@ -2892,12 +2902,10 @@ function stepSound(dt){if(!SND.on||!SND.ctx)return;const k=WX.key,rain=k==="rain
   if((T.cluck-=dt)<=0){T.cluck=6+Math.random()*10;if(has("manok"))SFX.cluck()}
   if((T.moo-=dt)<=0){T.moo=16+Math.random()*20;if(has("baka")||has("kalabaw"))SFX.moo()}
   if((T.quack-=dt)<=0){T.quack=10+Math.random()*14;if(has("bibe")||has("pato"))SFX.quack()}}
-/* auto-refresh when a new version is published */
-const BUILD="8";
-if(API&&!BUILD.startsWith("__")){let vT=null;const chk=async()=>{try{const r=await fetch("version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const v=await r.json();
-  if(v&&v.b&&String(v.b)!==BUILD){clearInterval(vT);if(!VISIT)save();if(!VISIT&&myUser())await netSend(true);toast("🔄 New update! Reloading the game…",3000);setTimeout(()=>location.reload(),1800)}}catch(e){}};
-  vT=setInterval(chk,60000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)chk()});setTimeout(chk,15000)}
-
+/* admin restart: when the admin presses Restart, every open game saves and reloads */
+if(API){const LOADED=Date.now();let rT=null;const chk=async()=>{try{const r=await fetch(API+"restart",{cache:"no-store"});if(!r.ok)return;const v=await r.json();
+  if(v&&v.at>LOADED&&v.at>(v.now||Date.now())-10*60000){clearInterval(rT);if(VISIT)goHome();save();if(myUser())await netSend(true);toast("🔄 The game is restarting for an update…",3000);setTimeout(()=>location.reload(),2000)}}catch(e){}};
+  rT=setInterval(chk,20000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)chk()})}
 /* ================= FISH: pond fish and fishing with a rod ================= */
 const FISHES=[],FISHK=[{id:"tilapia",n:"Tilapia",p:10,col:0x9aa3ab},{id:"bangus",n:"Milkfish",p:14,col:0xc9d6de},{id:"hito",n:"Catfish",p:12,col:0x4a4038}];
 FISHK.forEach(f=>{ITEMS[f.id]={n:f.n,p:f.p,ic:"fish",col:"#"+f.col.toString(16).padStart(6,"0")}});
