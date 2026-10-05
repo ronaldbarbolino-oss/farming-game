@@ -362,9 +362,9 @@ body.land .stage{width:100vw;height:100vh;height:100dvh}
   <div class="tray-head" id="lbHead"><h2>Farmers</h2><span class="hint" id="lbHint"></span></div>
   <div class="panel" id="lbPanel"><ol class="lb" id="lb"><li class="lbEmpty">Loading the list…</li></ol></div>
 
-  <div class="tray-head"><h2>Animals</h2><span class="hint">Buy a male and a female to breed: the female gets pregnant on her own and gives birth after 30 minutes. Each species has its own pen. They shelter on their own when it rains or snows. They can get sick: treat any with a red cross within 5 minutes or it will die.</span></div>
+  <div class="tray-head"><h2>Animals</h2><span class="hint">Buy a male and a female to breed: the female gets pregnant on her own and gives birth after 30 minutes. Each species has its own pen. They shelter on their own when it rains or snows.</span></div>
   <div class="panel"><div class="tools" id="shop"></div>
-    <div class="tools" style="margin-top:8px"><button class="btn" id="tRest" style="background:#6a5acd;box-shadow:0 4px 0 #463a9a">😴 Rest All Animals</button><span class="mktNote" id="restNote" style="margin:0">Resting animals go inside for 3 minutes. After that they can't get sick for 20 minutes.</span></div>
+    <div class="tools" style="margin-top:8px"><button class="btn" id="tRest" hidden style="background:#6a5acd;box-shadow:0 4px 0 #463a9a">😴 Rest All Animals</button><span class="mktNote" id="restNote" style="margin:0" hidden>Resting animals go inside for 3 minutes. After that they can't get sick for 20 minutes.</span></div>
     <h4 class="penH">Animal Houses</h4><p class="mktNote">Level up a house to keep more animals (+3 space) and give it a makeover: new roof, flowers, a flag, then lanterns and a stone path.</p><div class="tools" id="penUp"></div></div>
   </div>
 </div>
@@ -1201,7 +1201,7 @@ const lerp=(a,b,k)=>a+(b-a)*k;
 let NIGHT_NOW=false,nightT=0,wasNight=null;
 function stepAnimals(dt,t){if((nightT-=dt)<=0){nightT=5;NIGHT_NOW=isNight();if(wasNight!==null&&wasNight!==NIGHT_NOW)toast(NIGHT_NOW?"🌙 It's getting dark. The animals are going to sleep.":"🌅 Good morning! The animals are waking up.",3600);wasNight=NIGHT_NOW}
   const dead=[];breedT-=dt;if(breedT<=0){breedT=20;if(!VISIT)tryBreed()}
-  const bad=isBad();sickT-=dt;const roll=sickT<=0&&!VISIT;if(roll)sickT=15;
+  const bad=isBad();sickT-=dt;const roll=false;if(sickT<=0)sickT=15;
   animalObjs.forEach((o,i)=>{
     const p=S.pens[i];if(!p)return;const a=animal(p.id),g=o.g,U=g.userData;
     if(!o.state){o.state="idle";o.st=o.wait||1;o.nk=0;o.yaw=0;o.wl=0}
@@ -2259,7 +2259,7 @@ $("sellAll").onclick=sellAll;$("shopOpen").onclick=()=>{S.shopOpen=S.shopOpen===
 $("placeRot").onclick=()=>{if(PLACE){PLACE.r=(PLACE.r+Math.PI/2)%(Math.PI*2);PLACE.g.rotation.y=PLACE.r}};$("placeOk").onclick=confirmPlace;$("placeX").onclick=cancelPlace;
 const CD_HARV=600,CD_TREAT=120;const cdLeft=k=>Math.max(0,(k==="harv"?CD_HARV:CD_TREAT)-(now()-((S.cd||{})[k]||0)));
 const OWNER_KEY="ronfarm";const isOwner=()=>{const n=v=>String(v||"").toLowerCase().replace(/[^a-z0-9]/g,"");const p=(typeof CLOUD!=="undefined"&&(CLOUD.local||CLOUD.profile))||{};return[typeof LOCAL!=="undefined"&&LOCAL.user,p.farm,p.farmer].some(v=>n(v)===OWNER_KEY)};
-function cdUI(){const h=cdLeft("harv"),c=cdLeft("treat"),a=$("tAll"),b=$("tCure");if(!a||!b)return;a.hidden=false;b.hidden=!isOwner();
+function cdUI(){const h=cdLeft("harv"),c=cdLeft("treat"),a=$("tAll"),b=$("tCure");if(!a||!b)return;a.hidden=false;b.hidden=true;
   a.textContent=h>0?"Harvest All · "+fmt(h):"Harvest All";a.disabled=h>0;b.textContent=c>0?"Treat All · "+fmt(c):"Treat All";b.disabled=c>0}
 setInterval(cdUI,1000);
 $("tRest").onclick=()=>{const n=restAnimals(S.pens);if(!n)return toast(S.pens.length?"Your animals are already resting or protected.":"You don't have animals yet.");
@@ -2786,7 +2786,7 @@ function zoneCount(id){const z=zoneOf(id);return z==="pen"?S.pens.filter(p=>p.id
 const houseKey=id=>{const z=zoneOf(id);return z==="pen"?id:z};
 const PENUP=[150,400,900],PENADD=3;
 function zoneLimit(id){const z=zoneOf(id),base=z==="pen"?(PLIM[id]||5):ZLIM[z];return base+PENADD*((S.penLv||{})[houseKey(id)]|0)}
-function normalizePens(){(S.pens||[]).forEach((p,i)=>{if(!p.g)p.g=i%2?"F":"M";if(p.sick&&!p.sickAt)p.sickAt=now()})}
+function normalizePens(){(S.pens||[]).forEach((p,i)=>{if(!p.g)p.g=i%2?"F":"M";if(p.sick){p.sick=false;delete p.sickAt;delete p.heal}})}
 function rebuildAnimals(){animalObjs.forEach(o=>animalGroup.remove(o.g));animalObjs=[];syncAnimals();
   Object.values(CREW).forEach(W=>{if(W&&W.o&&W.o.queue)W.o.queue=W.o.queue.filter(q=>q.type!=="animal")})}
 function killAnimals(list){list.sort((a,b)=>b-a).forEach(i=>{const p=S.pens[i],a=animal(p.id),o=animalObjs[i];
