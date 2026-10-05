@@ -450,6 +450,7 @@ const ANIMALS=[
  {id:"pato",n:"Mallard",item:"Mallard eggs",t:420,cost:220,s:45,xp:3,lv:3,zone:"pond"},
  {id:"pusa",n:"Cat",item:"Cat Fur",t:300,cost:180,s:4,xp:4,lv:3,zone:"farm"},
  {id:"aso",n:"Dog",item:"Dog Fur",t:300,cost:200,s:5,xp:4,lv:3,zone:"farm"},
+ {id:"baboy",n:"Pig",item:"Truffle",t:420,cost:450,s:20,xp:6,lv:3},
  {id:"baka",n:"Cow",item:"Milk",t:540,cost:700,s:150,xp:9,lv:6},
  {id:"kabayo",n:"Horse",item:"Horsehair",t:480,cost:900,s:30,xp:11,lv:7},
  {id:"kalabaw",n:"Carabao",item:"Carabao milk",t:600,cost:1100,s:260,xp:14,lv:7}
@@ -572,8 +573,9 @@ function farmH(x,z){let h=0;
   return h}
 const PENS={manok:{x0:-10.8,x1:-7.2,z0:-6.4,z1:-2.7,n:"Chicken Coop",gate:"s"},kambing:{x0:-10.8,x1:-7.2,z0:1,z1:4.8,n:"Goat Pen",gate:"n"},
   baka:{x0:-16.8,x1:-12.9,z0:-6.6,z1:-2.7,n:"Cow Pen",gate:"s"},kalabaw:{x0:-16.8,x1:-12.9,z0:1,z1:5,n:"Carabao Pen",gate:"n"},
-  kabayo:{x0:-23.8,x1:-19.2,z0:-4.4,z1:3,n:"Stable",gate:"e"}};
-const PLIM={manok:8,kambing:6,baka:5,kalabaw:5,kabayo:6};
+  kabayo:{x0:-23.8,x1:-19.2,z0:-4.4,z1:3,n:"Stable",gate:"e"},
+  baboy:{x0:-23.8,x1:-19.6,z0:4.4,z1:8.4,n:"Pig Sty",gate:"e"}};
+const PLIM={manok:8,kambing:6,baka:5,kalabaw:5,kabayo:6,baboy:6};
 function inAnyPen(x,z,m=.3){for(const k in PENS){const p=PENS[k];if(x>p.x0-m&&x<p.x1+m&&z>p.z0-m&&z<p.z1+m)return true}return false}
 const SNOWB=new Builder();
 let POND_MESH=null,SKYMESH=null,SNOWMESH=null,SNOWG=null,SNOWF=null,sickT=8;
@@ -730,7 +732,7 @@ function tree(b,x,z,fruit,seed,scale=1,snb=SNOWB){
 }
 const FRUITTREES=[];
 /* interactive farm trees: pick fruit, chop down, plant saplings */
-const FRUITK={0xe2402f:"apple",0xf08a24:"orange",0xf5c732:"mango"},FRUITC={apple:0xe2402f,orange:0xf08a24,mango:0xf5c732},FTREE_T=180,TGROW=600,FTREES=[],BASETREES=[];
+const FRUITK={0xe2402f:"apple",0xf08a24:"orange",0xf5c732:"mango"},FRUITC={apple:0xe2402f,orange:0xf08a24,mango:0xf5c732,santol:0xd8b060,avocado:0x4a7a2a,rambutan:0xd8342b},FTREE_T=180,TGROW=600,FTREES=[],BASETREES=[];
 const TREEG=new THREE.Group();
 function makeTreeG(x,z,fruit,seed){const g=new THREE.Group(),b=new Builder(),sn=new Builder();tree(b,0,0,null,seed,1,sn);g.add(b.mesh());g.add(new THREE.Mesh(sn.geo(),SNOWMAT));
   const r=rnd(seed),s=.9+r()*.3;let fm=null;
@@ -745,7 +747,7 @@ function bush(b,x,z,flower,seed,sz=1){const r=rnd(seed);[[0,.32,0,.5],[.4,.27,.1
     .forEach(([x,z,f],k)=>BASETREES.push({id:"b"+k,x,z,f,seed:k*37+5}));world.add(TREEG);
   [[-5,6,0xff7bb0],[7,5.5,0xffd84a],[-5.4,-7.6,0xb48cff],[3.2,-6.5,0xffffff],[13.4,-.8,0xff7bb0],[-1.5,7,0xffffff],
    [-4.6,-2.7,0xffffff,1.3],[-4.7,5.7,null,1.4],[5.4,5.9,0xffffff,1.3],[5.5,-3.7,null,1.2],[2.2,6.6,0xff7bb0,1.1],[-1.2,-4.3,0xffffff,.9],[3.4,-4.5,null,1],[-5.3,2.3,0xffd84a,.9],
-   [-26,-5.5,null,1.3],[-21.5,5,0xffffff,1.2],[-8,5,null,1.2],[-13,6.3,0xff7bb0,1.1],[-4,8,null,1.5],[5.8,6.9,0xffffff,1.2],[9.8,-1.2,null,1.1],[-17.5,6.5,0xffffff,1.4]].forEach(([x,z,f,sz],k)=>bush(b,x,z,f,k*13+3,sz||1));
+   [-26,-5.5,null,1.3],[-25.6,6.4,0xffffff,1.1],[-8,5,null,1.2],[-13,6.3,0xff7bb0,1.1],[-4,8,null,1.5],[5.8,6.9,0xffffff,1.2],[9.8,-1.2,null,1.1],[-17.5,6.5,0xffffff,1.4]].forEach(([x,z,f,sz],k)=>bush(b,x,z,f,k*13+3,sz||1));
   // signpost
   b.add("cyl",0x7a4a24,1.8,.6,-3.9,.05,1.2,.05);b.add("box",0xc98a4b,1.8,1.05,-3.9,.08,.32,.9);b.add("box",0x8f5a2a,1.8,1.05,-3.9,.09,.36,.94);
   // hay bales
@@ -1070,6 +1072,19 @@ function makeAnimal(id){
     const tail=new THREE.Group();tail.position.set(-.25,.46,0);body.add(tail);part(tail,gCyl,C,-.05,.09,0,.025,.22,.025,0,0,.6);
     [[.17,.08],[.17,-.08],[-.17,.08],[-.17,-.08]].forEach(([x,z])=>legs.push(legP(g,x,z,.27,.27,.07,C,0xb07a3a)));
     Object.assign(U,{h:1,neck,head,jaw,earL,earR,tail,kind:"big",pet:true,graze:-.7,speed:1,gait:13,wagF:16,wagA:.7});
+  }else if(id==="baboy"){
+    const C=0xf2a5a0,D=0xe0857f;
+    part(body,gBox,C,0,.42,0,.66,.36,.4);part(body,gSph,C,-.3,.44,0,.2,.18,.2);part(body,gSph,D,0,.27,0,.3,.06,.18);
+    const neck=new THREE.Group();neck.position.set(.32,.46,0);body.add(neck);
+    const head=new THREE.Group();head.position.set(.08,0,0);neck.add(head);
+    part(head,gBox,C,0,0,0,.24,.24,.3);const jaw=part(head,gCyl,D,.15,-.03,0,.08,.08,.08,0,0,Math.PI/2);
+    part(head,gSph,0x8a4a40,.195,-.01,.035,.018,.022,.018);part(head,gSph,0x8a4a40,.195,-.01,-.035,.018,.022,.018);
+    part(head,gSph,0x111111,.1,.06,.09,.025,.025,.025);part(head,gSph,0x111111,.1,.06,-.09,.025,.025,.025);
+    const earL=new THREE.Group();earL.position.set(-.02,.13,.1);head.add(earL);part(earL,gCone,D,.03,.04,0,.06,.1,.03,0,0,-.6);
+    const earR=new THREE.Group();earR.position.set(-.02,.13,-.1);head.add(earR);part(earR,gCone,D,.03,.04,0,.06,.1,.03,0,0,-.6);
+    const tail=new THREE.Group();tail.position.set(-.36,.5,0);body.add(tail);part(tail,gSph,D,-.04,.04,0,.05,.05,.03);part(tail,gSph,D,-.08,.08,0,.035,.035,.025);
+    [[.2,.12],[.2,-.12],[-.2,.12],[-.2,-.12]].forEach(([x,z])=>legs.push(legP(g,x,z,.24,.24,.07,C,0x8a5a4a)));
+    Object.assign(U,{h:1,neck,head,jaw,earL,earR,tail,kind:"big",graze:-.75,speed:.4,gait:9});
   }else if(id==="pusa"){
     const C=0xf0a050,D=0xc8742a;
     part(body,gBox,C,0,.3,0,.42,.17,.17);[-.1,0,.1].forEach(dx=>part(body,gBox,D,dx,.36,0,.035,.06,.175));
@@ -1109,7 +1124,7 @@ const MT={};
 function mooTex(id){
   if(MT[id])return MT[id];const c=document.createElement("canvas");c.width=256;c.height=128;const x=c.getContext("2d");
   x.font="900 64px Nunito, Arial Rounded MT Bold, sans-serif";x.textAlign="center";x.textBaseline="middle";x.lineWidth=12;x.strokeStyle="#8f5a2a";x.fillStyle="#fff";
-  const w={baka:"Moo!",kambing:"Meee!",kalabaw:"Mooh!",kabayo:"Neigh!",aso:"Aw aw!",pusa:"Meow!",pato:"Quack!",bibe:"Quack!"}[id]||"Cluck!";x.strokeText(w,128,64);x.fillText(w,128,64);
+  const w={baboy:"Oink!",baka:"Moo!",kambing:"Meee!",kalabaw:"Mooh!",kabayo:"Neigh!",aso:"Aw aw!",pusa:"Meow!",pato:"Quack!",bibe:"Quack!"}[id]||"Cluck!";x.strokeText(w,128,64);x.fillText(w,128,64);
   return MT[id]=new THREE.CanvasTexture(c);
 }
 const BT={};
@@ -1133,7 +1148,7 @@ function zonePos(zone,r,id){
   return randPen(r,id)}
 function randPen(r,id){const P=PENS[id]||PENS.kambing,lx=P.x0+(id==="manok"?1.7:2.1);return[lx+.3+r()*(P.x1-lx-.9),P.z0+.6+r()*(P.z1-P.z0-1.2)]}
 /* every animal gets its own coat colour and a slightly different size */
-const COATS={baka:[0xffffff,0x6b4422,0xd8a868,0x3a3330,0xb5652f,0xf2e2c0],kambing:[0xefe7da,0x5a3a22,0x3a3330,0xc98a4b,0x9a9a9a,0xf2d0a0],kalabaw:[null,0x5a5550,0x3a3330,0x6b5a4a,0x7a7068,0x4a4038],
+const COATS={baboy:[null,0xf8c8c0,0x8a5a4a,0x3a3330,0xe8d0b0,0xd88a80],baka:[0xffffff,0x6b4422,0xd8a868,0x3a3330,0xb5652f,0xf2e2c0],kambing:[0xefe7da,0x5a3a22,0x3a3330,0xc98a4b,0x9a9a9a,0xf2d0a0],kalabaw:[null,0x5a5550,0x3a3330,0x6b5a4a,0x7a7068,0x4a4038],
   kabayo:[null,0x3a2615,0xf2f2ee,0xd8a24a,0x7a7068,0xb5652f],manok:[null,0xb5652f,0x3a3330,0xd8a24a,0xf2f2ee,0x9a6a3a],bibe:[null,0xf2e8d0,0xd8b880,0x9a8a7a,0xffffff,0xc9b48a],
   pato:[null,0x6b4a2c,0x3a5a3a,0x8a7a6a,0x5a4a3a,0x2f5a7a],aso:[null,0x3a2615,0xf2f2ee,0xd8a24a,0x6b6b6b,0x8a5a2a],pusa:[null,0x3a3330,0xf2f2ee,0xe08a3a,0x9a9a9a,0xc9a46a]};
 const _ca2=new THREE.Color();
@@ -2462,10 +2477,10 @@ function buyIsle(id){const d=ISLEITEMS.find(q=>q.id===id);if(S.lv<d.lv)return to
   after();shopUI(true)}
 
 /* ================= STORAGE & MARKET STALL ================= */
-const AITEM={manok:"itlog",bibe:"itlog_bibe",pato:"itlog_pato",kambing:"gatas_kambing",baka:"gatas_baka",kalabaw:"gatas_kalabaw",pusa:"fur_cat",aso:"fur_dog",kabayo:"horsehair"};
+const AITEM={baboy:"truffle",manok:"itlog",bibe:"itlog_bibe",pato:"itlog_pato",kambing:"gatas_kambing",baka:"gatas_baka",kalabaw:"gatas_kalabaw",pusa:"fur_cat",aso:"fur_dog",kabayo:"horsehair"};
 const ITEMS={itlog:{n:"Chicken Eggs",p:6,ic:"egg",col:"#fff3d6"},itlog_bibe:{n:"Duck Eggs",p:8,ic:"egg",col:"#e6efdc"},itlog_pato:{n:"Mallard Eggs",p:9,ic:"egg",col:"#d4e4ef"},
   gatas_kambing:{n:"Goat Milk",p:15,ic:"milk",col:"#3fb04a"},gatas_baka:{n:"Cow Milk",p:22,ic:"milk",col:"#2f7fb8"},gatas_kalabaw:{n:"Carabao Milk",p:28,ic:"milk",col:"#8a4ac0"},
-  apple:{n:"Apple",p:10,ic:"fruit",col:"#e2402f"},orange:{n:"Orange",p:12,ic:"fruit",col:"#f08a24"},mango:{n:"Mango",p:16,ic:"fruit",col:"#f5c732"},wood:{n:"Wood",p:8,ic:"wood",col:"#8a5a2a"},fur_cat:{n:"Cat Fur",p:4,ic:"fur",col:"#f0b65a"},fur_dog:{n:"Dog Fur",p:5,ic:"fur",col:"#c98a4b"},horsehair:{n:"Horsehair",p:30,ic:"fur",col:"#6b4422"}};
+  apple:{n:"Apple",p:10,ic:"fruit",col:"#e2402f"},orange:{n:"Orange",p:12,ic:"fruit",col:"#f08a24"},mango:{n:"Mango",p:16,ic:"fruit",col:"#f5c732"},santol:{n:"Santol",p:12,ic:"fruit",col:"#d8b060"},avocado:{n:"Avocado",p:18,ic:"fruit",col:"#4a7a2a"},rambutan:{n:"Rambutan",p:15,ic:"fruit",col:"#d8342b"},wood:{n:"Wood",p:8,ic:"wood",col:"#8a5a2a"},truffle:{n:"Truffle",p:20,ic:"truffle",col:"#4a3a2e"},fur_cat:{n:"Cat Fur",p:4,ic:"fur",col:"#f0b65a"},fur_dog:{n:"Dog Fur",p:5,ic:"fur",col:"#c98a4b"},horsehair:{n:"Horsehair",p:30,ic:"fur",col:"#6b4422"}};
 CROPS.forEach(c=>{ITEMS[c.id]={n:c.n,p:c.s,crop:true,isl:!!c.island}});
 const invCount=()=>Object.values(S.inv||{}).reduce((a,b)=>a+(b|0),0);
 const invCap=()=>{const b=S.builds||[];return 40*(S.basket||0)+60+80*b.filter(o=>o.id==="bodega").length+150*b.filter(o=>o.id==="kamalig").length};
@@ -2492,6 +2507,7 @@ function itemIcon(id){const it=ITEMS[id];if(it.crop)return ICONS[id]||"";if(ITEM
   const c=document.createElement("canvas");c.width=c.height=96;const x=c.getContext("2d");x.fillStyle="#f3e6c8";x.beginPath();x.arc(48,50,42,0,Math.PI*2);x.fill();
   if(it.ic==="fruit"){[[34,58],[60,58],[47,40]].forEach(([fx,fy])=>{x.fillStyle=it.col;x.strokeStyle="rgba(0,0,0,.35)";x.lineWidth=2.5;x.beginPath();x.arc(fx,fy,15,0,Math.PI*2);x.fill();x.stroke();x.fillStyle="#3f8f2c";x.beginPath();x.ellipse(fx+5,fy-15,6,3,-.5,0,Math.PI*2);x.fill();x.fillStyle="rgba(255,255,255,.6)";x.beginPath();x.arc(fx-5,fy-5,4,0,Math.PI*2);x.fill()})}
   else if(it.ic==="fish"){x.fillStyle=it.col;x.strokeStyle="rgba(0,0,0,.35)";x.lineWidth=3;x.beginPath();x.ellipse(44,52,26,13,0,0,Math.PI*2);x.fill();x.stroke();x.beginPath();x.moveTo(66,52);x.lineTo(84,38);x.lineTo(84,66);x.closePath();x.fill();x.stroke();x.fillStyle="#111";x.beginPath();x.arc(30,48,3,0,Math.PI*2);x.fill()}
+  else if(it.ic==="truffle"){[[36,58,16],[58,54,19],[48,40,13]].forEach(([tx,ty,tr])=>{x.fillStyle=it.col;x.strokeStyle="rgba(0,0,0,.35)";x.lineWidth=2.5;x.beginPath();x.arc(tx,ty,tr,0,Math.PI*2);x.fill();x.stroke();x.fillStyle="rgba(255,255,255,.18)";for(let k=0;k<5;k++){x.beginPath();x.arc(tx-tr/2+k*tr/4,ty-tr/3+(k%2)*tr/3,2,0,Math.PI*2);x.fill()}})}
   else if(it.ic==="fur"){x.fillStyle=it.col;x.strokeStyle="rgba(0,0,0,.3)";x.lineWidth=3;x.beginPath();x.ellipse(48,56,30,20,0,0,Math.PI*2);x.fill();x.stroke();x.strokeStyle="rgba(255,255,255,.55)";x.lineWidth=2.5;for(let k=0;k<6;k++){x.beginPath();x.moveTo(26+k*9,48);x.quadraticCurveTo(30+k*9,58,26+k*9,68);x.stroke()}}
   else if(it.ic==="wood"){[[48,64],[36,46],[60,46]].forEach(([lx,ly])=>{x.fillStyle="#8a5a2a";x.strokeStyle="#5a3a1a";x.lineWidth=3;x.beginPath();x.ellipse(lx,ly,14,12,0,0,Math.PI*2);x.fill();x.stroke();x.fillStyle="#d9b878";x.beginPath();x.ellipse(lx,ly,9,7.5,0,0,Math.PI*2);x.fill();x.strokeStyle="#a8763f";x.lineWidth=1.5;x.beginPath();x.ellipse(lx,ly,4.5,3.5,0,0,Math.PI*2);x.stroke()})}
   else if(it.ic==="egg"){x.fillStyle="#c49a5a";x.beginPath();x.ellipse(48,72,30,9,0,0,Math.PI*2);x.fill();[[34,56],[60,58],[47,46]].forEach(([ex,ey])=>{x.fillStyle=it.col;x.strokeStyle="#b8905a";x.lineWidth=2.5;x.beginPath();x.ellipse(ex,ey,11,15,0,0,Math.PI*2);x.fill();x.stroke()})}
@@ -2583,9 +2599,12 @@ const TTOOLS=[{id:"pataba",n:"Fertilizer ×10",cost:300,lv:1,d:"Your next 10 cro
   {id:"tricycle",n:"Own Tricycle",cost:1500,lv:3,d:"Free and faster trips to and from town."}];
 const DECOR=[{id:"mesa",n:"Table and Chairs",cost:250,lv:1,r:1,d:"Outdoor dining set."},{id:"bangko",n:"Wooden Bench",cost:150,lv:1,r:.8,d:"Wooden seat for resting."},
   {id:"paso",n:"Flower Pot",cost:120,lv:1,r:.5,d:"Colorful potted flowers."},{id:"ilaw",n:"Lamp Post",cost:180,lv:2,r:.4,d:"Street light for the path."},
-  {id:"sap_apple",n:"Apple Sapling",cost:40,lv:1,r:.9,tree:"apple",d:"Plant it on your farm. Grows into an apple tree in 10 minutes."},
-  {id:"sap_orange",n:"Orange Sapling",cost:50,lv:1,r:.9,tree:"orange",d:"Plant it on your farm. Grows into an orange tree in 10 minutes."},
-  {id:"sap_mango",n:"Mango Sapling",cost:60,lv:2,r:.9,tree:"mango",d:"Plant it on your farm. Grows into a mango tree in 10 minutes."},
+  {id:"sap_apple",n:"Apple Tree Seed",cost:40,lv:1,r:.9,tree:"apple",d:"Plant it on your farm. Grows into an apple tree in 10 minutes."},
+  {id:"sap_orange",n:"Orange Tree Seed",cost:50,lv:1,r:.9,tree:"orange",d:"Plant it on your farm. Grows into an orange tree in 10 minutes."},
+  {id:"sap_santol",n:"Santol Tree Seed",cost:50,lv:1,r:.9,tree:"santol",d:"Plant it on your farm. Grows into a santol tree in 10 minutes."},
+  {id:"sap_avocado",n:"Avocado Tree Seed",cost:70,lv:2,r:.9,tree:"avocado",d:"Plant it on your farm. Grows into an avocado tree in 10 minutes."},
+  {id:"sap_mango",n:"Mango Tree Seed",cost:60,lv:2,r:.9,tree:"mango",d:"Plant it on your farm. Grows into a mango tree in 10 minutes."},
+  {id:"sap_rambutan",n:"Rambutan Tree Seed",cost:65,lv:2,r:.9,tree:"rambutan",d:"Plant it on your farm. Grows into a rambutan tree in 10 minutes."},
   {id:"duyan",n:"Hammock",cost:400,lv:3,r:1.2,d:"Hammock hung between two posts."},{id:"poso",n:"Water Pump",cost:500,lv:3,r:.7,d:"Hand-operated water pump."}];
 DECOR.forEach(d=>{if(!BUILDS.find(b=>b.id===d.id))BUILDS.push({...d,inc:0,decor:true})});
 const ownTri=()=>(S.tools||[]).includes("tricycle");
@@ -2897,6 +2916,7 @@ function tone(type,f0,f1,dur,vol,at){const c=SND.ctx,o=c.createOscillator(),g=c.
 const SFX={bird(){const b=2600+Math.random()*1800,n=2+Math.floor(Math.random()*4);for(let i=0;i<n;i++)tone("sine",b*(1+Math.random()*.2),b*(.7+Math.random()*.6),.09+Math.random()*.06,.05,i*.13)},
   cluck(){for(let i=0;i<2+Math.floor(Math.random()*2);i++)tone("square",520,300,.07,.025,i*.16)},
   moo(){tone("sawtooth",150,105,1.1,.035);tone("sine",300,210,1.1,.02)},
+  oink(){tone("sawtooth",260,180,.18,.03);tone("sawtooth",240,160,.16,.025,.24)},
   quack(){for(let i=0;i<2;i++)tone("sawtooth",700,420,.12,.03,i*.2)}};
 function sndSet(on){if(on&&!sndInit()){toast("Sound isn't supported on this device.");return}SND.on=on;const b=$("sndBtn");b.textContent=on?"🔊 Sound":"🔇 Sound";b.setAttribute("aria-pressed",on);
   try{localStorage.setItem("farming-sound",on?"1":"0")}catch(e){}if(SND.ctx){if(on&&SND.ctx.state==="suspended")SND.ctx.resume();SND.master.gain.setTargetAtTime(on?.9:0,SND.ctx.currentTime,.4)}}
@@ -2909,6 +2929,7 @@ function stepSound(dt){if(!SND.on||!SND.ctx)return;const k=WX.key,rain=k==="rain
   if((T.bird-=dt)<=0){T.bird=rain||snow?9+Math.random()*10:2+Math.random()*5;if(!rain)SFX.bird()}
   if((T.cluck-=dt)<=0){T.cluck=6+Math.random()*10;if(has("manok"))SFX.cluck()}
   if((T.moo-=dt)<=0){T.moo=16+Math.random()*20;if(has("baka")||has("kalabaw"))SFX.moo()}
+  if((T.oink=(T.oink==null?12:T.oink)-dt)<=0){T.oink=12+Math.random()*16;if(has("baboy"))SFX.oink()}
   if((T.quack-=dt)<=0){T.quack=10+Math.random()*14;if(has("bibe")||has("pato"))SFX.quack()}}
 /* admin restart: when the admin presses Restart, every open game saves and reloads */
 if(API){const LOADED=Date.now();let rT=null;const chk=async()=>{try{const r=await fetch(API+"restart",{cache:"no-store"});if(!r.ok)return;const v=await r.json();
