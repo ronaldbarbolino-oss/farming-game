@@ -698,7 +698,7 @@ function setPondSize(lv){const k=1+.2*Math.max(0,Math.min(5,lv|0));if(Math.abs(k
   if(typeof POND!=="undefined"){POND.x=PONDS.x;POND.z=PONDS.z;POND.rx=2.47*k;POND.rz=1.9*k}paintGround();landDeco();pondDeco()}
 
 /* -------- mountains, waterfall & river -------- */
-let wfTex,rvTex,foamT=0;const WF={x:12,z:-19.2,top:12,w:2.6};
+let wfTex,rvTex,foamT=0;let RIVERW=null,rvTex2=null,wfTex2=null,WFF=null;const RIPPLES=[];const WF={x:12,z:-19.2,top:12,w:2.6};
 (function mountains(){
   const b=new Builder(),r=rnd(77);
   // main range (north & north-east)
@@ -737,6 +737,10 @@ let wfTex,rvTex,foamT=0;const WF={x:12,z:-19.2,top:12,w:2.6};
   const wf=new THREE.Mesh(new THREE.PlaneGeometry(WF.w,WF.top,1,8),wfMat);
   const wp=wf.geometry.attributes.position;for(let i=0;i<wp.count;i++){const yy=wp.getY(i);wp.setZ(i,Math.pow((WF.top/2-yy)/WF.top,2)*-.2+(yy>WF.top/2-.1?-.4:0))}
   wf.position.set(WF.x,WF.top/2,WF.z);world.add(wf);
+  {const k2=document.createElement("canvas");k2.width=64;k2.height=256;const y=k2.getContext("2d");for(let i=0;i<40;i++){y.fillStyle="rgba(255,255,255,"+(.35+Math.random()*.6)+")";y.fillRect(Math.random()*64,Math.random()*256,1+Math.random()*3,14+Math.random()*50)}
+    wfTex2=new THREE.CanvasTexture(k2);wfTex2.wrapS=wfTex2.wrapT=THREE.RepeatWrapping;wfTex2.repeat.set(1.3,2.5);
+    WFF=new THREE.Mesh(new THREE.PlaneGeometry(WF.w*1.05,WF.top,6,16),new THREE.MeshBasicMaterial({map:wfTex2,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,opacity:.8}));WFF.position.set(WF.x,WF.top/2,WF.z+.08);world.add(WFF);WFF.userData.b=Float32Array.from(WFF.geometry.attributes.position.array)}
+  for(let k=0;k<4;k++){const rm=new THREE.Mesh(new THREE.RingGeometry(.86,1,40),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,depthWrite:false,opacity:0}));rm.rotation.x=-Math.PI/2;rm.position.set(WF.x,-.05,WF.z+1.2);rm.userData.ph=k/4;world.add(rm);RIPPLES.push(rm)}
   const wf2=new THREE.Mesh(new THREE.PlaneGeometry(.7,WF.top*.8,1,6),wfMat);wf2.position.set(WF.x-1.75,WF.top*.4,WF.z+.25);world.add(wf2);
   const lip=new THREE.Mesh(new THREE.BoxGeometry(WF.w,.12,.8),new THREE.MeshBasicMaterial({color:0xbfe6f8}));lip.position.set(WF.x,WF.top,WF.z-.4);world.add(lip);
   // pool
@@ -746,12 +750,11 @@ let wfTex,rvTex,foamT=0;const WF={x:12,z:-19.2,top:12,w:2.6};
   const mist=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(mk),transparent:true,depthWrite:false}));mist.position.set(WF.x,1,WF.z+.9);mist.scale.set(7,3.4,1);world.add(mist);
   // river: from pool to the pond
   const pts=[[12,-16.9],[12.3,-13],[11.4,-9],[11.2,-5],[11.6,-1],[11.1,3],[10.2,5.6],[9.4,6.5]];
-  const pos=[],uv=[],idx=[];let L=0;
-  pts.forEach((p,i)=>{const q=pts[Math.min(i+1,pts.length-1)],o=pts[Math.max(i-1,0)],dx=q[0]-o[0],dz=q[1]-o[1],d=Math.hypot(dx,dz)||1,nx=-dz/d,nz=dx/d,w=.65;
-    if(i)L+=Math.hypot(p[0]-pts[i-1][0],p[1]-pts[i-1][1]);
-    pos.push(p[0]+nx*w,-.08,p[1]+nz*w,p[0]-nx*w,-.08,p[1]-nz*w);uv.push(0,L/2,1,L/2);
-    if(i){const a=(i-1)*2;idx.push(a,a+2,a+1,a+1,a+2,a+3)}});
-  const rg=new THREE.BufferGeometry();rg.setAttribute("position",new THREE.Float32BufferAttribute(pos,3));rg.setAttribute("uv",new THREE.Float32BufferAttribute(uv,2));rg.setIndex(idx);rg.computeVertexNormals();
+  const crv=new THREE.CatmullRomCurve3(pts.map(([x,z])=>new THREE.Vector3(x,0,z))),NS=90,NC=6,pos=[],uv=[],idx=[],RB=[];let L=0,prev=null;
+  for(let i=0;i<=NS;i++){const P=crv.getPointAt(i/NS),Tn=crv.getTangentAt(i/NS),nx=-Tn.z,nz=Tn.x,w=.68;if(prev)L+=P.distanceTo(prev);prev=P;
+    for(let c=0;c<NC;c++){const f=c/(NC-1)*2-1;pos.push(P.x+nx*w*f,-.08,P.z+nz*w*f);uv.push(c/(NC-1),L/2);RB.push(L,f)}
+    if(i){const a=(i-1)*NC;for(let c=0;c<NC-1;c++){const q=a+c;idx.push(q,q+NC,q+1,q+1,q+NC,q+NC+1)}}}
+  const rg=new THREE.BufferGeometry();rg.setAttribute("position",new THREE.Float32BufferAttribute(pos,3));rg.setAttribute("uv",new THREE.Float32BufferAttribute(uv,2));rg.setIndex(idx);rg.computeVertexNormals();RIVERW={g:rg,b:RB};
   const rk=document.createElement("canvas");rk.width=128;rk.height=128;const rx=rk.getContext("2d");
   // flat 2D cartoon water: two flat blues, foam along the banks and white flow streaks that slide downstream
   rx.fillStyle="#3fa9e0";rx.fillRect(0,0,128,128);rx.fillStyle="#5cc0f0";rx.fillRect(22,0,84,128);rx.fillStyle="#7ad2f6";rx.fillRect(44,0,40,128);
@@ -759,7 +762,13 @@ let wfTex,rvTex,foamT=0;const WF={x:12,z:-19.2,top:12,w:2.6};
   rx.lineCap="round";const SL=[[30,8,26],[58,40,34],[86,20,24],[42,78,30],[72,96,28],[96,64,22],[50,118,20]];
   SL.forEach(([x,y,l])=>{rx.strokeStyle="rgba(255,255,255,.9)";rx.lineWidth=5;rx.beginPath();rx.moveTo(x,y);rx.lineTo(x,y+l);rx.stroke();if(y+l>128){rx.beginPath();rx.moveTo(x,y-128);rx.lineTo(x,y+l-128);rx.stroke()}});
   rvTex=new THREE.CanvasTexture(rk);rvTex.wrapS=rvTex.wrapT=THREE.RepeatWrapping;rvTex.magFilter=THREE.NearestFilter;
-  const river=new THREE.Mesh(rg,new THREE.MeshBasicMaterial({map:rvTex,side:THREE.DoubleSide}));river.receiveShadow=true;world.add(river);
+  const river=new THREE.Mesh(rg,new THREE.MeshPhongMaterial({map:rvTex,side:THREE.DoubleSide,shininess:150,specular:0xffffff,transparent:true,opacity:.93,flatShading:true}));river.receiveShadow=true;world.add(river);
+  // sparkle and ripple layer that slides faster on top
+  {const k=document.createElement("canvas");k.width=k.height=128;const x=k.getContext("2d");x.lineCap="round";
+    for(let n=0;n<26;n++){const xx=14+Math.random()*100,yy=Math.random()*128,w=6+Math.random()*12;x.strokeStyle="rgba(255,255,255,"+(.45+Math.random()*.5)+")";x.lineWidth=2+Math.random()*2;x.beginPath();x.arc(xx,yy,w,Math.PI*1.15,Math.PI*1.85);x.stroke()}
+    for(let n=0;n<18;n++){x.fillStyle="#fff";const xx=12+Math.random()*104,yy=Math.random()*128;x.fillRect(xx,yy,2,2)}
+    rvTex2=new THREE.CanvasTexture(k);rvTex2.wrapS=rvTex2.wrapT=THREE.RepeatWrapping;
+    const top=new THREE.Mesh(rg,new THREE.MeshBasicMaterial({map:rvTex2,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,opacity:.7,side:THREE.DoubleSide}));top.position.y=.02;top.renderOrder=3;world.add(top)}
   // banks & a small wooden bridge
   const bb=new Builder();
   pts.forEach((p,i)=>{if(i%1)return;for(const sd of[-1,1]){bb.add("ico",0x8a9195,p[0]+sd*.8,.06,p[1]+(i*.37%1-.5)*.6,.18,.12,.16,0,i,0)}});
@@ -767,7 +776,13 @@ let wfTex,rvTex,foamT=0;const WF={x:12,z:-19.2,top:12,w:2.6};
   [[-.9,.45],[.9,.45],[-.9,-.45],[.9,-.45]].forEach(([dx,dz])=>bb.add("cyl",0x7a4f22,bx+dx,.3,bz+dz,.05,.6,.05));bb.add("box",0x8a5a2a,bx,.55,bz+.45,1.9,.05,.05);bb.add("box",0x8a5a2a,bx,.55,bz-.45,1.9,.05,.05);
   world.add(bb.mesh());
 })();
-function stepWater(dt){
+function stepWater4(dt){const tt=performance.now()/1000,fl=(typeof WC!=="undefined"&&WC.flow)||1;
+  if(RIVERW){const P=RIVERW.g.attributes.position,B=RIVERW.b;for(let i=0;i<P.count;i++){const L=B[i*2],f=B[i*2+1],e=1-f*f;P.setY(i,-.08+e*(.045*Math.sin(L*3.2-tt*4.2*fl)+.025*Math.sin(L*7.1+f*3-tt*6.3*fl)))}P.needsUpdate=true;RIVERW.g.computeVertexNormals()}
+  if(rvTex2){rvTex2.offset.y-=dt*1.5*fl;rvTex2.offset.x=Math.sin(tt*.7)*.03}
+  if(wfTex2)wfTex2.offset.y+=dt*2.6*fl;
+  if(WFF){const P=WFF.geometry.attributes.position,b=WFF.userData.b;for(let i=0;i<P.count;i++){const y=b[i*3+1];P.setZ(i,.06*Math.sin(y*2.1+tt*5)+.04*Math.sin(b[i*3]*4+tt*3))}P.needsUpdate=true}
+  RIPPLES.forEach(r=>{const u=(tt*.45+r.userData.ph)%1;r.scale.set(.6+u*3,.6+u*2.2,1);r.material.opacity=(1-u)*.7})}
+function stepWater(dt){stepWater4(dt);
   if(POND_MESH){const P=POND_MESH.geometry.attributes.position,tt=performance.now()/1000,fz=(typeof WC!=="undefined"&&WC.flow!=null)?Math.min(1,WC.flow*1.2):1;for(let i=0;i<P.count;i++){const x=P.getX(i),z=P.getZ(i),e=1-Math.hypot(x,z)*.6;P.setY(i,fz*e*(.022*Math.sin(x*6+tt*1.8)+.016*Math.sin(z*7-tt*1.3)+.01*Math.sin((x+z)*11+tt*2.6)))}P.needsUpdate=true}
   const fl=(typeof WC!=="undefined"&&WC.flow)||1;if(wfTex)wfTex.offset.y+=dt*1.6*fl;if(rvTex)rvTex.offset.y-=dt*.9*fl;
   foamT-=dt;if(foamT<=0){foamT=.06/fl;burst(WF.x+(Math.random()-.5)*WF.w,.15,WF.z+.6,0xffffff,2,.6)}
@@ -868,7 +883,7 @@ function bush(b,x,z,flower,seed,sz=1){const r=rnd(seed);[[0,.32,0,.5],[.4,.27,.1
 const clouds=[],SKYCLOUDMAT=new THREE.MeshLambertMaterial({vertexColors:true,transparent:true,opacity:.35,depthWrite:false});
 (function(){const r=rnd(99);for(let i=0;i<9;i++){const b=new Builder(),n=4+Math.floor(r()*3);
   for(let k=0;k<n;k++)b.add("ico1",0xffffff,(k-n/2)*1.1+r()*.4,r()*.5,(r()-.5)*1.2,1+r()*.6,.7+r()*.4,1+r()*.5);
-  const m=b.mesh(false,false,false);m.material=SKYCLOUDMAT;m.renderOrder=6;m.position.set((r()-.5)*70,12+r()*5,(r()-.5)*70);m.userData.v=.4+r()*.5;scene.add(m);clouds.push(m)}})();
+  const m=b.mesh(false,false,false);m.material=SKYCLOUDMAT;m.renderOrder=6;m.position.set((r()-.5)*70,12+r()*5,(r()-.5)*70);m.userData.v=.4+r()*.5;m.visible=false;clouds.push(m)}})();
 
 /* ================= FIELD ================= */
 const fieldGroup=new THREE.Group();scene.add(fieldGroup);
