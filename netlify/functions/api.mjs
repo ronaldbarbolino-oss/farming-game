@@ -21,6 +21,7 @@ export default async (req) => {
   const url = new URL(req.url);
   const path = url.pathname.replace(/^.*?\/api\/?/, "").replace(/^\.netlify\/functions\/api\/?/, "").replace(/\/$/, "");
   if (path === "health" || path === "") return J({ ok: true, service: "farming-api", path: url.pathname });
+  if (path === "mailcheck") { let mod = false; try { await import("nodemailer"); mod = true } catch {} const gp = (process.env.GMAIL_APP_PASSWORD || "").replace(/\s+/g, ""); return J({ gmailUser: !!process.env.GMAIL_USER, gmailPassLength: gp.length, nodemailer: mod, resend: !!process.env.RESEND_API_KEY }) }
   const meta = getStore({ name: "meta", consistency: "strong" });
   const farms = getStore({ name: "farms", consistency: "strong" });
   try {
@@ -57,7 +58,8 @@ export default async (req) => {
       if (gu && gp) {
         try { const nm = (await import("nodemailer")).default; const tr = nm.createTransport({ service: "gmail", auth: { user: gu, pass: gp } });
           await tr.sendMail({ from: '"Farming" <' + gu + '>', to, subject, text }); return { ok: true } }
-        catch (e) { return { ok: false, error: "Couldn't send the email right now. Try again later." } }
+        catch (e) { const c = String(e && (e.code || e.responseCode) || ""); console.log("mail error", c, String(e && e.message || e).slice(0, 300));
+          return { ok: false, error: c === "EAUTH" || /535|Username and Password/i.test(String(e && e.message)) ? "Email login failed: the Gmail address or App Password on the server is wrong." : "Couldn't send the email right now (" + (c || "error") + "). Try again later." } }
       }
       const key = process.env.RESEND_API_KEY, from = process.env.MAIL_FROM || "Farming <onboarding@resend.dev>";
       if (!key) return { ok: false, error: "Email isn't set up on the server yet. Please tell the game admin." };
