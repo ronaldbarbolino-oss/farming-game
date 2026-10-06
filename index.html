@@ -739,6 +739,9 @@ sun.shadow.mapSize.set(MOBILE?1024:2048,MOBILE?1024:2048);Object.assign(sun.shad
 scene.add(sun);
 
 /* -------- geometry builder: merges many primitives into one vertex-colored mesh -------- */
+var BARNG=new THREE.Group(),BARNHIT=null;
+const barnOff=()=>{const q=(typeof S!=="undefined"&&S&&S.barnPos)||[0,0];return q};
+const inBarn=(x,z,m)=>{const [dx,dz]=barnOff();m=m||0;return x>-2+dx-m&&x<6.4+dx+m&&z>-11+dz-m&&z<-6.2+dz+m};
 const BASE={
   box:new THREE.BoxGeometry(1,1,1).toNonIndexed(),
   sph:new THREE.SphereGeometry(1,QLV===0?7:10,QLV===0?5:7).toNonIndexed(),
@@ -860,7 +863,7 @@ function buildSnowLayers(){
 const STALLS=null;
 function shelterSpot(o,i){const z=o.g.userData.zone,id=o.id;
   if(z==="pond")return[11.4+(Math.random()-.5)*.3,10.45,true];
-  if(z==="farm")return[.5+(Math.random()-.5)*.6,-6.75,true];
+  if(z==="farm"){const [bx,bz]=barnOff();return[.5+bx+(Math.random()-.5)*.6,-6.75+bz,true]}
   const P=PENS[id]||PENS.kambing,midz=(P.z0+P.z1)/2;
   if(id==="manok")return[P.x0+1.55,midz+(Math.random()-.5)*.3,true];
   let k=0;for(let j=0;j<i;j++){const q=animalObjs[j];if(q&&q.id===id)k++}
@@ -885,12 +888,12 @@ var GROUND_G=null,paintGround=()=>{},landDeco=()=>{},pondDeco=()=>{},LANDM=null,
     if(x>FX0-.6&&x<FX0+8.6&&z>FZ0-.6&&z<FZ0+8.6)continue;
     if(inAnyPen(x,z)||inPlotArea(x,z))continue;if(z>-9.4&&z<-6.6&&x<-3.5)continue;if(x>17||farmH(x,z)<-.03)continue;
     if(Math.abs(x-.5)<.8&&z<-3&&z>-7)continue;
-    if(x>-1.8&&x<5.8&&z>-10.2&&z<-6.6)continue;
+    if(x>-1.8+barnOff()[0]&&x<5.8+barnOff()[0]&&z>-10.2+barnOff()[1]&&z<-6.6+barnOff()[1])continue;
     if(r()<.22){const col=[0xffffff,0xffd84a,0xff7bb0,0xb48cff,0xff9a3c][Math.floor(r()*5)];b.add("cyl",0x3f8a26,x,.06,z,.01,.12,.01);b.add("sph",col,x,.13,z,.04,.025,.04)}
     else b.add("cone",r()<.5?0x4e9a2c:0x5fae38,x,.07,z,.04,.14,.04,0,0,(r()-.5)*.4);
   }
   // dirt paths
-  b.add("box",0xc9a46a,.5,.012,-5,1.4,.02,4.4);
+  b.add("box",0xc9a46a,.5+barnOff()[0],.012,-5+barnOff()[1],1.4,.02,4.4);
   b.add("box",0xc9a46a,-13.75,.012,-.15,20.1,.02,1.6);b.add("box",0xc9a46a,.5,.012,8.6,1.1,.02,6.8);b.add("box",0xc9a46a,-13,.012,9.3,26,.02,1);
   b.add("box",0xc9a46a,4.1,.012,0,5.2,.02,1.3);
   // distant hills
@@ -1055,7 +1058,7 @@ function bush(b,x,z,flower,seed,sz=1){const r=rnd(seed);[[0,.32,0,.5],[.4,.27,.1
   // signpost
   b.add("cyl",0x7a4a24,1.8,.6,-3.9,.05,1.2,.05);b.add("box",0xc98a4b,1.8,1.05,-3.9,.08,.32,.9);b.add("box",0x8f5a2a,1.8,1.05,-3.9,.09,.36,.94);
   // hay bales
-  [[-2.4,-5.4,0],[-2.3,-6.4,.3],[-2.35,-5.9,0,.62]].forEach(([x,z,ry,y])=>{b.add("cyl",0xdcb851,x,y||.3,z,.3,.8,.3,0,ry,Math.PI/2);b.add("cyl",0xb8902e,x,y||.3,z,.31,.05,.31,0,ry,Math.PI/2);SNOWB.add("sph",0xffffff,x,(y||.3)+.27,z,.3,.07,.38,0,ry,0)});
+  
   // rocks
   [[6.5,-5],[-4.8,3.8],[13,5.6]].forEach(([x,z],k)=>b.add("ico",0xa8adad,x,.12,z,.3,.2,.25,0,k,0));
   world.add(b.mesh());
@@ -1063,43 +1066,47 @@ function bush(b,x,z,flower,seed,sz=1){const r=rnd(seed);[[0,.32,0,.5],[.4,.27,.1
 
 /* -------- barn & silos -------- */
 (function barn(){
-  const b=new Builder(),cx=.5,cz=-8.4,W=3.6,H=2.2,D=2.8,rh=1.5,top=H;
+  const b=new Builder(),bb=new Builder(),bsn=new Builder(),cx=.5,cz=-8.4,W=3.6,H=2.2,D=2.8,rh=1.5,top=H;
   const RED=0xc8382b,WHITE=0xf7f3ea,ROOF=0x5a3a30;
-  b.add("box",0x9b7a5a,cx,.06,cz,W+.3,.12,D+.3);
-  b.add("box",RED,cx,H/2,cz,W,H,D);
+  bb.add("box",0x9b7a5a,cx,.06,cz,W+.3,.12,D+.3);
+  bb.add("box",RED,cx,H/2,cz,W,H,D);
   // gable prism (axis along z, apex up)
-  const sy=rh/1.5;b.add("prism",RED,cx,top+.5*sy,cz,W/2/0.866,D,sy,-Math.PI/2,0,0);
+  const sy=rh/1.5;bb.add("prism",RED,cx,top+.5*sy,cz,W/2/0.866,D,sy,-Math.PI/2,0,0);
   // roof panels
   const hw=W/2,ang=Math.atan2(rh,hw),len=Math.hypot(hw,rh)+.25;
-  [-1,1].forEach(sd=>{const px=cx+sd*(hw/2+.04),py=top+rh/2+.07;SNOWB.add("box",0xffffff,px+sd*Math.sin(ang)*.1,py+Math.cos(ang)*.1,cz,len*.86,.09,D+.15,0,0,-sd*ang)});
-  for(let k=0;k<5;k++)SNOWB.add("sph",0xffffff,cx,top+rh+.2,cz-D/2+.3+k*(D-.6)/4,.22,.1,.32);
-  b.add("box",ROOF,cx-hw/2-.04,top+rh/2+.07,cz,len,.12,D+.35,0,0,ang);
-  b.add("box",ROOF,cx+hw/2+.04,top+rh/2+.07,cz,len,.12,D+.35,0,0,-ang);
-  b.add("box",0x3e2620,cx,top+rh+.1,cz,.18,.14,D+.4);
+  [-1,1].forEach(sd=>{const px=cx+sd*(hw/2+.04),py=top+rh/2+.07;bsn.add("box",0xffffff,px+sd*Math.sin(ang)*.1,py+Math.cos(ang)*.1,cz,len*.86,.09,D+.15,0,0,-sd*ang)});
+  for(let k=0;k<5;k++)bsn.add("sph",0xffffff,cx,top+rh+.2,cz-D/2+.3+k*(D-.6)/4,.22,.1,.32);
+  bb.add("box",ROOF,cx-hw/2-.04,top+rh/2+.07,cz,len,.12,D+.35,0,0,ang);
+  bb.add("box",ROOF,cx+hw/2+.04,top+rh/2+.07,cz,len,.12,D+.35,0,0,-ang);
+  bb.add("box",0x3e2620,cx,top+rh+.1,cz,.18,.14,D+.4);
   // trim
   const fz=cz+D/2+.01;
-  [[-1,1],[1,1],[-1,-1],[1,-1]].forEach(([sx,sz])=>b.add("box",WHITE,cx+sx*W/2,H/2,cz+sz*D/2,.12,H,.12));
-  b.add("box",WHITE,cx,H,fz,W+.1,.12,.06);
-  b.add("box",WHITE,cx-hw/2,top+rh/2,fz+.01,len-.2,.1,.06,0,0,ang);b.add("box",WHITE,cx+hw/2,top+rh/2,fz+.01,len-.2,.1,.06,0,0,-ang);
+  [[-1,1],[1,1],[-1,-1],[1,-1]].forEach(([sx,sz])=>bb.add("box",WHITE,cx+sx*W/2,H/2,cz+sz*D/2,.12,H,.12));
+  bb.add("box",WHITE,cx,H,fz,W+.1,.12,.06);
+  bb.add("box",WHITE,cx-hw/2,top+rh/2,fz+.01,len-.2,.1,.06,0,0,ang);bb.add("box",WHITE,cx+hw/2,top+rh/2,fz+.01,len-.2,.1,.06,0,0,-ang);
   // door
-  b.add("box",0x8e1f17,cx,.8,fz+.02,1.5,1.6,.04);
-  b.add("box",WHITE,cx,.8,fz+.05,1.6,.1,.04);b.add("box",WHITE,cx,1.6,fz+.05,1.6,.1,.04);
-  b.add("box",WHITE,cx-.75,.8,fz+.05,.1,1.65,.04);b.add("box",WHITE,cx+.75,.8,fz+.05,.1,1.65,.04);b.add("box",WHITE,cx,.8,fz+.05,.08,1.6,.04);
+  bb.add("box",0x8e1f17,cx,.8,fz+.02,1.5,1.6,.04);
+  bb.add("box",WHITE,cx,.8,fz+.05,1.6,.1,.04);bb.add("box",WHITE,cx,1.6,fz+.05,1.6,.1,.04);
+  bb.add("box",WHITE,cx-.75,.8,fz+.05,.1,1.65,.04);bb.add("box",WHITE,cx+.75,.8,fz+.05,.1,1.65,.04);bb.add("box",WHITE,cx,.8,fz+.05,.08,1.6,.04);
   const da=Math.atan2(1.6,.75),dl=Math.hypot(.75,1.6);
-  b.add("box",WHITE,cx-.375,.8,fz+.06,.08,dl,.03,0,0,-Math.atan2(.75,1.6));b.add("box",WHITE,cx+.375,.8,fz+.06,.08,dl,.03,0,0,Math.atan2(.75,1.6));
-  b.add("box",WHITE,cx-.375,.8,fz+.06,.08,dl,.03,0,0,Math.atan2(.75,1.6));b.add("box",WHITE,cx+.375,.8,fz+.06,.08,dl,.03,0,0,-Math.atan2(.75,1.6));
+  bb.add("box",WHITE,cx-.375,.8,fz+.06,.08,dl,.03,0,0,-Math.atan2(.75,1.6));bb.add("box",WHITE,cx+.375,.8,fz+.06,.08,dl,.03,0,0,Math.atan2(.75,1.6));
+  bb.add("box",WHITE,cx-.375,.8,fz+.06,.08,dl,.03,0,0,Math.atan2(.75,1.6));bb.add("box",WHITE,cx+.375,.8,fz+.06,.08,dl,.03,0,0,-Math.atan2(.75,1.6));
   // loft
-  b.add("box",WHITE,cx,top+.55,fz+.03,.85,.7,.05);b.add("box",0xf2d36b,cx,top+.55,fz+.06,.65,.5,.04);
-  b.add("box",WHITE,cx,top+.55,fz+.09,.06,.5,.02);
+  bb.add("box",WHITE,cx,top+.55,fz+.03,.85,.7,.05);bb.add("box",0xf2d36b,cx,top+.55,fz+.06,.65,.5,.04);
+  bb.add("box",WHITE,cx,top+.55,fz+.09,.06,.5,.02);
   // side windows
-  [-.8,.8].forEach(dz=>{b.add("box",WHITE,cx+W/2+.01,1.3,cz+dz,.05,.6,.6);b.add("box",0x5a3018,cx+W/2+.03,1.3,cz+dz,.04,.45,.45)});
+  [-.8,.8].forEach(dz=>{bb.add("box",WHITE,cx+W/2+.01,1.3,cz+dz,.05,.6,.6);bb.add("box",0x5a3018,cx+W/2+.03,1.3,cz+dz,.04,.45,.45)});
   // weathervane
-  b.add("cyl",0x555555,cx,top+rh+.5,cz+D/2-.2,.02,.8,.02);b.add("box",0x333333,cx+.12,top+rh+.85,cz+D/2-.2,.35,.1,.02);
+  bb.add("cyl",0x555555,cx,top+rh+.5,cz+D/2-.2,.02,.8,.02);bb.add("box",0x333333,cx+.12,top+rh+.85,cz+D/2-.2,.35,.1,.02);
   // silos
   [[3.5,-9],[4.9,-8.6]].forEach(([x,z],k)=>{const h=4.4-k*.6;
-    b.add("cyl",0xdfe3e5,x,h/2,z,.65,h,.65);
-    for(let j=1;j<6;j++)b.add("cyl",0xaab2b6,x,h*j/6,z,.66,.05,.66);
-    b.add("sph",0xc6ccd0,x,h,z,.66,.55,.66);SNOWB.add("sph",0xffffff,x,h+.12,z,.6,.36,.6);b.add("cyl",0x8b9398,x,h+.6,z,.08,.12,.08)});
+    bb.add("cyl",0xdfe3e5,x,h/2,z,.65,h,.65);
+    for(let j=1;j<6;j++)bb.add("cyl",0xaab2b6,x,h*j/6,z,.66,.05,.66);
+    bb.add("sph",0xc6ccd0,x,h,z,.66,.55,.66);bsn.add("sph",0xffffff,x,h+.12,z,.6,.36,.6);bb.add("cyl",0x8b9398,x,h+.6,z,.08,.12,.08)});
+  BARNG.add(bb.mesh());BARNG.add(new THREE.Mesh(bsn.geo(),SNOWMAT));{const h=new THREE.Mesh(new THREE.BoxGeometry(8.4,4.6,4.8),new THREE.MeshBasicMaterial({visible:false}));h.position.set(2.2,2.3,-8.6);h.userData.barn=true;BARNG.add(h);BARNHIT=h}
+  // hay bales next to the barn move with it
+  [[-2.4,-5.4,0],[-2.3,-6.4,.3],[-2.35,-5.9,0,.62]].forEach(([x,z,ry,y])=>{bb.add("cyl",0xdcb851,x,y||.3,z,.3,.8,.3,0,ry,Math.PI/2);bb.add("cyl",0xb8902e,x,y||.3,z,.31,.05,.31,0,ry,Math.PI/2)});
+  BARNG.children[0].geometry.dispose();BARNG.remove(BARNG.children[0]);BARNG.add(bb.mesh());world.add(BARNG);
   // market stall (east side)
   const cols=[[0xe2402f,0xfff6df],[0xf5c732,0xfff6df],[0x2f7fb8,0xfff6df]],fr=[0xe2402f,0xf5c732,0x7a3f9c,0xf08a24,0x7ccf4a,0xe2402f];
   for(let k=0;k<3;k++){const z=-2.2+k*1.5,x=7.6,r=rnd(k+9);
@@ -1703,7 +1710,7 @@ function stepFarmer(dt,t){
   if(badW&&o.state!=="shelter"){funEnd(f);if(o.target){o.target.claim=false;o.target=null}if(o.carry){removeWeed(o.carry);o.carry=null}o.state="shelter"}
   if(!badW&&o.state==="shelter"){g.visible=true;o.state="idle";o.st=.5}
   switch(o.state){
-    case "shelter":if(walkTo(.5,-6.75,1.6))g.visible=false;break;
+    case "shelter":if(walkTo(.5+barnOff()[0],-6.75+barnOff()[1],1.6))g.visible=false;break;
     case "idle":
       if(o.st<=0){const w=nearestWeed();if(w){w.claim=true;o.target=w;o.state="go"}
         else{const r=Math.random();if(r<.4&&!badW){funStart(f);break}if(r<.55){o.state="wipe";o.st=1.8}else{o.state="stroll";const n=SIZES[S.size];o.tx=FX0-.5+Math.random()*(n+1);o.tz=FZ0-.5;if(Math.random()<.5){o.tx=FX0-.55;o.tz=FZ0+Math.random()*n}}}}
@@ -2446,6 +2453,7 @@ cv.addEventListener("pointerdown",e=>{cv.setPointerCapture(e.pointerId);pointers
     let go=null;
     if(p&&p.build!=null){const o=(S.builds||[])[p.build];if(o)go=()=>{const d=BUILDS.find(q=>q.id===o.id);startBuildMove(p.build);return[o.x,o.z,d?d.n:"it"]}}
     else if(p&&p.hill){const H=HILLS.find(q=>q.id===p.hill);if(H)go=()=>{const [x,z]=hillXZ(H);startHillMove(H.id);return[x,z,"hill"]}}
+    else if(p&&p.barn)go=()=>{const [bx,bz]=barnOff();startBarnMove();return[2.2+bx,-8.6+bz,"barn"]};
     else if(p&&p.ftree!=null){const T=FTREES[p.ftree];if(T)go=()=>{startTreeMove(p.ftree);return[T.x,T.z,treeName(T)]}}
     else if(pl)go=()=>{startPlotMove(pl.id,true);return[pl.x0+PN/2,pl.z0+PN/2,pl.n]};
     else if(p&&p.tile!=null&&p.tile<SIZES[S.size]**2)go=()=>{const n=SIZES[S.size];startFieldMove();return[FX0+n/2,FZ0+n/2,"main field"]};
@@ -2494,8 +2502,8 @@ const ray=new THREE.Raycaster(),ndc=new THREE.Vector2();
 let hovered=null;   // {tile:i} or {pen:i}
 function pickAt(e){
   const r=cvRect(),P=exy(e);ndc.set((P.x-r.left)/r.width*2-1,-(P.y-r.top)/r.height*2+1);ray.setFromCamera(ndc,camera);
-  const hits=ray.intersectObjects([...BTN3D.filter(b=>b.visible),...TSHOPHITS,...(AD.hit&&AD.on?[AD.hit]:[]),...FTREES.map(t=>t.hit),...HILLHITS,...BUILDG.children.map(g=>g.userData.hit).filter(Boolean),STALLHIT,...WHITS,...ISLE.hits,...weeds.filter(w=>w.state==="ground").map(w=>w.m),...animalGroup.children,...tileObjs.map(o=>o.hit)],true);
-  for(const h of hits){if(h.object.userData.btn3d)return{btn3d:h.object.userData.btn3d};if(h.object.userData.tshop)return{tshop:h.object.userData.tshop};if(h.object.userData.drop)return{drop:true};if(h.object.userData.ftree!=null)return{ftree:h.object.userData.ftree};if(h.object.userData.build!=null)return{build:h.object.userData.build};if(h.object.userData.hill)return{hill:h.object.userData.hill};if(h.object.userData.stall)return{stall:true};if(h.object.userData.worker){const W=CREW[h.object.userData.worker];if(W&&W.g.visible)return{worker:h.object.userData.worker};continue}if(h.object.userData.isle!=null)return{isle:h.object.userData.isle};const pi=h.object.userData.pen;if(pi!=null&&animalObjs[pi]&&!animalObjs[pi].g.visible)continue;if(h.object.userData.weed)return{weed:h.object.userData.weed};if(h.object.userData.pen!=null&&!h.object.isSprite)return{pen:h.object.userData.pen};if(h.object.isSprite&&h.object.userData.pen!=null)return{pen:h.object.userData.pen};if(h.object.userData.tile!=null)return{tile:h.object.userData.tile}}
+  const hits=ray.intersectObjects([...BTN3D.filter(b=>b.visible),...TSHOPHITS,...(AD.hit&&AD.on?[AD.hit]:[]),...FTREES.map(t=>t.hit),...HILLHITS,...BUILDG.children.map(g=>g.userData.hit).filter(Boolean),STALLHIT,...(BARNHIT?[BARNHIT]:[]),...WHITS,...ISLE.hits,...weeds.filter(w=>w.state==="ground").map(w=>w.m),...animalGroup.children,...tileObjs.map(o=>o.hit)],true);
+  for(const h of hits){if(h.object.userData.btn3d)return{btn3d:h.object.userData.btn3d};if(h.object.userData.tshop)return{tshop:h.object.userData.tshop};if(h.object.userData.drop)return{drop:true};if(h.object.userData.ftree!=null)return{ftree:h.object.userData.ftree};if(h.object.userData.build!=null)return{build:h.object.userData.build};if(h.object.userData.hill)return{hill:h.object.userData.hill};if(h.object.userData.stall)return{stall:true};if(h.object.userData.barn)return{barn:true};if(h.object.userData.worker){const W=CREW[h.object.userData.worker];if(W&&W.g.visible)return{worker:h.object.userData.worker};continue}if(h.object.userData.isle!=null)return{isle:h.object.userData.isle};const pi=h.object.userData.pen;if(pi!=null&&animalObjs[pi]&&!animalObjs[pi].g.visible)continue;if(h.object.userData.weed)return{weed:h.object.userData.weed};if(h.object.userData.pen!=null&&!h.object.isSprite)return{pen:h.object.userData.pen};if(h.object.isSprite&&h.object.userData.pen!=null)return{pen:h.object.userData.pen};if(h.object.userData.tile!=null)return{tile:h.object.userData.tile}}
   return null;
 }
 function hoverAt(e){if(PLACE){placePointer(e,false);hovered=null;return}const p=pickAt(e);hovered=p&&p.worker?null:p;cv.dataset.worker=p&&p.worker?"1":""}
@@ -2738,7 +2746,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="144";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
+const GAMEVER="149";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 function cvRect(){return ROT?{left:0,top:0,width:cv.clientWidth,height:cv.clientHeight}:cv.getBoundingClientRect()}
 function setRot(){const want=!!MOBILE&&innerHeight>innerWidth*1.05;if(want!==ROT){ROT=want;document.body.classList.toggle("rot",want)}const r=document.documentElement.style;r.setProperty("--LW",(ROT?innerHeight:innerWidth)+"px");r.setProperty("--LH",(ROT?innerWidth:innerHeight)+"px")}
 let _olTried=false;function tryLockLand(){if(_olTried||!MOBILE||!(innerHeight>innerWidth))return;_olTried=true;try{const d=document.documentElement,go=()=>{if(screen.orientation&&screen.orientation.lock)screen.orientation.lock("landscape").catch(()=>{})};
@@ -2829,7 +2837,7 @@ function stepHelper(dt,t){
   if(rest&&o.state!=="rest"){funEnd(f);o.state="rest";o.tile=-1}
   if(!rest&&o.state==="rest"){g.visible=true;o.state="idle";o.st=.4}
   switch(o.state){
-    case "rest":if(walkTo(1.1,-6.75,1.6))g.visible=false;break;
+    case "rest":if(walkTo(1.1+barnOff()[0],-6.75+barnOff()[1],1.6))g.visible=false;break;
     case "idle":if(o.st<=0){const i=ripeIdx(),j=i<0?soilIdx():-1,tr=i<0&&j<0?ripeTree():null;if(i>=0){o.tile=i;o.state="go"}else if(j>=0){o.tile=j;o.state="goP"}else if(tr){o.tree=tr;o.state="goT"}else if(autoJobPush(helper)){o.st=.4}else if(Math.random()<.45){funStart(helper)}else{const n=SIZES[S.size];o.state="wait";o.tx=FX0-.85;o.tz=FZ0+.5+Math.random()*(n-1)}}break;
     case "wait":{const i=ripeIdx();if(i>=0){o.tile=i;o.state="go";break}const j=soilIdx();if(j>=0){o.tile=j;o.state="goP";break}if(walkTo(o.tx,o.tz,.8)){o.state="look";o.st=1.5+Math.random()*2}break}
     case "look":{const i=ripeIdx();if(i>=0){o.tile=i;o.state="go";break}if(o.st<=0){o.state="idle";o.st=0}break}
@@ -2877,7 +2885,7 @@ function groundPoint(e){const r=cvRect(),P=exy(e);ndc.set((P.x-r.left)/r.width*2
   const v=ray.ray.intersectPlane(GPLANE,_gpv);if(!v)return null;return{x:Math.max(-70,Math.min(17,v.x)),z:Math.max(-24,Math.min(51,v.z))}}
 function taskTarget(q){
   if(q.type==="walk")return[q.x,q.z];
-  if(q.type==="rest")return[1.1,-6.75];
+  if(q.type==="rest")return[1.1+barnOff()[0],-6.75+barnOff()[1]];
   if(q.tile!=null){if(q.tile>=S.tiles.length)return null;return tileXZ(q.tile)}
   if(q.type==="weed")return q.weed&&q.weed.state==="ground"?[q.weed.x,q.weed.z]:null;
   if(q.type==="animal"){const a=animalObjs[q.pen];return a&&a.g.visible?[a.g.position.x,a.g.position.z]:null}
@@ -3187,7 +3195,7 @@ function buildMansionRoads(){while(ROADG.children.length)ROADG.remove(ROADG.chil
     else if(PLOTS.some(q=>!q.island&&x>q.x0-1&&x<q.x0+(q.sz||PN)+1&&z>q.z0-1&&z<q.z0+(q.sz||PN)+1))c=-1;
     else if(blds.some(([bx,bz,r])=>Math.hypot(x-bx,z-bz)<r))c=-1;
     else if(farmH(x,z)<-.03||((x-POND.x)/(POND.rx+1.2))**2+((z-POND.z)/(POND.rz+1.2))**2<1)c=-1;
-    else if(x>-2.8&&x<7.2&&z>-11.8&&z<-5.4&&!goal[k])c=-1;
+    else if(inBarn(x,z,.8)&&!goal[k])c=-1;
     else if(mtns().some(([mx,mz,mr])=>Math.hypot(x-mx,z-mz)<mr*1.25+.8)||Math.hypot(x-CF.x,z-CF.z)<2.4)c=-1;
     else if(FTREES.some(T=>Math.hypot(x-T.x,z-T.z)<1.1))c=6;
     cost[k]=c}
@@ -3251,7 +3259,7 @@ function validHill(id,x,z){const H=HILLS.find(q=>q.id===id),R=H.rad*hs(H)*1.3;if
   for(const o of S.builds||[]){const d=BUILDS.find(q=>q.id===o.id);if(Math.hypot(x-o.x,z-o.z)<R+(d?d.r:1.5)*.75)return(d?d.n:"A building")+" is in the way."}
   for(const T of FTREES)if(Math.hypot(x-T.x,z-T.z)<R)return"A tree is in the way. Move it or chop it first.";
   for(let a=0;a<16;a++){const px=x+Math.cos(a/16*Math.PI*2)*R,pz=z+Math.sin(a/16*Math.PI*2)*R;if(farmH(px,pz)<-.03||farmH(x,z)<-.03)return"Can't put a hill on water."}
-  if(Math.hypot(x-CF.x,z-CF.z)<R+1.6)return"That covers the bonfire.";if(x>-2-R&&x<6.4+R&&z>-11-R&&z<-6.2+R)return"That covers the barn.";
+  if(Math.hypot(x-CF.x,z-CF.z)<R+1.6)return"That covers the bonfire.";if(inBarn(x,z,R))return"That covers the barn.";
   return""}
 function startHillMove(id){const H=HILLS.find(q=>q.id===id);if(!H)return;closeHill();cancelPlace();const [x,z]=hillXZ(H),g=new THREE.Group(),m=new THREE.Mesh(new THREE.ConeGeometry(H.rad*hs(H)*1.2,H.h*hs(H),16),GHOSTMAT);m.position.y=H.h*hs(H)/2;g.add(m);scene.add(g);
   PLACE={hill:id,g,d:{n:"Hill",r:H.rad*hs(H)},r:0,ok:false,x,z};updateGhost(x,z);$("placeRot").hidden=true;$("placeBar").hidden=false;$("placeTxt").textContent="Move the hill · drag it and let go, or tap where it should go";setTool("move")}
@@ -3263,7 +3271,7 @@ function validPlace(x,z,R0,skipT){const r=R0*.75;
   if(inAnyPen(x,z,r+.2))return false;
   if(((x-POND.x)/(POND.rx+.8+r))**2+((z-POND.z)/(POND.rz+.8+r))**2<1||Math.hypot(x-12,z+17.5)<2.6+r)return false;
   for(let i=0;i<RIVER.length-1;i++)if(segDist(x,z,RIVER[i][0],RIVER[i][1],RIVER[i+1][0],RIVER[i+1][1])<r+.9)return false;
-  if(x>-2-r&&x<6.4+r&&z>-11-r&&z<-6.2+r)return false;
+  if(inBarn(x,z,r))return false;
   if(x>6.6-r&&x<8.6+r&&z>-3.2-r&&z<1.6+r)return false;
   if(z>-9.6-r&&z<-6.4+r&&x<-3.5)return false;if(Math.hypot(x-.5,z-4)<.4||Math.hypot(x-CF.x,z-CF.z)<1.9+r)return false;
   for(const o of S.builds||[]){const d=BUILDS.find(q=>q.id===o.id);if(Math.hypot(x-o.x,z-o.z)<r+(d?d.r:1.5)*.75+.15)return false}
@@ -3289,7 +3297,7 @@ function validPen(id,x0,x1,z0,z1){if(x0<-68||x1>16.5||z0<-23||z1>50)return"Too c
   for(const k in PENS){if(k===id)continue;const Q=PENS[k];if(x0<Q.x1+.8&&x1>Q.x0-.8&&z0<Q.z1+.8&&z1>Q.z0-.8)return"That covers the "+Q.n+".";}
   for(const a of layout())if(!(a.p&&a.p.island)&&x0<a.x0+a.n+.4&&x1>a.x0-.4&&z0<a.z0+a.n+.4&&z1>a.z0-.4)return a.p?"That covers "+a.p.n+".":"That covers the main field.";
   for(const q of PLOTS){if(q.island)continue;const m=q.sz||PN;if(x0<q.x0+m+.3&&x1>q.x0-.3&&z0<q.z0+m+.3&&z1>q.z0-.3)return"That covers "+q.n+" (land for sale).";}
-  if(z0<-6.4&&z1>-9.6&&x0<-3.5)return"That covers the road.";if(x0<6.4&&x1>-2&&z0<-6.2&&z1>-11)return"That covers the barn.";if(x0<8.6&&x1>6.6&&z0<1.6&&z1>-3.2)return"Something is in the way.";
+  if(z0<-6.4&&z1>-9.6&&x0<-3.5)return"That covers the road.";if(x0<6.4+barnOff()[0]&&x1>-2+barnOff()[0]&&z0<-6.2+barnOff()[1]&&z1>-11+barnOff()[1])return"That covers the barn.";if(x0<8.6&&x1>6.6&&z0<1.6&&z1>-3.2)return"Something is in the way.";
   for(let x=x0;x<=x1+.01;x+=.5)for(let z=z0;z<=z1+.01;z+=.5){if(farmH(x,z)<-.03)return"Can't put a pen on water.";for(const [mx,mz,mr] of mtns())if(Math.hypot(x-mx,z-mz)<mr*1.25)return"Too close to the mountain.";
     if(Math.hypot(x-CF.x,z-CF.z)<1.8)return"That covers the bonfire.";if(((x-POND.x)/(POND.rx+.8))**2+((z-POND.z)/(POND.rz+.8))**2<1)return"That covers the lake."}
   for(const o of S.builds||[]){const d=BUILDS.find(q=>q.id===o.id),r=(d?d.r:1.5)*.75;if(o.x>x0-r&&o.x<x1+r&&o.z>z0-r&&o.z<z1+r)return(d?d.n:"A building")+" is in the way."}
@@ -3297,12 +3305,23 @@ function validPen(id,x0,x1,z0,z1){if(x0<-68||x1>16.5||z0<-23||z1>50)return"Too c
   return""}
 function startPenMove(id){const P=PENS[id];if(!P)return;cancelPlace();const w=P.x1-P.x0,d=P.z1-P.z0,g=new THREE.Group(),m=new THREE.Mesh(new THREE.BoxGeometry(w,.5,d),GHOSTMAT);m.position.set(w/2,.25,d/2);g.add(m);scene.add(g);
   PLACE={pen:id,g,w,dd:d,d:{n:P.n,r:0},r:0,ok:false,x0:P.x0,z0:P.z0};updateGhost(P.x0+w/2,P.z0+d/2);$("placeRot").hidden=true;$("placeBar").hidden=false;$("placeTxt").textContent="Move "+P.n+" · drag it and let go to drop it";setTool("move")}
+function applyBarnPos(){const [dx,dz]=barnOff();BARNG.position.set(dx,0,dz)}
+function validBarn(dx,dz){const x0=-2+dx,x1=6.4+dx,z0=-11+dz,z1=-6.2+dz;if(x0<-68||x1>16.5||z0<-23||z1>50)return"Too close to the edge of the farm.";
+  for(const a of layout())if(!(a.p&&a.p.island)&&x0<a.x0+a.n+.3&&x1>a.x0-.3&&z0<a.z0+a.n+.3&&z1>a.z0-.3)return a.p?"That covers "+a.p.n+".":"That covers the main field.";
+  for(const q of PLOTS){if(q.island)continue;const m=q.sz||PN;if(x0<q.x0+m&&x1>q.x0&&z0<q.z0+m&&z1>q.z0)return"That covers "+q.n+".";}
+  for(const k in PENS){const P=PENS[k];if(x0<P.x1+.5&&x1>P.x0-.5&&z0<P.z1+.5&&z1>P.z0-.5)return"That covers the "+P.n+".";}
+  if(z0<-6.6&&z1>-9.4&&x0<-3.5)return"That covers the road.";
+  for(let x=x0;x<=x1+.01;x+=.6)for(let z=z0;z<=z1+.01;z+=.6){if(farmH(x,z)<-.03)return"Can't put the barn on water.";for(const [mx,mz,mr] of mtns())if(Math.hypot(x-mx,z-mz)<mr*1.2)return"Too close to the mountain.";if(Math.hypot(x-CF.x,z-CF.z)<1.8)return"That covers the bonfire.";if(((x-POND.x)/(POND.rx+.6))**2+((z-POND.z)/(POND.rz+.6))**2<1)return"That covers the lake."}
+  for(const o of S.builds||[]){const d=BUILDS.find(q=>q.id===o.id),r=(d?d.r:1.5)*.75;if(o.x>x0-r&&o.x<x1+r&&o.z>z0-r&&o.z<z1+r)return(d?d.n:"A building")+" is in the way."}
+  for(const T of FTREES)if(T.x>x0-.3&&T.x<x1+.3&&T.z>z0-.3&&T.z<z1+.3)return"A tree is in the way. Move it or chop it first.";return""}
+function startBarnMove(){cancelPlace();const g=new THREE.Group(),m=new THREE.Mesh(new THREE.BoxGeometry(8.4,3,4.8),GHOSTMAT);m.position.set(2.2,1.5,-8.6);g.add(m);scene.add(g);const [dx,dz]=barnOff();
+  PLACE={barn:true,g,d:{n:"Barn",r:0},r:0,ok:false,dx,dz};updateGhost(2.2+dx,-8.6+dz);$("placeRot").hidden=true;$("placeBar").hidden=false;$("placeTxt").textContent="Move the barn and silos · drag and let go";setTool("move")}
 function startTreeMove(k){const T=FTREES[k];if(!T)return;cancelPlace();const g=new THREE.Group(),m=new THREE.Mesh(new THREE.CylinderGeometry(.75,.75,1.6,16),GHOSTMAT);m.position.y=.8;g.add(m);scene.add(g);
   PLACE={tree:T,g,d:{n:treeName(T),r:.8},r:0,ok:false,x:T.x,z:T.z};updateGhost(T.x,T.z);$("placeRot").hidden=true;$("placeBar").hidden=false;$("placeTxt").textContent="Move "+treeName(T)+" · drag it and let go to drop it";setTool("move")}
 function startBuildMove(i){const o=(S.builds||[])[i];if(!o)return;if(typeof EDIT!=="undefined"&&EDIT!=null)endEdit();S.builds.splice(i,1);renderBuilds();startPlace(o.id,false,o)}
 function validField(x0,z0){const N=SIZES[S.size],x1=x0+N,z1=z0+N;if(x0<-68||x1>16.5||z0<-23||z1>50)return"Too close to the edge of the farm.";
   for(const q of PLOTS)if(!q.island&&(S.plots||[]).includes(q.id)&&x0<q.x0+PN+.2&&x1>q.x0-.2&&z0<q.z0+PN+.2&&z1>q.z0-.2)return"That covers "+q.n+".";
-  if(x0<6.4&&x1>-2&&z0<-6.2&&z1>-11)return"That covers the barn.";
+  if(x0<6.4+barnOff()[0]&&x1>-2+barnOff()[0]&&z0<-6.2+barnOff()[1]&&z1>-11+barnOff()[1])return"That covers the barn.";
   for(let x=x0-.2;x<=x1+.21;x+=.5)for(let z=z0-.2;z<=z1+.21;z+=.5){if(farmH(x,z)<-.03)return"Can't put the field on water.";if(inAnyPen(x,z,.2))return"That covers an animal pen.";if(z>-9.6&&z<-6.4&&x<-3.5)return"That covers the road.";
     for(const [mx,mz,mr] of mtns())if(Math.hypot(x-mx,z-mz)<mr*1.25)return"Too close to the mountain.";if(Math.hypot(x-CF.x,z-CF.z)<1.6)return"That covers the bonfire.";
     if(((x-POND.x)/(POND.rx+.6))**2+((z-POND.z)/(POND.rz+.6))**2<1)return"That covers the lake."}
@@ -3315,6 +3334,7 @@ function startPlotMove(id,noCam){const p=PLOTS.find(q=>q.id===id);if(!p)return;c
   PLACE={plot:p,g,d:{n:p.n,r:0},r:0,ok:false,x0:p.x0,z0:p.z0};updateGhost(p.x0+PN/2,p.z0+PN/2);if(!noCam){cam.follow=false;Object.assign(camT,{tx:p.x0+PN/2,tz:p.z0+PN/2,dist:Math.max(camT.dist,30)})}
   $("placeRot").hidden=true;$("placeBar").hidden=false;$("placeTxt").textContent="Move "+p.n+" · tap where it should go (it snaps next to other land) · or press and hold the land to drag it";setTool("move")}
 function updateGhost(x,z){if(!PLACE)return;
+  if(PLACE.barn){const dx=Math.round((x-2.2)*2)/2,dz=Math.round((z+8.6)*2)/2;PLACE.dx=dx;PLACE.dz=dz;PLACE.g.position.set(dx,0,dz);const [ox,oz]=barnOff();PLACE.why=(dx===ox&&dz===oz)?"":validBarn(dx,dz);PLACE.ok=!PLACE.why;GHOSTMAT.color.setHex(PLACE.ok?0x7fe08a:0xff6a5a);$("placeOk").disabled=!PLACE.ok;return}
   if(PLACE.field){const x0=Math.round(x-PLACE.N/2),z0=Math.round(z-PLACE.N/2);PLACE.x0=x0;PLACE.z0=z0;PLACE.g.position.set(x0,0,z0);PLACE.why=(x0===FX0&&z0===FZ0)?"":validField(x0,z0);PLACE.ok=!PLACE.why;GHOSTMAT.color.setHex(PLACE.ok?0x7fe08a:0xff6a5a);$("placeOk").disabled=!PLACE.ok;return}
   if(PLACE.hill){PLACE.x=x;PLACE.z=z;PLACE.g.position.set(x,0,z);PLACE.why=validHill(PLACE.hill,x,z);PLACE.ok=!PLACE.why;GHOSTMAT.color.setHex(PLACE.ok?0x7fe08a:0xff6a5a);$("placeOk").disabled=!PLACE.ok;return}
   if(PLACE.pen){const x0=Math.round((x-PLACE.w/2)*2)/2,z0=Math.round((z-PLACE.dd/2)*2)/2;PLACE.x0=x0;PLACE.z0=z0;PLACE.g.position.set(x0,0,z0);PLACE.why=validPen(PLACE.pen,x0,x0+PLACE.w,z0,z0+PLACE.dd);PLACE.ok=!PLACE.why;GHOSTMAT.color.setHex(PLACE.ok?0x7fe08a:0xff6a5a);$("placeOk").disabled=!PLACE.ok;return}
@@ -3325,6 +3345,8 @@ function updateGhost(x,z){if(!PLACE)return;
     PLACE.x0=x0;PLACE.z0=z0;PLACE.g.position.set(x0,0,z0);PLACE.why=validPlot(PLACE.plot,x0,z0);PLACE.ok=!PLACE.why;GHOSTMAT.color.setHex(PLACE.ok?0x7fe08a:0xff6a5a);$("placeOk").disabled=!PLACE.ok;return}PLACE.x=x;PLACE.z=z;PLACE.g.position.set(x,0,z);PLACE.ok=validPlace(x,z,PLACE.d.r);GHOSTMAT.color.setHex(PLACE.ok?0x7fe08a:0xff6a5a);$("placeOk").disabled=!PLACE.ok}
 function cancelPlace(){$("placeRot").hidden=false;if(PLACE){scene.remove(PLACE.g);if(PLACE.moving){S.builds=(S.builds||[]).concat(PLACE.moving);renderBuilds()}PLACE=null}$("placeBar").hidden=true}
 function confirmPlace(){
+  if(PLACE&&PLACE.barn){if(!PLACE.ok)return toast(PLACE.why||"Can't put the barn there.");S.barnPos=[PLACE.dx,PLACE.dz];scene.remove(PLACE.g);PLACE=null;$("placeBar").hidden=true;$("placeRot").hidden=false;hovered=null;applyBarnPos();
+    if(typeof paintGround==="function")paintGround();if(typeof landDeco==="function")landDeco();buildMansionRoads();burst(2.2+S.barnPos[0],1,-8.6+S.barnPos[1],0xc98a4b,24,.6);after();return toast("📐 Moved the barn.",2400)}
   if(PLACE&&PLACE.field){if(!PLACE.ok)return toast(PLACE.why||"Can't put the field there.");S.fieldPos=[PLACE.x0,PLACE.z0];scene.remove(PLACE.g);PLACE=null;$("placeBar").hidden=true;$("placeRot").hidden=false;
     _LK="";layout();hovered=null;buildField();if(typeof paintGround==="function")paintGround();if(typeof landDeco==="function")landDeco();after();return toast("📐 Moved the main field.",2400)}
   if(PLACE&&PLACE.hill){if(!PLACE.ok)return toast(PLACE.why||"Can't put the hill there.");const id=PLACE.hill,x=+PLACE.x.toFixed(2),z=+PLACE.z.toFixed(2);S.hillPos=Object.assign({},S.hillPos||{},{[id]:[x,z]});
@@ -3728,9 +3750,9 @@ const TOWNX={lights:[],pl:[],band:[],aud:[],notes:[],walkers:[],stageOn:null};co
     for(let k=0;k<8;k++){const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:ntex,transparent:true,depthWrite:false}));sp.scale.set(.5,.5,1);sp.userData={ph:k/8,x0:x-.6,z0:z};scene.add(sp);TOWNX.notes.push(sp)}
     TOWNX.stage={x,z,yy};const lab=labelSprite("Town Stage");lab.position.set(x+1.5,yy+3.9,z);lab.scale.set(2.4,.6,1);scene.add(lab)}
   // ground extension under the west side of town
-  {const gx0=T.x-62,gx1=Math.max(T.x+8,-70),gx=new THREE.Mesh(new THREE.PlaneGeometry(gx1-gx0,110),new THREE.MeshLambertMaterial({color:0x5aa83a}));gx.rotation.x=-Math.PI/2;gx.position.set((gx0+gx1)/2,-.012,T.z);gx.receiveShadow=true;scene.add(gx);
+  {const gx0=T.x-96,gx1=Math.max(T.x+8,-70),gx=new THREE.Mesh(new THREE.PlaneGeometry(gx1-gx0,130),new THREE.MeshLambertMaterial({color:0x5aa83a}));gx.rotation.x=-Math.PI/2;gx.position.set((gx0+gx1)/2,-.012,T.z);gx.receiveShadow=true;scene.add(gx);
     const r9=rnd(91);for(let k=0;k<40;k++){const x=T.x-34-r9()*24,z=T.z-40+r9()*80;if(z>T.z-24&&z<T.z+24)continue;tree(b,x,z,k%4?null:0xe2402f,900+k,.9+r9()*.4)}
-    for(let k=0;k<10;k++){const a=k/10*Math.PI*2;b.add("ico1",k%2?0x4f9e31:0x5aa83a,T.x-62+Math.cos(a)*6,-3,T.z+Math.sin(a)*40,12,9,14,0,k,0)}}
+    for(let k=0;k<10;k++){const a=k/10*Math.PI*2;b.add("ico1",k%2?0x4f9e31:0x5aa83a,T.x-80+Math.cos(a)*6,-3,T.z+Math.sin(a)*40,12,9,14,0,k,0)}}
   // sidewalk trees and planters
   for(let k=0;k<7;k++){const x=T.x-12+k*4,z=T.z+14.2;tree(b,x,z,null,950+k,.7);b.add("box",0x8a5a2a,x,.15,z,.8,.3,.8)}
   for(let k=0;k<4;k++){const x=T.x+17.4,z=T.z-13+k*2.8;if(Math.abs(z-T.z)<2.6)continue;tree(b,x,z,null,970+k,.7)}
@@ -3761,7 +3783,8 @@ const MUNI={flags:[],people:[],lights:[],jets:[],hands:null};
   // plaza and roads
   b.add("box",0xd9d2c3,X(1),.03,Z(0),15,.06,22);for(let i=-7;i<=7;i++)b.add("box",0xc9c0ae,X(1),.065,Z(i*1.5),15,.01,.08);for(let i=-3;i<=4;i++)b.add("box",0xc9c0ae,X(i*2),.065,Z(0),.08,.01,22);
   const road=(x0,z0,x1,z1)=>{const L=Math.hypot(x1-x0,z1-z0),ry=Math.atan2(-(z1-z0),x1-x0);b.add("box",0x4a5058,(X(x0)+X(x1))/2,.025,(Z(z0)+Z(z1))/2,L+2,.03,2,0,ry,0);for(let k=.8;k<L;k+=1.4)b.add("box",0xf5c732,X(x0+(x1-x0)*k/L),.045,Z(z0+(z1-z0)*k/L),.6,.01,.08,0,ry,0)};
-  road(9.5,-12,9.5,12);road(9.5,-12,22,-12);road(-15,-12,9.5,-12);road(-15,12,9.5,12);road(9.5,0,20,0);
+  road(9.5,-12,9.5,12);road(9.5,-12,22,-12);road(-15,-12,9.5,-12);road(-15,12,9.5,12);road(9.5,0,20,0);road(-5.6,-12,-5.6,12);road(-15,-12,-15,12);
+  for(let k=0;k<4;k++){b.add("box",0xf2f2ee,X(-6.9),.05,Z(-7+k*1.6),.08,.01,1.2);b.add("box",0xf2f2ee,X(-6.9),.05,Z(3+k*1.6),.08,.01,1.2)}
   // municipal hall (faces east, toward the plaza)
   {const hx=-10.5,W=5.2,D=15,F=2,CR=0xf3e6c8,TR=0xe6d6b0,RF=0xb5452f;
     b.add("box",0xbfb39a,X(hx),.2,Z(0),W+1,.4,D+1);b.add("box",CR,X(hx),.4+F/2,Z(0),W,F,D);b.add("box",TR,X(hx),.4+F+.07,Z(0),W+.2,.14,D+.2);b.add("box",CR,X(hx),.54+F*1.5,Z(0),W,F,D);b.add("box",TR,X(hx),.54+F*2+.08,Z(0),W+.3,.16,D+.3);
@@ -3807,6 +3830,8 @@ const MUNI={flags:[],people:[],lights:[],jets:[],hands:null};
     const ft=new THREE.Group(),fb=new Builder();fb.add("box",0xd23a2a,0,.6,0,3.2,.7,1.1);fb.add("box",0xd23a2a,1.25,1.1,0,.8,.7,1.05);fb.add("box",0x3c556e,1.66,1.15,0,.02,.4,.9);fb.add("box",0xcfd3d6,-.3,1.05,0,2.4,.08,.5);for(let k=0;k<7;k++)fb.add("box",0xcfd3d6,-1.4+k*.35,1.1,0,.04,.04,.5);
       [[1,.55],[1,-.55],[-1,.55],[-1,-.55]].forEach(([x,z])=>fb.add("cyl",0x1b1b1b,x,.25,z,.25,.14,.25,Math.PI/2));ft.add(fb.mesh());ft.position.set(X(1.4),0,Z(13.6));ft.rotation.y=-Math.PI/2;scene.add(ft);
       const fl=new THREE.Mesh(new THREE.BoxGeometry(.25,.08,.4),new THREE.MeshBasicMaterial({color:0xff2a2a}));fl.position.set(1.25,1.5,0);ft.add(fl);MUNI.lights.push(fl)}
+  {const LOOP=[[-5.6,-12],[9.5,-12],[9.5,12],[-15,12],[-15,-12]],seg=[];let tot=0;for(let k=0;k<LOOP.length;k++){const a=LOOP[k],c=LOOP[(k+1)%LOOP.length],l=Math.hypot(c[0]-a[0],c[1]-a[1]);seg.push([a,c,l]);tot+=l}MUNI.loop={seg,tot};MUNI.cars=[];
+    [0xd23a2a,0x2f7fb8,0xf2b632].forEach((c,i)=>{const car=makeCar(c,false);scene.add(car);MUNI.cars.push({m:car,u:i/3*tot,sp:2.4+i*.3})})}
   // people strolling around the plaza
   const SH=[0x2f7fb8,0xd9568a,0x3f8f2c,0xf2b632,0x8a4fc8,0xe2402f];for(let k=0;k<(QLV===0?5:9);k++){const f=makeFarmer({shirt:SH[k%6],pants:[0x2b2b3a,0x3b5f9a,0x6b4a2c][k%3],skin:[0xe0a878,0xc68a5a,0x8a5a3a][k%3],hat:SH[(k+3)%6]});f.g.scale.setScalar(.9);scene.add(f.g);
     MUNI.people.push({f,a:k/9*Math.PI*2,r:4.6+(k%3)*1.4,sp:(k%2?1:-1)*(.12+.03*(k%4)),cx:X(2.5),cz:Z(0),pause:0})}})();
@@ -3815,6 +3840,8 @@ function stepMunicipal(dt,t){if(Math.hypot(cam.tx-(TOWN.x-42),cam.tz-TOWN.z)>90)
   MUNI.flags.forEach(F=>{F.piv.rotation.y=Math.sin(t*2.4+F.ph)*.35;F.f.rotation.y=Math.sin(t*5+F.ph)*.2});
   MUNI.jets.forEach(j=>{const k=1+Math.sin(t*6)*.25;j.scale.set(.18*(2-k),.45*k,.18*(2-k))});
   MUNI.lights.forEach((l,i)=>{l.material.color.setHex(Math.floor(t*4+i)%2?0xff2a2a:0x2a6aff)});
+  if(MUNI.loop){const MX=TOWN.x-42,MZ=TOWN.z,{seg,tot}=MUNI.loop;MUNI.cars.forEach(c=>{c.u=(c.u+c.sp*dt)%tot;let s=c.u,k=0;while(s>seg[k][2]){s-=seg[k][2];k++}const [a,b2,l]=seg[k],f=s/l,dx=(b2[0]-a[0])/l,dz=(b2[1]-a[1])/l;
+    c.m.position.set(MX+a[0]+(b2[0]-a[0])*f-dz*.45,0,MZ+a[1]+(b2[1]-a[1])*f+dx*.45);c.m.rotation.y=Math.atan2(-dz,dx);if(c.m.userData.wheels)c.m.userData.wheels.forEach(w=>w.rotation.y+=dt*c.sp*4)})}
   MUNI.people.forEach(p=>{if(p.pause>0){p.pause-=dt;p.f.legL.rotation.z=p.f.legR.rotation.z=0;return}if(Math.random()<dt*.05)p.pause=2+Math.random()*3;p.a+=p.sp*dt;const x=p.cx+Math.cos(p.a)*p.r,z=p.cz+Math.sin(p.a)*p.r*1.6,dx=-Math.sin(p.a)*p.sp,dz=Math.cos(p.a)*p.sp*1.6;
     p.f.g.position.set(x,0,z);p.f.g.rotation.y=Math.atan2(-dz,dx);const sw=Math.sin(t*8+p.a*5);p.f.legL.rotation.z=sw*.6;p.f.legR.rotation.z=-sw*.6;p.f.armL.rotation.z=-sw*.5;p.f.armR.rotation.z=sw*.5;p.f.g.visible=!isBad()})}
 function stepTown(dt,t){stepMunicipal(dt,t);const h=typeof phHour==="function"?phHour():12,dark=1-daylight(h),show=h>=18&&h<21&&!isBad();
@@ -6773,7 +6800,7 @@ function perfInit(){if(PERF.init)return;PERF.init=true;
     const w=new THREE.Group();w.userData.cw=true;scene.add(w);w.add(o);PERF.cull.push({w,o,off:sph.center.clone().sub(o.position),r:sph.radius})})}
 function hideOutlines(){scene.traverse(o=>{if(o.isMesh&&(o.userData.outline||o.material===OUT||o.material===OUTU))o.visible=false})}
 const _pc=new THREE.Vector3();
-function perfStep(dt,t){{const ff=scene.fog&&scene.fog.far>=50?scene.fog.far:400,want=Math.max(110,Math.min(420,ff+20));if(Math.abs(camera.far-want)>1){camera.far=want;camera.updateProjectionMatrix()}}
+function perfStep(dt,t){if(typeof applyBarnPos==="function")applyBarnPos();{const ff=scene.fog&&scene.fog.far>=50?scene.fog.far:400,want=Math.max(110,Math.min(420,ff+20));if(Math.abs(camera.far-want)>1){camera.far=want;camera.updateProjectionMatrix()}}
   if(!PERF.init)return;
   if(QLV<2){PERF.sh+=dt;if(PERF.sh>(QLV===0?.5:.12)){PERF.sh=0;renderer.shadowMap.needsUpdate=true}}
   PERF.t+=dt;if(PERF.t>.25){PERF.t=0;const far=(scene.fog?scene.fog.far:200)+8,cp=camera.position;
@@ -6797,7 +6824,7 @@ function loop(t){
   perfStep(dt,t);renderer.render(scene,camera);requestAnimationFrame(loop);
 }
 function start(){
-  makeIcons();resize();buildField();buildSnowLayers();scene.add(sun.target);normalizePens();initFarmer();initHelper();initCrew();renderBuilds();buildBoat();buildJeep();initFolk();shopUI(true);townUI(true);syncAnimals();ui();wxUI();helperUI();applyCam(1);
+  makeIcons();resize();buildField();buildSnowLayers();scene.add(sun.target);normalizePens();applyBarnPos();initFarmer();initHelper();initCrew();renderBuilds();buildBoat();buildJeep();initFolk();shopUI(true);townUI(true);syncAnimals();ui();wxUI();helperUI();applyCam(1);
   $("loading").hidden=true;setTimeout(perfInit,1500);{const sp=$("splash"),t0=window.__spT0||0,w=Math.max(0,2400-(performance.now()-t0));setTimeout(()=>{if(sp){sp.classList.add("out");setTimeout(()=>sp.remove(),700)}},w)}requestAnimationFrame(loop);setInterval(ui,1000);setInterval(()=>{invUI(false);townUI(false)},1000);invUI(true);initCloud();
 }
 window.claude?.hot?.ready?window.claude.hot.ready(start):start();
