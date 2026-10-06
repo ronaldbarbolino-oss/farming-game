@@ -399,6 +399,7 @@ body.land .modeTag{max-width:46vw;font-size:.64rem;opacity:.85}
   <div class="tray-head"><h2>Animals</h2><span class="hint">Buy a male and a female to breed: the female gets pregnant on her own and gives birth after 30 minutes. Each species has its own pen. They shelter on their own when it rains or snows.</span></div>
   <div class="panel"><div class="tools" id="shop"></div>
     <div class="tools" style="margin-top:8px"><button class="btn" id="tRest" hidden style="background:#6a5acd;box-shadow:0 4px 0 #463a9a">😴 Rest All Animals</button><span class="mktNote" id="restNote" style="margin:0" hidden>Resting animals go inside for 3 minutes. After that they can't get sick for 20 minutes.</span></div>
+    <h4 class="penH">Sell Animals</h4><p class="mktNote">Sell an animal you don't need. Adults sell for 70% of their price, babies for 35%, sick animals for half of that. Pregnant animals are sold last.</p><div class="tools" id="sellA"></div>
     <h4 class="penH">Animal Houses</h4><p class="mktNote">Level up a house to keep more animals (+3 space) and give it a makeover. Press 📐 Bigger pen to make the yard wider (+2 space).</p><div class="tools" id="penUp"></div></div>
   </div>
 </div>
@@ -724,7 +725,7 @@ const PLIM={manok:8,kambing:6,baka:5,kalabaw:5,kabayo:6,baboy:6};
 /* pens can be made bigger: each space level widens the yard and pushes the pens west to make room */
 const MTNS0=[[-22,-30,6],[-14,-33,7],[-5,-31,6.5],[3,-35,8],[12,-31,7],[15,-37,7.5]];
 /* the three hills on the west side can be moved, removed or brought back; they now have snow, rocks and flowers */
-const HILLS=[{id:"h1",x:-37,z:-19,h:9,rad:6},{id:"h2",x:-38,z:7,h:8,rad:5.5},{id:"h3",x:-28,z:-22,h:7,rad:5}],HILL_RM=500;
+const HILLS=[{id:"h1",x:-37,z:-19,h:9,rad:6},{id:"h3",x:-28,z:-22,h:7,rad:5}],HILL_RM=500;
 const HILL_UP=[800,2000],hs=H=>1+.25*((S.hillLv||{})[H.id]|0);const hillXZ=H=>{const q=(S.hillPos||{})[H.id];return q?q:[H.x,H.z]};const hillOn=H=>!(S.hillGone||[]).includes(H.id);
 function mtns(skip){const a=MTNS0.slice();HILLS.forEach(H=>{if(H.id===skip||!hillOn(H))return;const [x,z]=hillXZ(H);a.push([x,z,H.rad*hs(H)])});return a}
 const PENS0=JSON.parse(JSON.stringify(PENS)),PENCOL={manok:0,kambing:0,baka:1,kalabaw:1,kabayo:2,baboy:2};
@@ -2539,6 +2540,11 @@ function expandSpace(k){S.penSz=S.penSz||{};const lv=S.penSz[k]|0,P=PENS[k];if(!
   toast("📐 "+P.n+" is bigger now! Room for "+PENSZADD+" more animals.",3200);after()}
 function expandHouse(k,n){S.penLv=S.penLv||{};const lv=S.penLv[k]|0;if(lv>=PENUP.length)return;const c=PENUP[lv];if(S.coins<c)return toast("You need "+c+" coins to expand the "+n+".");
   S.coins-=c;S.penLv[k]=lv+1;const P=PENS[k];if(P)burst((P.x0+P.x1)/2,.6,(P.z0+P.z1)/2,0xc98a4b,22,.5);toast(n+" upgraded to Level "+(lv+2)+"! It looks better and holds "+PENADD+" more animals.",3200);after();buildPenX()}
+function sellPrice(p){const a=animal(p.id);let v=a.cost*(isBaby(p)?.35:.7);if(p.sick)v*=.5;return Math.max(1,Math.round(v))}
+function pickSell(id,g){const L=S.pens.map((p,i)=>[p,i]).filter(([p])=>p.id===id&&(g==="F"?p.g==="F":p.g!=="F"));L.sort((x,y)=>(!!x[0].preg-!!y[0].preg)||(isBaby(x[0])-isBaby(y[0])));return L.length?L[0][0]:null}
+function sellAnimal(id,g){if(VISIT)return;const p=pickSell(id,g);if(!p)return;const i=S.pens.indexOf(p),a=animal(id),v=sellPrice(p),o=animalObjs[i];
+  if(o)burst(o.g.position.x,.8,o.g.position.z,0xffd84a,14);S.pens.splice(i,1);S.coins+=v;if(typeof pendingBirth!=="undefined")pendingBirth.length=0;hovered=null;rebuildAnimals();after();
+  toast("Sold a "+(p.g==="F"?"female ":"male ")+a.n+(isBaby(p)?" (baby)":"")+" · +"+v.toLocaleString()+" coins",2800)}
 function buyAnimal(a,gender){
   if(S.lv<a.lv)return toast(a.n+" unlocks at Level "+a.lv+".");
   const z=a.zone||"pen";if(zoneCount(a.id)>=zoneLimit(a.id))return toast((z==="pen"?"Full: "+(PENS[a.id]?PENS[a.id].n:"pen")+".":z==="pond"?"The pond is full.":"You have enough dogs and cats.")+" Expand it under Animal Houses.",3200);
@@ -2567,6 +2573,12 @@ function ui(){
   const shop=$("shop");
   if(shop._lv!==S.lv){shop._lv=S.lv;shop.innerHTML=ANIMALS.map(a=>S.lv<a.lv?`<div class="abuy lock"><b>${a.n}</b><small>Level ${a.lv}</small></div>`:`<div class="abuy"><b>${a.n}</b><small>${a.cost} coins</small><button class="btn sm" data-id="${a.id}" data-g="M">♂ Male</button><button class="btn sm" data-id="${a.id}" data-g="F" style="background:#d9568a;box-shadow:0 4px 0 #9a2f5a">♀ Female</button></div>`).join("");
     shop.querySelectorAll("button[data-id]").forEach(b=>b.onclick=()=>buyAnimal(animal(b.dataset.id),b.dataset.g))}
+  {const el=$("sellA"),key=VISIT?"v":S.pens.map(p=>p.id+p.g+(isBaby(p)?"b":"")+(p.sick?"s":"")).sort().join(",");if(el&&el._k!==key){el._k=key;
+    const ids=[...new Set(S.pens.map(p=>p.id))];
+    el.innerHTML=VISIT?"":!ids.length?'<span class="mktNote" style="margin:0">You have no animals to sell yet.</span>':ids.map(id=>{const a=animal(id),m=S.pens.filter(p=>p.id===id&&p.g!=="F"),f=S.pens.filter(p=>p.id===id&&p.g==="F");
+      const btn=(g,list)=>{if(!list.length)return"";const p=pickSell(id,g);return `<button class="btn sm alt" data-sell="${id}" data-g="${g}">Sell ${g==="F"?"♀":"♂"} · ${sellPrice(p).toLocaleString()}</button>`};
+      return `<div class="abuy"><b>${a.n}</b><small>♂ ${m.length} · ♀ ${f.length}</small>${btn("M",m)}${btn("F",f)}</div>`}).join("");
+    el.querySelectorAll("[data-sell]").forEach(b=>b.onclick=()=>sellAnimal(b.dataset.sell,b.dataset.g))}}
   {const pu=$("penUp"),HS=[...Object.keys(PENS).map(id=>({k:id,n:PENS[id].n,ids:[id]})),{k:"pond",n:"Duck Pond (grows bigger)",ids:["bibe","pato"]},{k:"farm",n:"Dog & Cat Yard",ids:["aso","pusa"]}];
     const key=JSON.stringify([S.penLv||{},S.penSz||{},S.pens.length,Math.floor(S.coins/50)]);if(pu&&pu._k!==key){pu._k=key;
     pu.innerHTML=HS.map(h=>{const lv=(S.penLv||{})[h.k]|0,cap=zoneLimit(h.ids[0]),have=h.k==="pond"||h.k==="farm"?S.pens.filter(p=>zoneOf(p.id)===h.k).length:S.pens.filter(p=>p.id===h.k).length,c=PENUP[lv];
@@ -2576,7 +2588,7 @@ function ui(){
   {const lb=$("tLake"),pl=(S.penLv||{}).pond|0,ll=S.lakeLv|0,c=pl<PENUP.length?PENUP[pl]:ll<LAKEUP.length?LAKEUP[ll]:0;lb.disabled=!c;lb.textContent=c?"🌊 Expand Lake · "+c.toLocaleString():"🌊 Lake: Max size"}
   const nx=S.size+1,ex=$("tExpand");
   if(nx<SIZES.length){ex.disabled=false;ex.textContent="Expand "+SIZES[nx]+"×"+SIZES[nx]+" · "+EXPAND[nx]}else{ex.disabled=true;ex.textContent="Fully expanded"}
-  {const own=PLOTS.filter(q=>!q.island&&(S.plots||[]).includes(q.id));$("tMoveLand").hidden=!own.length;$("tHills").hidden=!(S.hillGone||[]).length||!!VISIT}
+  {const own=PLOTS.filter(q=>!q.island&&(S.plots||[]).includes(q.id));$("tMoveLand").hidden=!own.length;$("tHills").hidden=!(S.hillGone||[]).some(id=>HILLS.some(H=>H.id===id))||!!VISIT}
   {const np=nextPlot(),bp=$("tPlot");if(np){bp.disabled=false;bp.textContent="Buy "+np.n+" · "+np.cost.toLocaleString()+(S.lv<np.lv?" · Level "+np.lv:"")}else{bp.disabled=true;bp.textContent="You bought all the land"}}
 }
 $("tPlow").onclick=plowAll;$("tAll").onclick=harvestAll;$("tExpand").onclick=expand;
@@ -2953,7 +2965,7 @@ function growHill(){const id=HILLSEL;if(!id)return;const H=HILLS.find(q=>q.id===
 function closeHill(){HILLSEL=null;$("hillBar").hidden=true}
 function removeHill(){const id=HILLSEL;closeHill();if(!id)return;if(S.coins<HILL_RM)return toast("You need "+HILL_RM+" coins to clear the hill.");S.coins-=HILL_RM;const H=HILLS.find(q=>q.id===id),[x,z]=hillXZ(H);
   S.hillGone=(S.hillGone||[]).concat(id);buildHills();try{landDeco()}catch(e){}burst(x,1,z,0x9aa1a4,30,.8);after();toast("⛰️ The hill is gone. Now it's flat grass you can build on.",3200)}
-function restoreHills(){if(!(S.hillGone||[]).length)return;const back=S.hillGone.filter(id=>{const H=HILLS.find(q=>q.id===id),[x,z]=hillXZ(H),R=H.rad*hs(H)*1.3;return !(S.builds||[]).some(o=>Math.hypot(o.x-x,o.z-z)<R)&&!Object.values(PENS).some(P=>x>P.x0-R&&x<P.x1+R&&z>P.z0-R&&z<P.z1+R)});
+function restoreHills(){if(!(S.hillGone||[]).length)return;const back=S.hillGone.filter(id=>{const H=HILLS.find(q=>q.id===id);if(!H)return false;const [x,z]=hillXZ(H),R=H.rad*hs(H)*1.3;return !(S.builds||[]).some(o=>Math.hypot(o.x-x,o.z-z)<R)&&!Object.values(PENS).some(P=>x>P.x0-R&&x<P.x1+R&&z>P.z0-R&&z<P.z1+R)});
   if(!back.length)return toast("Something is built where the hills were. Move it first.",3200);S.hillGone=S.hillGone.filter(id=>!back.includes(id));buildHills();try{landDeco()}catch(e){}after();toast("⛰️ The hills are back.",2400)}
 function validHill(id,x,z){const H=HILLS.find(q=>q.id===id),R=H.rad*hs(H)*1.3;if(x<-40||x>14||z<-30||z>50)return"Too close to the edge of the farm.";
   if(Math.abs(z+8)<R+1.4&&x<-3)return"That covers the road.";
