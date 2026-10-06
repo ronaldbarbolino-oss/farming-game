@@ -2361,12 +2361,20 @@ function tapPen(i,x,y){const p=S.pens[i],a=animal(p.id);
   if(p.sick){if(p.heal)return toast(a.n+" is getting medicine. Healthy in "+fmt(p.heal-now())+".");const c=cureCost(a);if(S.coins<c)return toast("You need "+c+" coins for medicine.");S.coins-=c;startHeal(p);floatText("Medicine given −"+c,x,y);const o=animalObjs[i];if(o)burst(o.g.position.x,.7,o.g.position.z,0x7fe08a,14);toast(a.n+" got medicine. It will be healthy in "+fmt(p.heal-now())+".",3200);after();return}
   const left=a.t-(now()-p.at);if(left>0)return toast(a.item+" in "+fmt(left));const it=AITEM[a.id];if(it){if(!addItem(it,1,x,y))return;gain(0,a.xp,null)}else gain(a.s,a.xp,x,y);p.at=now();after()}
 function harvestAll(){if(cdLeft("harv")>0)return toast("Harvest All is ready again in "+fmt(cdLeft("harv"))+".");
-  let xp=0,n=0,cash=0,stop=false;
-  S.tiles.forEach((t,i)=>{if(stop)return;const st=tileState(t);if(st&&st.dead){S.tiles[i]={k:"soil"};n++;burstTile(i,0x8b6b3d,6);return}if(st&&!st.dead&&st.left<=0){const q=st.w>.5?0:1;if(q&&!addItem(st.c.id,q,null)){stop=true;return}xp+=st.c.xp;n++;S.tiles[i]={k:"soil"};burstTile(i,st.c.col,8,.4)}});
+  let xp=0,n=0,cash=0,stop=false,sent=0;
+  // the helpers walk out and harvest the field themselves, crop by crop, until it is done
+  const crew=["helper","helper2"].map(k=>CREW[k]).filter(Boolean),workers=crew.length?crew:(CREW.farmer?[CREW.farmer]:[]);
+  if(workers.length){const taken=new Set();Object.values(CREW).forEach(W=>W&&W.o&&W.o.queue&&W.o.queue.forEach(q=>{if(q.type==="harvest")taken.add(q.tile)}));
+    const todo=[];S.tiles.forEach((t,i)=>{const st=tileState(t);if(st&&st.p>=1&&!isIsleTile(i)&&!taken.has(i))todo.push(i)});
+    todo.sort((a,b)=>{const A=tileXZ(a),B=tileXZ(b);return A[1]-B[1]||A[0]-B[0]});
+    const per=Math.ceil(todo.length/workers.length);workers.forEach((W,k)=>{const part=todo.slice(k*per,(k+1)*per);if(!part.length)return;W.o.resting=false;if(W.o.fun)funEnd(W);part.forEach(i=>W.o.queue.push({type:"harvest",tile:i,crop:S.tiles[i].c}));sent+=part.length});
+    if(sent)updateCrewUI()}
+  S.tiles.forEach((t,i)=>{if(stop)return;if(sent&&!isIsleTile(i))return;const st=tileState(t);if(st&&st.dead){S.tiles[i]={k:"soil"};n++;burstTile(i,0x8b6b3d,6);return}if(st&&!st.dead&&st.left<=0){const q=st.w>.5?0:1;if(q&&!addItem(st.c.id,q,null)){stop=true;return}xp+=st.c.xp;n++;S.tiles[i]={k:"soil"};burstTile(i,st.c.col,8,.4)}});
   S.pens.forEach(p=>{if(stop)return;const a=animal(p.id);if(!p.sick&&!isBaby(p)&&now()-p.at>=a.t){const it=AITEM[a.id];if(it){if(!addItem(it,1,null)){stop=true;return}}else cash+=a.s;xp+=a.xp;n++;p.at=now()}});
   FTREES.forEach((T,k)=>{if(stop||!T.kind||treeGrow(k)<1||treeLeft(k)>0)return;const q=treeYield(k);if(!addItem(T.kind,q,null)){stop=true;return}S.trees[T.id]=now();xp+=2;n+=q});
-  if(!n)return toast(stop?"Storage is full! Sell some at the stall first.":"Nothing is ready to harvest yet.");
-  S.cd=S.cd||{};S.cd.harv=now();cdUI();const r=$("tAll").getBoundingClientRect();gain(cash,xp,r.left+r.width/2,r.top);toast(n+" crops went to storage"+(cash?" · +"+cash+" coins":"")+(stop?". Storage is full.":""),3000);after();invUI(true);
+  if(!n&&!sent)return toast(stop?"Storage is full! Sell some at the stall first.":"Nothing is ready to harvest yet.");
+  S.cd=S.cd||{};S.cd.harv=now();cdUI();const r=$("tAll").getBoundingClientRect();if(cash||xp)gain(cash,xp,r.left+r.width/2,r.top);
+  toast((sent?"🧺 Your helpers are harvesting "+sent+" crop"+(sent>1?"s":"")+" on the field.":"")+(n?(sent?" ":"")+n+" item"+(n>1?"s":"")+" from animals and trees went to storage":"")+(cash?" · +"+cash+" coins":"")+(stop?". Storage is full.":""),3600);after();invUI(true);
 }
 function plowAll(){
   const empty=S.tiles.map((t,i)=>t.k==="grass"?i:-1).filter(i=>i>=0);
