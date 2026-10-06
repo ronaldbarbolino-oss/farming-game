@@ -214,7 +214,7 @@ button{touch-action:manipulation}
 #menuBtn,#rotBtn,.drawerTop{display:none}
 body.hideui .crew,body.hideui .views,body.hideui .cam,body.hideui .modeTag,body.hideui .toolbar,body.hideui .tip,body.hideui #menuBtn,body.hideui #rotBtn{display:none!important}
 @media (pointer:coarse) and (orientation:portrait){#rotBtn{display:inline-block}}
-@media (max-width:640px) and (orientation:portrait){.sbtns{left:auto;right:8px;transform:none;top:226px;flex-direction:column}}
+@media (max-width:640px) and (orientation:portrait){.sbtns{left:8px;right:8px;transform:none;top:8px;flex-direction:row;flex-wrap:wrap;justify-content:flex-end;gap:4px}.sbtns .sb{font-size:.7rem;padding:3px 7px}.crew{top:44px!important}}
 body.land .wrap{padding:0;max-width:none;gap:0}
 body.land .stage{position:fixed;inset:0;height:auto;min-height:0;border:0;border-radius:0;box-shadow:none;z-index:10}
 body.land .hud{position:fixed;top:calc(6px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:12;background:rgba(58,38,21,.6);padding:3px 8px;border-radius:12px;flex-wrap:nowrap;gap:6px;max-width:48vw;overflow:hidden}
@@ -249,6 +249,14 @@ body.land .drawerTop{display:flex;justify-content:space-between;align-items:cent
 body.land{overflow:hidden;overscroll-behavior:none}
 body.land .stage{width:100vw;height:100vh;height:100dvh}
 @media (prefers-reduced-motion:reduce){#below{transition:none}}
+
+/* fixed-angle camera pad: move and zoom only */
+.cam{display:grid!important;grid-template-columns:repeat(3,38px);grid-template-rows:repeat(3,38px);gap:4px!important;grid-template-areas:"zi u zo" "l h r" ". d ."}
+.cam .cbtn{min-width:0!important;width:38px;height:38px!important;padding:0!important;font-size:1rem!important;display:grid;place-items:center}
+#cU{grid-area:u}#cD{grid-area:d}#cLf{grid-area:l}#cRt{grid-area:r}#c0{grid-area:h}#cZi{grid-area:zi}#cZo{grid-area:zo}
+@media (max-width:640px){.cam{grid-template-columns:repeat(3,34px);grid-template-rows:repeat(3,34px);top:auto!important;bottom:64px!important}.cam .cbtn{width:34px;height:34px!important}}
+body.land .cam{top:auto!important;bottom:calc(8px + env(safe-area-inset-bottom,0px))!important;grid-template-columns:repeat(3,32px);grid-template-rows:repeat(3,32px)}
+body.land .cam .cbtn{width:32px;height:32px!important}
 </style>
 
 <div class="wrap">
@@ -293,10 +301,14 @@ body.land .stage{width:100vw;height:100vh;height:100dvh}
     <div class="placeBar" id="editBar" hidden><span id="editTxt"></span><div><button class="cbtn" id="editRot" type="button">⟳ Rotate</button><button class="cbtn" id="editMove" type="button">✥ Move</button><button class="cbtn on" id="editDone" type="button">Done</button></div></div>
     <div class="placeBar" id="placeBar" hidden><span id="placeTxt"></span><div><button class="cbtn" id="placeRot" type="button">Rotate</button><button class="cbtn on" id="placeOk" type="button">Place here</button><button class="cbtn" id="placeX" type="button">Cancel</button></div></div>
     <div class="cam">
-      <button class="cbtn" id="cL" aria-label="Rotate left">↺</button>
-      <button class="cbtn" id="cR" aria-label="Rotate right">↻</button>
-      <button class="cbtn" id="cA" aria-pressed="false">Auto</button>
+      <button class="cbtn" id="cU" aria-label="Move up">▲</button>
+      <button class="cbtn" id="cLf" aria-label="Move left">◀</button>
+      <button class="cbtn" id="cRt" aria-label="Move right">▶</button>
+      <button class="cbtn" id="cD" aria-label="Move down">▼</button>
+      <button class="cbtn" id="cZi" aria-label="Zoom in">＋</button>
+      <button class="cbtn" id="cZo" aria-label="Zoom out">－</button>
       <button class="cbtn" id="c0" aria-label="Reset view">⌂</button>
+      <button class="cbtn" id="cA" hidden aria-pressed="false">Auto</button>
     </div>
   </div>
 
@@ -310,6 +322,7 @@ body.land .stage{width:100vw;height:100vh;height:100dvh}
     <button class="btn alt" id="tExpand"></button>
     <button class="btn alt" id="tLake" style="background:#2f8fc8;box-shadow:0 4px 0 #1d6a98"></button>
     <button class="btn alt" id="tPlot"></button>
+    <button class="btn alt" id="tMoveLand" hidden>📐 Move Land</button>
     <button class="btn" id="tHelper"></button>
     <button class="btn" id="tHire" style="background:#2f7fb8;box-shadow:0 4px 0 #1d5a85"></button>
     <button class="btn" id="tHspd" style="background:#e07a2a;box-shadow:0 4px 0 #a5521a"></button>
@@ -422,6 +435,10 @@ body.land .stage{width:100vw;height:100vh;height:100dvh}
     <div class="scs" id="tsList" style="max-height:52vh;overflow:auto"></div>
     <div class="suRow"><button class="btn alt" type="button" id="tsJeep"></button><button class="btn" type="button" id="tsClose">Close</button></div>
   </div>
+</div>
+<div class="modal" id="plotM" hidden>
+  <div class="suBox"><h3>📐 Move which land?</h3><p class="suLead">Pick a piece of land, then tap where it should go. Your crops move with it.</p><div id="plotList" style="display:flex;flex-direction:column;gap:6px"></div>
+    <div class="suRow"><button class="btn alt" type="button" id="plotClose">Cancel</button></div></div>
 </div>
 <div class="modal" id="boatM" hidden>
   <div class="suBox">
@@ -572,11 +589,13 @@ const _ca=new THREE.Color(),_cb=new THREE.Color();
 const mix=(a,b,t)=>_ca.set(a).lerp(_cb.set(b),Math.max(0,Math.min(1,t))).getHex();
 /* -------- extra farmland parcels -------- */
 const PN=8;
-const IX_=80,IZ_=4;
+const IX_=80,IZ_=4;const CX=165,CZ=4,CHX=17,CHZ=14;
 const PLOTS=[{id:"isla",n:"Secret Island",x0:IX_-.5,z0:IZ_+31,sz:6,y:1.2,island:true,cost:100000,lv:3},{id:"timog",n:"South Land",x0:-4,z0:12,cost:1500,lv:4},{id:"kanluran",n:"West Land",x0:-17,z0:10,cost:4000,lv:6},{id:"malayo",n:"Far Land",x0:-26.5,z0:10,cost:8000,lv:8},{id:"lambak",n:"Valley Land",x0:-4,z0:21,cost:15000,lv:9},{id:"burol",n:"Hill Land",x0:-17,z0:21,cost:25000,lv:10}];
+const PLOT_DEF={};PLOTS.forEach(p=>PLOT_DEF[p.id]=[p.x0,p.z0]);
+function applyPlotPos(){const P=(typeof S!=="undefined"&&S&&S.plotPos)||{};PLOTS.forEach(p=>{if(p.island)return;const v=P[p.id],d=PLOT_DEF[p.id];p.x0=v?v[0]:d[0];p.z0=v?v[1]:d[1]})}
 function inPlotArea(x,z,m=.6){return PLOTS.some(p=>!p.island&&x>p.x0-m&&x<p.x0+PN+m&&z>p.z0-m&&z<p.z0+PN+m)}
 let _LK="",_LC=null;
-function layout(){const key=S.size+"|"+(S.plots||[]).join(",");if(key===_LK&&_LC)return _LC;
+function layout(){const key=S.size+"|"+(S.plots||[]).join(",")+"|"+JSON.stringify(S.plotPos||{});if(key===_LK&&_LC)return _LC;applyPlotPos();
   const n=SIZES[S.size],L=[{x0:FX0,z0:FZ0,n,start:0}];let st=n*n;
   (S.plots||[]).forEach(id=>{const p=PLOTS.find(q=>q.id===id);if(p){const m=p.sz||PN;L.push({x0:p.x0,z0:p.z0,n:m,start:st,p,y:p.y||0});st+=m*m}});
   _LK=key;_LC=L;return L}
@@ -1542,7 +1561,7 @@ function setSeason(k,manual){if(!SEASONS[k])return;WX.key=k;WX.timer=SDUR[k]||SE
 /* ================= DAY & NIGHT (Philippine time) ================= */
 const PHT=new Intl.DateTimeFormat("en-US",{timeZone:"Asia/Manila",hour:"numeric",minute:"2-digit",hour12:false});
 /* game clock: one in-game day lasts 48 real minutes (1 game hour = 2 real minutes), the same for every player */
-const GAME_DAY=48*60;function phHour(){return((Date.now()/1000)%GAME_DAY)/GAME_DAY*24}
+const DAY_S=36*60,NIGHT_S=8*60,GAME_DAY=DAY_S+NIGHT_S;function phHour(){const t=(Date.now()/1000)%GAME_DAY;return t<DAY_S?6+12.5*t/DAY_S:(18.5+11.5*(t-DAY_S)/NIGHT_S)%24}
 function daylight(h){return h<5?0:h<6.5?smooth(5,6.5,h):h<18?1:h<19?1-smooth(18,19,h):0}
 const isNight=()=>{const h=phHour();return h>=18.5||h<6};
 const NIGHTSKY=new THREE.Color(0x0e1a3a),DUSK=new THREE.Color(0xff9a5a),_dn=new THREE.Color();let DN={d:daylight(phHour()),ui:0};
@@ -1662,6 +1681,35 @@ const sea=new THREE.Mesh(seaGeo,SEAMAT);sea.receiveShadow=true;root.add(sea);
 const far=new THREE.Mesh(new THREE.PlaneGeometry(400,600),SEAMAT);far.rotation.x=-Math.PI/2;far.position.set(284,-.03,0);root.add(far);
 const seaP=seaGeo.attributes.position;
 function stepSea(t){for(let i=0;i<seaP.count;i++)seaP.setY(i,W(seaP.getX(i),seaP.getZ(i),t));seaP.needsUpdate=true}
+/* livelier sea: sparkles that ride the swell and foam waves that roll up every shore */
+const SHORE=[];let seaSpark=null,seaSparkM=null;
+(function seaFx(){
+  {const k=document.createElement("canvas");k.width=k.height=256;const x=k.getContext("2d");x.lineCap="round";
+    for(let n=0;n<70;n++){const xx=Math.random()*256,yy=Math.random()*256,w=4+Math.random()*12;x.strokeStyle="rgba(255,255,255,"+(.35+Math.random()*.5)+")";x.lineWidth=1.5+Math.random()*2;x.beginPath();x.arc(xx,yy,w,Math.PI*1.15,Math.PI*1.85);x.stroke()}
+    for(let n=0;n<90;n++){x.fillStyle="rgba(255,255,255,.9)";x.fillRect(Math.random()*256,Math.random()*256,2,2)}
+    seaSpark=new THREE.CanvasTexture(k);seaSpark.wrapS=seaSpark.wrapT=THREE.RepeatWrapping;seaSpark.repeat.set(14,18);
+    const m=new THREE.Mesh(seaGeo,new THREE.MeshBasicMaterial({map:seaSpark,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,opacity:.5}));m.position.y=.03;m.renderOrder=2;root.add(m);seaSparkM=m}
+  const fk=document.createElement("canvas");fk.width=64;fk.height=32;const fx=fk.getContext("2d"),gr=fx.createLinearGradient(0,0,0,32);gr.addColorStop(0,"rgba(255,255,255,0)");gr.addColorStop(.55,"rgba(255,255,255,.95)");gr.addColorStop(.7,"rgba(255,255,255,.8)");gr.addColorStop(1,"rgba(255,255,255,0)");fx.fillStyle=gr;fx.fillRect(0,0,64,32);
+  for(let n=0;n<30;n++){fx.fillStyle="rgba(255,255,255,.9)";fx.beginPath();fx.arc(Math.random()*64,16+Math.random()*8,1+Math.random()*2.5,0,Math.PI*2);fx.fill()}
+  const ftex=new THREE.CanvasTexture(fk);ftex.wrapS=THREE.RepeatWrapping;
+  // shore points: march outward from a centre until the land ends
+  const contour=(cx,cz,isLand,n,rmax)=>{const P=[];for(let i=0;i<n;i++){const a=i/n*Math.PI*2,dx=Math.cos(a),dz=Math.sin(a);let r=1,last=null;while(r<rmax){if(isLand(cx+dx*r,cz+dz*r))last=r;r+=.2}if(last!=null){P.push({x:cx+dx*(last+.2),z:cz+dz*(last+.2),nx:dx,nz:dz})}}return P};
+  const ribbon=(pts,closed,ph,amp)=>{const n=pts.length,pos=new Float32Array(n*2*3),uv=[],idx=[];for(let i=0;i<n;i++){uv.push(i*.35,0,i*.35,1);if(i<n-1||closed){const a=i*2,b=((i+1)%n)*2;idx.push(a,b,a+1,a+1,b,b+1)}}
+    const g=new THREE.BufferGeometry();g.setAttribute("position",new THREE.BufferAttribute(pos,3));g.setAttribute("uv",new THREE.Float32BufferAttribute(uv,2));g.setIndex(idx);
+    const m=new THREE.Mesh(g,new THREE.MeshBasicMaterial({map:ftex,transparent:true,depthWrite:false,opacity:0,side:THREE.DoubleSide}));m.renderOrder=4;m.frustumCulled=false;root.add(m);SHORE.push({m,pts,ph,amp:amp||2.4})};
+  const isle=contour(4,0,(x,z)=>H(x,z)>.1&&i2d(x,z)>1.05,220,45),sec=contour(I2.x,I2.z,(x,z)=>i2d(x,z)<1&&H(x,z)>.1,120,22);
+  [0,.5].forEach(ph=>{ribbon(isle,true,ph);ribbon(sec,true,ph+.25)});
+  // farm coast is a straight beach facing east
+  const fc=[];for(let z=-46;z<=56;z+=1)fc.push({x:18.9-IX,z:z-IZ,nx:1,nz:0});[0,.33,.66].forEach(ph=>ribbon(fc,false,ph,3.2));
+  // MW City seawall
+  const sdr=(x,z,hx,hz,rr)=>{const qx=Math.abs(x)-hx+rr,qz=Math.abs(z)-hz+rr;return Math.hypot(Math.max(qx,0),Math.max(qz,0))+Math.min(Math.max(qx,qz),0)-rr};
+  const cl=contour(CX-IX,CZ-IZ,(x,z)=>sdr(x-(CX-IX),z-(CZ-IZ),17,14,4)<.2,160,30);[0,.5].forEach(ph=>ribbon(cl,true,ph,1.4));
+})();
+function stepShore(dt,t){if(seaSpark){seaSpark.offset.x=Math.sin(t*.05)*.4;seaSpark.offset.y=t*.012}
+  SHORE.forEach(S0=>{const u=(t*.16+S0.ph)%1,off=(1-u)*S0.amp,P=S0.m.geometry.attributes.position,a=P.array;
+    S0.pts.forEach((p,i)=>{const x1=p.x+p.nx*(off-.2),z1=p.z+p.nz*(off-.2),x2=p.x+p.nx*(off+.45),z2=p.z+p.nz*(off+.45),j=i*6;a[j]=x1;a[j+1]=Math.max(.06,W(x1,z1,t)+.05);a[j+2]=z1;a[j+3]=x2;a[j+4]=Math.max(.06,W(x2,z2,t)+.05);a[j+5]=z2});
+    P.needsUpdate=true;S0.m.material.opacity=Math.sin(u*Math.PI)*.85*(u>.85?(1-u)/.15:1)})}
+
 const deco=new Builder();
 function palm(b,x,z,seed){
   const r=rnd(seed),g=H(x,z),lean=.25+r()*.45,dir=r()*Math.PI*2,h=3.4+r()*1.8,segs=7;
@@ -1949,7 +1997,7 @@ function stepBoat(dt,t){
 /* ================= TRAIL ISLAND (rebuilt from the uploaded tril.xml map) ================= */
 let carnStep=()=>{};
 (function trailIsland(){
-  const keep=new Set([sea,far,boat,...gulls]);root.children.forEach(c=>{if(c.isMesh&&c.material===GROUNDMAT)keep.add(c)});
+  const keep=new Set([sea,far,boat,...gulls,seaSparkM,...SHORE.map(q=>q.m)]);root.children.forEach(c=>{if(c.isMesh&&c.material===GROUNDMAT)keep.add(c)});
   root.children.slice().forEach(c=>{if(!keep.has(c))root.remove(c)});
   const tug=SPOTS.findIndex(q=>q.v==="boat");for(let i=hitBoxes.length-1;i>=0;i--)if(hitBoxes[i].userData.isle!==tug)hitBoxes.splice(i,1);
   const b=new Builder(),r=rnd(77),T=new THREE.Group();root.add(T);
@@ -2140,18 +2188,18 @@ return{root,spots:SPOTS,hits:hitBoxes,boat,
   spotWorld(i,v){(SPOTS[i]._m||hitBoxes[0]).getWorldPosition(v);v.y+=SPOTS[i].box[4]/2+.3;return v},
   boatWorld(v){return boat.getWorldPosition(v)},
   weather(key,dt){SEAMAT.color.lerp(_sc.set(SEAC[key]||SEAC.spring),Math.min(1,dt*.7));ampT=SAMP[key]||1;AMP+=(ampT-AMP)*Math.min(1,dt*.5)},
-  step(dt,t){stepSea(t);carnStep(dt,t);const blink=Math.sin(t*3)>.4?1:.2;REDMAT.color.setRGB(1,.23*blink,.19*blink);spotHead.rotation.y=t*.45;radar.rotation.y=t*1.4;stepBoat(dt,t);stepGulls(t);stepFx(dt,t)}};
+  step(dt,t){stepSea(t);stepShore(dt,t);carnStep(dt,t);const blink=Math.sin(t*3)>.4?1:.2;REDMAT.color.setRGB(1,.23*blink,.19*blink);spotHead.rotation.y=t*.45;radar.rotation.y=t*1.4;stepBoat(dt,t);stepGulls(t);stepFx(dt,t)}};
 })();
 
 /* ================= CAMERA ================= */
 const VIEWS={falls:{tx:11,ty:4,tz:-15,dist:26,pol:1.15},all:{tx:-3,ty:.6,tz:-1.5,dist:32,pol:.85},field:{tx:.5,ty:.6,tz:1,dist:17,pol:.9},pen:{tx:-15,ty:.6,tz:-.8,dist:25,pol:.9},barn:{tx:2,ty:.6,tz:-7.5,dist:15,pol:1},
   isla:{tx:IX,ty:1,tz:IZ,dist:56,pol:.98},bayan:{tx:-62,ty:1,tz:-11,dist:30,pol:.95},market:{tx:9.5,ty:.8,tz:-.7,dist:11,pol:1.02},lab:{tx:IX+1,ty:1.6,tz:IZ-1,dist:12,pol:.5,roofOff:true},tug:{dist:17,pol:1.02,follow:true}};
-const cam={az:.75,pol:.85,dist:32,tx:-3,ty:.6,tz:-1.5,auto:false,follow:false};
+const CAM_AZ=0,CAM_POL=.8;const cam={az:CAM_AZ,pol:CAM_POL,dist:32,tx:-3,ty:.6,tz:-1.5,auto:false,follow:false};
 const DEF={...cam};
 let camT={...cam};
 const _fv=new THREE.Vector3(),SUNOFF=new THREE.Vector3(14,24,10).normalize().multiplyScalar(85);
 function applyCam(dt){
-  if(cam.auto)camT.az+=dt*.15;
+  cam.auto=false;camT.az=CAM_AZ;camT.pol=CAM_POL;
   if(cam.follow){(cam.followFn||ISLE.boatWorld)(_fv);camT.tx=_fv.x;camT.tz=_fv.z;camT.ty=1.5}
   const k=Math.min(1,dt*(cam.follow?5:4.5));
   ["az","pol","dist","tx","ty","tz"].forEach(p=>cam[p]+=(camT[p]-cam[p])*k);
@@ -2188,7 +2236,10 @@ function endPtr(e){
 cv.addEventListener("pointerup",endPtr);cv.addEventListener("pointercancel",endPtr);
 cv.addEventListener("pointerleave",e=>{if(e.pointerType==="mouse")hovered=null});
 cv.addEventListener("wheel",e=>{e.preventDefault();camT.dist=Math.min(90,Math.max(5,camT.dist*(1+Math.sign(e.deltaY)*.1)));hideTip()},{passive:false});
-$("cL").onclick=()=>{camT.az+=Math.PI/4};$("cR").onclick=()=>{camT.az-=Math.PI/4};
+{const mv=(dx,dz)=>{cam.follow=false;const k=camT.dist*.12;camT.tx=Math.max(-85,Math.min(195,camT.tx+dx*k));camT.tz=Math.max(-45,Math.min(50,camT.tz+dz*k))},zm=f=>{camT.dist=Math.min(90,Math.max(5,camT.dist*f))};
+  const hold=(id,fn)=>{const b=$(id);let iv=null;const go=()=>{fn();clearInterval(iv);iv=setInterval(fn,120)},stop=()=>{clearInterval(iv);iv=null};b.addEventListener("pointerdown",e=>{e.preventDefault();go()});["pointerup","pointerleave","pointercancel"].forEach(ev=>b.addEventListener(ev,stop))};
+  hold("cU",()=>mv(0,-1));hold("cD",()=>mv(0,1));hold("cLf",()=>mv(-1,0));hold("cRt",()=>mv(1,0));hold("cZi",()=>zm(.88));hold("cZo",()=>zm(1.14));
+  window.addEventListener("keydown",e=>{if(e.target&&(e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA"))return;const m={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0]}[e.key];if(m){e.preventDefault();mv(...m)}else if(e.key==="+"||e.key==="=")zm(.88);else if(e.key==="-")zm(1.14)})}
 $("c0").onclick=()=>{const a=camT.az;Object.assign(camT,DEF);camT.az=Math.round((a-DEF.az)/(2*Math.PI))*2*Math.PI+DEF.az;cam.auto=false;setAuto()};
 $("cA").onclick=()=>{cam.auto=!cam.auto;setAuto()};
 function setAuto(){$("cA").classList.toggle("on",cam.auto);$("cA").setAttribute("aria-pressed",cam.auto)}
@@ -2221,9 +2272,8 @@ function clickAt(e){
   if(p.isle!=null){const s=ISLE.spots[p.isle];toast(s.n+": "+s.d,5500);if(s.v==="boat"&&!ISLE.sailing())goView("tug");else if(s.v==="lab"||s.v==="dorm")ISLE.setRoof(false);return}
   if(p.ftree!=null){if(TOOL==="chop")chopTree(p.ftree,x,y);else if(TOOL==="harvest"||TOOL==="care")pickTree(p.ftree,x,y);else toast("Use Harvest to pick fruit. To cut a tree, tap a helper's 🪓 Chop.");return}
   if(TOOL==="chop")return toast("Chop: tap a tree to cut it down.");if(TOOL==="move"&&p.tile==null)return;
-  if(TOOL==="move"&&(p.weed||p.pen!=null))return;
-  if(p.weed){if(TOOL==="care"||TOOL==="harvest")playerWeed(p.weed,x,y);else toast("Use Care to pull weeds.")}
-  else if(p.pen!=null){if(TOOL==="care"||TOOL==="harvest")tapPen(p.pen,x,y);else toast("Use Care for the animals.")}
+  if(p.weed){if(TOOL==="care"||TOOL==="harvest"||TOOL==="move")playerWeed(p.weed,x,y);else toast("Use Care to pull weeds.")}
+  else if(p.pen!=null){if(TOOL==="care"||TOOL==="harvest"||TOOL==="move")tapPen(p.pen,x,y);else toast("Use Care for the animals.")}
   else tap(p.tile,x,y);
 }
 const hl=new THREE.Mesh(new THREE.PlaneGeometry(.98,.98),new THREE.MeshBasicMaterial({color:0xfff3a0,transparent:true,opacity:.45,depthWrite:false}));
@@ -2381,9 +2431,13 @@ function ui(){
   {const lb=$("tLake"),pl=(S.penLv||{}).pond|0,ll=S.lakeLv|0,c=pl<PENUP.length?PENUP[pl]:ll<LAKEUP.length?LAKEUP[ll]:0;lb.disabled=!c;lb.textContent=c?"🌊 Expand Lake · "+c.toLocaleString():"🌊 Lake: Max size"}
   const nx=S.size+1,ex=$("tExpand");
   if(nx<SIZES.length){ex.disabled=false;ex.textContent="Expand "+SIZES[nx]+"×"+SIZES[nx]+" · "+EXPAND[nx]}else{ex.disabled=true;ex.textContent="Fully expanded"}
+  {const own=PLOTS.filter(q=>!q.island&&(S.plots||[]).includes(q.id));$("tMoveLand").hidden=!own.length}
   {const np=nextPlot(),bp=$("tPlot");if(np){bp.disabled=false;bp.textContent="Buy "+np.n+" · "+np.cost.toLocaleString()+(S.lv<np.lv?" · Level "+np.lv:"")}else{bp.disabled=true;bp.textContent="You bought all the land"}}
 }
-$("tPlow").onclick=plowAll;$("tAll").onclick=harvestAll;$("tExpand").onclick=expand;$("tLake").onclick=expandLake;
+$("tPlow").onclick=plowAll;$("tAll").onclick=harvestAll;$("tExpand").onclick=expand;
+$("tMoveLand").onclick=()=>{if(VISIT)return;const own=PLOTS.filter(q=>!q.island&&(S.plots||[]).includes(q.id));if(own.length===1)return startPlotMove(own[0].id);const L=$("plotList");L.textContent="";
+  own.forEach(q=>{const b=document.createElement("button");b.className="btn";b.type="button";b.textContent=q.n;b.onclick=()=>{$("plotM").hidden=true;startPlotMove(q.id)};L.append(b)});$("plotM").hidden=false};
+$("plotClose").onclick=()=>{$("plotM").hidden=true};$("tLake").onclick=expandLake;
 $("tHelper").onclick=()=>{S.helperOn=!S.helperOn;helperUI();save();toast(S.helperOn?"The helper is back to work: harvesting and planting your selected seed.":"The helper is resting in the barn.")};
 $("tPlot").onclick=buyPlot;
 const HIRE_COST=1500;
@@ -2492,7 +2546,7 @@ function stepHelper(dt,t){
 /* ================= CREW: you command the farmers ================= */
 const CREW={},WHITS=[];let SEL=null;
 const GPLANE=new THREE.Plane(new THREE.Vector3(0,1,0),0),_gpv=new THREE.Vector3();
-const TASKT={walk:0,plow:1.1,plant:.8,harvest:.8,weed:1.4,animal:.9,rest:0,chop:2.6,pick:1,fish:7};
+const TASKT={walk:0,plow:1.1,plant:.2,harvest:.8,weed:1.4,animal:.9,rest:0,chop:2.6,pick:1,fish:7};
 const TASKN={walk:"Walking",plow:"Plowing",plant:"Planting",harvest:"Harvesting",weed:"Pulling weeds",animal:"Tending animals",rest:"Resting",chop:"Chopping a tree",pick:"Picking fruit",fish:"Fishing"};
 function wName(k){return k==="farmer"?((typeof CLOUD!=="undefined"&&((CLOUD.profile&&CLOUD.profile.farmer)||(CLOUD.local&&CLOUD.local.farmer)))||"Juan"):k==="helper2"?"Helper 2":"Helper"}
 function wAuto(k){return k==="farmer"?S.farmerAuto!==false:k==="helper2"?S.helper2On!==false:S.helperOn!==false}
@@ -2533,6 +2587,8 @@ function commandAt(e,p){
     if(TOOL==="plow"&&t.k!=="grass")return toast("This plot is already plowed.");
     if(TOOL==="plant"){if(crop(S.sel).island)return toast("Can only be planted on the island: "+crop(S.sel).n+".");if(t.k==="crop")return toast("Something is already planted here.");if(t.k==="grass"&&!willPlow)return toast("Order them to plow it first.");const c=crop(S.sel);if(S.lv<c.lv)return toast(c.n+" unlocks at Level "+c.lv+".")}
     if(TOOL==="harvest"&&t.k!=="crop"&&!willPlant)return toast("Nothing here to harvest.");
+    if(TOOL==="plant"&&t.k==="soil"){const [px,pz]=tileXZ(i),sc=toScreen(px,1.3,pz);if(plantAt(i,S.sel,sc.x,sc.y,true)){after();burstTile(i,0x6cc046,8,.4)}
+      for(let k=q.length-1;k>=0;k--)if(q[k].type==="walk")q.splice(k,1);W.o.resting=false;q.push({type:"walk",x:px-.45,z:pz});updateCrewUI();return}
     task={type:TOOL,tile:i,crop:S.sel}}
   else{const gp=groundPoint(e);if(gp)task={type:"walk",x:gp.x,z:gp.z}}
   if(!task)return;
@@ -2742,9 +2798,26 @@ function startPlace(id,fromInv,moving){const d=BUILDS.find(q=>q.id===id);if(!d)r
   cancelPlace();const g=makeBuild(id);g.traverse(o=>{if(o.isMesh)o.material=GHOSTMAT});const ring=new THREE.Mesh(new THREE.RingGeometry(d.r-.08,d.r,32),GHOSTMAT);ring.rotation.x=-Math.PI/2;ring.position.y=.05;g.add(ring);
   g.position.set(cam.tx,0,cam.tz);scene.add(g);PLACE={d,g,r:moving?moving.r||0:0,ok:false,fromInv:!!fromInv,moving:moving||null};g.rotation.y=PLACE.r;if(moving){cam.tx=moving.x;cam.tz=moving.z}updateGhost(cam.tx,cam.tz);
   $("placeBar").hidden=false;$("placeTxt").textContent=(moving?"Move: ":"Build: ")+d.n+" · tap where to place it";setTool("move");document.querySelector(".stage").scrollIntoView({block:"nearest",behavior:"smooth"})}
-function updateGhost(x,z){if(!PLACE)return;PLACE.x=x;PLACE.z=z;PLACE.g.position.set(x,0,z);PLACE.ok=validPlace(x,z,PLACE.d.r);GHOSTMAT.color.setHex(PLACE.ok?0x7fe08a:0xff6a5a);$("placeOk").disabled=!PLACE.ok}
-function cancelPlace(){if(PLACE){scene.remove(PLACE.g);if(PLACE.moving){S.builds=(S.builds||[]).concat(PLACE.moving);renderBuilds()}PLACE=null}$("placeBar").hidden=true}
-function confirmPlace(){if(!PLACE||!PLACE.ok)return toast("Can't build here. Pick an empty grassy spot.");const d=PLACE.d,p={x:PLACE.x,z:PLACE.z};
+function validPlot(p,x0,z0){const N=PN,x1=x0+N,z1=z0+N;if(x0<-33||x1>16.5||z0<-23||z1>31)return"Too close to the edge of the farm.";
+  const a=layout()[0];if(x0<a.x0+a.n&&x1>a.x0&&z0<a.z0+a.n&&z1>a.z0)return"That covers the main field.";
+  for(const q of PLOTS)if(!q.island&&q.id!==p.id&&(S.plots||[]).includes(q.id)&&x0<q.x0+PN&&x1>q.x0&&z0<q.z0+PN&&z1>q.z0)return"That covers "+q.n+".";
+  for(let x=x0;x<=x1;x+=.5)for(let z=z0;z<=z1;z+=.5){if(farmH(x,z)<-.03)return"Can't put land on water.";if(inAnyPen(x,z,.1))return"That covers an animal pen.";if(z>-9.6&&z<-6.4&&x<-3.5)return"That covers the road.";
+    for(const [mx,mz,mr] of MTNS)if(Math.hypot(x-mx,z-mz)<mr*1.25)return"Too close to the mountain.";if(Math.hypot(x-CF.x,z-CF.z)<1.6)return"That covers the bonfire.";
+    for(let i=0;i<RIVER.length-1;i++)if(segDist(x,z,RIVER[i][0],RIVER[i][1],RIVER[i+1][0],RIVER[i+1][1])<.8)return"That covers the river."}
+  for(const o of S.builds||[]){const d=BUILDS.find(q=>q.id===o.id),r=(d?d.r:1.5)*.75;if(o.x>x0-r&&o.x<x1+r&&o.z>z0-r&&o.z<z1+r)return"A building is in the way."}
+  for(const T of FTREES)if(T.x>x0-.3&&T.x<x1+.3&&T.z>z0-.3&&T.z<z1+.3)return"A tree is in the way. Have a helper chop it first.";
+  return""}
+function startPlotMove(id){const p=PLOTS.find(q=>q.id===id);if(!p)return;cancelPlace();const g=new THREE.Group(),m=new THREE.Mesh(new THREE.BoxGeometry(PN,.12,PN),GHOSTMAT);m.position.set(PN/2,.08,PN/2);g.add(m);scene.add(g);
+  PLACE={plot:p,g,d:{n:p.n,r:0},r:0,ok:false,x0:p.x0,z0:p.z0};updateGhost(p.x0+PN/2,p.z0+PN/2);cam.follow=false;Object.assign(camT,{tx:p.x0+PN/2,tz:p.z0+PN/2,dist:Math.max(camT.dist,30)});
+  $("placeRot").hidden=true;$("placeBar").hidden=false;$("placeTxt").textContent="Move "+p.n+" · tap where it should go (it snaps next to other land)";setTool("move")}
+function updateGhost(x,z){if(!PLACE)return;if(PLACE.plot){let x0=Math.round(x-PN/2),z0=Math.round(z-PN/2);
+    const a=layout()[0],edges=[a.x0+a.n,a.x0-PN],ez=[a.z0+a.n,a.z0-PN];PLOTS.forEach(q=>{if(q.island||q.id===PLACE.plot.id||!(S.plots||[]).includes(q.id))return;edges.push(q.x0+PN,q.x0-PN);ez.push(q.z0+PN,q.z0-PN)});
+    edges.forEach(e=>{if(Math.abs(x0-e)<=1)x0=e});ez.forEach(e=>{if(Math.abs(z0-e)<=1)z0=e});
+    PLACE.x0=x0;PLACE.z0=z0;PLACE.g.position.set(x0,0,z0);PLACE.why=validPlot(PLACE.plot,x0,z0);PLACE.ok=!PLACE.why;GHOSTMAT.color.setHex(PLACE.ok?0x7fe08a:0xff6a5a);$("placeOk").disabled=!PLACE.ok;return}PLACE.x=x;PLACE.z=z;PLACE.g.position.set(x,0,z);PLACE.ok=validPlace(x,z,PLACE.d.r);GHOSTMAT.color.setHex(PLACE.ok?0x7fe08a:0xff6a5a);$("placeOk").disabled=!PLACE.ok}
+function cancelPlace(){$("placeRot").hidden=false;if(PLACE){scene.remove(PLACE.g);if(PLACE.moving){S.builds=(S.builds||[]).concat(PLACE.moving);renderBuilds()}PLACE=null}$("placeBar").hidden=true}
+function confirmPlace(){if(PLACE&&PLACE.plot){if(!PLACE.ok)return toast(PLACE.why||"Can't put the land there.");const p=PLACE.plot;S.plotPos=Object.assign({},S.plotPos||{},{[p.id]:[PLACE.x0,PLACE.z0]});
+    scene.remove(PLACE.g);PLACE=null;$("placeBar").hidden=true;$("placeRot").hidden=false;_LK="";layout();hovered=null;buildField();if(typeof paintGround==="function")paintGround();if(typeof landDeco==="function")landDeco();after();return toast("📐 Moved "+p.n+".",2400)}
+  if(!PLACE||!PLACE.ok)return toast("Can't build here. Pick an empty grassy spot.");const d=PLACE.d,p={x:PLACE.x,z:PLACE.z};
   if(PLACE.moving){S.builds=(S.builds||[]).concat({...PLACE.moving,x:+p.x.toFixed(2),z:+p.z.toFixed(2),r:PLACE.r});PLACE.moving=null;burst(p.x,.5,p.z,0xc98a4b,12);cancelPlace();renderBuilds();after();return toast("Moved: "+d.n+".",2200)}
   if(PLACE.fromInv){S.decor[d.id]--}else{if(S.coins<d.cost)return toast("Not enough coins.");if(d.wood&&woodHave()<d.wood)return toast("You need "+d.wood+" wood.");S.coins-=d.cost;if(d.wood){useWood(d.wood);invUI(true)}}
   if(d.tree){S.ptrees=(S.ptrees||[]).concat({u:Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36),kind:d.tree,x:+p.x.toFixed(2),z:+p.z.toFixed(2),at:now(),seed:Math.floor(Math.random()*9000)+100});buildTrees()}
@@ -3177,7 +3250,6 @@ function stepTown(dt,t){const h=typeof phHour==="function"?phHour():12,dark=1-da
   TOWNX.walkers.forEach(w=>{w.u+=w.dir*w.sp*dt;if(w.u>1){w.u=1;w.dir=-1}if(w.u<0){w.u=0;w.dir=1}const [a,b2]=w.seg,x=a[0]+(b2[0]-a[0])*w.u,z=a[1]+(b2[1]-a[1])*w.u;w.f.g.position.set(x,0,z);
     w.f.g.rotation.y=Math.atan2(-(b2[1]-a[1])*w.dir,(b2[0]-a[0])*w.dir);w.f.g.visible=!isBad();animWorker(w.f,w.o,dt,t,true,0,0,0,0)})}
 /* ================= GOPYESTA CITY: a New York style island east of GoPyesta Island ================= */
-const CX=165,CZ=4,CHX=17,CHZ=14;
 const CITY={lights:[],glows:[],pl:[],cabs:[],walkers:[],winMats:[],ferry:null,ads:[],_was:true};
 (function buildCity(){const b=new Builder(),r=rnd(9091),Y=1.2;
   const sdr=(x,z,hx,hz,rr)=>{const qx=Math.abs(x)-hx+rr,qz=Math.abs(z)-hz+rr;return Math.hypot(Math.max(qx,0),Math.max(qz,0))+Math.min(Math.max(qx,qz),0)-rr};
