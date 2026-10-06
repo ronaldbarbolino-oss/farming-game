@@ -2738,7 +2738,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
+const GAMEVER="142";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 function cvRect(){return ROT?{left:0,top:0,width:cv.clientWidth,height:cv.clientHeight}:cv.getBoundingClientRect()}
 function setRot(){const want=!!MOBILE&&innerHeight>innerWidth*1.05;if(want!==ROT){ROT=want;document.body.classList.toggle("rot",want)}const r=document.documentElement.style;r.setProperty("--LW",(ROT?innerHeight:innerWidth)+"px");r.setProperty("--LH",(ROT?innerWidth:innerHeight)+"px")}
 let _olTried=false;function tryLockLand(){if(_olTried||!MOBILE||!(innerHeight>innerWidth))return;_olTried=true;try{const d=document.documentElement,go=()=>{if(screen.orientation&&screen.orientation.lock)screen.orientation.lock("landscape").catch(()=>{})};
@@ -2757,7 +2757,7 @@ $("spSend").onclick=async()=>{const email=$("spEmail").value.trim(),msg=$("spMsg
   $("spSend").disabled=true;try{const p=CLOUD.local||{};const r=await fetch(API+"support",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({email,topic:$("spTopic").value,msg,u:$("spUser").value.trim()||myUser()||"",farm:p.farm||""})});const d=await r.json();if(!r.ok)throw new Error(d.error||"Couldn't send. Try again.");
     $("spTo").textContent=email;$("spForm").hidden=true;$("spDone").hidden=false;$("spMsg").value=""}catch(e){$("spErr").textContent=e.message}$("spSend").disabled=false};{const qb=$("qBtn");if(qb){qb.textContent=qLabel();qb.onclick=()=>{const m=$("gfxM");m.hidden=false;let q=QPICK,r=RPICK;
     const draw=()=>{m.querySelectorAll("[data-q]").forEach(b=>{const v=b.dataset.q==="a"?null:+b.dataset.q;b.classList.toggle("on",v===q)});m.querySelectorAll("[data-r]").forEach(b=>{const v=b.dataset.r==="a"?null:+b.dataset.r;b.classList.toggle("on",v===r)});
-      $("gfxNow").textContent="Now: "+["Low","Medium","High"][QLV]+" · "+Math.round(innerWidth*PRNOW)+"×"+Math.round(innerHeight*PRNOW)+" pixels · Game version v"+(typeof BUILD!=="undefined"?BUILD:"?")};
+      $("gfxNow").textContent="Now: "+["Low","Medium","High"][QLV]+" · "+Math.round(innerWidth*PRNOW)+"×"+Math.round(innerHeight*PRNOW)+" pixels · Game version v"+GAMEVER};
     m.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>{q=b.dataset.q==="a"?null:+b.dataset.q;draw()});m.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{r=b.dataset.r==="a"?null:+b.dataset.r;draw()});
     $("gfxApply").onclick=()=>{m.hidden=true;toast("Saving graphics · reloading…",1400);setTimeout(()=>setQuality(q,r),500)};$("gfxClose").onclick=()=>{m.hidden=true};draw()}}}
 $("sellAll").onclick=sellAll;$("shopOpen").onclick=()=>{S.shopOpen=S.shopOpen===false;save();invUI(true);toast(S.shopOpen?"The stall is open. Buyers will come.":"The stall is closed. No buyers will come.",2600)};$("goMkt").onclick=()=>{goView("market")};
