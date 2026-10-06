@@ -89,7 +89,9 @@ const ENC={"salt": "H2dVWCh4wBcPwaoacs1fFg==", "iv": "yD20rV2Bitmu0Lqf", "ct": "
 const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
 const b64u=u=>btoa(String.fromCharCode(...u)).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
 let SK=null;const $=id=>document.getElementById(id);
-async function signRaw(data){if(!SK||!(SK instanceof CryptoKey))throw new Error("The admin page is locked. Reload this page and type your admin password again.");return crypto.subtle.sign({name:"ECDSA",hash:"SHA-256"},SK,data)}
+function relock(msg){SK=null;$("adminGrid").hidden=true;const o=$("out");if(o)o.hidden=true;$("lock").hidden=false;$("lockErr").textContent=msg||"";try{$("pw").focus()}catch(e){}}
+window.addEventListener("pageshow",e=>{if(e.persisted&&!(SK instanceof CryptoKey))relock("Type your admin password again.")});
+async function signRaw(data){if(!SK||!(SK instanceof CryptoKey)){relock("Your admin session ended. Type your admin password again, then press the button again.");throw new Error("Locked. Type your admin password again at the top.")}return crypto.subtle.sign({name:"ECDSA",hash:"SHA-256"},SK,data)}
 $("unlockF").onsubmit=async e=>{e.preventDefault();$("lockErr").textContent="";$("unlockB").disabled=true;
   try{const base=await crypto.subtle.importKey("raw",new TextEncoder().encode($("pw").value.trim()),"PBKDF2",false,["deriveKey"]);
     const key=await crypto.subtle.deriveKey({name:"PBKDF2",salt:b64(ENC.salt),iterations:ENC.it,hash:"SHA-256"},base,{name:"AES-GCM",length:256},false,["decrypt"]);
