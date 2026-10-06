@@ -1793,7 +1793,7 @@ function setSeason(k,manual){if(!SEASONS[k])return;WX.key=k;WX.timer=SDUR[k]||SE
 /* ================= DAY & NIGHT (Philippine time) ================= */
 const PHT=new Intl.DateTimeFormat("en-US",{timeZone:"Asia/Manila",hour:"numeric",minute:"2-digit",hour12:false});
 /* game clock: one in-game day lasts 48 real minutes (1 game hour = 2 real minutes), the same for every player */
-const DAY_S=36*60,NIGHT_S=8*60,GAME_DAY=DAY_S+NIGHT_S;function phHour(){const t=(Date.now()/1000)%GAME_DAY;return t<DAY_S?6+12.5*t/DAY_S:(18.5+11.5*(t-DAY_S)/NIGHT_S)%24}
+const DAY_S=36*60,NIGHT_S=8*60,GAME_DAY=DAY_S+NIGHT_S;const CLOCK_OFF=314;function phHour(){const t=(Date.now()/1000+CLOCK_OFF)%GAME_DAY;return t<DAY_S?6+12.5*t/DAY_S:(18.5+11.5*(t-DAY_S)/NIGHT_S)%24}
 function daylight(h){return h<5?0:h<6.5?smooth(5,6.5,h):h<18?1:h<19?1-smooth(18,19,h):0}
 const isNight=()=>{const h=phHour();return h>=18.5||h<6};
 const NIGHTSKY=new THREE.Color(0x0e1a3a),DUSK=new THREE.Color(0xff9a5a),_dn=new THREE.Color();let DN={d:daylight(phHour()),ui:0};
@@ -2753,7 +2753,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="154";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
+const GAMEVER="155";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 function cvRect(){return ROT?{left:0,top:0,width:cv.clientWidth,height:cv.clientHeight}:cv.getBoundingClientRect()}
 function setRot(){const want=!!MOBILE&&innerHeight>innerWidth*1.05;if(want!==ROT){ROT=want;document.body.classList.toggle("rot",want)}const r=document.documentElement.style;r.setProperty("--LW",(ROT?innerHeight:innerWidth)+"px");r.setProperty("--LH",(ROT?innerWidth:innerHeight)+"px")}
 let _olTried=false;function tryLockLand(){if(_olTried||!MOBILE||!(innerHeight>innerWidth))return;_olTried=true;try{const d=document.documentElement,go=()=>{if(screen.orientation&&screen.orientation.lock)screen.orientation.lock("landscape").catch(()=>{})};
