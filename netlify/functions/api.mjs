@@ -136,6 +136,18 @@ export default async (req) => {
       await aS.setJSON("t/" + code, { u, exp: Date.now() + 30 * 60000 });
       return J({ ok: true, code, exp: Date.now() + 30 * 60000 });
     }
+    if (req.method === "POST" && path === "admin/transfer") {
+      let b; try { b = await req.json() } catch { return J({ error: "bad json" }, 400) }
+      const u = norm(b.u), at = Number(b.at) || 0, aS = getStore({ name: "auth", consistency: "strong" });
+      if (Math.abs(Date.now() - at) > 5 * 60000) return J({ error: "expired" }, 400);
+      if (!(typeof b.sig === "string" && await adminOk("transfer:" + u + ":" + at, b.sig))) return J({ error: "not allowed" }, 403);
+      const m = await meta.get(u, { type: "json" });
+      if (!m) return J({ error: "No player with the username " + u + "." }, 404);
+      const A = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789", r = crypto.getRandomValues(new Uint8Array(8));
+      const code = [...r].map(x => A[x % A.length]).join(""), exp = Date.now() + 24 * 3600000;
+      await aS.setJSON("t/" + code, { u, exp, admin: true });
+      return J({ ok: true, u, farm: m.farm, code, exp });
+    }
     if (req.method === "POST" && path === "transfer/finish") {
       let b; try { b = await req.json() } catch { return J({ error: "bad json" }, 400) }
       const code = String(b.code || "").toUpperCase().replace(/[^A-Z0-9]/g, ""), aS = getStore({ name: "auth", consistency: "strong" });

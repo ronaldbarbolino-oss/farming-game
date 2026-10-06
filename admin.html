@@ -55,6 +55,11 @@ ul{padding-left:18px;margin:6px 0 0}li{margin:4px 0;word-break:break-all;font-si
   <p class="note" id="pNote">Counts players who opened the game with an account since the online map was added.</p>
   <div class="tbl"><table><thead><tr><th data-s="u">Username</th><th data-s="farm">Farm</th><th data-s="lv">Level</th><th data-s="coins">Coins</th><th data-s="animals">Animals</th><th data-s="seen">Last seen</th><th data-s="created">Joined</th></tr></thead><tbody id="pBody"><tr><td colspan="7">Unlock to load players.</td></tr></tbody></table></div>
   <p class="err" id="pErr" role="alert"></p>
+  <hr style="border:0;border-top:3px dashed var(--wood);margin:18px 0 6px">
+  <label for="tU">Transfer code for a player</label>
+  <p class="note">Makes a one-time code (valid 24 hours) that moves this player's farm to the app or a new phone. Give it only to the owner of the farm. Their old device stops saving online.</p>
+  <div class="toolsrow"><input id="tU" placeholder="Username" autocomplete="off"><button type="button" id="tGo" style="margin:0">📲 Make transfer code</button></div>
+  <p class="note" id="tOut" role="status" style="font-size:1.05em"></p><p class="err" id="tErr" role="alert"></p>
 </section>
 <section class="card" id="buys" style="grid-column:1/-1">
   <label>Coin purchases (InstaPay)</label>
@@ -91,6 +96,11 @@ const esc=v=>String(v==null?"":v).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",
 const ago=ms=>{const m=Math.floor(ms/60000);return m<1?"just now":m<60?m+"m ago":m<1440?Math.floor(m/60)+"h ago":Math.floor(m/1440)+"d ago"};
 const dfmt=t=>t?new Date(t).toLocaleString("en-PH",{timeZone:"Asia/Manila",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}):"–";
 async function signed(tag){const at=Date.now(),sig=new Uint8Array(await crypto.subtle.sign({name:"ECDSA",hash:"SHA-256"},SK,new TextEncoder().encode(tag+":"+at)));return{at,sig:b64u(sig)}}
+$("tGo").onclick=async()=>{$("tErr").textContent="";$("tOut").textContent="";const u=$("tU").value.trim().toLowerCase();if(!u){$("tErr").textContent="Type a username.";return}
+$("tGo").disabled=true;try{const at=Date.now(),sig=new Uint8Array(await crypto.subtle.sign({name:"ECDSA",hash:"SHA-256"},SK,new TextEncoder().encode("transfer:"+u+":"+at)));
+const r=await fetch("/api/admin/transfer",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({u,at,sig:b64u(sig)})});const d=await r.json();if(!r.ok)throw new Error(d.error||r.status);
+const c=d.code.slice(0,4)+"-"+d.code.slice(4);$("tOut").innerHTML="";const b=document.createElement("b");b.textContent=c;$("tOut").append("Code for "+d.u+" ("+(d.farm||"")+"): ",b," · valid until "+new Date(d.exp).toLocaleString("en-PH",{timeZone:"Asia/Manila"}))}
+catch(e){$("tErr").textContent="Couldn't make the code: "+e.message}$("tGo").disabled=false};
 async function loadPlayers(){$("pErr").textContent="";$("pRefresh").disabled=true;try{const r=await fetch("/api/admin/players",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(await signed("players"))});const d=await r.json();if(!r.ok)throw new Error(d.error||r.status);PL=d.players||[];PNOW=d.now||Date.now();drawPlayers()}catch(e){$("pErr").textContent="Couldn't load players: "+e.message}$("pRefresh").disabled=false}
 function drawPlayers(){const q=$("pq").value.trim().toLowerCase(),on=p=>PNOW-p.seen<150000,day=new Date(PNOW).toLocaleDateString("en-PH",{timeZone:"Asia/Manila"});
   $("stTotal").textContent=PL.length;$("stOn").textContent=PL.filter(on).length;$("stToday").textContent=PL.filter(p=>p.created&&new Date(p.created).toLocaleDateString("en-PH",{timeZone:"Asia/Manila"})===day).length;$("stAvg").textContent=PL.length?(PL.reduce((a,p)=>a+(p.lv||1),0)/PL.length).toFixed(1):"–";
