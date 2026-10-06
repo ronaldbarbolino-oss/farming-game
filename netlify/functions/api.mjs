@@ -15,6 +15,8 @@ async function adminOk(msg, sig) {
 }
 const pub = m => ({ u: m.u, farm: m.farm, farmer: m.farmer, shirt: m.shirt, lv: m.lv, size: m.size, seen: m.seen });
 
+// a restart time shipped with a deploy: open games reload once after it
+const DEPLOY_RESTART = 1791252303737;
 export default async (req) => {
   const url = new URL(req.url);
   const path = url.pathname.replace(/^.*?\/api\/?/, "").replace(/^\.netlify\/functions\/api\/?/, "").replace(/\/$/, "");
@@ -25,7 +27,8 @@ export default async (req) => {
     const ctl = getStore({ name: "control", consistency: "strong" });
     if (req.method === "GET" && path === "restart") {
       const r = await ctl.get("restart", { type: "json" });
-      return J({ at: r ? r.at : 0, now: Date.now() });
+      const dep = DEPLOY_RESTART <= Date.now() ? DEPLOY_RESTART : 0;
+      return J({ at: Math.max(r ? r.at : 0, dep), now: Date.now() });
     }
     if (req.method === "POST" && path === "restart") {
       let b; try { b = await req.json() } catch { return J({ error: "bad json" }, 400) }
