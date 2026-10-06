@@ -322,6 +322,7 @@ body.land .cam .cbtn{width:32px;height:32px!important}
     <button class="btn" id="tRedeem" style="background:#8a4ac0;box-shadow:0 4px 0 #5e2f88">🎁 Redeem Code</button>
     <button class="btn alt" id="tExpand"></button>
     <button class="btn alt" id="tLake" style="background:#2f8fc8;box-shadow:0 4px 0 #1d6a98"></button>
+    <a class="btn" id="tGetApp" hidden href="/farming.apk" download="Farming.apk" style="background:#3a7a3a;box-shadow:0 4px 0 #23502a;text-decoration:none">📲 Get the Android App</a>
     <button class="btn" id="tBuyCoins" style="background:#e8a530;box-shadow:0 4px 0 #a8741a">💰 Buy Coins</button>
     <button class="btn alt" id="tPlot"></button>
     <button class="btn alt" id="tMoveLand" hidden>📐 Move Land</button>
@@ -3423,7 +3424,7 @@ $("cmSend").onclick=async()=>{const ref=$("cmRef").value.trim();$("cmErr").textC
   $("cmSend").disabled=true;try{await netSend(true);const r=await fetch(API+"buy",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({u:myUser(),tok:myTok(),pack:CM_PACK.id,ref})});const d=await r.json();if(!r.ok)throw new Error(d.error||"Couldn't send. Try again.");
     toast("✅ Sent! The admin will check your payment and your coins will be added automatically.",5000);$("cmStep2").hidden=true;$("cmStep1").hidden=false;loadMyBuys(true)}catch(e){$("cmErr").textContent=e.message}$("cmSend").disabled=false};
 $("cmBack").onclick=()=>{$("cmStep2").hidden=true;$("cmStep1").hidden=false};$("cmClose").onclick=()=>{$("coinM").hidden=true};
-$("tBuyCoins").onclick=openCoins;$("coinStat").onclick=openCoins;setInterval(()=>loadMyBuys(false),45000);setTimeout(()=>loadMyBuys(false),8000);
+$("tBuyCoins").onclick=openCoins;{const inApp=matchMedia("(display-mode: standalone)").matches||document.referrer.startsWith("android-app://");if(/^https?:$/.test(location.protocol)&&!(window.claude&&window.claude.use)&&/Android/i.test(navigator.userAgent)&&!inApp)$("tGetApp").hidden=false}$("coinStat").onclick=openCoins;setInterval(()=>loadMyBuys(false),45000);setTimeout(()=>loadMyBuys(false),8000);
 function openBoatMenu(){if(S.inTown)return toast("Go home to the farm first, then ride the boat.",3000);$("boatM").hidden=false}
 document.querySelectorAll("#boatM [data-go]").forEach(b=>b.onclick=()=>{$("boatM").hidden=true;const g=b.dataset.go;if(g==="island")enterIsland();else if(g==="city")enterCity();else{ISLE_OPEN=false;goView("all");toast("🌾 Back on the farm.",2000)}});
 $("boatClose").onclick=()=>{$("boatM").hidden=true};
