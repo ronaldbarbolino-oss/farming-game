@@ -8,8 +8,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Farming">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icon-192.png?v=2">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
+<link rel="icon" href="icon-192.png?v=3">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
 <meta name="description" content="Farming game: plant crops, raise animals, build houses and sail to the island.">
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font-size:14px;font-family:system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 </head>
@@ -275,9 +275,17 @@ body.land .cw-lv{font-size:.58rem}body.land .cw-bar{display:none}
 body.land .modeTag{max-width:46vw;font-size:.64rem;opacity:.85}
 
 /* animated splash logo */
-#splash{position:fixed;inset:0;z-index:300;display:grid;place-items:center;overflow:hidden;background:radial-gradient(circle at 50% 38%,#fff6c2 0,#9be3ff 22%,#3fa9f0 60%,#1f6fc8 100%);transition:opacity .6s ease,visibility .6s}
+#splash{position:fixed;inset:0;z-index:300;display:grid;place-items:center;overflow:hidden;background:radial-gradient(circle at 50% 30%,#fffbe0 0,#ffe9a8 10%,#bfe9ff 30%,#6cc4f5 62%,#2f8ee0 100%);transition:opacity .6s ease,visibility .6s}
 #splash.out{opacity:0;visibility:hidden}
-#splash .rays{position:absolute;left:50%;top:38%;width:220vmax;height:220vmax;margin:-110vmax 0 0 -110vmax;background:repeating-conic-gradient(rgba(255,255,255,.13) 0 8deg,rgba(255,255,255,0) 8deg 20deg);animation:spRot 24s linear infinite;border-radius:50%}
+#splash .rays{position:absolute;left:50%;top:30%;width:220vmax;height:220vmax;margin:-110vmax 0 0 -110vmax;background:repeating-conic-gradient(rgba(255,255,255,.13) 0 8deg,rgba(255,255,255,0) 8deg 20deg);animation:spRot 24s linear infinite;border-radius:50%}
+#splash .land{position:absolute;left:0;bottom:0;width:100%;height:100%;pointer-events:none}
+#splash .cl{position:absolute;width:22vmin;height:8vmin;border-radius:8vmin;background:#fff;box-shadow:6vmin -3vmin 0 1vmin #fff,-5vmin -1.5vmin 0 .2vmin #fff;opacity:.95;animation:spCl 38s linear infinite}
+#splash .c1{top:12%;left:-30%}#splash .c2{top:26%;left:-30%;transform:scale(.7);animation-duration:52s;animation-delay:-20s}#splash .c3{top:6%;left:-30%;transform:scale(.55);animation-duration:64s;animation-delay:-40s}
+#splash .bird{position:absolute;width:4vmin;height:2vmin;border-top:.6vmin solid #2b3640;border-radius:50% 50% 0 0;animation:spBird 14s linear infinite}
+#splash .bird::after{content:"";position:absolute;left:100%;top:-.6vmin;width:4vmin;height:2vmin;border-top:.6vmin solid #2b3640;border-radius:50% 50% 0 0}
+#splash .b1{top:20%;left:-10%}#splash .b2{top:24%;left:-14%;transform:scale(.7);animation-delay:-.8s}#splash .b3{top:17%;left:-18%;transform:scale(.55);animation-delay:-1.5s}
+#splash .flw circle{animation:spFl 2s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:center}
+@keyframes spCl{to{left:120%}}@keyframes spBird{0%{left:-15%;translate:0 0}50%{translate:0 -4vmin}100%{left:115%;translate:0 0}}@keyframes spFl{to{transform:scale(1.25)}}
 #splash .box{position:relative;display:flex;flex-direction:column;align-items:center;gap:2vmin}
 #splash .art{width:min(46vmin,330px);aspect-ratio:1;border-radius:22%;box-shadow:0 18px 40px rgba(0,40,90,.35),inset 0 0 0 4px rgba(255,255,255,.5);background:#5fae3a center/cover;animation:spPop .9s cubic-bezier(.2,1.6,.4,1) both,spBob 3s ease-in-out .9s infinite;position:relative;overflow:hidden}
 #splash .art::after{content:"";position:absolute;inset:-40%;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.55) 50%,transparent 60%);animation:spShine 2.8s ease-in-out 1s infinite}
@@ -298,9 +306,28 @@ body.land .modeTag{max-width:46vw;font-size:.64rem;opacity:.85}
 .logo{animation:lgShine 4s ease-in-out infinite}@keyframes lgShine{0%,100%{filter:drop-shadow(0 1px 0 #7a3d10) drop-shadow(0 1px 0 #7a3d10) drop-shadow(0 1px 0 #7a3d10) drop-shadow(0 2px 0 #4a2508) drop-shadow(0 4px 3px rgba(0,0,0,.35)) brightness(1)}50%{filter:drop-shadow(0 1px 0 #7a3d10) drop-shadow(0 1px 0 #7a3d10) drop-shadow(0 1px 0 #7a3d10) drop-shadow(0 2px 0 #4a2508) drop-shadow(0 4px 3px rgba(0,0,0,.35)) brightness(1.18)}}
 </style>
 
-<div id="splash" role="img" aria-label="Farming"><div class="rays"></div>
+<div id="splash" role="img" aria-label="Farming"><div class="rays"></div><svg class="land" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+<defs><linearGradient id="spH1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9fd8ff"/><stop offset="1" stop-color="#6fb8e8"/></linearGradient>
+<linearGradient id="spH2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fdc5a"/><stop offset="1" stop-color="#4fae36"/></linearGradient>
+<linearGradient id="spH3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7ccf4a"/><stop offset="1" stop-color="#3f9a2c"/></linearGradient>
+<linearGradient id="spH4" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5fbe3a"/><stop offset="1" stop-color="#2f7f28"/></linearGradient>
+<pattern id="spRow" width="44" height="44" patternUnits="userSpaceOnUse" patternTransform="skewX(-28)"><rect width="44" height="44" fill="#a8642e"/><rect width="22" height="44" fill="#8a4f22"/><circle cx="11" cy="14" r="7" fill="#7ccf4a"/><circle cx="11" cy="34" r="6" fill="#6cc040"/></pattern></defs>
+<path d="M0 560 Q200 470 420 520 T860 500 T1300 480 T1600 520 V900 H0Z" fill="url(#spH1)" opacity=".9"/>
+<g fill="#4f8fc0" opacity=".55"><path d="M150 520 l60 -110 l60 110z"/><path d="M1220 505 l80 -140 l80 140z"/><path d="M1330 510 l50 -90 l50 90z"/></g>
+<path d="M0 640 Q260 540 560 600 T1100 580 T1600 600 V900 H0Z" fill="url(#spH2)"/>
+<g transform="translate(1180 520)"><rect x="0" y="20" width="70" height="52" fill="#d23a2a"/><path d="M-8 22 L35 -10 L78 22Z" fill="#8e2a1f"/><rect x="25" y="40" width="20" height="32" fill="#fff"/><rect x="88" y="0" width="24" height="72" fill="#dfe6ea"/><ellipse cx="100" cy="0" rx="12" ry="8" fill="#3f8fd8"/></g>
+<g fill="#2f8a28"><circle cx="360" cy="575" r="26"/><circle cx="392" cy="585" r="20"/><circle cx="980" cy="560" r="24"/><circle cx="1500" cy="575" r="28"/></g>
+<path d="M0 730 Q300 640 700 700 T1600 690 V900 H0Z" fill="url(#spH3)"/>
+<path d="M120 900 L520 700 L1080 700 L1480 900Z" fill="url(#spRow)" opacity=".95"/>
+<path d="M0 820 Q400 760 800 800 T1600 790 V900 H0Z" fill="url(#spH4)"/>
+<g class="flw"><circle cx="90" cy="835" r="9" fill="#ff7bb0"/><circle cx="160" cy="850" r="8" fill="#ffd84a"/><circle cx="1420" cy="840" r="9" fill="#fff"/><circle cx="1510" cy="855" r="8" fill="#ff7bb0"/><circle cx="260" cy="860" r="7" fill="#b48cff"/><circle cx="1330" cy="865" r="7" fill="#ffd84a"/></g>
+<g fill="#7a4a24"><rect x="40" y="760" width="8" height="60"/><rect x="110" y="755" width="8" height="60"/><rect x="180" y="750" width="8" height="60"/><rect x="30" y="775" width="170" height="8" fill="#fff6df"/><rect x="1400" y="750" width="8" height="60"/><rect x="1470" y="755" width="8" height="60"/><rect x="1540" y="760" width="8" height="60"/><rect x="1390" y="770" width="170" height="8" fill="#fff6df"/></g>
+</svg>
+<div class="cl c1"></div><div class="cl c2"></div><div class="cl c3"></div>
+<div class="bird b1"></div><div class="bird b2"></div><div class="bird b3"></div>
+
   <div class="spk" style="left:14%;top:18%"></div><div class="spk" style="left:82%;top:24%;animation-delay:.5s"></div><div class="spk" style="left:20%;top:72%;animation-delay:.9s"></div><div class="spk" style="left:78%;top:68%;animation-delay:1.3s"></div><div class="spk" style="left:50%;top:9%;animation-delay:.2s"></div>
-  <div class="box"><div class="art" style="background-image:url(icon-512.png?v=2)"></div>
+  <div class="box"><div class="art" style="background-image:url(icon-512.png?v=3)"></div>
   <div class="title"><span style="animation-delay:0.35s,1.20s">F</span><span style="animation-delay:0.43s,1.32s">a</span><span style="animation-delay:0.51s,1.44s">r</span><span style="animation-delay:0.59s,1.56s">m</span><span style="animation-delay:0.67s,1.68s">i</span><span style="animation-delay:0.75s,1.80s">n</span><span style="animation-delay:0.83s,1.92s">g</span></div>
   <div class="bar"><i></i></div><div class="hint" id="spHint">Loading your farm…</div></div></div>
 <script>window.__spT0=performance.now();setTimeout(function(){var e=document.getElementById("splash");if(e){e.classList.add("out");setTimeout(function(){e.remove()},700)}},15000);</script>
