@@ -257,6 +257,8 @@ body.land .stage{width:100vw;height:100vh;height:100dvh}
 @media (max-width:640px){.cam{grid-template-columns:repeat(3,34px);grid-template-rows:repeat(3,34px);top:auto!important;bottom:64px!important}.cam .cbtn{width:34px;height:34px!important}}
 body.land .cam{top:auto!important;bottom:calc(8px + env(safe-area-inset-bottom,0px))!important;grid-template-columns:repeat(3,32px);grid-template-rows:repeat(3,32px)}
 body.land .cam .cbtn{width:32px;height:32px!important}
+
+@media (pointer:coarse){.cam{display:none!important}}
 </style>
 
 <div class="wrap">
@@ -2211,10 +2213,15 @@ function applyCam(dt){
 }
 const pointers=new Map();let dragMoved=0,pinch0=0,ang0=0,downAt=null;
 cv.addEventListener("pointerdown",e=>{cv.setPointerCapture(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});dragMoved=0;downAt={x:e.clientX,y:e.clientY};
-  if(pointers.size===2){const [a,b]=[...pointers.values()];pinch0=Math.hypot(a.x-b.x,a.y-b.y);ang0=Math.atan2(b.y-a.y,b.x-a.x)}hideTip()});
+  if(pointers.size===2){const [a,b]=[...pointers.values()];pinch0=Math.hypot(a.x-b.x,a.y-b.y);ang0=Math.atan2(b.y-a.y,b.x-a.x)}hideTip();
+  clearTimeout(HOLD.t);if(pointers.size===1&&!PLACE&&!SEL&&!VISIT){const p=pickAt(e),pl=p&&p.tile!=null?plotOfTile(p.tile):null;if(pl){const g0=groundPoint(e);
+    HOLD.t=setTimeout(()=>{if(pointers.size!==1||dragMoved>14||PLACE)return;startPlotMove(pl.id,true);if(!PLACE)return;PLACE.drag=true;PLACE.ox=g0?g0.x-(pl.x0+PN/2):0;PLACE.oz=g0?g0.z-(pl.z0+PN/2):0;cv.classList.add("drag");try{navigator.vibrate&&navigator.vibrate(30)}catch(err){}
+      $("placeTxt").textContent="Drag "+pl.n+" and let go to drop it"},550)}}});
+const HOLD={t:0};function plotOfTile(i){for(const a of layout())if(a.p&&!a.p.island&&i>=a.start&&i<a.start+a.n*a.n)return a.p;return null}
 cv.addEventListener("pointermove",e=>{
   const prev=pointers.get(e.pointerId);
   if(!prev){if(e.pointerType==="mouse")hoverAt(e);return}
+  if(PLACE&&PLACE.drag){pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});const gp=groundPoint(e);if(gp)updateGhost(gp.x-PLACE.ox,gp.z-PLACE.oz);return}
   const dx=e.clientX-prev.x,dy=e.clientY-prev.y;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
   if(pointers.size===1){dragMoved+=Math.abs(dx)+Math.abs(dy);if(downAt&&Math.hypot(e.clientX-downAt.x,e.clientY-downAt.y)>(e.pointerType==="mouse"?6:16)){cv.classList.add("drag");if(e.shiftKey||(e.buttons&2)){camT.az-=dx*.008;camT.pol=Math.min(1.35,Math.max(.35,camT.pol-dy*.006));cam.auto=false;setAuto();return}pan(dx,dy)}}
   else if(pointers.size===2){const [a,b]=[...pointers.values()],d=Math.hypot(a.x-b.x,a.y-b.y),an=Math.atan2(b.y-a.y,b.x-a.x);if(pinch0){camT.dist=Math.min(90,Math.max(5,camT.dist*pinch0/d));let da=an-ang0;da=Math.atan2(Math.sin(da),Math.cos(da));camT.az+=da;camT.pol=Math.min(1.35,Math.max(.35,camT.pol-dy*.004))}pinch0=d;ang0=an;dragMoved=99;cam.follow=false;cam.auto=false;setAuto()}
@@ -2228,7 +2235,8 @@ document.querySelectorAll(".views .cbtn").forEach(b=>b.onclick=()=>goView(b.data
 let onIsle=false,ISLE_OPEN=false;
 function checkIsle(){if(ISLE_OPEN&&Math.hypot(camT.tx-IX,camT.tz-IZ)>55&&!(TRIP.on&&TRIP.toIsle))ISLE_OPEN=false;const n=Math.hypot(cam.tx-IX,cam.tz-IZ)<40;$("tIsle").textContent=TRIP.on?"Sailing…":ownBoat()?(S.boatAt==="isla"?"Sail back to the Farm":"Sail to the Island"):(n?"Back to the Farm":"Go to GoPyesta Island");if(n!==onIsle){onIsle=n;
   if(!TRIP.on){if(n)toast("You are at GoPyesta Island.",2200)}}}
-function endPtr(e){
+function endPtr(e){clearTimeout(HOLD.t);
+  if(PLACE&&PLACE.drag){pointers.delete(e.pointerId);if(!pointers.size){cv.classList.remove("drag");pinch0=0}if(PLACE.ok)confirmPlace();else{toast(PLACE.why||"Can't put the land there.",2600);cancelPlace()}return}
   const tr=e.pointerType==="mouse"?6:16,wasTap=pointers.size===1&&downAt&&Math.hypot(e.clientX-downAt.x,e.clientY-downAt.y)<=tr&&dragMoved<tr*2.5;
   pointers.delete(e.pointerId);if(!pointers.size){cv.classList.remove("drag");pinch0=0}
   if(wasTap&&e.type==="pointerup")clickAt(e);
@@ -2807,9 +2815,9 @@ function validPlot(p,x0,z0){const N=PN,x1=x0+N,z1=z0+N;if(x0<-33||x1>16.5||z0<-2
   for(const o of S.builds||[]){const d=BUILDS.find(q=>q.id===o.id),r=(d?d.r:1.5)*.75;if(o.x>x0-r&&o.x<x1+r&&o.z>z0-r&&o.z<z1+r)return"A building is in the way."}
   for(const T of FTREES)if(T.x>x0-.3&&T.x<x1+.3&&T.z>z0-.3&&T.z<z1+.3)return"A tree is in the way. Have a helper chop it first.";
   return""}
-function startPlotMove(id){const p=PLOTS.find(q=>q.id===id);if(!p)return;cancelPlace();const g=new THREE.Group(),m=new THREE.Mesh(new THREE.BoxGeometry(PN,.12,PN),GHOSTMAT);m.position.set(PN/2,.08,PN/2);g.add(m);scene.add(g);
-  PLACE={plot:p,g,d:{n:p.n,r:0},r:0,ok:false,x0:p.x0,z0:p.z0};updateGhost(p.x0+PN/2,p.z0+PN/2);cam.follow=false;Object.assign(camT,{tx:p.x0+PN/2,tz:p.z0+PN/2,dist:Math.max(camT.dist,30)});
-  $("placeRot").hidden=true;$("placeBar").hidden=false;$("placeTxt").textContent="Move "+p.n+" · tap where it should go (it snaps next to other land)";setTool("move")}
+function startPlotMove(id,noCam){const p=PLOTS.find(q=>q.id===id);if(!p)return;cancelPlace();const g=new THREE.Group(),m=new THREE.Mesh(new THREE.BoxGeometry(PN,.12,PN),GHOSTMAT);m.position.set(PN/2,.08,PN/2);g.add(m);scene.add(g);
+  PLACE={plot:p,g,d:{n:p.n,r:0},r:0,ok:false,x0:p.x0,z0:p.z0};updateGhost(p.x0+PN/2,p.z0+PN/2);if(!noCam){cam.follow=false;Object.assign(camT,{tx:p.x0+PN/2,tz:p.z0+PN/2,dist:Math.max(camT.dist,30)})}
+  $("placeRot").hidden=true;$("placeBar").hidden=false;$("placeTxt").textContent="Move "+p.n+" · tap where it should go (it snaps next to other land) · or press and hold the land to drag it";setTool("move")}
 function updateGhost(x,z){if(!PLACE)return;if(PLACE.plot){let x0=Math.round(x-PN/2),z0=Math.round(z-PN/2);
     const a=layout()[0],edges=[a.x0+a.n,a.x0-PN],ez=[a.z0+a.n,a.z0-PN];PLOTS.forEach(q=>{if(q.island||q.id===PLACE.plot.id||!(S.plots||[]).includes(q.id))return;edges.push(q.x0+PN,q.x0-PN);ez.push(q.z0+PN,q.z0-PN)});
     edges.forEach(e=>{if(Math.abs(x0-e)<=1)x0=e});ez.forEach(e=>{if(Math.abs(z0-e)<=1)z0=e});
@@ -2832,7 +2840,7 @@ let incT=0;function stepIncome(dt){if(VISIT)return;incT+=dt;if(incT<60)return;in
     [-1,1].forEach(s=>{b.add("box",0x7a5432,(x0+x1)/2,.3,z+s*(w/2-.12),x1-x0,.15,.15)});
     for(let x=x0+.4;x<=x1;x+=1.8)[-1,1].forEach(s=>b.add("cyl",0x6b4a2c,x,-1,z+s*(w/2+.04),.13,2.9,.13));
     b.add("cyl",0x2b3640,x1-.5,.62,z-w/2+.2,.1,.24,.1)};
-  pier(17.4,23.8,2.6,1.8);pier(41.6,48.2,IZ_+.5,1.8);
+  pier(17.4,23.8,2.6,1.8);pier(IX_-22.4,IX_-15.8,IZ_+.5,1.8);
   
 
   scene.add(b.mesh())})();
