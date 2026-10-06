@@ -309,6 +309,8 @@ body.rot{position:fixed;top:0;left:0;width:100vh;height:100vw;transform:rotate(9
 body.rot.land .stage{width:100vh!important;height:100vw!important}
 body.rot.land .crew{max-height:calc(100vw - 128px)}body.rot.land .sbtns{max-height:calc(100vw - 140px)}
 body.rot.land #below{width:min(460px,62vh)}body.rot.land .crew{max-width:min(28vh,230px)}body.rot.land .hud{max-width:56vh}
+
+.gfxOpts{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.gfxOpts .btn{margin:0;padding:8px 4px}.gfxOpts .btn.on{background:var(--leaf,#3f8f2c);color:#fff;border-color:#2b6a1f;box-shadow:0 3px 0 #2b6a1f}
 </style>
 
 <div id="splash" role="img" aria-label="Farming"><div class="rays"></div><svg class="land" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
@@ -530,6 +532,15 @@ body.rot.land #below{width:min(460px,62vh)}body.rot.land .crew{max-width:min(28v
     <p class="err" id="trErr" role="alert"></p>
     <div class="suRow"><button class="btn alt" type="button" id="trCopy">Copy code</button><button class="btn" type="button" id="trClose">Done</button></div></div>
 </div>
+<div class="modal" id="gfxM" hidden>
+  <div class="suBox"><h3>⚡ Graphics</h3>
+    <label>Quality</label><p class="suLead" style="margin:0 0 6px">Lower quality removes shadows, outlines and some grass so old phones run smoothly.</p>
+    <div class="gfxOpts"><button type="button" class="btn sm alt" data-q="a">✨ Auto</button><button type="button" class="btn sm alt" data-q="0">🐢 Low</button><button type="button" class="btn sm alt" data-q="1">⚖️ Medium</button><button type="button" class="btn sm alt" data-q="2">🚀 High</button></div>
+    <label style="margin-top:10px">Resolution</label><p class="suLead" style="margin:0 0 6px">Lower resolution is faster but less sharp.</p>
+    <div class="gfxOpts"><button type="button" class="btn sm alt" data-r="a">✨ Auto</button><button type="button" class="btn sm alt" data-r="0.5">50%</button><button type="button" class="btn sm alt" data-r="0.75">75%</button><button type="button" class="btn sm alt" data-r="1">100%</button></div>
+    <p class="suLead" id="gfxNow" style="margin-top:8px;font-size:.8rem"></p>
+    <div class="suRow"><button class="btn alt" type="button" id="gfxClose">Cancel</button><button class="btn" type="button" id="gfxApply">Apply</button></div></div>
+</div>
 <div class="modal" id="supM" hidden>
   <div class="suBox"><h3>💬 Customer support</h3>
     <p class="suLead">Need help moving your farm to the app, a payment, or anything else? Send us a message. We reply to your email from <b>farmgaming.ph@gmail.com</b>.</p>
@@ -711,7 +722,8 @@ const LOWDEV=MOBILE&&((navigator.deviceMemory||4)<=3||(navigator.hardwareConcurr
 const QPICK=(()=>{try{const q=localStorage.getItem("farming-q");return q==null?null:+q}catch(e){return null}})();
 let QLV=QPICK!=null?QPICK:(MOBILE?(LOWDEV?0:1):2);
 const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:QLV>=2,powerPreference:"high-performance"});
-const PRMAX=QLV===0?1:QLV===1?Math.min(window.devicePixelRatio||1,1.25):Math.min(window.devicePixelRatio||1,MOBILE?1.5:2);let PRNOW=PRMAX;
+const RPICK=(()=>{try{const q=localStorage.getItem("farming-res");return q==null?null:+q}catch(e){return null}})();
+const PRMAX=RPICK!=null?Math.max(.5,Math.min(window.devicePixelRatio||1,2)*RPICK):QLV===0?1:QLV===1?Math.min(window.devicePixelRatio||1,1.25):Math.min(window.devicePixelRatio||1,MOBILE?1.5:2);let PRNOW=PRMAX;
 renderer.setPixelRatio(PRNOW);
 renderer.shadowMap.enabled=QLV>=1;renderer.shadowMap.type=QLV>=2?THREE.PCFSoftShadowMap:THREE.PCFShadowMap;if(QLV<2)renderer.shadowMap.autoUpdate=false;
 const scene=new THREE.Scene();
@@ -1636,14 +1648,15 @@ function stepFire(dt,t){const h=typeof phHour==="function"?phHour():12,dark=1-da
   FIRE.embers.forEach(m=>{const u=(t*.6+m.userData.ph)%1;m.position.set(CF.x+Math.sin(m.userData.ph*30+t)*.25*u,.4+u*1.8,CF.z+Math.cos(m.userData.ph*20)*.2*u);m.material.opacity=1-u});
   FIRE.light.intensity=(.4+dark*1.8)*(1+.15*Math.sin(t*13))*(wet?.4:1)}
 function funStart(f){const o=f.o,night=isNight();let r=Math.random(),k;
-  if(night)k=r<.65?"fire":r<.8?"dance":"nap";else k=r<.35?"swim":r<.55?"fire":r<.78?"dance":"nap";
+  if(night)k=r<.35?"feast":r<.75?"fire":r<.88?"dance":"nap";else k=r<.28?"swim":r<.5?"feast":r<.65?"fire":r<.83?"dance":"nap";
   const F={k,ph:"go",t:0,dur:0};
   if(k==="swim"){const a=Math.random()*Math.PI*2;F.a=a;F.ex=PONDS.x+Math.cos(a)*2.75*PONDS.s;F.ez=PONDS.z+Math.sin(a)*2.15*PONDS.s;F.dur=14+Math.random()*8}
   else if(k==="fire"){const i=f===farmer?0:HELPERS.indexOf(f)+1,a=[0,2.1,4.2][i%3]+.25;F.tx=CF.x+Math.cos(a)*1.25;F.tz=CF.z+Math.sin(a)*1.25;F.dur=20+Math.random()*15}
+  else if(k==="feast"){const a=Math.random()*Math.PI*2;F.a=a;F.ex=PONDS.x+Math.cos(a)*2.95*PONDS.s;F.ez=PONDS.z+Math.sin(a)*2.3*PONDS.s;const i=f===farmer?0:HELPERS.indexOf(f)+1,b=[0,2.1,4.2][i%3]+.25;F.tx=CF.x+Math.cos(b)*1.25;F.tz=CF.z+Math.sin(b)*1.25;F.fishT=5+Math.random()*4;F.props=[]}
   else if(k==="nap"){const T=FTREES.filter((q,i)=>treeGrow(i)>=1);const p=T.length?T[Math.floor(Math.random()*T.length)]:null;if(p){F.tx=p.x+1.1;F.tz=p.z+.4}else{F.tx=f.g.position.x;F.tz=f.g.position.z}F.dur=15+Math.random()*10}
   else{F.ph="do";F.dur=6+Math.random()*4}
   o.fun=F;o.state="fun"}
-function funEnd(f){const o=f.o;if(!o.fun)return;o.fun=null;f.g.position.y=0;f.g.rotation.x=0;f.g.rotation.z=0;if(o.state==="fun"){o.state="idle";o.st=.5}}
+function funEnd(f){const o=f.o;if(!o.fun)return;if(o.fun.props)o.fun.props.forEach(m=>m.parent&&m.parent.remove(m));o.fun=null;f.g.position.y=0;f.g.rotation.x=0;f.g.rotation.z=0;if(o.state==="fun"){o.state="idle";o.st=.5}}
 function funTick(f,dt,t,walkTo){const o=f.o,F=o.fun,g=f.g,P={crT:0,armL:0,armR:0};if(!F){o.state="idle";return P}F.t+=dt;
   if(F.k==="swim"){
     if(F.ph==="go"){if(walkTo(F.ex,F.ez,1.2)){F.ph="do";F.t=0}}
@@ -1654,11 +1667,27 @@ function funTick(f,dt,t,walkTo){const o=f.o,F=o.fun,g=f.g,P={crT:0,armL:0,armR:0
     if(F.ph==="dry"){P.armR=2.7+Math.sin(t*10)*.15;if(F.t>1.6)funEnd(f)}}
   else if(F.k==="fire"){if(F.ph==="go"){if(walkTo(F.tx,F.tz,1.1)){F.ph="do";F.t=0}}
     else{P.crT=1;g.rotation.y=Math.atan2(-(CF.z-g.position.z),CF.x-g.position.x);P.armL=P.armR=1.3+Math.sin(t*1.5)*.15;if(Math.floor(F.t/6)%2)P.armR=1.9;if(F.t>F.dur||isBad())funEnd(f)}}
+  else if(F.k==="feast"){
+    if(F.ph==="go"){if(walkTo(F.ex,F.ez,1.2)){F.ph="fish";F.t=0;F.tool="rod"}}
+    else if(F.ph==="fish"){g.rotation.y=Math.atan2(-(PONDS.z-g.position.z),PONDS.x-g.position.x);P.armR=1.25+Math.sin(t*2)*.05+(F.t>F.fishT-.8?(F.t-F.fishT+.8)*1.6:0);
+      if(Math.random()<dt*.8)burst(PONDS.x+(g.position.x-PONDS.x)*.55,0,PONDS.z+(g.position.z-PONDS.z)*.55,0xbfefff,2,.2);
+      if(F.t>F.fishT){F.tool=null;const fish=new THREE.Mesh(FEAST.fishG,FEAST.fishM);fish.scale.set(.18,.09,.06);scene.add(fish);F.props.push(fish);F.fish=fish;burst(g.position.x,.6,g.position.z,0x7fd0ff,10,.3);F.ph="walk";F.t=0}}
+    else if(F.ph==="walk"){if(F.fish)F.fish.position.set(g.position.x+Math.cos(g.rotation.y)*.25,.7,g.position.z-Math.sin(g.rotation.y)*.25);P.armR=1.4;if(walkTo(F.tx,F.tz,1.1)){F.ph="grill";F.t=0;
+        const st=new THREE.Mesh(FEAST.stickG,FEAST.stickM);scene.add(st);F.props.push(st);F.stick=st}}
+    else if(F.ph==="grill"){P.crT=1;const dx=CF.x-g.position.x,dz=CF.z-g.position.z,d=Math.hypot(dx,dz)||1;g.rotation.y=Math.atan2(-dz,dx);P.armL=P.armR=1.45+Math.sin(t*3)*.08;
+      const hx=g.position.x+dx/d*.75,hz=g.position.z+dz/d*.75;F.stick.position.set(hx,.42,hz);F.stick.rotation.set(0,Math.atan2(-dz,dx),Math.PI/2-.35);if(F.fish){F.fish.position.set(hx+dx/d*.12,.5,hz+dz/d*.12);F.fish.rotation.x=t*2;
+        const c=Math.min(1,F.t/8);F.fish.material=c>.6?FEAST.fishCooked:FEAST.fishM}
+      if(Math.random()<dt*3)burst(hx,.6,hz,0xcfcfcf,1,.15);if(F.t>8.5){F.ph="eat";F.t=0;if(F.stick){scene.remove(F.stick)}const cup=new THREE.Mesh(FEAST.cupG,FEAST.cupM);scene.add(cup);F.props.push(cup);F.cup=cup}}
+    else if(F.ph==="eat"){P.crT=1;const up=Math.sin(F.t*1.6)>.6,hand=g.position,fx=Math.cos(g.rotation.y),fz=-Math.sin(g.rotation.y);P.armR=up?2.5:1.1;P.armL=F.t<4?2.3+Math.sin(t*6)*.15:1.1;
+      if(F.cup)F.cup.position.set(hand.x+fx*.22-fz*.18,up?.98:.62,hand.z+fz*.22+fx*.18);if(F.fish){F.fish.material=FEAST.fishCooked;F.fish.position.set(hand.x+fx*.22+fz*.18,F.t<4?.95:.62,hand.z+fz*.22-fx*.18);if(F.t>4){scene.remove(F.fish);F.fish=null}}
+      if(Math.random()<dt*.35){const sc=toScreen(hand.x,1.9,hand.z);floatText(Math.random()<.5?"😋":"🥤",sc.x,sc.y)}
+      if(F.t>9||isBad())funEnd(f)}}
   else if(F.k==="nap"){if(F.ph==="go"){if(walkTo(F.tx,F.tz,.9)){F.ph="do";F.t=0}}
     else{g.rotation.x+=(-1.45-g.rotation.x)*Math.min(1,dt*3);g.position.y=.12;P.armL=P.armR=.2;if(F.t>F.dur){g.rotation.x=0;g.position.y=0;funEnd(f)}}}
   else{P.crT=.15+.15*Math.sin(t*8);P.armL=2.5+Math.sin(t*8)*.5;P.armR=2.5+Math.cos(t*8)*.5;g.rotation.y+=dt*1.2;if(F.t>F.dur)funEnd(f)}
   return P}
-const FUNTXT={swim:"Swimming in the lake",fire:"Warming up by the bonfire",dance:"Dancing",nap:"Napping under a tree"};
+const FEAST={fishG:new THREE.SphereGeometry(1,10,8),fishM:new THREE.MeshLambertMaterial({color:0x6aa8d8}),fishCooked:new THREE.MeshLambertMaterial({color:0xc9782a}),stickG:new THREE.CylinderGeometry(.015,.015,.9,5),stickM:new THREE.MeshLambertMaterial({color:0x8a5a2a}),cupG:new THREE.CylinderGeometry(.06,.05,.13,10),cupM:new THREE.MeshLambertMaterial({color:0x8a4a24})};
+const FUNTXT={feast:"Fishing, then grilling fish by the bonfire",swim:"Swimming in the lake",fire:"Warming up by the bonfire",dance:"Dancing",nap:"Napping under a tree"};
 function stepFarmer(dt,t){
   if(farmer&&farmer.o.fun&&farmer.o.queue&&farmer.o.queue.length)funEnd(farmer);if(!farmer)return;if(runQueue(farmer,dt,t))return;const f=farmer,o=f.o,g=f.g;
   let walking=false,crT=0,armL=0,armR=0,tug=0,legSpread=0;
@@ -1702,7 +1731,7 @@ function stepFarmer(dt,t){
   f.armR.rotation.x=o.state==="wipe"?-.5:0;
   f.head.rotation.y=o.state==="idle"?Math.sin(t*1.3)*.4:0;
   f.torso.position.y=Math.sin(t*2)*.004;
-  showTool3D(f,null);
+  showTool3D(f,o.fun&&o.fun.tool||null);
 }
 
 
@@ -2722,7 +2751,11 @@ $("supBtn").onclick=()=>openSupport();$("supBtn2").onclick=()=>openSupport("Move
 $("spSend").onclick=async()=>{const email=$("spEmail").value.trim(),msg=$("spMsg").value.trim();$("spErr").textContent="";if(!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(email))return $("spErr").textContent="Type your email so we can reply.";if(msg.length<5)return $("spErr").textContent="Write your message first.";
   if(!API)return $("spErr").textContent="Open the game at farming-ph.netlify.app, or email farmgaming.ph@gmail.com.";
   $("spSend").disabled=true;try{const p=CLOUD.local||{};const r=await fetch(API+"support",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({email,topic:$("spTopic").value,msg,u:$("spUser").value.trim()||myUser()||"",farm:p.farm||""})});const d=await r.json();if(!r.ok)throw new Error(d.error||"Couldn't send. Try again.");
-    $("spTo").textContent=email;$("spForm").hidden=true;$("spDone").hidden=false;$("spMsg").value=""}catch(e){$("spErr").textContent=e.message}$("spSend").disabled=false};{const qb=$("qBtn");if(qb){qb.textContent=qLabel();qb.onclick=()=>{const order=[null,0,1,2],i=order.indexOf(QPICK);const n=order[(i+1)%order.length];toast("Graphics: "+(n==null?"Auto":["Low","Medium","High"][n])+" · reloading…",1500);setTimeout(()=>setQuality(n),600)}}}
+    $("spTo").textContent=email;$("spForm").hidden=true;$("spDone").hidden=false;$("spMsg").value=""}catch(e){$("spErr").textContent=e.message}$("spSend").disabled=false};{const qb=$("qBtn");if(qb){qb.textContent=qLabel();qb.onclick=()=>{const m=$("gfxM");m.hidden=false;let q=QPICK,r=RPICK;
+    const draw=()=>{m.querySelectorAll("[data-q]").forEach(b=>{const v=b.dataset.q==="a"?null:+b.dataset.q;b.classList.toggle("on",v===q)});m.querySelectorAll("[data-r]").forEach(b=>{const v=b.dataset.r==="a"?null:+b.dataset.r;b.classList.toggle("on",v===r)});
+      $("gfxNow").textContent="Now: "+["Low","Medium","High"][QLV]+" · "+Math.round(innerWidth*PRNOW)+"×"+Math.round(innerHeight*PRNOW)+" pixels"};
+    m.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>{q=b.dataset.q==="a"?null:+b.dataset.q;draw()});m.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{r=b.dataset.r==="a"?null:+b.dataset.r;draw()});
+    $("gfxApply").onclick=()=>{m.hidden=true;toast("Saving graphics · reloading…",1400);setTimeout(()=>setQuality(q,r),500)};$("gfxClose").onclick=()=>{m.hidden=true};draw()}}}
 $("sellAll").onclick=sellAll;$("shopOpen").onclick=()=>{S.shopOpen=S.shopOpen===false;save();invUI(true);toast(S.shopOpen?"The stall is open. Buyers will come.":"The stall is closed. No buyers will come.",2600)};$("goMkt").onclick=()=>{goView("market")};
 $("placeRot").onclick=()=>{if(PLACE){PLACE.r=(PLACE.r+Math.PI/2)%(Math.PI*2);PLACE.g.rotation.y=PLACE.r}};$("placeOk").onclick=confirmPlace;$("placeX").onclick=cancelPlace;
 const CD_HARV=120,CD_TREAT=120;const cdLeft=k=>Math.max(0,(k==="harv"?CD_HARV:CD_TREAT)-(now()-((S.cd||{})[k]||0)));
@@ -2816,7 +2849,7 @@ function stepHelper(dt,t){
   f.legL.rotation.z=sw*.6+1.0*o.cr;f.legR.rotation.z=-sw*.6-.9*o.cr;
   f.armL.rotation.z=lerp(f.armL.rotation.z,armL||(walking?-sw*.5:0),Math.min(1,dt*12));f.armR.rotation.z=lerp(f.armR.rotation.z,armR||(walking?sw*.5:0),Math.min(1,dt*12));
   f.head.rotation.y=o.state==="look"?Math.sin(t*1.6)*.5:0;
-  showTool3D(f,o.state==="goP"||o.state==="plantP"?"pouch":o.state==="pickT"?"basket":null);
+  showTool3D(f,o.fun&&o.fun.tool?o.fun.tool:o.state==="goP"||o.state==="plantP"?"pouch":o.state==="pickT"?"basket":null);
 }
 
 /* ================= CREW: you command the farmers ================= */
@@ -2948,7 +2981,7 @@ function wStatus(k){const W=CREW[k];if(!W)return"";const o=W.o,q=o.queue&&o.queu
   if(q){const n=TASKN[q.type];return(q.phase==="work"?n:q.type==="walk"?"Walking there":"On the way: "+n.toLowerCase())+(o.queue.length>1?" · "+o.queue.length+" orders":"")}
   if(!wAuto(k))return o.resting?"Resting in the barn":"Waiting for orders";
   if(!W.g.visible)return"Sheltering in the barn";
-  if(o.state==="fun"&&o.fun)return FUNTXT[o.fun.k]+" · free time";
+  if(o.state==="fun"&&o.fun)return (o.fun.k==="feast"?({go:"Going fishing at the lake",fish:"Fishing at the lake",walk:"Bringing the fish to the bonfire",grill:"Grilling fish at the bonfire",eat:"Eating grilled fish and having a drink"}[o.fun.ph]||FUNTXT.feast):FUNTXT[o.fun.k])+" · free time";
   if(k==="farmer")return o.state==="go"||o.state==="kneel"||o.state==="pull"||o.state==="yank"?"Pulling weeds on their own":"Wandering on their own";
   return o.state==="go"||o.state==="pick"?"Harvesting on their own":o.state==="goP"||o.state==="plantP"?"Planting on their own":o.state==="goT"||o.state==="pickT"?"Picking fruit on their own":"Waiting for crops"}
 let CREWHIDE=false;try{CREWHIDE=localStorage.getItem("farming-crew-hide")==="1"}catch(e){}
@@ -6653,12 +6686,12 @@ function perfStep(dt,t){{const ff=scene.fog&&scene.fog.far>=50?scene.fog.far:400
     for(const c of PERF.cull){_pc.copy(c.o.position).add(c.off);c.w.visible=_pc.distanceTo(cp)-c.r<far}
     if(QLV===0&&Math.random()<.05)hideOutlines()}
   // auto: if the phone is slow, lower the resolution a little at a time
-  if(QPICK==null){PERF.fr++;PERF.ft+=dt;if(PERF.ft>4){const fps=PERF.fr/PERF.ft;PERF.fr=0;PERF.ft=0;
+  if(QPICK==null&&RPICK==null){PERF.fr++;PERF.ft+=dt;if(PERF.ft>4){const fps=PERF.fr/PERF.ft;PERF.fr=0;PERF.ft=0;
     if(fps<32&&PRNOW>.7){PRNOW=Math.max(.7,+(PRNOW-.15).toFixed(2));renderer.setPixelRatio(PRNOW);try{resize()}catch(e){}}
     else if(fps>55&&PRNOW<PRMAX){PRNOW=Math.min(PRMAX,+(PRNOW+.1).toFixed(2));renderer.setPixelRatio(PRNOW);try{resize()}catch(e){}}
     if(fps<22&&sun.castShadow&&MOBILE){sun.castShadow=false}}}}
-function setQuality(q){try{if(q==null)localStorage.removeItem("farming-q");else localStorage.setItem("farming-q",q)}catch(e){}save();location.reload()}
-function qLabel(){return"⚡ Graphics: "+(QPICK==null?"Auto ("+["Low","Medium","High"][QLV]+")":["Low","Medium","High"][QLV])}
+function setQuality(q,res){try{if(q==null)localStorage.removeItem("farming-q");else localStorage.setItem("farming-q",q);if(res==null)localStorage.removeItem("farming-res");else localStorage.setItem("farming-res",res)}catch(e){}save();location.reload()}
+function qLabel(){return"⚡ Graphics: "+(QPICK==null?"Auto":["Low","Medium","High"][QLV])+(RPICK!=null?" · "+Math.round(RPICK*100)+"%":"")}
 function loop(t){
   const dt=Math.min(.1,(t-last)/1000);last=t;const ts=t/1000;
   applyCam(dt);stepAnimals(dt,ts);stepExtras(dt,ts);stepFarm2(dt,ts);stepFire(dt,ts);stepNet(dt);stepSound(dt);stepFish(dt,ts);ISLE.step(dt,ts);checkIsle();stepCity(dt,ts);checkCity();

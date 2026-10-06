@@ -89,6 +89,7 @@ const ENC={"salt": "H2dVWCh4wBcPwaoacs1fFg==", "iv": "yD20rV2Bitmu0Lqf", "ct": "
 const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
 const b64u=u=>btoa(String.fromCharCode(...u)).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
 let SK=null;const $=id=>document.getElementById(id);
+async function signRaw(data){if(!SK||!(SK instanceof CryptoKey))throw new Error("The admin page is locked. Reload this page and type your admin password again.");return crypto.subtle.sign({name:"ECDSA",hash:"SHA-256"},SK,data)}
 $("unlockF").onsubmit=async e=>{e.preventDefault();$("lockErr").textContent="";$("unlockB").disabled=true;
   try{const base=await crypto.subtle.importKey("raw",new TextEncoder().encode($("pw").value.trim()),"PBKDF2",false,["deriveKey"]);
     const key=await crypto.subtle.deriveKey({name:"PBKDF2",salt:b64(ENC.salt),iterations:ENC.it,hash:"SHA-256"},base,{name:"AES-GCM",length:256},false,["decrypt"]);
@@ -101,7 +102,7 @@ $("giftF").onsubmit=async e=>{e.preventDefault();$("giftErr").textContent="";con
   if(!u)return $("giftErr").textContent="Type the player's username or farm name.";if(!(c>=0&&c<=1000000&&w>=0&&w<=10000000)||!(c||w))return $("giftErr").textContent="Give 1 to 1,000,000 coins and/or 1 to 10,000,000 wood.";
   const n=[...crypto.getRandomValues(new Uint8Array(6))].map(b=>b.toString(16).padStart(2,"0")).join("");
   const p=new TextEncoder().encode(JSON.stringify({u,c,...(w?{w}:{}),n,t:Math.floor(Date.now()/1000)}));
-  const sig=new Uint8Array(await crypto.subtle.sign({name:"ECDSA",hash:"SHA-256"},SK,p));const code="FARM-"+b64u(p)+"."+b64u(sig);
+  const sig=new Uint8Array(await signRaw(p));const code="FARM-"+b64u(p)+"."+b64u(sig);
   $("code").value=code;$("out").hidden=false;hist.unshift([c?c.toLocaleString()+" coins":"",w?w.toLocaleString()+" wood":""].filter(Boolean).join(" + ")+" → "+u);$("hist").innerHTML="";hist.forEach(t=>{const li=document.createElement("li");li.textContent=t;$("hist").append(li)})};
 $("copyB").onclick=async()=>{try{await navigator.clipboard.writeText($("code").value);$("copyB").textContent="Copied!"}catch(e){$("code").select();document.execCommand("copy");$("copyB").textContent="Copied!"}setTimeout(()=>$("copyB").textContent="Copy code",1600)};
 $("shareB").onclick=async()=>{const t="Your Farming gift code (open the game, tap 🎁 Redeem Code):\n"+$("code").value;if(navigator.share){try{await navigator.share({text:t})}catch(e){}}else{try{await navigator.clipboard.writeText(t)}catch(e){}$("shareB").textContent="Copied!";setTimeout(()=>$("shareB").textContent="Share",1600)}};
@@ -109,14 +110,14 @@ let PL=[],PNOW=Date.now(),SORT={k:"seen",d:-1};
 const esc=v=>String(v==null?"":v).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const ago=ms=>{const m=Math.floor(ms/60000);return m<1?"just now":m<60?m+"m ago":m<1440?Math.floor(m/60)+"h ago":Math.floor(m/1440)+"d ago"};
 const dfmt=t=>t?new Date(t).toLocaleString("en-PH",{timeZone:"Asia/Manila",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}):"–";
-async function signed(tag){const at=Date.now(),sig=new Uint8Array(await crypto.subtle.sign({name:"ECDSA",hash:"SHA-256"},SK,new TextEncoder().encode(tag+":"+at)));return{at,sig:b64u(sig)}}
+async function signed(tag){const at=Date.now(),sig=new Uint8Array(await signRaw(new TextEncoder().encode(tag+":"+at)));return{at,sig:b64u(sig)}}
 $("tGo").onclick=async()=>{$("tErr").textContent="";$("tOut").textContent="";const u=$("tU").value.trim().toLowerCase();if(!u){$("tErr").textContent="Type a username.";return}
-$("tGo").disabled=true;try{const at=Date.now(),sig=new Uint8Array(await crypto.subtle.sign({name:"ECDSA",hash:"SHA-256"},SK,new TextEncoder().encode("transfer:"+u+":"+at)));
+$("tGo").disabled=true;try{const at=Date.now(),sig=new Uint8Array(await signRaw(new TextEncoder().encode("transfer:"+u+":"+at)));
 const r=await fetch("/api/admin/transfer",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({u,at,sig:b64u(sig)})});const d=await r.json();if(!r.ok)throw new Error(d.error||r.status);
 const c=d.code.slice(0,4)+"-"+d.code.slice(4);$("tOut").innerHTML="";const b=document.createElement("b");b.textContent=c;$("tOut").append("Code for "+d.u+" ("+(d.farm||"")+"): ",b," · valid until "+new Date(d.exp).toLocaleString("en-PH",{timeZone:"Asia/Manila"}))}
 catch(e){$("tErr").textContent="Couldn't make the code: "+e.message}$("tGo").disabled=false};
 let SP=[];
-async function loadSupport(set){$("spErr").textContent="";try{const at=Date.now(),sig=new Uint8Array(await crypto.subtle.sign({name:"ECDSA",hash:"SHA-256"},SK,new TextEncoder().encode("support:"+at)));
+async function loadSupport(set){$("spErr").textContent="";try{const at=Date.now(),sig=new Uint8Array(await signRaw(new TextEncoder().encode("support:"+at)));
   const r=await fetch("/api/admin/support",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({at,sig:b64u(sig),...(set?{set}:{})})});const d=await r.json();if(!r.ok)throw new Error(d.error||r.status);SP=d.tickets||[];drawSupport()}catch(e){$("spErr").textContent="Couldn't load messages: "+e.message}}
 function drawSupport(){const f=$("spF").value,L=SP.filter(t=>f==="all"||t.status!=="done"),tb=$("spBody");tb.textContent="";$("spCount").textContent=SP.filter(t=>t.status!=="done").length+" open";
   if(!L.length){tb.innerHTML='<tr><td colspan="6">No messages.</td></tr>';return}
@@ -134,7 +135,7 @@ function drawPacks(){const tb=$("pkBody");tb.textContent="";PK.forEach((p,i)=>{c
 async function loadPacks(){$("pkErr").textContent="";try{const r=await fetch("/api/packs",{cache:"no-store"});const d=await r.json();PK=(d.packs||[]).map(p=>({coins:p.coins,price:p.price,tag:p.tag||""}));drawPacks()}catch(e){$("pkErr").textContent="Couldn't load packs: "+e.message}}
 $("pkAdd").onclick=()=>{if(PK.length>=8)return;PK.push({coins:1000,price:50,tag:""});drawPacks()};$("pkReset").onclick=()=>{PK=PK_SUG.map(p=>({...p,tag:p.tag||""}));drawPacks();$("pkMsg").textContent="Suggested prices filled in. Press Save packs to use them."};
 $("pkSave").onclick=async()=>{$("pkErr").textContent="";$("pkMsg").textContent="";const packs=PK.map(p=>({coins:Math.floor(+p.coins),price:Math.floor(+p.price),...(String(p.tag||"").trim()?{tag:String(p.tag).trim()}:{})}));
-  $("pkSave").disabled=true;try{const at=Date.now(),sig=new Uint8Array(await crypto.subtle.sign({name:"ECDSA",hash:"SHA-256"},SK,new TextEncoder().encode("packs:"+at+":"+JSON.stringify(packs))));
+  $("pkSave").disabled=true;try{const at=Date.now(),sig=new Uint8Array(await signRaw(new TextEncoder().encode("packs:"+at+":"+JSON.stringify(packs))));
     const r=await fetch("/api/admin/packs",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({packs,at,sig:b64u(sig)})});const d=await r.json();if(!r.ok)throw new Error(d.error||r.status);PK=d.packs.map(p=>({coins:p.coins,price:p.price,tag:p.tag||""}));drawPacks();$("pkMsg").textContent="✅ Saved. Players see the new packs now."}
   catch(e){$("pkErr").textContent="Couldn't save: "+e.message}$("pkSave").disabled=false};
 async function loadPlayers(){$("pErr").textContent="";$("pRefresh").disabled=true;try{const r=await fetch("/api/admin/players",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(await signed("players"))});const d=await r.json();if(!r.ok)throw new Error(d.error||r.status);PL=d.players||[];PNOW=d.now||Date.now();drawPlayers()}catch(e){$("pErr").textContent="Couldn't load players: "+e.message}$("pRefresh").disabled=false}
@@ -148,12 +149,12 @@ $("pCsv").onclick=()=>{const rows=[["username","farm","farmer","level","coins","
   const csv=rows.map(r=>r.map(v=>'"'+String(v==null?"":v).replace(/"/g,'""')+'"').join(",")).join("\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="farming-players.csv";a.click()};
 setInterval(()=>{if(SK&&!document.hidden)loadPlayers()},60000);
 $("restartB").onclick=async()=>{const m=$("rsMsg");m.style.color="";m.textContent="Sending…";$("restartB").disabled=true;
-  try{const at=Date.now(),sig=new Uint8Array(await crypto.subtle.sign({name:"ECDSA",hash:"SHA-256"},SK,new TextEncoder().encode("restart:"+at)));
+  try{const at=Date.now(),sig=new Uint8Array(await signRaw(new TextEncoder().encode("restart:"+at)));
     const r=await fetch("/api/restart",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({at,sig:b64u(sig)})});const d=await r.json().catch(()=>({}));
     if(!r.ok)throw new Error(d.error||("Error "+r.status));m.style.color="#3f8f2c";m.textContent="Done! Players' games will reload within about 20 seconds."}
   catch(e){m.style.color="";m.textContent="Couldn't restart: "+e.message}$("restartB").disabled=false};
 async function giftCode(u,c,w){const n=[...crypto.getRandomValues(new Uint8Array(6))].map(b=>b.toString(16).padStart(2,"0")).join("");
-  const p=new TextEncoder().encode(JSON.stringify({u,c,...(w?{w}:{}),n,t:Math.floor(Date.now()/1000)}));const sig=new Uint8Array(await crypto.subtle.sign({name:"ECDSA",hash:"SHA-256"},SK,p));return"FARM-"+b64u(p)+"."+b64u(sig)}
+  const p=new TextEncoder().encode(JSON.stringify({u,c,...(w?{w}:{}),n,t:Math.floor(Date.now()/1000)}));const sig=new Uint8Array(await signRaw(p));return"FARM-"+b64u(p)+"."+b64u(sig)}
 let BL=[];
 async function loadBuys(){$("bErr").textContent="";$("bRefresh").disabled=true;try{const r=await fetch("/api/admin/buys",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(await signed("buys"))});const d=await r.json();if(!r.ok)throw new Error(d.error||"Couldn't load");BL=d.buys||[];drawBuys()}catch(e){$("bErr").textContent=e.message}$("bRefresh").disabled=false}
 function drawBuys(){const f=$("bFilter").value,L=BL.filter(b=>f==="all"||b.status==="pending");$("bCount").textContent=BL.filter(b=>b.status==="pending").length+" waiting";
