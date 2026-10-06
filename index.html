@@ -313,7 +313,7 @@ body.land .modeTag{max-width:46vw;font-size:.64rem;opacity:.85}
       <button class="tb" data-t="care" aria-pressed="false" title="Care (5): collect from animals, treat them, pull weeds"><span>3</span>Care</button>
       
     </div>
-    <div class="placeBar" id="editBar" hidden><span id="editTxt"></span><div><button class="cbtn" id="editRot" type="button">⟳ Rotate</button><button class="cbtn" id="editMove" type="button">✥ Move</button><button class="cbtn on" id="editDone" type="button">Done</button></div></div>
+    <div class="placeBar" id="hillBar" hidden><span id="hillTxt"></span><div><button class="cbtn" id="hillMove" type="button">✥ Move</button><button class="cbtn" id="hillGrow" type="button">⬆ Bigger</button><button class="cbtn" id="hillRm" type="button">🗑 Remove · 500</button><button class="cbtn on" id="hillDone" type="button">Done</button></div></div><div class="placeBar" id="editBar" hidden><span id="editTxt"></span><div><button class="cbtn" id="editRot" type="button">⟳ Rotate</button><button class="cbtn" id="editMove" type="button">✥ Move</button><button class="cbtn on" id="editDone" type="button">Done</button></div></div>
     <div class="placeBar" id="placeBar" hidden><span id="placeTxt"></span><div><button class="cbtn" id="placeRot" type="button">Rotate</button><button class="cbtn on" id="placeOk" type="button">Place here</button><button class="cbtn" id="placeX" type="button">Cancel</button></div></div>
     <div class="cam">
       <button class="cbtn" id="cU" aria-label="Move up">▲</button>
@@ -339,7 +339,7 @@ body.land .modeTag{max-width:46vw;font-size:.64rem;opacity:.85}
     <a class="btn" id="tGetApp" hidden href="/farming.apk" download="Farming.apk" style="background:#3a7a3a;box-shadow:0 4px 0 #23502a;text-decoration:none">📲 Get the Android App</a>
     <button class="btn" id="tBuyCoins" style="background:#e8a530;box-shadow:0 4px 0 #a8741a">💰 Buy Coins</button>
     <button class="btn alt" id="tPlot"></button>
-    <button class="btn alt" id="tMoveLand" hidden>📐 Move Land</button>
+    <button class="btn alt" id="tMoveLand" hidden>📐 Move Land</button><button class="btn alt" id="tHills" hidden>⛰️ Bring back hills</button>
     <button class="btn" id="tHelper"></button>
     <button class="btn" id="tHire" style="background:#2f7fb8;box-shadow:0 4px 0 #1d5a85"></button>
     <button class="btn" id="tHspd" style="background:#e07a2a;box-shadow:0 4px 0 #a5521a"></button>
@@ -601,7 +601,7 @@ const xpNeed=l=>Math.round(10*Math.pow(l,1.55));
 const FX0=-3.5, FZ0=-3;                       // field corner
 const PEN={x0:-11.5,x1:-6,z0:-3,z1:4};          // animal pen bounds
 
-function fresh(){return{inTown:false,seeds:[],tools:[],fert:0,basket:0,decor:{},inv:{},shopOpen:true,builds:[],boats:[],boatAt:"farm",guard:false,plots:[],helperOn:true,helpers:1,hspd:0,trees:{},cut:[],ptrees:[],penLv:{},penSz:{},penPos:{},treePos:{},free:{},redeemed:[],axe:0,coins:1500,xp:0,lv:1,size:0,sel:"pechay",tiles:Array(25).fill(null).map(()=>({k:"grass"})),pens:[]}}
+function fresh(){return{inTown:false,seeds:[],tools:[],fert:0,basket:0,decor:{},inv:{},shopOpen:true,builds:[],boats:[],boatAt:"farm",guard:false,plots:[],helperOn:true,helpers:1,hspd:0,trees:{},cut:[],ptrees:[],penLv:{},penSz:{},penPos:{},treePos:{},hillPos:{},hillGone:[],free:{},redeemed:[],axe:0,coins:1500,xp:0,lv:1,size:0,sel:"pechay",tiles:Array(25).fill(null).map(()=>({k:"grass"})),pens:[]}}
 let S=fresh();
 
 if(window.claude?.hot?.data?.S)S=window.claude.hot.data.S;
@@ -722,6 +722,11 @@ const PENS={manok:{x0:-10.8,x1:-7.2,z0:-6.4,z1:-2.7,n:"Chicken Coop",gate:"s"},k
   baboy:{x0:-23.8,x1:-19.6,z0:4.4,z1:8.4,n:"Pig Sty",gate:"e"}};
 const PLIM={manok:8,kambing:6,baka:5,kalabaw:5,kabayo:6,baboy:6};
 /* pens can be made bigger: each space level widens the yard and pushes the pens west to make room */
+const MTNS0=[[-22,-30,6],[-14,-33,7],[-5,-31,6.5],[3,-35,8],[12,-31,7],[15,-37,7.5]];
+/* the three hills on the west side can be moved, removed or brought back; they now have snow, rocks and flowers */
+const HILLS=[{id:"h1",x:-37,z:-19,h:9,rad:6},{id:"h2",x:-38,z:7,h:8,rad:5.5},{id:"h3",x:-28,z:-22,h:7,rad:5}],HILL_RM=500;
+const HILL_UP=[800,2000],hs=H=>1+.25*((S.hillLv||{})[H.id]|0);const hillXZ=H=>{const q=(S.hillPos||{})[H.id];return q?q:[H.x,H.z]};const hillOn=H=>!(S.hillGone||[]).includes(H.id);
+function mtns(skip){const a=MTNS0.slice();HILLS.forEach(H=>{if(H.id===skip||!hillOn(H))return;const [x,z]=hillXZ(H);a.push([x,z,H.rad*hs(H)])});return a}
 const PENS0=JSON.parse(JSON.stringify(PENS)),PENCOL={manok:0,kambing:0,baka:1,kalabaw:1,kabayo:2,baboy:2};
 const PENSZ=[600,1500,3000,5000],PENGROW=.5,PENSZADD=2;let PENLABS=[],PENSNOW=null,_plk=null;
 function penSz(id,L){return(L||(S&&S.penSz)||{})[id]|0}
@@ -795,7 +800,7 @@ var GROUND_G=null,paintGround=()=>{},landDeco=()=>{},pondDeco=()=>{},LANDM=null,
   for(let i=0;i<34;i++){const a=i/34*Math.PI*2+r()*.1,d=40+r()*8,s=5+r()*7;r();r();r();continue;if(Math.cos(a)*d>12)continue;if(Math.cos(a)*d<-26&&Math.abs(Math.sin(a)*d+8)<30)continue;
     b.add("ico1",r()<.5?0x4f9e31:0x5aa83a,Math.cos(a)*d,-s*.35,Math.sin(a)*d,s*1.5,s,s*1.3,0,r()*3,0)}
   // distant tree clusters
-  for(let i=0;i<70;i++){const a=r()*Math.PI*2,d=35+r()*10,x=Math.cos(a)*d,z=Math.sin(a)*d,s=.8+r()*.8;if(x>15||inPlotArea(x,z,2))continue;if(inAnyPen(x,z,1)||(S.builds||[]).some(o=>Math.hypot(o.x-x,o.z-z)<2.6))continue;if(x<-20&&Math.abs(z+8)<7)continue;
+  for(let i=0;i<70;i++){const a=r()*Math.PI*2,d=35+r()*10,x=Math.cos(a)*d,z=Math.sin(a)*d,s=.8+r()*.8;if(x>15||inPlotArea(x,z,2))continue;if(inAnyPen(x,z,1)||(S.builds||[]).some(o=>Math.hypot(o.x-x,o.z-z)<2.6)||mtns().some(([mx,mz,mr])=>Math.hypot(x-mx,z-mz)<mr*1.2))continue;if(x<-20&&Math.abs(z+8)<7)continue;
     b.add("cyl",0x7a4a24,x,.5*s,z,.12*s,1*s,.12*s);b.add("sph",r()<.5?0x2f8a28:0x3fa033,x,1.6*s,z,.9*s,1.1*s,.9*s,0,r()*3,0)}
   LANDM=b.mesh(false,true,false);world.add(LANDM)};landDeco();
   // pond
@@ -824,7 +829,7 @@ let wfTex,rvTex,foamT=0;const SPRAY=[];let RIVERW=null,rvTex2=null,wfTex2=null,W
 (function mountains(){
   const b=new Builder(),r=rnd(77);
   // main range (north & north-east)
-  const peaks=[[-22,-30,9,6],[-14,-33,12,7],[-5,-31,10,6.5],[3,-35,14,8],[12,-31,11,7],[15,-37,12,7.5],[-37,-19,9,6],[-38,7,8,5.5],[-28,-22,7,5]];
+  const peaks=[[-22,-30,9,6],[-14,-33,12,7],[-5,-31,10,6.5],[3,-35,14,8],[12,-31,11,7],[15,-37,12,7.5]];
   peaks.forEach(([x,z,h,rad],k)=>{
     b.add("cone",0x4f8a3a,x,h*.18,z,rad*1.25,h*.36,rad*1.2,0,r()*3,0);
     b.add("cone",mix(0x8d9497,0x7a8286,r()),x,h/2,z,rad,h,rad*.95,0,r()*3,0);
@@ -1686,7 +1691,7 @@ function stepWeather(dt,t){
   if(GROUNDMAT){GROUNDMAT.color.copy(WC.gTint);GROUNDMAT.emissive.setRGB(.9,.94,.98).multiplyScalar(WC.gI)}
   Object.values(AM).forEach(m=>{m.emissive.copy(WC.em).multiplyScalar(WC.emI*.6)});
   if(SUNSPRITE)SUNSPRITE.material.opacity=Math.min(1,WC.sunV);
-  SNOWMAT.opacity=WC.snow;if(SNOWMESH)SNOWMESH.visible=WC.snow>.03;if(PENSNOW)PENSNOW.visible=WC.snow>.03;
+  SNOWMAT.opacity=WC.snow;if(SNOWMESH)SNOWMESH.visible=WC.snow>.03;if(PENSNOW)PENSNOW.visible=WC.snow>.03;if(HILLG.userData.snow)HILLG.userData.snow.visible=WC.snow>.03;
   if(SNOWG){SNOWG.material.opacity=WC.snow*.9;SNOWG.visible=WC.snow>.03;const nn=SIZES[S.size];SNOWF.position.set(FX0+nn/2,.19,FZ0+nn/2);SNOWF.scale.set(nn+.2,nn+.2,1);SNOWF.material.opacity=WC.snow*.8;SNOWF.visible=WC.snow>.03}
   ISLE.weather(WX.key,dt);dayNight(dt,t);
   CLOUDMAT.color.copy(WC.cloud);
@@ -2314,6 +2319,7 @@ cv.addEventListener("pointerdown",e=>{cv.setPointerCapture(e.pointerId);pointers
   clearTimeout(HOLD.t);if(pointers.size===1&&!PLACE&&!SEL&&!VISIT){const p=pickAt(e),g0=groundPoint(e),pl=p&&p.tile!=null?plotOfTile(p.tile):null;
     let go=null;
     if(p&&p.build!=null){const o=(S.builds||[])[p.build];if(o)go=()=>{const d=BUILDS.find(q=>q.id===o.id);startBuildMove(p.build);return[o.x,o.z,d?d.n:"it"]}}
+    else if(p&&p.hill){const H=HILLS.find(q=>q.id===p.hill);if(H)go=()=>{const [x,z]=hillXZ(H);startHillMove(H.id);return[x,z,"hill"]}}
     else if(p&&p.ftree!=null){const T=FTREES[p.ftree];if(T)go=()=>{startTreeMove(p.ftree);return[T.x,T.z,treeName(T)]}}
     else if(pl)go=()=>{startPlotMove(pl.id,true);return[pl.x0+PN/2,pl.z0+PN/2,pl.n]};
     else if(g0&&(!p||p.pen!=null)){const k=penAt(g0.x,g0.z);if(k&&PENS[k])go=()=>{const P=PENS[k];startPenMove(k);return[(P.x0+P.x1)/2,(P.z0+P.z1)/2,P.n]}}
@@ -2361,8 +2367,8 @@ const ray=new THREE.Raycaster(),ndc=new THREE.Vector2();
 let hovered=null;   // {tile:i} or {pen:i}
 function pickAt(e){
   const r=cv.getBoundingClientRect();ndc.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(ndc,camera);
-  const hits=ray.intersectObjects([...BTN3D.filter(b=>b.visible),...TSHOPHITS,...(AD.hit&&AD.on?[AD.hit]:[]),...FTREES.map(t=>t.hit),...BUILDG.children.map(g=>g.userData.hit).filter(Boolean),STALLHIT,...WHITS,...ISLE.hits,...weeds.filter(w=>w.state==="ground").map(w=>w.m),...animalGroup.children,...tileObjs.map(o=>o.hit)],true);
-  for(const h of hits){if(h.object.userData.btn3d)return{btn3d:h.object.userData.btn3d};if(h.object.userData.tshop)return{tshop:h.object.userData.tshop};if(h.object.userData.drop)return{drop:true};if(h.object.userData.ftree!=null)return{ftree:h.object.userData.ftree};if(h.object.userData.build!=null)return{build:h.object.userData.build};if(h.object.userData.stall)return{stall:true};if(h.object.userData.worker){const W=CREW[h.object.userData.worker];if(W&&W.g.visible)return{worker:h.object.userData.worker};continue}if(h.object.userData.isle!=null)return{isle:h.object.userData.isle};const pi=h.object.userData.pen;if(pi!=null&&animalObjs[pi]&&!animalObjs[pi].g.visible)continue;if(h.object.userData.weed)return{weed:h.object.userData.weed};if(h.object.userData.pen!=null&&!h.object.isSprite)return{pen:h.object.userData.pen};if(h.object.isSprite&&h.object.userData.pen!=null)return{pen:h.object.userData.pen};if(h.object.userData.tile!=null)return{tile:h.object.userData.tile}}
+  const hits=ray.intersectObjects([...BTN3D.filter(b=>b.visible),...TSHOPHITS,...(AD.hit&&AD.on?[AD.hit]:[]),...FTREES.map(t=>t.hit),...HILLHITS,...BUILDG.children.map(g=>g.userData.hit).filter(Boolean),STALLHIT,...WHITS,...ISLE.hits,...weeds.filter(w=>w.state==="ground").map(w=>w.m),...animalGroup.children,...tileObjs.map(o=>o.hit)],true);
+  for(const h of hits){if(h.object.userData.btn3d)return{btn3d:h.object.userData.btn3d};if(h.object.userData.tshop)return{tshop:h.object.userData.tshop};if(h.object.userData.drop)return{drop:true};if(h.object.userData.ftree!=null)return{ftree:h.object.userData.ftree};if(h.object.userData.build!=null)return{build:h.object.userData.build};if(h.object.userData.hill)return{hill:h.object.userData.hill};if(h.object.userData.stall)return{stall:true};if(h.object.userData.worker){const W=CREW[h.object.userData.worker];if(W&&W.g.visible)return{worker:h.object.userData.worker};continue}if(h.object.userData.isle!=null)return{isle:h.object.userData.isle};const pi=h.object.userData.pen;if(pi!=null&&animalObjs[pi]&&!animalObjs[pi].g.visible)continue;if(h.object.userData.weed)return{weed:h.object.userData.weed};if(h.object.userData.pen!=null&&!h.object.isSprite)return{pen:h.object.userData.pen};if(h.object.isSprite&&h.object.userData.pen!=null)return{pen:h.object.userData.pen};if(h.object.userData.tile!=null)return{tile:h.object.userData.tile}}
   return null;
 }
 function hoverAt(e){if(PLACE){placePointer(e,false);hovered=null;return}const p=pickAt(e);hovered=p&&p.worker?null:p;cv.dataset.worker=p&&p.worker?"1":""}
@@ -2376,6 +2382,7 @@ function clickAt(e){
   if(p&&p.drop){openDrop(x,y);return}
   if(p&&p.tshop){openTownShop(p.tshop);return}
   if(p&&p.build!=null&&!SEL){editBuild(p.build);return}
+  if(p&&p.hill&&!SEL){openHill(p.hill);return}
   if(p&&p.worker){selectWorker(SEL===p.worker?null:p.worker);return}
   {const gp=(!p||p.tile!=null||p.pen!=null)?groundPoint(e):null,pp=p&&p.pen!=null&&S.pens[p.pen],pk=pp?(zoneOf(pp.id)==="pen"?pp.id:zoneOf(pp.id)):gp&&penAt(gp.x,gp.z);
     if(pk&&pk!=="farm"&&(TOOL==="move"||TOOL==="care"||TOOL==="harvest")){collectPen(pk,x,y);return}}
@@ -2569,10 +2576,11 @@ function ui(){
   {const lb=$("tLake"),pl=(S.penLv||{}).pond|0,ll=S.lakeLv|0,c=pl<PENUP.length?PENUP[pl]:ll<LAKEUP.length?LAKEUP[ll]:0;lb.disabled=!c;lb.textContent=c?"🌊 Expand Lake · "+c.toLocaleString():"🌊 Lake: Max size"}
   const nx=S.size+1,ex=$("tExpand");
   if(nx<SIZES.length){ex.disabled=false;ex.textContent="Expand "+SIZES[nx]+"×"+SIZES[nx]+" · "+EXPAND[nx]}else{ex.disabled=true;ex.textContent="Fully expanded"}
-  {const own=PLOTS.filter(q=>!q.island&&(S.plots||[]).includes(q.id));$("tMoveLand").hidden=!own.length}
+  {const own=PLOTS.filter(q=>!q.island&&(S.plots||[]).includes(q.id));$("tMoveLand").hidden=!own.length;$("tHills").hidden=!(S.hillGone||[]).length||!!VISIT}
   {const np=nextPlot(),bp=$("tPlot");if(np){bp.disabled=false;bp.textContent="Buy "+np.n+" · "+np.cost.toLocaleString()+(S.lv<np.lv?" · Level "+np.lv:"")}else{bp.disabled=true;bp.textContent="You bought all the land"}}
 }
 $("tPlow").onclick=plowAll;$("tAll").onclick=harvestAll;$("tExpand").onclick=expand;
+$("tHills").onclick=restoreHills;$("hillMove").onclick=()=>{const id=HILLSEL;if(id)startHillMove(id)};$("hillRm").onclick=removeHill;$("hillGrow").onclick=growHill;$("hillDone").onclick=closeHill;
 $("tMoveLand").onclick=()=>{if(VISIT)return;const own=PLOTS.filter(q=>!q.island&&(S.plots||[]).includes(q.id));if(own.length===1)return startPlotMove(own[0].id);const L=$("plotList");L.textContent="";
   own.forEach(q=>{const b=document.createElement("button");b.className="btn";b.type="button";b.textContent=q.n;b.onclick=()=>{$("plotM").hidden=true;startPlotMove(q.id)};L.append(b)});$("plotM").hidden=false};
 $("plotClose").onclick=()=>{$("plotM").hidden=true};$("tLake").onclick=expandLake;
@@ -2927,10 +2935,42 @@ function endEdit(){EDIT=-1;$("editBar").hidden=true}
 function rotEdit(){const o=(S.builds||[])[EDIT];if(!o)return endEdit();o.r=((o.r||0)+Math.PI/4)%(Math.PI*2);const g=BUILDG.children[EDIT];if(g)g.rotation.y=o.r;save()};
 function moveEdit(){const i=EDIT;const o=(S.builds||[])[i];endEdit();if(!o)return;S.builds.splice(i,1);renderBuilds();startPlace(o.id,false,o)};
 $("editDone").onclick=endEdit;$("editRot").onclick=rotEdit;$("editMove").onclick=moveEdit;
-const MTNS=[[-22,-30,6],[-14,-33,7],[-5,-31,6.5],[3,-35,8],[12,-31,7],[15,-37,7.5],[-37,-19,6],[-38,7,5.5],[-28,-22,5]];
+const HILLG=new THREE.Group();scene.add(HILLG);const HILLHITS=[];let _hillK=null,HILLSEL=null;
+function buildHills(){const k=JSON.stringify([S.hillPos||{},S.hillGone||[],S.hillLv||{}]);if(k===_hillK)return;_hillK=k;while(HILLG.children.length)HILLG.remove(HILLG.children[0]);HILLHITS.length=0;HILLG.userData.snow=null;
+  const b=new Builder(),sn=new Builder();let any=false;HILLS.forEach((H,n)=>{if(!hillOn(H))return;any=true;const [x,z]=hillXZ(H),h=H.h*hs(H),rad=H.rad*hs(H),r=rnd(91+n*17);
+    b.add("cone",0x5fae38,x,h*.1,z,rad*1.35,h*.2,rad*1.3,0,r()*3,0);b.add("cone",0x4f8a3a,x,h*.18,z,rad*1.2,h*.36,rad*1.15,0,r()*3,0);
+    b.add("cone",mix(0x8d9497,0x7a8286,r()),x,h/2,z,rad,h,rad*.95,0,r()*3,0);b.add("cone",0x6f777b,x+rad*.35,h*.32,z+rad*.2,rad*.55,h*.6,rad*.5,0,r()*3,0);
+    b.add("cone",0xf4f7f8,x,h*.84,z,rad*.34,h*.34,rad*.33,0,0,0);sn.add("cone",0xffffff,x,h*.62,z,rad*.62,h*.4,rad*.6,0,0,0);
+    for(let q=0;q<7;q++){const a=r()*Math.PI*2,d=rad*(.95+r()*.25);b.add("ico",[0x8d9497,0x9aa1a4,0x737b7f][q%3],x+Math.cos(a)*d,.25,z+Math.sin(a)*d,.45+r()*.4,.35+r()*.3,.4+r()*.4,0,r()*3,0)}
+    for(let q=0;q<11;q++){const a=r()*Math.PI*2,d=rad*(1.05+r()*.3);b.add("cyl",0x7a4a24,x+Math.cos(a)*d,.3,z+Math.sin(a)*d,.1,.6,.1);b.add("cone",r()<.5?0x2f7f28:0x3d9331,x+Math.cos(a)*d,1.2,z+Math.sin(a)*d,.5,1.6,.5)}
+    for(let q=0;q<26;q++){const a=r()*Math.PI*2,d=rad*(1.15+r()*.35),c=[0xffffff,0xffd84a,0xff7bb0,0xb48cff][q%4];b.add("sph",0x3f8f2c,x+Math.cos(a)*d,.08,z+Math.sin(a)*d,.12,.08,.12);b.add("sph",c,x+Math.cos(a)*d,.16,z+Math.sin(a)*d,.07,.05,.07)}
+    const hit=new THREE.Mesh(new THREE.CylinderGeometry(rad,rad*1.2,h*.8,12),new THREE.MeshBasicMaterial({visible:false}));hit.position.set(x,h*.4,z);hit.userData.hill=H.id;HILLG.add(hit);HILLHITS.push(hit)});
+  if(!any)return;HILLG.add(b.mesh());const sm=new THREE.Mesh(sn.geo(),SNOWMAT);sm.visible=!!(SNOWMESH&&SNOWMESH.visible);HILLG.add(sm);HILLG.userData.snow=sm}
+function openHill(id){const H=HILLS.find(q=>q.id===id);if(!H||VISIT)return;HILLSEL=id;const lv=(S.hillLv||{})[id]|0,c=HILL_UP[lv];$("hillTxt").textContent="⛰️ Hill · Size "+(lv+1)+" · move it, make it bigger, or remove it";const gb=$("hillGrow");gb.textContent=c?"⬆ Bigger · "+c.toLocaleString():"Biggest size";gb.disabled=!c;$("hillBar").hidden=false}
+function growHill(){const id=HILLSEL;if(!id)return;const H=HILLS.find(q=>q.id===id),lv=(S.hillLv||{})[id]|0,c=HILL_UP[lv];if(!c)return toast("This hill is already at its biggest.");if(S.coins<c)return toast("You need "+c.toLocaleString()+" coins to make the hill bigger.");
+  const old=S.hillLv;S.hillLv=Object.assign({},old||{},{[id]:lv+1});const [x,z]=hillXZ(H),why=validHill(id,x,z);if(why){S.hillLv=old;return toast("No room to grow here: "+why+" Move the hill first.",3600)}
+  S.coins-=c;closeHill();buildHills();try{landDeco()}catch(e){}burst(x,2,z,0x5fae38,30,.8);after();toast("⛰️ The hill grew bigger!",2600)}
+function closeHill(){HILLSEL=null;$("hillBar").hidden=true}
+function removeHill(){const id=HILLSEL;closeHill();if(!id)return;if(S.coins<HILL_RM)return toast("You need "+HILL_RM+" coins to clear the hill.");S.coins-=HILL_RM;const H=HILLS.find(q=>q.id===id),[x,z]=hillXZ(H);
+  S.hillGone=(S.hillGone||[]).concat(id);buildHills();try{landDeco()}catch(e){}burst(x,1,z,0x9aa1a4,30,.8);after();toast("⛰️ The hill is gone. Now it's flat grass you can build on.",3200)}
+function restoreHills(){if(!(S.hillGone||[]).length)return;const back=S.hillGone.filter(id=>{const H=HILLS.find(q=>q.id===id),[x,z]=hillXZ(H),R=H.rad*hs(H)*1.3;return !(S.builds||[]).some(o=>Math.hypot(o.x-x,o.z-z)<R)&&!Object.values(PENS).some(P=>x>P.x0-R&&x<P.x1+R&&z>P.z0-R&&z<P.z1+R)});
+  if(!back.length)return toast("Something is built where the hills were. Move it first.",3200);S.hillGone=S.hillGone.filter(id=>!back.includes(id));buildHills();try{landDeco()}catch(e){}after();toast("⛰️ The hills are back.",2400)}
+function validHill(id,x,z){const H=HILLS.find(q=>q.id===id),R=H.rad*hs(H)*1.3;if(x<-40||x>14||z<-30||z>50)return"Too close to the edge of the farm.";
+  if(Math.abs(z+8)<R+1.4&&x<-3)return"That covers the road.";
+  for(const [mx,mz,mr] of mtns(id))if(Math.hypot(x-mx,z-mz)<R+mr*1.1)return"Too close to another mountain.";
+  for(const a of layout())if(!(a.p&&a.p.island)){const cx=Math.max(a.x0,Math.min(a.x0+a.n,x)),cz=Math.max(a.z0,Math.min(a.z0+a.n,z));if(Math.hypot(x-cx,z-cz)<R+.3)return a.p?"That covers "+a.p.n+".":"That covers the main field."}
+  for(const q of PLOTS){if(q.island)continue;const m=q.sz||PN,cx=Math.max(q.x0,Math.min(q.x0+m,x)),cz=Math.max(q.z0,Math.min(q.z0+m,z));if(Math.hypot(x-cx,z-cz)<R+.3)return"That covers "+q.n+"."}
+  for(const k in PENS){const P=PENS[k],cx=Math.max(P.x0,Math.min(P.x1,x)),cz=Math.max(P.z0,Math.min(P.z1,z));if(Math.hypot(x-cx,z-cz)<R+.4)return"That covers the "+P.n+"."}
+  for(const o of S.builds||[]){const d=BUILDS.find(q=>q.id===o.id);if(Math.hypot(x-o.x,z-o.z)<R+(d?d.r:1.5)*.75)return(d?d.n:"A building")+" is in the way."}
+  for(const T of FTREES)if(Math.hypot(x-T.x,z-T.z)<R)return"A tree is in the way. Move it or chop it first.";
+  for(let a=0;a<16;a++){const px=x+Math.cos(a/16*Math.PI*2)*R,pz=z+Math.sin(a/16*Math.PI*2)*R;if(farmH(px,pz)<-.03||farmH(x,z)<-.03)return"Can't put a hill on water."}
+  if(Math.hypot(x-CF.x,z-CF.z)<R+1.6)return"That covers the bonfire.";if(x>-2-R&&x<6.4+R&&z>-11-R&&z<-6.2+R)return"That covers the barn.";
+  return""}
+function startHillMove(id){const H=HILLS.find(q=>q.id===id);if(!H)return;closeHill();cancelPlace();const [x,z]=hillXZ(H),g=new THREE.Group(),m=new THREE.Mesh(new THREE.ConeGeometry(H.rad*hs(H)*1.2,H.h*hs(H),16),GHOSTMAT);m.position.y=H.h*hs(H)/2;g.add(m);scene.add(g);
+  PLACE={hill:id,g,d:{n:"Hill",r:H.rad*hs(H)},r:0,ok:false,x,z};updateGhost(x,z);$("placeRot").hidden=true;$("placeBar").hidden=false;$("placeTxt").textContent="Move the hill · drag it and let go, or tap where it should go";setTool("move")}
 function validPlace(x,z,R0,skipT){const r=R0*.75;
   if(x<-33||x>16.5||z<-23||z>50)return false;if(farmH(x,z)<-.03)return false;
-  for(const [mx,mz,mr] of MTNS)if(Math.hypot(x-mx,z-mz)<mr*1.25+r)return false;
+  for(const [mx,mz,mr] of mtns())if(Math.hypot(x-mx,z-mz)<mr*1.25+r)return false;
   for(const a of layout())if(!(a.p&&a.p.island)&&x>a.x0-r-.2&&x<a.x0+a.n+r+.2&&z>a.z0-r-.2&&z<a.z0+a.n+r+.2)return false;
   for(const p of PLOTS)if(!p.island&&x>p.x0-r-.2&&x<p.x0+(p.sz||PN)+r+.2&&z>p.z0-r-.2&&z<p.z0+(p.sz||PN)+r+.2)return false;
   if(inAnyPen(x,z,r+.2))return false;
@@ -2953,7 +2993,7 @@ function validPlot(p,x0,z0){const N=PN,x1=x0+N,z1=z0+N;if(x0<-33||x1>16.5||z0<-2
   const a=layout()[0];if(x0<a.x0+a.n&&x1>a.x0&&z0<a.z0+a.n&&z1>a.z0)return"That covers the main field.";
   for(const q of PLOTS)if(!q.island&&q.id!==p.id&&(S.plots||[]).includes(q.id)&&x0<q.x0+PN&&x1>q.x0&&z0<q.z0+PN&&z1>q.z0)return"That covers "+q.n+".";
   for(let x=x0;x<=x1;x+=.5)for(let z=z0;z<=z1;z+=.5){if(farmH(x,z)<-.03)return"Can't put land on water.";if(inAnyPen(x,z,.1))return"That covers an animal pen.";if(z>-9.6&&z<-6.4&&x<-3.5)return"That covers the road.";
-    for(const [mx,mz,mr] of MTNS)if(Math.hypot(x-mx,z-mz)<mr*1.25)return"Too close to the mountain.";if(Math.hypot(x-CF.x,z-CF.z)<1.6)return"That covers the bonfire.";
+    for(const [mx,mz,mr] of mtns())if(Math.hypot(x-mx,z-mz)<mr*1.25)return"Too close to the mountain.";if(Math.hypot(x-CF.x,z-CF.z)<1.6)return"That covers the bonfire.";
     for(let i=0;i<RIVER.length-1;i++)if(segDist(x,z,RIVER[i][0],RIVER[i][1],RIVER[i+1][0],RIVER[i+1][1])<.8)return"That covers the river."}
   for(const o of S.builds||[]){const d=BUILDS.find(q=>q.id===o.id),r=(d?d.r:1.5)*.75;if(o.x>x0-r&&o.x<x1+r&&o.z>z0-r&&o.z<z1+r)return"A building is in the way."}
   for(const T of FTREES)if(T.x>x0-.3&&T.x<x1+.3&&T.z>z0-.3&&T.z<z1+.3)return"A tree is in the way. Have a helper chop it first.";
@@ -2963,7 +3003,7 @@ function validPen(id,x0,x1,z0,z1){if(x0<-32||x1>16.5||z0<-23||z1>50)return"Too c
   for(const a of layout())if(!(a.p&&a.p.island)&&x0<a.x0+a.n+.4&&x1>a.x0-.4&&z0<a.z0+a.n+.4&&z1>a.z0-.4)return a.p?"That covers "+a.p.n+".":"That covers the main field.";
   for(const q of PLOTS){if(q.island)continue;const m=q.sz||PN;if(x0<q.x0+m+.3&&x1>q.x0-.3&&z0<q.z0+m+.3&&z1>q.z0-.3)return"That covers "+q.n+" (land for sale).";}
   if(z0<-6.4&&z1>-9.6&&x0<-3.5)return"That covers the road.";if(x0<6.4&&x1>-2&&z0<-6.2&&z1>-11)return"That covers the barn.";if(x0<8.6&&x1>6.6&&z0<1.6&&z1>-3.2)return"Something is in the way.";
-  for(let x=x0;x<=x1+.01;x+=.5)for(let z=z0;z<=z1+.01;z+=.5){if(farmH(x,z)<-.03)return"Can't put a pen on water.";for(const [mx,mz,mr] of MTNS)if(Math.hypot(x-mx,z-mz)<mr*1.25)return"Too close to the mountain.";
+  for(let x=x0;x<=x1+.01;x+=.5)for(let z=z0;z<=z1+.01;z+=.5){if(farmH(x,z)<-.03)return"Can't put a pen on water.";for(const [mx,mz,mr] of mtns())if(Math.hypot(x-mx,z-mz)<mr*1.25)return"Too close to the mountain.";
     if(Math.hypot(x-CF.x,z-CF.z)<1.8)return"That covers the bonfire.";if(((x-POND.x)/(POND.rx+.8))**2+((z-POND.z)/(POND.rz+.8))**2<1)return"That covers the lake."}
   for(const o of S.builds||[]){const d=BUILDS.find(q=>q.id===o.id),r=(d?d.r:1.5)*.75;if(o.x>x0-r&&o.x<x1+r&&o.z>z0-r&&o.z<z1+r)return(d?d.n:"A building")+" is in the way."}
   for(const T of FTREES)if(T.x>x0-.4&&T.x<x1+.4&&T.z>z0-.4&&T.z<z1+.4)return"A tree is in the way. Move the tree or chop it first.";
@@ -2977,6 +3017,7 @@ function startPlotMove(id,noCam){const p=PLOTS.find(q=>q.id===id);if(!p)return;c
   PLACE={plot:p,g,d:{n:p.n,r:0},r:0,ok:false,x0:p.x0,z0:p.z0};updateGhost(p.x0+PN/2,p.z0+PN/2);if(!noCam){cam.follow=false;Object.assign(camT,{tx:p.x0+PN/2,tz:p.z0+PN/2,dist:Math.max(camT.dist,30)})}
   $("placeRot").hidden=true;$("placeBar").hidden=false;$("placeTxt").textContent="Move "+p.n+" · tap where it should go (it snaps next to other land) · or press and hold the land to drag it";setTool("move")}
 function updateGhost(x,z){if(!PLACE)return;
+  if(PLACE.hill){PLACE.x=x;PLACE.z=z;PLACE.g.position.set(x,0,z);PLACE.why=validHill(PLACE.hill,x,z);PLACE.ok=!PLACE.why;GHOSTMAT.color.setHex(PLACE.ok?0x7fe08a:0xff6a5a);$("placeOk").disabled=!PLACE.ok;return}
   if(PLACE.pen){const x0=Math.round((x-PLACE.w/2)*2)/2,z0=Math.round((z-PLACE.dd/2)*2)/2;PLACE.x0=x0;PLACE.z0=z0;PLACE.g.position.set(x0,0,z0);PLACE.why=validPen(PLACE.pen,x0,x0+PLACE.w,z0,z0+PLACE.dd);PLACE.ok=!PLACE.why;GHOSTMAT.color.setHex(PLACE.ok?0x7fe08a:0xff6a5a);$("placeOk").disabled=!PLACE.ok;return}
   if(PLACE.tree){PLACE.x=x;PLACE.z=z;PLACE.g.position.set(x,0,z);PLACE.ok=validPlace(x,z,.9,PLACE.tree)&&!inAnyPen(x,z,.6);PLACE.why=PLACE.ok?"":"Can't put the tree there. Pick an empty grassy spot.";GHOSTMAT.color.setHex(PLACE.ok?0x7fe08a:0xff6a5a);$("placeOk").disabled=!PLACE.ok;return}
   if(PLACE.plot){let x0=Math.round(x-PN/2),z0=Math.round(z-PN/2);
@@ -2985,6 +3026,8 @@ function updateGhost(x,z){if(!PLACE)return;
     PLACE.x0=x0;PLACE.z0=z0;PLACE.g.position.set(x0,0,z0);PLACE.why=validPlot(PLACE.plot,x0,z0);PLACE.ok=!PLACE.why;GHOSTMAT.color.setHex(PLACE.ok?0x7fe08a:0xff6a5a);$("placeOk").disabled=!PLACE.ok;return}PLACE.x=x;PLACE.z=z;PLACE.g.position.set(x,0,z);PLACE.ok=validPlace(x,z,PLACE.d.r);GHOSTMAT.color.setHex(PLACE.ok?0x7fe08a:0xff6a5a);$("placeOk").disabled=!PLACE.ok}
 function cancelPlace(){$("placeRot").hidden=false;if(PLACE){scene.remove(PLACE.g);if(PLACE.moving){S.builds=(S.builds||[]).concat(PLACE.moving);renderBuilds()}PLACE=null}$("placeBar").hidden=true}
 function confirmPlace(){
+  if(PLACE&&PLACE.hill){if(!PLACE.ok)return toast(PLACE.why||"Can't put the hill there.");const id=PLACE.hill,x=+PLACE.x.toFixed(2),z=+PLACE.z.toFixed(2);S.hillPos=Object.assign({},S.hillPos||{},{[id]:[x,z]});
+    scene.remove(PLACE.g);PLACE=null;$("placeBar").hidden=true;$("placeRot").hidden=false;hovered=null;buildHills();try{landDeco()}catch(e){}burst(x,1,z,0x9aa1a4,22,.7);after();return toast("⛰️ Moved the hill.",2200)}
   if(PLACE&&PLACE.pen){if(!PLACE.ok)return toast(PLACE.why||"Can't put the pen there.");const id=PLACE.pen,P=PENS[id],ex=penSz(id)*PENGROW,B=PENS0[id];
     S.penPos=Object.assign({},S.penPos||{},{[id]:[+(PLACE.x0+PLACE.w).toFixed(2),+PLACE.z0.toFixed(2)]});scene.remove(PLACE.g);PLACE=null;$("placeBar").hidden=true;$("placeRot").hidden=false;hovered=null;syncPenLayout();
     const Q=PENS[id];burst((Q.x0+Q.x1)/2,.5,(Q.z0+Q.z1)/2,0xc98a4b,22,.5);after();return toast("📐 Moved the "+P.n+".",2400)}
@@ -4040,7 +4083,7 @@ $("rdForm").onsubmit=async e=>{e.preventDefault();$("rdErr").textContent="";$("r
   try{const g=await redeemCode($("rdCode").value);$("redeem").hidden=true;const parts=[];if(g.c)parts.push("+"+g.c.toLocaleString()+" coins");if(g.w)parts.push("+"+g.w.toLocaleString()+" wood");toast("🎁 Gift received: "+(parts.join(" and ")||"nothing")+"!",4200);const r=$("tRedeem").getBoundingClientRect();floatText(parts.join(" "),r.left+r.width/2,r.top)}
   catch(err){$("rdErr").textContent=err.message||"Couldn't redeem that code."}$("rdGo").disabled=false};
 function stepFarm2(dt,t){
-  buildTrees();buildPenX();ensureHelper2();stepFalling(dt);FTREES.forEach((T,k)=>{const gr=treeGrow(k);if(T.born!=null)T.g.scale.setScalar(.3+.7*gr);if(T.fruit)T.fruit.visible=gr>=1&&treeLeft(k)<=0});
+  buildTrees();buildHills();buildPenX();ensureHelper2();stepFalling(dt);FTREES.forEach((T,k)=>{const gr=treeGrow(k);if(T.born!=null)T.g.scale.setScalar(.3+.7*gr);if(T.fruit)T.fruit.visible=gr>=1&&treeLeft(k)<=0});
   if(VISIT){AD.g.visible=false}else if(!AD.on){if(!S.inTown){AD.t-=dt;if(AD.t<=0)spawnDrop()}}else AD.g.visible=true;
   if(!AD.on){}
   else{const g=AD.g;if(!AD.land){AD.y=Math.max(0,AD.y-dt*1.8);g.position.y=AD.y;g.rotation.y+=dt*.6;g.rotation.z=Math.sin(t*1.7)*.08;if(AD.y<=0){AD.land=true;g.rotation.z=0;AD.chute.visible=false;AD.ring.visible=true;burst(g.position.x,.2,g.position.z,0xd8c8a0,14,.3)}}
