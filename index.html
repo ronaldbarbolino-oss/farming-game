@@ -1415,23 +1415,64 @@ function initFarmer(){
   farmer={...f,o:{state:"idle",st:1.5,cr:0,target:null,tx:.5,tz:-3.8,carry:null}};
 }
 function nearestWeed(){let best=null,bd=1e9;const p=farmer.g.position;weeds.forEach(w=>{if(w.state!=="ground"||w.claim)return;const d=Math.hypot(w.x-p.x,w.z-p.z);if(d<bd){bd=d;best=w}});return best}
+/* ================= FREE TIME: when nobody gives orders, the farmers swim, sit by the bonfire, dance or nap ================= */
+const CF={x:15.6,z:-.4};const FIRE={flames:[],embers:[],light:null};
+(function campfire(){const b=new Builder();
+  for(let k=0;k<10;k++){const a=k/10*Math.PI*2;b.add("ico",[0x8d9497,0x7a8286,0x9aa1a4][k%3],CF.x+Math.cos(a)*.55,.08,CF.z+Math.sin(a)*.55,.17,.12,.15,0,a,0)}
+  [[0,.5],[Math.PI/2,.5],[Math.PI/4,.45]].forEach(([a])=>b.add("cyl",0x6b4422,CF.x,.12,CF.z,.07,.75,.07,Math.PI/2,a,0));
+  b.add("cyl",0x3a2615,CF.x,.03,CF.z,.42,.02,.42);
+  [0,2.1,4.2].forEach((a,k)=>{const x=CF.x+Math.cos(a)*1.55,z=CF.z+Math.sin(a)*1.55;b.add("cyl",0x8a5a2a,x,.2,z,.2,1.1,.2,Math.PI/2,-a+Math.PI/2,0);b.add("cyl",0xb08a5a,x+Math.cos(a+Math.PI/2)*.55,.2,z+Math.sin(a+Math.PI/2)*.55,.17,.02,.17,0,0,Math.PI/2)});
+  scene.add(b.mesh());
+  const FC=[0xff5a1a,0xff9a2a,0xffd84a];for(let k=0;k<5;k++){const m=new THREE.Mesh(new THREE.ConeGeometry(.16-k*.015,.6,6),new THREE.MeshBasicMaterial({color:FC[k%3],transparent:true,opacity:.9,depthWrite:false}));m.position.set(CF.x+(k-2)*.07,.35,CF.z+((k*7)%3-1)*.06);m.userData.ph=k*1.7;scene.add(m);FIRE.flames.push(m)}
+  for(let k=0;k<6;k++){const m=new THREE.Mesh(new THREE.SphereGeometry(.03,6,4),new THREE.MeshBasicMaterial({color:0xffb030,transparent:true}));m.userData.ph=k/6;scene.add(m);FIRE.embers.push(m)}
+  FIRE.light=new THREE.PointLight(0xff9a40,0,7,2);FIRE.light.position.set(CF.x,.8,CF.z);scene.add(FIRE.light);
+  const sg=labelSprite("Bonfire");sg.position.set(CF.x,1.6,CF.z);sg.scale.set(1.2,.3,1);scene.add(sg)})();
+function stepFire(dt,t){const h=typeof phHour==="function"?phHour():12,dark=1-daylight(h),wet=isBad();
+  FIRE.flames.forEach(m=>{const s=1+.25*Math.sin(t*11+m.userData.ph)+.15*Math.sin(t*17+m.userData.ph*2);m.scale.set(1,s*(wet?.5:1),1);m.rotation.y=t*2+m.userData.ph;m.visible=true});
+  FIRE.embers.forEach(m=>{const u=(t*.6+m.userData.ph)%1;m.position.set(CF.x+Math.sin(m.userData.ph*30+t)*.25*u,.4+u*1.8,CF.z+Math.cos(m.userData.ph*20)*.2*u);m.material.opacity=1-u});
+  FIRE.light.intensity=(.4+dark*1.8)*(1+.15*Math.sin(t*13))*(wet?.4:1)}
+function funStart(f){const o=f.o,night=isNight();let r=Math.random(),k;
+  if(night)k=r<.65?"fire":r<.8?"dance":"nap";else k=r<.35?"swim":r<.55?"fire":r<.78?"dance":"nap";
+  const F={k,ph:"go",t:0,dur:0};
+  if(k==="swim"){const a=Math.random()*Math.PI*2;F.a=a;F.ex=PONDS.x+Math.cos(a)*2.75*PONDS.s;F.ez=PONDS.z+Math.sin(a)*2.15*PONDS.s;F.dur=14+Math.random()*8}
+  else if(k==="fire"){const i=f===farmer?0:HELPERS.indexOf(f)+1,a=[0,2.1,4.2][i%3]+.25;F.tx=CF.x+Math.cos(a)*1.25;F.tz=CF.z+Math.sin(a)*1.25;F.dur=20+Math.random()*15}
+  else if(k==="nap"){const T=FTREES.filter((q,i)=>treeGrow(i)>=1);const p=T.length?T[Math.floor(Math.random()*T.length)]:null;if(p){F.tx=p.x+1.1;F.tz=p.z+.4}else{F.tx=f.g.position.x;F.tz=f.g.position.z}F.dur=15+Math.random()*10}
+  else{F.ph="do";F.dur=6+Math.random()*4}
+  o.fun=F;o.state="fun"}
+function funEnd(f){const o=f.o;if(!o.fun)return;o.fun=null;f.g.position.y=0;f.g.rotation.x=0;f.g.rotation.z=0;if(o.state==="fun"){o.state="idle";o.st=.5}}
+function funTick(f,dt,t,walkTo){const o=f.o,F=o.fun,g=f.g,P={crT:0,armL:0,armR:0};if(!F){o.state="idle";return P}F.t+=dt;
+  if(F.k==="swim"){
+    if(F.ph==="go"){if(walkTo(F.ex,F.ez,1.2)){F.ph="do";F.t=0}}
+    else if(F.ph==="do"){const w=F.a+F.t*.35,cx=PONDS.x+Math.cos(w)*1.3*PONDS.s,cz=PONDS.z+Math.sin(w)*.95*PONDS.s;g.position.x+=(cx-g.position.x)*Math.min(1,dt*1.5);g.position.z+=(cz-g.position.z)*Math.min(1,dt*1.5);
+      g.position.y+=(-.5-g.position.y)*Math.min(1,dt*3);g.rotation.y=-(w+Math.PI/2);g.rotation.z=-.5;P.armL=2.6+Math.sin(t*5)*1.4;P.armR=2.6-Math.sin(t*5)*1.4;
+      if(Math.random()<dt*2)burst(g.position.x,.0,g.position.z,0xffffff,3,.3);if(F.t>F.dur){F.ph="out";g.rotation.z=0}}
+    else{g.position.y+=(0-g.position.y)*Math.min(1,dt*4);if(walkTo(F.ex,F.ez,1)){g.position.y=0;F.ph="dry";F.t=0}}
+    if(F.ph==="dry"){P.armR=2.7+Math.sin(t*10)*.15;if(F.t>1.6)funEnd(f)}}
+  else if(F.k==="fire"){if(F.ph==="go"){if(walkTo(F.tx,F.tz,1.1)){F.ph="do";F.t=0}}
+    else{P.crT=1;g.rotation.y=Math.atan2(-(CF.z-g.position.z),CF.x-g.position.x);P.armL=P.armR=1.3+Math.sin(t*1.5)*.15;if(Math.floor(F.t/6)%2)P.armR=1.9;if(F.t>F.dur||isBad())funEnd(f)}}
+  else if(F.k==="nap"){if(F.ph==="go"){if(walkTo(F.tx,F.tz,.9)){F.ph="do";F.t=0}}
+    else{g.rotation.x+=(-1.45-g.rotation.x)*Math.min(1,dt*3);g.position.y=.12;P.armL=P.armR=.2;if(F.t>F.dur){g.rotation.x=0;g.position.y=0;funEnd(f)}}}
+  else{P.crT=.15+.15*Math.sin(t*8);P.armL=2.5+Math.sin(t*8)*.5;P.armR=2.5+Math.cos(t*8)*.5;g.rotation.y+=dt*1.2;if(F.t>F.dur)funEnd(f)}
+  return P}
+const FUNTXT={swim:"Swimming in the lake",fire:"Warming up by the bonfire",dance:"Dancing",nap:"Napping under a tree"};
 function stepFarmer(dt,t){
-  if(!farmer)return;if(runQueue(farmer,dt,t))return;const f=farmer,o=f.o,g=f.g;
+  if(farmer&&farmer.o.fun&&farmer.o.queue&&farmer.o.queue.length)funEnd(farmer);if(!farmer)return;if(runQueue(farmer,dt,t))return;const f=farmer,o=f.o,g=f.g;
   let walking=false,crT=0,armL=0,armR=0,tug=0,legSpread=0;
   o.st-=dt;
   const walkTo=(x,z,sp)=>{const dx=x-g.position.x,dz=z-g.position.z,d=Math.hypot(dx,dz);if(d<.04)return true;
     const want=Math.atan2(-dz,dx);let da=want-g.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));g.rotation.y+=da*Math.min(1,dt*6);
     if(Math.abs(da)<.8){g.position.x+=dx/d*Math.min(sp*dt,d);g.position.z+=dz/d*Math.min(sp*dt,d)}walking=true;return false};
   const badW=isBad();
-  if(badW&&o.state!=="shelter"){if(o.target){o.target.claim=false;o.target=null}if(o.carry){removeWeed(o.carry);o.carry=null}o.state="shelter"}
+  if(badW&&o.state!=="shelter"){funEnd(f);if(o.target){o.target.claim=false;o.target=null}if(o.carry){removeWeed(o.carry);o.carry=null}o.state="shelter"}
   if(!badW&&o.state==="shelter"){g.visible=true;o.state="idle";o.st=.5}
   switch(o.state){
     case "shelter":if(walkTo(.5,-6.75,1.6))g.visible=false;break;
     case "idle":
       if(o.st<=0){const w=nearestWeed();if(w){w.claim=true;o.target=w;o.state="go"}
-        else{const r=Math.random();if(r<.35){o.state="wipe";o.st=1.8}else{o.state="stroll";const n=SIZES[S.size];o.tx=FX0-.5+Math.random()*(n+1);o.tz=FZ0-.5;if(Math.random()<.5){o.tx=FX0-.55;o.tz=FZ0+Math.random()*n}}}}
+        else{const r=Math.random();if(r<.4&&!badW){funStart(f);break}if(r<.55){o.state="wipe";o.st=1.8}else{o.state="stroll";const n=SIZES[S.size];o.tx=FX0-.5+Math.random()*(n+1);o.tz=FZ0-.5;if(Math.random()<.5){o.tx=FX0-.55;o.tz=FZ0+Math.random()*n}}}}
       break;
     case "stroll":if(walkTo(o.tx,o.tz,.9)){o.state="idle";o.st=.8+Math.random()*1.5}break;
+    case "fun":{const P=funTick(f,dt,t,walkTo);crT=P.crT;armL=P.armL;armR=P.armR;break}
     case "wipe":armR=2.7+Math.sin(t*10)*.15;f.head.rotation.z=.15;if(o.st<=0){o.state="idle";o.st=.5;f.head.rotation.z=0}break;
     case "go":{
       const w=o.target;if(!w||w.state!=="ground"){o.state="idle";o.st=.3;break}
@@ -2413,16 +2454,16 @@ function helperHarvest(i){const t=S.tiles[i],st=tileState(t);if(!st||st.p<1)retu
   after()}
 function helperUI(){const b=$("tHelper");if(!b)return;b.textContent=S.helperOn?"Helper: Working":"Helper: Resting";b.classList.toggle("alt",!S.helperOn)}
 function stepHelper(dt,t){
-  if(!helper)return;if(runQueue(helper,dt,t))return;const f=helper,o=f.o,g=f.g,SP=spdOf(helper);let walking=false,crT=0,armL=0,armR=0;o.st-=dt*SP;
+  if(helper&&helper.o.fun&&helper.o.queue&&helper.o.queue.length)funEnd(helper);if(!helper)return;if(runQueue(helper,dt,t))return;const f=helper,o=f.o,g=f.g,SP=spdOf(helper);let walking=false,crT=0,armL=0,armR=0;o.st-=dt*SP;
   const walkTo=(x,z,sp)=>{sp*=SP;const dx=x-g.position.x,dz=z-g.position.z,d=Math.hypot(dx,dz);if(d<.05)return true;
     const want=Math.atan2(-dz,dx);let da=want-g.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));g.rotation.y+=da*Math.min(1,dt*6);
     if(Math.abs(da)<.8){g.position.x+=dx/d*Math.min(sp*dt,d);g.position.z+=dz/d*Math.min(sp*dt,d)}walking=true;return false};
   const rest=!(helper.key==="helper2"?S.helper2On!==false:S.helperOn)||isBad()||!!VISIT;
-  if(rest&&o.state!=="rest"){o.state="rest";o.tile=-1}
+  if(rest&&o.state!=="rest"){funEnd(f);o.state="rest";o.tile=-1}
   if(!rest&&o.state==="rest"){g.visible=true;o.state="idle";o.st=.4}
   switch(o.state){
     case "rest":if(walkTo(1.1,-6.75,1.6))g.visible=false;break;
-    case "idle":if(o.st<=0){const i=ripeIdx(),j=i<0?soilIdx():-1,tr=i<0&&j<0?ripeTree():null;if(i>=0){o.tile=i;o.state="go"}else if(j>=0){o.tile=j;o.state="goP"}else if(tr){o.tree=tr;o.state="goT"}else if(autoJobPush(helper)){o.st=.4}else{const n=SIZES[S.size];o.state="wait";o.tx=FX0-.85;o.tz=FZ0+.5+Math.random()*(n-1)}}break;
+    case "idle":if(o.st<=0){const i=ripeIdx(),j=i<0?soilIdx():-1,tr=i<0&&j<0?ripeTree():null;if(i>=0){o.tile=i;o.state="go"}else if(j>=0){o.tile=j;o.state="goP"}else if(tr){o.tree=tr;o.state="goT"}else if(autoJobPush(helper)){o.st=.4}else if(Math.random()<.45){funStart(helper)}else{const n=SIZES[S.size];o.state="wait";o.tx=FX0-.85;o.tz=FZ0+.5+Math.random()*(n-1)}}break;
     case "wait":{const i=ripeIdx();if(i>=0){o.tile=i;o.state="go";break}const j=soilIdx();if(j>=0){o.tile=j;o.state="goP";break}if(walkTo(o.tx,o.tz,.8)){o.state="look";o.st=1.5+Math.random()*2}break}
     case "look":{const i=ripeIdx();if(i>=0){o.tile=i;o.state="go";break}if(o.st<=0){o.state="idle";o.st=0}break}
     case "go":{const st=tileState(S.tiles[o.tile]);if(!st||st.p<1){o.state="idle";o.st=0;break}
@@ -2437,6 +2478,7 @@ function stepHelper(dt,t){
     case "plantP":crT=1;armR=.9+Math.sin(t*10)*.35;if(o.st<=0){const [x,z]=tileXZ(o.tile),sc=toScreen(x,1.3,z);if(plantAt(o.tile,S.sel,sc.x,sc.y,true))after();o.tile=-1;o.state="stand";o.st=.2}break;
     case "pick":crT=1;armL=armR=.95+Math.sin(t*14)*.25;if(o.st<=0){helperHarvest(o.tile);o.tile=-1;o.state="stand";o.st=.25}break;
     case "stand":armR=2.2;if(o.st<=0){o.state="idle";o.st=0}break;
+    case "fun":{const i=ripeIdx();if(i>=0&&o.fun&&o.fun.k!=="swim"){funEnd(f);o.tile=i;o.state="go";break}const P=funTick(f,dt,t,walkTo);crT=P.crT;armL=P.armL;armR=P.armR;break}
   }
   f.fill.visible=o.carry>0;
   o.cr=lerp(o.cr,crT,Math.min(1,dt*8));const sw=walking?Math.sin(t*11):0;
@@ -2574,6 +2616,7 @@ function wStatus(k){const W=CREW[k];if(!W)return"";const o=W.o,q=o.queue&&o.queu
   if(q){const n=TASKN[q.type];return(q.phase==="work"?n:q.type==="walk"?"Walking there":"On the way: "+n.toLowerCase())+(o.queue.length>1?" · "+o.queue.length+" orders":"")}
   if(!wAuto(k))return o.resting?"Resting in the barn":"Waiting for orders";
   if(!W.g.visible)return"Sheltering in the barn";
+  if(o.state==="fun"&&o.fun)return FUNTXT[o.fun.k]+" · free time";
   if(k==="farmer")return o.state==="go"||o.state==="kneel"||o.state==="pull"||o.state==="yank"?"Pulling weeds on their own":"Wandering on their own";
   return o.state==="go"||o.state==="pick"?"Harvesting on their own":o.state==="goP"||o.state==="plantP"?"Planting on their own":o.state==="goT"||o.state==="pickT"?"Picking fruit on their own":"Waiting for crops"}
 let CREWHIDE=false;try{CREWHIDE=localStorage.getItem("farming-crew-hide")==="1"}catch(e){}
@@ -2688,7 +2731,7 @@ function validPlace(x,z,R0){const r=R0*.75;
   for(let i=0;i<RIVER.length-1;i++)if(segDist(x,z,RIVER[i][0],RIVER[i][1],RIVER[i+1][0],RIVER[i+1][1])<r+.9)return false;
   if(x>-2-r&&x<6.4+r&&z>-11-r&&z<-6.2+r)return false;
   if(x>6.6-r&&x<8.6+r&&z>-3.2-r&&z<1.6+r)return false;
-  if(z>-9.6-r&&z<-6.4+r&&x<-3.5)return false;if(Math.hypot(x-.5,z-4)<.4)return false;
+  if(z>-9.6-r&&z<-6.4+r&&x<-3.5)return false;if(Math.hypot(x-.5,z-4)<.4||Math.hypot(x-CF.x,z-CF.z)<1.9+r)return false;
   for(const o of S.builds||[]){const d=BUILDS.find(q=>q.id===o.id);if(Math.hypot(x-o.x,z-o.z)<r+(d?d.r:1.5)*.75+.15)return false}
   for(const T of FTREES)if(Math.hypot(x-T.x,z-T.z)<r+.6*(T.s||1))return false;
   return true}
@@ -2717,7 +2760,7 @@ let incT=0;function stepIncome(dt){if(VISIT)return;incT+=dt;if(incT<60)return;in
     for(let x=x0+.4;x<=x1;x+=1.8)[-1,1].forEach(s=>b.add("cyl",0x6b4a2c,x,-1,z+s*(w/2+.04),.13,2.9,.13));
     b.add("cyl",0x2b3640,x1-.5,.62,z-w/2+.2,.1,.24,.1)};
   pier(17.4,23.8,2.6,1.8);pier(41.6,48.2,IZ_+.5,1.8);
-  const l1=labelSprite("Pier to the Island");l1.position.set(19.6,1.5,2.6);scene.add(l1);
+  
 
   scene.add(b.mesh())})();
 /* -- passenger ferry: every 5 minutes from the farm boat terminal to the GoPyesta island -- */
@@ -2756,7 +2799,7 @@ const FERRY={g:new THREE.Group(),pax:[],walkers:[],phase:"",A:{x:22.6,z:3.9},B:{
   g.position.set(FERRY.A.x,0,FERRY.A.z);scene.add(g);
   {const eb=btnSprite("⛴️ Ride Boat","#2f7fb8","boat");eb.position.set(23.6,3.4,1.3);scene.add(eb)}
   {const cb=btnSprite("⛴️ Ride Boat","#3a4a6a","boat");cb.userData.cloudy=true;cb.position.set(IX+27,3.2,IZ+.4);scene.add(cb)}
-  const sg=labelSprite("Boat Terminal · Ferry every 5 min");sg.position.set(18.6,2.4,4.2);sg.scale.set(3,.75,1);scene.add(sg);
+  
   const sb=new Builder();sb.add("box",0xa87a48,20.2,.5,4.3,3.2,.1,1.6);[[18.8,3.7],[21.6,3.7],[18.8,4.9],[21.6,4.9]].forEach(([x,z])=>sb.add("cyl",0x6b4a2c,x,-.6,z,.1,2.2,.1));sb.add("box",0x2f7fb8,20.2,1.9,4.3,3.4,.1,1.8);[[18.8,3.6],[21.6,3.6]].forEach(([x,z])=>sb.add("cyl",0x2b3640,x,1.2,z,.05,1.4,.05));scene.add(sb.mesh());
   for(let k=0;k<6;k++){const f=makeFarmer({shirt:SH[k],pants:[0x2b2b3a,0x3b5f9a][k%2],skin:SK[k%3],hat:SH[(k+3)%6]});f.g.visible=false;scene.add(f.g);FERRY.walkers.push({f,o:{cr:0},k})}})();
 function stepFerry(dt,t){const c=(Date.now()/1000)%300,F=FERRY,g=F.g,A=F.A,B=F.B;let x=A.x,z=A.z,ph="dockA",u=0;
@@ -3685,7 +3728,7 @@ function stepFarm2(dt,t){
 
 function loop(t){
   const dt=Math.min(.1,(t-last)/1000);last=t;const ts=t/1000;
-  applyCam(dt);stepAnimals(dt,ts);stepExtras(dt,ts);stepFarm2(dt,ts);stepNet(dt);stepSound(dt);stepFish(dt,ts);ISLE.step(dt,ts);checkIsle();stepCity(dt,ts);checkCity();
+  applyCam(dt);stepAnimals(dt,ts);stepExtras(dt,ts);stepFarm2(dt,ts);stepFire(dt,ts);stepNet(dt);stepSound(dt);stepFish(dt,ts);ISLE.step(dt,ts);checkIsle();stepCity(dt,ts);checkCity();
   clouds.forEach(c=>{c.position.x+=c.userData.v*dt;if(c.position.x>130)c.position.x=-60});
   tileObjs.forEach((o,i)=>{if(o.sp.visible){o.sp.rotation.y=ts*2+i;o.sp.position.y=.95+Math.sin(ts*3+i)*.08}});
   acc+=dt;if(acc>.2){acc=0;syncField()}
