@@ -418,6 +418,7 @@ body.land .cam .cbtn{width:32px;height:32px!important}
     <h3 id="wmTitle">World Map</h3>
     <p class="suLead" id="wmLead">Visit other farmers, online or offline. Green means they're playing right now.</p>
     <div class="wmMap"><svg id="wmSvg" viewBox="0 0 640 400" role="img" aria-label="Map of farms"></svg></div>
+    <div class="wmTools" id="wmF" style="margin-bottom:6px"><button class="btn sm" type="button" data-f="all">All</button><button class="btn sm alt" type="button" data-f="on">🟢 Online</button><button class="btn sm alt" type="button" data-f="off">⚪ Offline</button></div>
     <div class="wmTools"><input id="wmQ" placeholder="Search a farm or player" aria-label="Search farms"><button class="btn alt" type="button" id="wmRefresh">Refresh</button></div>
     <ul class="wmList" id="wmList"></ul>
     <p class="err" id="wmErr" role="alert"></p>
@@ -3621,8 +3622,10 @@ window.addEventListener("pagehide",()=>{if(API&&!VISIT&&myUser()&&navigator.send
 const isOn=f=>NET.now-f.seen<ONLINE_MS;
 const ago=ms=>{const m=Math.floor(ms/60000);return m<1?"just now":m<60?m+"m ago":m<1440?Math.floor(m/60)+"h ago":Math.floor(m/1440)+"d ago"};
 function pinXY(u){let h=2166136261;for(let i=0;i<u.length;i++){h^=u.charCodeAt(i);h=Math.imul(h,16777619)}h>>>=0;const a=(h%3600)/3600*Math.PI*2,r=.25+((h>>>12)%1000)/1000*.72;return[320+Math.cos(a)*r*250,200+Math.sin(a)*r*140]}
+let WMF="all";document.querySelectorAll("#wmF [data-f]").forEach(b=>b.onclick=()=>{WMF=b.dataset.f;drawMap()});
 function drawMap(){const svg=$("wmSvg"),q=String($("wmQ").value||"").trim().toLowerCase(),me=myUser();
-  const L=NET.list.filter(f=>!q||(f.farm+" "+f.farmer+" "+f.u).toLowerCase().includes(q)).sort((a,b)=>(isOn(b)-isOn(a))||b.seen-a.seen);
+  const nOn=NET.list.filter(isOn).length;document.querySelectorAll("#wmF [data-f]").forEach(b=>{const k=b.dataset.f;b.classList.toggle("alt",k!==WMF);b.textContent=(k==="all"?"All":k==="on"?"🟢 Online":"⚪ Offline")+" ("+(k==="all"?NET.list.length:k==="on"?nOn:NET.list.length-nOn)+")"});
+  const L=NET.list.filter(f=>(WMF==="all"||(WMF==="on")===isOn(f))&&(!q||(f.farm+" "+f.farmer+" "+f.u).toLowerCase().includes(q))).sort((a,b)=>(isOn(b)-isOn(a))||b.seen-a.seen);
   let g='<defs><radialGradient id="wmI" cx="50%" cy="50%" r="55%"><stop offset="0" stop-color="#7cc94c"/><stop offset=".85" stop-color="#5fae3a"/><stop offset="1" stop-color="#e8d9a0"/></radialGradient></defs>';
   g+='<ellipse cx="320" cy="200" rx="300" ry="182" fill="#e8d9a0"/><ellipse cx="320" cy="200" rx="288" ry="172" fill="url(#wmI)"/>';
   g+='<path d="M120 90 C200 150 260 120 330 200 S470 260 560 320" stroke="#4aa8d8" stroke-width="9" fill="none" stroke-linecap="round" opacity=".85"/>';
