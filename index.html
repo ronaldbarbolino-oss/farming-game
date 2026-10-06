@@ -477,34 +477,34 @@ body.land .cam .cbtn{width:32px;height:32px!important}
 (function(){
 /* ================= DATA ================= */
 const CROPS=[
- {id:"pechay",n:"Bok Choy",t:180,c:3,s:7,xp:1,lv:1,col:0x86d65a,shape:"leaf"},
- {id:"mais",n:"Corn",t:180,c:4,s:10,xp:2,lv:1,col:0xf5c732,shape:"corn"},
- {id:"kamatis",n:"Tomato",t:180,c:4,s:10,xp:3,lv:2,col:0xe2402f,shape:"ball"},
- {id:"talong",n:"Eggplant",t:180,c:4,s:11,xp:4,lv:3,col:0x7a3f9c,shape:"long"},
- {id:"sitaw",n:"String Beans",t:180,c:5,s:13,xp:6,lv:4,col:0x8fcc3c,shape:"bean"},
- {id:"sampaguita",n:"Jasmine",t:180,c:6,s:15,xp:5,lv:3,col:0xffffff,shape:"flower"},
- {id:"ampalaya",n:"Bitter Gourd",t:180,c:6,s:15,xp:8,lv:5,col:0x4caa3e,shape:"long"},
- {id:"rosas",n:"Rose",t:180,c:7,s:17,xp:10,lv:5,col:0xe2304a,shape:"flower"},
- {id:"kalabasa",n:"Squash",t:180,c:8,s:20,xp:12,lv:6,col:0xf08a24,shape:"pump"},
- {id:"sili",n:"Chili",t:180,c:9,s:23,xp:3,lv:2,col:0xd9342b,shape:"bean",town:true},
- {id:"pakwan",n:"Watermelon",t:180,c:7,s:17,xp:5,lv:2,col:0x3a9a3a,shape:"pump",town:true},
- {id:"presa",n:"Strawberry",t:180,c:8,s:19,xp:6,lv:3,col:0xe8304a,shape:"ball",town:true},
- {id:"ubas",n:"Grapes",t:180,c:8,s:20,xp:9,lv:5,col:0x6a3a9a,shape:"ball",town:true},
- {id:"lilang_dahon",n:"Violet Leaf",t:180,c:7,s:17,xp:10,lv:3,col:0x8a4ac0,shape:"fern",island:true},
- {id:"gintong_bunga",n:"Golden Fruit",t:180,c:14,s:35,xp:16,lv:5,col:0xf2c230,shape:"ball",island:true},
- {id:"bughaw_kabute",n:"Blue Mushroom",t:180,c:10,s:25,xp:24,lv:7,col:0x3fa8e8,shape:"shroom",island:true},
- {id:"pinya",n:"Pineapple",t:180,c:8,s:20,xp:18,lv:8,col:0xf0b62a,shape:"pine"}
+ {id:"pechay",n:"Bok Choy",t:420,c:3,s:7,xp:1,lv:1,col:0x86d65a,shape:"leaf"},
+ {id:"mais",n:"Corn",t:420,c:4,s:10,xp:2,lv:1,col:0xf5c732,shape:"corn"},
+ {id:"kamatis",n:"Tomato",t:420,c:4,s:10,xp:3,lv:2,col:0xe2402f,shape:"ball"},
+ {id:"talong",n:"Eggplant",t:420,c:4,s:11,xp:4,lv:3,col:0x7a3f9c,shape:"long"},
+ {id:"sitaw",n:"String Beans",t:420,c:5,s:13,xp:6,lv:4,col:0x8fcc3c,shape:"bean"},
+ {id:"sampaguita",n:"Jasmine",t:420,c:6,s:15,xp:5,lv:3,col:0xffffff,shape:"flower"},
+ {id:"ampalaya",n:"Bitter Gourd",t:420,c:6,s:15,xp:8,lv:5,col:0x4caa3e,shape:"long"},
+ {id:"rosas",n:"Rose",t:420,c:7,s:17,xp:10,lv:5,col:0xe2304a,shape:"flower"},
+ {id:"kalabasa",n:"Squash",t:420,c:8,s:20,xp:12,lv:6,col:0xf08a24,shape:"pump"},
+ {id:"sili",n:"Chili",t:420,c:9,s:23,xp:3,lv:2,col:0xd9342b,shape:"bean",town:true},
+ {id:"pakwan",n:"Watermelon",t:420,c:7,s:17,xp:5,lv:2,col:0x3a9a3a,shape:"pump",town:true},
+ {id:"presa",n:"Strawberry",t:420,c:8,s:19,xp:6,lv:3,col:0xe8304a,shape:"ball",town:true},
+ {id:"ubas",n:"Grapes",t:420,c:8,s:20,xp:9,lv:5,col:0x6a3a9a,shape:"ball",town:true},
+ {id:"lilang_dahon",n:"Violet Leaf",t:420,c:7,s:17,xp:10,lv:3,col:0x8a4ac0,shape:"fern",island:true},
+ {id:"gintong_bunga",n:"Golden Fruit",t:420,c:14,s:35,xp:16,lv:5,col:0xf2c230,shape:"ball",island:true},
+ {id:"bughaw_kabute",n:"Blue Mushroom",t:420,c:10,s:25,xp:24,lv:7,col:0x3fa8e8,shape:"shroom",island:true},
+ {id:"pinya",n:"Pineapple",t:420,c:8,s:20,xp:18,lv:8,col:0xf0b62a,shape:"pine"}
 ];
 const ANIMALS=[
- {id:"manok",n:"Chicken",item:"Eggs",t:300,cost:120,s:25,xp:2,lv:2},
- {id:"kambing",n:"Goat",item:"Milk",t:480,cost:350,s:80,xp:5,lv:4},
- {id:"bibe",n:"Duck",item:"Eggs",t:360,cost:150,s:35,xp:2,lv:2,zone:"pond"},
- {id:"pato",n:"Mallard",item:"Mallard eggs",t:420,cost:220,s:45,xp:3,lv:3,zone:"pond"},
- {id:"pusa",n:"Cat",item:"Cat Fur",t:300,cost:180,s:4,xp:4,lv:3,zone:"farm"},
- {id:"aso",n:"Dog",item:"Dog Fur",t:300,cost:200,s:5,xp:4,lv:3,zone:"farm"},
- {id:"baboy",n:"Pig",item:"Truffle",t:420,cost:450,s:20,xp:6,lv:3},
- {id:"baka",n:"Cow",item:"Milk",t:540,cost:700,s:150,xp:9,lv:6},
- {id:"kabayo",n:"Horse",item:"Horsehair",t:480,cost:900,s:30,xp:11,lv:7},
+ {id:"manok",n:"Chicken",item:"Eggs",t:600,cost:120,s:25,xp:2,lv:2},
+ {id:"kambing",n:"Goat",item:"Milk",t:600,cost:350,s:80,xp:5,lv:4},
+ {id:"bibe",n:"Duck",item:"Eggs",t:600,cost:150,s:35,xp:2,lv:2,zone:"pond"},
+ {id:"pato",n:"Mallard",item:"Mallard eggs",t:600,cost:220,s:45,xp:3,lv:3,zone:"pond"},
+ {id:"pusa",n:"Cat",item:"Cat Fur",t:600,cost:180,s:4,xp:4,lv:3,zone:"farm"},
+ {id:"aso",n:"Dog",item:"Dog Fur",t:600,cost:200,s:5,xp:4,lv:3,zone:"farm"},
+ {id:"baboy",n:"Pig",item:"Truffle",t:600,cost:450,s:20,xp:6,lv:3},
+ {id:"baka",n:"Cow",item:"Milk",t:600,cost:700,s:150,xp:9,lv:6},
+ {id:"kabayo",n:"Horse",item:"Horsehair",t:600,cost:900,s:30,xp:11,lv:7},
  {id:"kalabaw",n:"Carabao",item:"Carabao milk",t:600,cost:1100,s:260,xp:14,lv:7}
 ];
 const ZLIM={pen:12,pond:8,farm:4};const zoneOf=id=>(ANIMALS.find(a=>a.id===id)||{}).zone||"pen";
@@ -2479,7 +2479,7 @@ window.addEventListener("orientationchange",relayout);document.addEventListener(
 $("tTown").onclick=startJeep;
 $("sellAll").onclick=sellAll;$("shopOpen").onclick=()=>{S.shopOpen=S.shopOpen===false;save();invUI(true);toast(S.shopOpen?"The stall is open. Buyers will come.":"The stall is closed. No buyers will come.",2600)};$("goMkt").onclick=()=>{goView("market")};
 $("placeRot").onclick=()=>{if(PLACE){PLACE.r=(PLACE.r+Math.PI/2)%(Math.PI*2);PLACE.g.rotation.y=PLACE.r}};$("placeOk").onclick=confirmPlace;$("placeX").onclick=cancelPlace;
-const CD_HARV=600,CD_TREAT=120;const cdLeft=k=>Math.max(0,(k==="harv"?CD_HARV:CD_TREAT)-(now()-((S.cd||{})[k]||0)));
+const CD_HARV=120,CD_TREAT=120;const cdLeft=k=>Math.max(0,(k==="harv"?CD_HARV:CD_TREAT)-(now()-((S.cd||{})[k]||0)));
 const OWNER_KEY="ronfarm";const isOwner=()=>{const n=v=>String(v||"").toLowerCase().replace(/[^a-z0-9]/g,"");const p=(typeof CLOUD!=="undefined"&&(CLOUD.local||CLOUD.profile))||{};return[typeof LOCAL!=="undefined"&&LOCAL.user,p.farm,p.farmer].some(v=>n(v)===OWNER_KEY)};
 function cdUI(){const h=cdLeft("harv"),c=cdLeft("treat"),a=$("tAll"),b=$("tCure");if(!a||!b)return;a.hidden=false;b.hidden=true;
   a.textContent=h>0?"Harvest All · "+fmt(h):"Harvest All";a.disabled=h>0;b.textContent=c>0?"Treat All · "+fmt(c):"Treat All";b.disabled=c>0}
@@ -2566,7 +2566,7 @@ function stepHelper(dt,t){
 /* ================= CREW: you command the farmers ================= */
 const CREW={},WHITS=[];let SEL=null;
 const GPLANE=new THREE.Plane(new THREE.Vector3(0,1,0),0),_gpv=new THREE.Vector3();
-const TASKT={walk:0,plow:1.1,plant:.2,harvest:.8,weed:1.4,animal:.9,rest:0,chop:2.6,pick:1,fish:7};
+const TASKT={walk:0,plow:1.1,plant:.2,harvest:.35,weed:1.4,animal:.9,rest:0,chop:2.6,pick:1,fish:7};
 const TASKN={walk:"Walking",plow:"Plowing",plant:"Planting",harvest:"Harvesting",weed:"Pulling weeds",animal:"Tending animals",rest:"Resting",chop:"Chopping a tree",pick:"Picking fruit",fish:"Fishing"};
 function wName(k){return k==="farmer"?((typeof CLOUD!=="undefined"&&((CLOUD.profile&&CLOUD.profile.farmer)||(CLOUD.local&&CLOUD.local.farmer)))||"Juan"):k==="helper2"?"Helper 2":"Helper"}
 function wAuto(k){return k==="farmer"?S.farmerAuto!==false:k==="helper2"?S.helper2On!==false:S.helperOn!==false}
@@ -2593,7 +2593,7 @@ function taskTarget(q){
   return null}
 function helperHarvestAll(k){const W=CREW[k];if(!W)return;const q=W.o.queue,taken=new Set();Object.values(CREW).forEach(c=>c&&c.o&&c.o.queue.forEach(x=>{if(x.type==="harvest")taken.add(x.tile)}));let n=0;
   S.tiles.forEach((t,i)=>{if(q.length>=16)return;const st=tileState(t);if(!st||st.p<1||isIsleTile(i)||taken.has(i))return;q.push({type:"harvest",tile:i,crop:t.c});n++});
-  if(!n)return toast("No ripe crops for "+wName(k)+" to harvest yet. Crops are ready 3 minutes after planting.",3200);W.o.resting=false;updateCrewUI();toast("🧺 "+wName(k)+" is harvesting "+n+" ripe crop"+(n>1?"s":"")+".",2600)}
+  if(!n)return toast("No ripe crops for "+wName(k)+" to harvest yet. Crops are ready 7 minutes after planting.",3200);W.o.resting=false;updateCrewUI();toast("🧺 "+wName(k)+" is harvesting "+n+" ripe crop"+(n>1?"s":"")+".",2600)}
 function commandAt(e,p){
   const W=CREW[SEL];if(!W)return;const q=W.o.queue;if(q.length>=16)return toast("Order list is full for "+wName(SEL)+".");
   let task=null;
