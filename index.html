@@ -557,6 +557,16 @@ body.land .sbtns .sb{font-size:.6rem!important;padding:3px 6px!important}
     <div id="spDone" hidden><p class="suLead" style="font-size:1.05rem">✅ Message sent! We'll reply to <b id="spTo"></b> from farmgaming.ph@gmail.com. Check your inbox and spam folder.</p><div class="suRow"><button class="btn" type="button" id="spOk">OK</button></div></div>
     <p class="suLead" style="margin-top:8px;font-size:.8rem">You can also email us directly at <b>farmgaming.ph@gmail.com</b>.</p></div>
 </div>
+<div class="modal" id="pwM" hidden>
+  <div class="suBox"><h3>🔑 Password for phone login</h3>
+    <div id="pwForm"><p class="suLead">Make a new password for this farm. Then on your phone, tap <b>Log in</b> and use your username and this password. Your farm will be the same on both.</p>
+    <p class="suLead" style="margin:4px 0 8px">Username: <b id="pwU" style="font-size:1.15rem"></b></p>
+    <label for="pwN" style="display:block">New password (at least 4 letters or numbers)</label><input id="pwN" style="display:block;width:100%;box-sizing:border-box" type="password" maxlength="64" autocomplete="new-password">
+    <label for="pwN2" style="display:block;margin-top:6px">Type it again</label><input id="pwN2" style="display:block;width:100%;box-sizing:border-box" type="password" maxlength="64" autocomplete="new-password">
+    <label class="keep"><input type="checkbox" id="pwShow"> Show password</label><p class="err" id="pwErr" role="alert"></p>
+    <div class="suRow"><button class="btn alt" type="button" id="pwClose">Close</button><button class="btn" type="button" id="pwGo">Save password</button></div></div>
+    <div id="pwDone" hidden><p class="suLead" style="font-size:1.05rem">✅ Password saved! On your phone, open Farming, tap <b>Log in</b>, then type username <b id="pwU2"></b> and your new password.</p><div class="suRow"><button class="btn" type="button" onclick="document.getElementById('pwM').hidden=true">OK</button></div></div></div>
+</div>
 <div class="modal" id="syM" hidden>
   <div class="suBox"><h3>☁️ Sync with your other devices</h3>
     <div id="syForm"><p class="suLead">Type your password once. Then log in on your phone, the app or another computer with the same username and password, and your farm stays the same everywhere.</p>
@@ -654,6 +664,7 @@ body.land .sbtns .sb{font-size:.6rem!important;padding:3px 6px!important}
     <p class="err" id="suErr" role="alert"></p>
     <p style="margin:2px 0 6px"><button class="btn sm" type="button" id="trBtn" style="background:#2f7fb8;box-shadow:0 3px 0 #1d5a85">📲 Move my farm to the app / another phone</button> <button class="btn sm" type="button" id="syncOnBtn" style="background:#3f8f2c;box-shadow:0 3px 0 #2b6a1f">☁️ Sync with my other devices</button></p>
     <p style="margin:2px 0 6px"><button class="btn sm alt" type="button" id="emailBtn">📧 Email &amp; account recovery</button> <small id="emailState"></small></p>
+    <p style="margin:2px 0 6px"><button class="btn sm" type="button" id="pwBtn" style="background:#b8862f;box-shadow:0 3px 0 #8a6220">🔑 Set password for phone login</button> <small id="pwUser"></small></p>
     <div class="suRow"><button class="btn alt" type="button" id="logoutBtn">Log out</button><button class="btn alt" type="button" id="suClose">Close</button><button class="btn alt" type="button" id="suLater" hidden>Later</button><button class="btn" type="submit" id="suGo">Start Farming</button></div>
   </form>
 </div>
@@ -2753,7 +2764,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="159";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
+const GAMEVER="161";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 function cvRect(){return ROT?{left:0,top:0,width:cv.clientWidth,height:cv.clientHeight}:cv.getBoundingClientRect()}
 function setRot(){const au=document.getElementById("auth"),inAuth=!(typeof LOCAL!=="undefined"&&LOCAL.user)||(au&&!au.hidden);const want=!!MOBILE&&innerHeight>innerWidth*1.05&&!inAuth;if(want!==ROT){ROT=want;document.body.classList.toggle("rot",want)}const r=document.documentElement.style;r.setProperty("--LW",(ROT?innerHeight:innerWidth)+"px");r.setProperty("--LH",(ROT?innerWidth:innerHeight)+"px")}
 let _olTried=false;function tryLockLand(){if(_olTried||!MOBILE||!(innerHeight>innerWidth)||!(typeof LOCAL!=="undefined"&&LOCAL.user))return;_olTried=true;try{const d=document.documentElement,go=()=>{if(screen.orientation&&screen.orientation.lock)screen.orientation.lock("landscape").catch(()=>{})};
@@ -6496,7 +6507,7 @@ function localAuthStart(){$("lbHead").hidden=true;$("lbPanel").hidden=true;let u
 
 /* ---- email verification and account recovery ---- */
 const postJ=async(path,body)=>{const r=await fetch(API+path,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});let d={};try{d=await r.json()}catch(e){}if(!r.ok)throw new Error(d.error||"Something went wrong. Try again.");return d};
-function emailStateUI(){const a=myUser()&&accts()[myUser()],el=$("emailState");if(el)el.textContent=a&&a.email?(a.emailOk?"✅ "+a.email:"⏳ "+a.email+" (not verified)"):"No email yet"}
+function emailStateUI(){const a=myUser()&&accts()[myUser()],el=$("emailState");{const pu=$("pwUser");if(pu)pu.textContent=myUser()?"Username: "+myUser():""}if(el)el.textContent=a&&a.email?(a.emailOk?"✅ "+a.email:"⏳ "+a.email+" (not verified)"):"No email yet"}
 function openEmail(prefill,auto){if(!API)return toast("Email works in the Farming app at farming-ph.netlify.app.",3200);if(!myUser())return;const a=accts()[myUser()]||{};
   $("emailM").hidden=false;$("emErr").textContent="";$("emStep1").hidden=false;$("emStep2").hidden=true;$("emAddr").value=prefill||a.email||"";if(auto&&prefill)$("emSend").click()}
 async function emSend(){const email=$("emAddr").value.trim().toLowerCase();$("emErr").textContent="";if(!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(email))return $("emErr").textContent="Type a valid email.";
@@ -6526,6 +6537,14 @@ async function adoptAccount(d,pw,tok){const u=d.u,A=accts(),salt=Math.random().t
 $("trBtn").onclick=async()=>{if(!API)return toast("Moving your farm works in the Farming app at farming-ph.netlify.app.",3200);if(!myUser())return;$("trM").hidden=false;$("trErr").textContent="";$("trCode").textContent="…";
   try{save();await netSend(true);const d=await postJ("transfer/start",{u:myUser(),tok:myTok()});$("trCode").textContent=d.code.slice(0,4)+"-"+d.code.slice(4)}catch(e){$("trErr").textContent=e.message;$("trCode").textContent="—"}};
 $("syncOnBtn").onclick=()=>{if(!API)return toast("Sync works in the Farming app at farming-ph.netlify.app.",3200);if(!myUser())return;$("syM").hidden=false;$("syErr").textContent="";$("syDone").hidden=true;$("syForm").hidden=false;$("syU").textContent=myUser();setTimeout(()=>$("syPw").focus(),50)};
+$("pwBtn").onclick=()=>{if(!API)return toast("Phone login works in the Farming app at farming-ph.netlify.app.",3200);const u=myUser();if(!u)return;$("pwM").hidden=false;$("pwErr").textContent="";$("pwDone").hidden=true;$("pwForm").hidden=false;$("pwU").textContent=u;$("pwU2").textContent=u;["pwN","pwN2"].forEach(k=>$(k).value="");setTimeout(()=>$("pwN").focus(),50)};
+$("pwShow").onchange=()=>{const t=$("pwShow").checked?"text":"password";$("pwN").type=t;$("pwN2").type=t};
+$("pwClose").onclick=()=>{$("pwM").hidden=true};
+$("pwGo").onclick=async()=>{const u=myUser(),p=$("pwN").value,p2=$("pwN2").value;$("pwErr").textContent="";
+  if(p.length<4)return $("pwErr").textContent="Use at least 4 letters or numbers.";if(p!==p2)return $("pwErr").textContent="The two passwords don't match.";
+  $("pwGo").disabled=true;try{await netSend(true);if(NET.taken)throw new Error("This device isn't linked to the farm online. Log out and log in again with your old password, then try again.");
+    await postJ("setpw",{u,tok:myTok(),pw:p});const all=accts();if(all[u]){const salt=Math.random().toString(36).slice(2)+Date.now().toString(36);all[u].salt=salt;all[u].hash=await hashPw(p,salt);saveAccts(all)}
+    ["pwN","pwN2"].forEach(k=>$(k).value="");$("pwForm").hidden=true;$("pwDone").hidden=false}catch(e){$("pwErr").textContent=e.message||"Couldn't save. Check your internet and try again."}$("pwGo").disabled=false};
 $("syClose").onclick=()=>{$("syM").hidden=true};$("syGo").onclick=async()=>{const u=myUser(),a=accts()[u],p=$("syPw").value;$("syErr").textContent="";if(!a||await hashPw(p,a.salt)!==a.hash)return $("syErr").textContent="That's not your password for this farm.";
   $("syGo").disabled=true;try{await netSend(true);if(NET.taken)throw new Error("This device isn't linked to the farm online. Log out and log in again.");await postJ("setpw",{u,tok:myTok(),pw:p});$("syPw").value="";$("syForm").hidden=true;$("syDone").hidden=false}catch(e){$("syErr").textContent=e.message}$("syGo").disabled=false};
 $("trCopy").onclick=async()=>{const t=$("trCode").textContent.replace("-","");try{await navigator.clipboard.writeText(t);$("trCopy").textContent="Copied!"}catch(e){}setTimeout(()=>$("trCopy").textContent="Copy code",1500)};
