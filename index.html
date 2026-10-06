@@ -2352,7 +2352,7 @@ function tap(i,x,y){
     else toast(st.c.n+": "+fmt(st.left)+" left before harvest")}
   after();
 }
-function penAt(x,z){for(const k in PENS){const P=PENS[k];if(x>P.x0&&x<P.x1&&z>P.z0&&z<P.z1)return k}if(typeof POND!=="undefined"&&((x-POND.x)/(POND.rx+.6))**2+((z-POND.z)/(POND.rz+.6))**2<1)return"pond";return null}
+function penAt(x,z){for(const m of [0,.9])for(const k in PENS){const P=PENS[k];if(x>P.x0-m&&x<P.x1+m&&z>P.z0-m&&z<P.z1+m)return k}if(typeof POND!=="undefined"&&((x-POND.x)/(POND.rx+.6))**2+((z-POND.z)/(POND.rz+.6))**2<1)return"pond";return null}
 function collectPen(k,x,y){let n=0,soon=1e9,full=false;S.pens.forEach(p=>{const a=animal(p.id);if(!a||!(p.id===k||zoneOf(p.id)===k))return;if(isBaby(p))return;const left=a.t-(now()-p.at);if(left>0){soon=Math.min(soon,left);return}
     const it=AITEM[a.id];if(it){if(!addItem(it,1,null)){full=true;return}gain(0,a.xp,null)}else gain(a.s,a.xp,null);p.at=now();n++});
   if(n){floatText("+"+n+" collected",x,y);after();toast("🧺 Collected from "+n+" animal"+(n>1?"s":"")+".",2000)}else if(full)toast("Storage is full! Sell at the stall or build a Warehouse.",3000);else if(soon<1e9)toast("Not ready yet · next in "+fmt(soon),2200);else toast(k==="pond"?"No ducks here yet.":"No grown animals here yet.",2200)}
