@@ -16,7 +16,7 @@ async function adminOk(msg, sig) {
 const pub = m => ({ u: m.u, farm: m.farm, farmer: m.farmer, shirt: m.shirt, lv: m.lv, size: m.size, seen: m.seen });
 
 // a restart time shipped with a deploy: open games reload once after it
-const DEPLOY_RESTART = 1791259629574;
+const DEPLOY_RESTART = 1791260346335;
 export default async (req) => {
   const url = new URL(req.url);
   const path = url.pathname.replace(/^.*?\/api\/?/, "").replace(/^\.netlify\/functions\/api\/?/, "").replace(/\/$/, "");
