@@ -31,8 +31,9 @@ ul{padding-left:18px;margin:6px 0 0}li{margin:4px 0;word-break:break-all;font-si
 <section class="card" id="gift">
   <form id="giftF">
     <label for="who">Player username or farm name</label><input id="who" required maxlength="40" placeholder="e.g. rayle or Rayle's Farm">
-    <label for="amt">Coins to give</label><input id="amt" type="number" min="1" max="1000000" step="1" value="5000" required>
+    <label for="amt">Coins to give</label><input id="amt" type="number" min="0" max="1000000" step="1" value="5000" required>
     <div class="quick"><button type="button" data-a="500">500</button><button type="button" data-a="1000">1,000</button><button type="button" data-a="5000">5,000</button><button type="button" data-a="10000">10,000</button></div>
+    <label for="wood">Wood to give (optional)</label><input id="wood" type="number" min="0" max="10000000" step="1" value="0">
     <button type="submit" id="makeB">Make Gift Code</button><p class="err" id="giftErr" role="alert"></p>
   </form>
   <div id="out" hidden>
@@ -70,12 +71,12 @@ $("unlockF").onsubmit=async e=>{e.preventDefault();$("lockErr").textContent="";$
   catch(err){$("lockErr").textContent=window.crypto&&crypto.subtle?"Wrong password.":"Open this page over https."}$("unlockB").disabled=false};
 document.querySelectorAll(".quick button").forEach(b=>b.onclick=()=>{$("amt").value=b.dataset.a});
 const hist=[];
-$("giftF").onsubmit=async e=>{e.preventDefault();$("giftErr").textContent="";const u=$("who").value.trim(),c=Math.floor(+$("amt").value);
-  if(!u)return $("giftErr").textContent="Type the player's username or farm name.";if(!(c>0&&c<=1000000))return $("giftErr").textContent="Coins must be between 1 and 1,000,000.";
+$("giftF").onsubmit=async e=>{e.preventDefault();$("giftErr").textContent="";const u=$("who").value.trim(),c=Math.floor(+$("amt").value||0),w=Math.floor(+$("wood").value||0);
+  if(!u)return $("giftErr").textContent="Type the player's username or farm name.";if(!(c>=0&&c<=1000000&&w>=0&&w<=10000000)||!(c||w))return $("giftErr").textContent="Give 1 to 1,000,000 coins and/or 1 to 10,000,000 wood.";
   const n=[...crypto.getRandomValues(new Uint8Array(6))].map(b=>b.toString(16).padStart(2,"0")).join("");
-  const p=new TextEncoder().encode(JSON.stringify({u,c,n,t:Math.floor(Date.now()/1000)}));
+  const p=new TextEncoder().encode(JSON.stringify({u,c,...(w?{w}:{}),n,t:Math.floor(Date.now()/1000)}));
   const sig=new Uint8Array(await crypto.subtle.sign({name:"ECDSA",hash:"SHA-256"},SK,p));const code="FARM-"+b64u(p)+"."+b64u(sig);
-  $("code").value=code;$("out").hidden=false;hist.unshift(c.toLocaleString()+" coins → "+u);$("hist").innerHTML="";hist.forEach(t=>{const li=document.createElement("li");li.textContent=t;$("hist").append(li)})};
+  $("code").value=code;$("out").hidden=false;hist.unshift([c?c.toLocaleString()+" coins":"",w?w.toLocaleString()+" wood":""].filter(Boolean).join(" + ")+" → "+u);$("hist").innerHTML="";hist.forEach(t=>{const li=document.createElement("li");li.textContent=t;$("hist").append(li)})};
 $("copyB").onclick=async()=>{try{await navigator.clipboard.writeText($("code").value);$("copyB").textContent="Copied!"}catch(e){$("code").select();document.execCommand("copy");$("copyB").textContent="Copied!"}setTimeout(()=>$("copyB").textContent="Copy code",1600)};
 $("shareB").onclick=async()=>{const t="Your Farming gift code (open the game, tap 🎁 Redeem Code):\n"+$("code").value;if(navigator.share){try{await navigator.share({text:t})}catch(e){}}else{try{await navigator.clipboard.writeText(t)}catch(e){}$("shareB").textContent="Copied!";setTimeout(()=>$("shareB").textContent="Share",1600)}};
 let PL=[],PNOW=Date.now(),SORT={k:"seen",d:-1};
