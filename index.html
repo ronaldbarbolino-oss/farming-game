@@ -3644,9 +3644,14 @@ function stepSound(dt){if(!SND.on||!SND.ctx)return;const k=WX.key,rain=k==="rain
   if((T.oink=(T.oink==null?12:T.oink)-dt)<=0){T.oink=12+Math.random()*16;if(has("baboy"))SFX.oink()}
   if((T.quack-=dt)<=0){T.quack=10+Math.random()*14;if(has("bibe")||has("pato"))SFX.quack()}}
 /* admin restart: when the admin presses Restart, every open game saves and reloads */
-if(API){const LOADED=Date.now();let rT=null;const chk=async()=>{try{const r=await fetch(API+"restart",{cache:"no-store"});if(!r.ok)return;const v=await r.json();
-  if(v&&v.at>LOADED&&v.at>(v.now||Date.now())-10*60000){clearInterval(rT);if(VISIT)goHome();save();if(myUser())await netSend(true);toast("🔄 The game is restarting for an update…",3000);setTimeout(()=>location.reload(),2000)}}catch(e){}};
-  rT=setInterval(chk,20000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)chk()})}
+if(API){let base=null,rT=null,going=false;
+  const hardReload=async at=>{try{if(window.caches){const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}}catch(e){}
+    try{if(navigator.serviceWorker){const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.update().catch(()=>{})))}}catch(e){}
+    const u=new URL(location.href);u.searchParams.set("r",String(at));location.replace(u.toString())};
+  const chk=async()=>{if(going)return;try{const r=await fetch(API+"restart?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const v=await r.json();const at=v&&v.at||0;
+    if(base===null){base=at;return}
+    if(at>base){going=true;clearInterval(rT);if(VISIT)goHome();save();try{if(myUser())await netSend(true)}catch(e){}toast("🔄 The game is restarting for an update…",3000);setTimeout(()=>hardReload(at),1500)}}catch(e){}};
+  chk();rT=setInterval(chk,15000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)chk()});window.addEventListener("focus",chk);window.addEventListener("pageshow",chk);window.addEventListener("online",chk)}
 /* ================= FISH: pond fish and fishing with a rod ================= */
 const FISHES=[],FISHK=[{id:"tilapia",n:"Tilapia",p:10,col:0x9aa3ab},{id:"bangus",n:"Milkfish",p:14,col:0xc9d6de},{id:"hito",n:"Catfish",p:12,col:0x4a4038}];
 FISHK.forEach(f=>{ITEMS[f.id]={n:f.n,p:f.p,ic:"fish",col:"#"+f.col.toString(16).padStart(6,"0")}});
