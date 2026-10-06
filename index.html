@@ -2753,7 +2753,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="152";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
+const GAMEVER="153";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 function cvRect(){return ROT?{left:0,top:0,width:cv.clientWidth,height:cv.clientHeight}:cv.getBoundingClientRect()}
 function setRot(){const want=!!MOBILE&&innerHeight>innerWidth*1.05;if(want!==ROT){ROT=want;document.body.classList.toggle("rot",want)}const r=document.documentElement.style;r.setProperty("--LW",(ROT?innerHeight:innerWidth)+"px");r.setProperty("--LH",(ROT?innerWidth:innerHeight)+"px")}
 let _olTried=false;function tryLockLand(){if(_olTried||!MOBILE||!(innerHeight>innerWidth))return;_olTried=true;try{const d=document.documentElement,go=()=>{if(screen.orientation&&screen.orientation.lock)screen.orientation.lock("landscape").catch(()=>{})};
@@ -3697,7 +3697,7 @@ const TSHOPHITS=[];
   for(let k=0;k<6;k++){const a=k/6*Math.PI*2+.3,x=T.x+Math.cos(a)*6.3,z=T.z+Math.sin(a)*6.3;b.add("cyl",0x2b3640,x,1.1,z,.05,2.2,.05);lamps_.push([x,z]);
     b.add("box",0xc98a4b,T.x+Math.cos(a+.5)*6.1,.45,T.z+Math.sin(a+.5)*6.1,1.3,.07,.4,0,-(a+.5)+Math.PI/2,0)}
   // houses around town
-  [[T.x+16,T.z+6,"bato",-Math.PI/2],[T.x+15,T.z+12,"kubo",-Math.PI/2],[T.x-17,T.z-5,"kubo",Math.PI/2],[T.x-17,T.z+8,"bato",Math.PI/2],[T.x+8,T.z+13,"kubo",Math.PI],[T.x-8,T.z+14,"bato",Math.PI]].forEach(([x,z,id,ry])=>{const g=_mkB(id);g.position.set(x,0,z);g.rotation.y=ry;scene.add(g)});
+  [[T.x+16,T.z+6,"bato",-Math.PI/2],[T.x+15,T.z+12,"kubo",-Math.PI/2],[T.x-17,T.z-5,"kubo",Math.PI/2],[T.x-17,T.z+8,"bato",Math.PI/2],[T.x+8,T.z+13,"kubo",Math.PI],[T.x-8,T.z+12.4,"bato",Math.PI]].forEach(([x,z,id,ry])=>{const g=_mkB(id);g.position.set(x,0,z);g.rotation.y=ry;scene.add(g)});
   scene.add(b.mesh());
   const lm=new Builder();lamps_.forEach(([x,z])=>lm.add("box",0xfff2b0,x,2.25,z,.25,.25,.25));scene.add(new THREE.Mesh(lm.geo(),new THREE.MeshBasicMaterial({color:0xfff2b0})));
   const wtr=new THREE.Mesh(new THREE.CylinderGeometry(1.85,1.85,.05,24),new THREE.MeshBasicMaterial({color:0x7fd0f0}));wtr.position.set(T.x,.66,T.z);scene.add(wtr);
@@ -3730,11 +3730,20 @@ const TOWNX={lights:[],pl:[],band:[],aud:[],notes:[],walkers:[],stageOn:null};co
   row(T.x-13.2,T.z+19.5,2.4,0,12,Math.PI);                                   // south row facing the plaza
   row(T.x-21,T.z-16.5,2.4,0,6,0);                                           // north-west row
   row(T.x+23,T.z-15,0,2.4,8,-Math.PI/2,(x,z)=>Math.abs(z-T.z)<2.6);          // east row, gap for the road
-  row(T.x-24,T.z-6,0,2.4,6,Math.PI/2);                                      // west row
+  row(T.x-24,T.z-6,0,2.4,6,Math.PI/2,(x,z)=>Math.abs(z-T.z)<2.6);          // west row, gap for the road to the municipal hall
   {const m=new THREE.InstancedMesh(new THREE.BoxGeometry(.5,.5,.02),new THREE.MeshBasicMaterial({color:0xffd27a}),TOWNLIT.length),o=new THREE.Object3D();
     TOWNLIT.forEach(([x,y,z,ry],i)=>{o.position.set(x,y,z);o.rotation.set(0,ry,0);o.scale.set(Math.random()<.25?.001:1,1,1);o.updateMatrix();m.setMatrixAt(i,o.matrix)});m.visible=false;scene.add(m);TOWNX.lit=m}
   // streets in front of the rows
-  b.add("box",0x6a6f73,T.x+1,.025,T.z+16.6,30,.03,2.2);b.add("box",0x6a6f73,T.x-15,.025,T.z-13.7,16,.03,2);b.add("box",0x6a6f73,T.x+20.2,.025,T.z-5.4,2.2,.03,20);b.add("box",0x6a6f73,T.x-21.2,.025,T.z+.6,2,.03,15);
+  // a ring road around the town centre with sidewalks, crosswalks and lane lines, joined to the farm road and the municipal road
+  {const RX0=T.x-21.2,RX1=T.x+20.2,RZ0=T.z-13.7,RZ1=T.z+16.6,RW=2.4;
+    const seg=(x0,z0,x1,z1)=>{const L=Math.hypot(x1-x0,z1-z0),ry=Math.atan2(-(z1-z0),x1-x0),cx=(x0+x1)/2,cz=(z0+z1)/2,nx=-(z1-z0)/L,nz=(x1-x0)/L;b.add("box",0x4a5058,cx,.026,cz,L+RW,.03,RW,0,ry,0);
+      [-1,1].forEach(sd=>b.add("box",0xd8d2c6,cx+nx*sd*(RW/2+.35),.06,cz+nz*sd*(RW/2+.35),L+RW+1.4,.1,.7,0,ry,0));for(let k=1;k<L-.5;k+=1.4)b.add("box",0xf5c732,x0+(x1-x0)*k/L,.046,z0+(z1-z0)*k/L,.6,.01,.09,0,ry,0)};
+    seg(RX0,RZ0,RX1,RZ0);seg(RX0,RZ1,RX1,RZ1);seg(RX0,RZ0,RX0,RZ1);seg(RX1,RZ0,RX1,RZ1);
+    // crosswalks where the farm road and the municipal road meet the ring
+    const zebra=(x,z,alongX)=>{for(let k=-3;k<=3;k++)b.add("box",0xf4f4f0,x+(alongX?k*.3:0),.05,z+(alongX?0:k*.3),alongX?.16:1.8,.01,alongX?1.8:.16)};
+    zebra(RX1+2.2,T.z,true);zebra(RX0-2.2,T.z,true);zebra(T.x,RZ0+2,false);zebra(T.x,RZ1-2,false);
+    b.add("box",0x4a5058,RX0-3,.026,T.z,6,.03,2.2);
+    TOWNX.ring={pts:[[RX0,RZ0],[RX1,RZ0],[RX1,RZ1],[RX0,RZ1]]}}
   // street lights
   const LP=[[T.x-12,T.z+15],[T.x-6,T.z+15],[T.x,T.z+15],[T.x+6,T.z+15],[T.x+12,T.z+15],[T.x-18,T.z-12.2],[T.x-12,T.z-12.2],[T.x+18.6,T.z-13],[T.x+18.6,T.z-4],[T.x+18.6,T.z+3],[T.x-19.6,T.z-4],[T.x-19.6,T.z+3],[T.x+9,T.z-6],[T.x-9,T.z+6],[T.x+9,T.z+6],[T.x-9,T.z-6]];
   const lampMat=new THREE.MeshBasicMaterial({color:0xfff2b0});
@@ -3775,13 +3784,15 @@ const TOWNX={lights:[],pl:[],band:[],aud:[],notes:[],walkers:[],stageOn:null};co
   [[JEEP_TOWN.x+4,T.z+3.2,0x3f8f2c],[JEEP_TOWN.x+5.6,T.z+3.2,0xd9342b],[JEEP_TOWN.x+7.2,T.z+3.2,0x2f7fb8]].forEach(([x,z,c])=>{b.add("box",c,x,.65,z,1.1,.8,.9);b.add("box",0x2f7fb8,x,1.15,z,1.2,.08,1);b.add("box",0x2b3640,x-.7,.6,z,.8,.25,.25);
     [[.35,.45],[.35,-.45],[-1,0]].forEach(([dx,dz])=>b.add("cyl",0x1a1a1a,x+dx,.22,z+dz,.22,.14,.22,Math.PI/2,0,0))});
   scene.add(b.mesh());
+  {const P=TOWNX.ring.pts,seg=[];let tot=0;for(let k=0;k<4;k++){const a=P[k],c=P[(k+1)%4],l=Math.hypot(c[0]-a[0],c[1]-a[1]);seg.push([a,c,l]);tot+=l}TOWNX.loop={seg,tot};TOWNX.cars=[];
+    [0x2f7fb8,0xd23a2a,0xf2f2ee,0x3f8f2c,0xf2b632].slice(0,QLV===0?3:5).forEach((c,i)=>{const car=makeCar(c,false);scene.add(car);TOWNX.cars.push({m:car,u:i/5*tot,sp:2.6+(i%3)*.4})})}
   // audience and street walkers
   const SH=[0xe86a9a,0x3fa8e8,0xf2b632,0x8a4ac0,0x2fb08a,0xe2402f,0xff9a3c,0xffffff,0x7ccf4a],SK=[0xe0a878,0xc68a5a,0xa8724a];
   for(let k=0;k<10;k++){const f=makeFarmer({shirt:SH[k%9],pants:[0x2b2b3a,0x6b4a2c,0x3b5f9a][k%3],skin:SK[k%3],hat:SH[(k+4)%9]});const ax=TOWNX.stage.x-3.2-(k%3)*.9,az=TOWNX.stage.z-2.2+Math.floor(k/3)*1.1+(k%2)*.3;
     f.g.position.set(ax,0,az);f.g.rotation.y=0;f.g.visible=false;scene.add(f.g);TOWNX.aud.push({f,ph:k*.7,x:ax,z:az})}
   TOWNX.ball=[];{const cx=T.x+9,cz=T.z-19.5;for(let k=0;k<4;k++){const f=makeFarmer({shirt:[0xe2402f,0x3fa8e8,0xe2402f,0x3fa8e8][k],pants:0xf2f2ee,skin:SK[k%3],hat:[0xe2402f,0x3fa8e8][k%2]});f.g.scale.setScalar(.8);scene.add(f.g);TOWNX.ball.push({f,o:{cr:0},ph:k*1.6,cx,cz})}
     const bl=new THREE.Mesh(new THREE.SphereGeometry(.14,10,8),am(0xe8622a));scene.add(bl);TOWNX.bl=bl}
-  const ST=[[[T.x-13,T.z+15.6],[T.x+14,T.z+15.6]],[[T.x+19.4,T.z-14],[T.x+19.4,T.z+4]],[[T.x-20,T.z-13.2],[T.x-6,T.z-13.2]],[[T.x-20.4,T.z-5],[T.x-20.4,T.z+7]]];
+  const ST=[[[T.x-19,T.z+14.8],[T.x+18,T.z+14.8]],[[T.x+18.4,T.z-12],[T.x+18.4,T.z+14]],[[T.x-19,T.z-11.9],[T.x+18,T.z-11.9]],[[T.x-19.4,T.z-12],[T.x-19.4,T.z+14]],[[T.x-19,T.z+18.4],[T.x+18,T.z+18.4]],[[T.x+22,T.z-12],[T.x+22,T.z+14]]];
   for(let k=0;k<10;k++){const f=makeFarmer({shirt:SH[(k+2)%9],pants:[0x3b5f9a,0x2b2b3a,0x6b4a2c][k%3],skin:SK[(k+1)%3],hat:SH[(k+6)%9]});const seg=ST[k%ST.length];scene.add(f.g);TOWNX.walkers.push({f,seg,u:Math.random(),dir:k%2?1:-1,sp:.05+Math.random()*.04,o:{cr:0}})}
 })();
 /* ===== Municipal area west of the town: municipal hall with a clock tower, plaza, monument, gazebo, police, fire station and health center ===== */
@@ -3851,7 +3862,9 @@ function stepMunicipal(dt,t){if(Math.hypot(cam.tx-(TOWN.x-42),cam.tz-TOWN.z)>90)
     c.m.position.set(MX+a[0]+(b2[0]-a[0])*f-dz*.45,0,MZ+a[1]+(b2[1]-a[1])*f+dx*.45);c.m.rotation.y=Math.atan2(-dz,dx);if(c.m.userData.wheels)c.m.userData.wheels.forEach(w=>w.rotation.y+=dt*c.sp*4)})}
   MUNI.people.forEach(p=>{if(p.pause>0){p.pause-=dt;p.f.legL.rotation.z=p.f.legR.rotation.z=0;return}if(Math.random()<dt*.05)p.pause=2+Math.random()*3;p.a+=p.sp*dt;const x=p.cx+Math.cos(p.a)*p.r,z=p.cz+Math.sin(p.a)*p.r*1.6,dx=-Math.sin(p.a)*p.sp,dz=Math.cos(p.a)*p.sp*1.6;
     p.f.g.position.set(x,0,z);p.f.g.rotation.y=Math.atan2(-dz,dx);const sw=Math.sin(t*8+p.a*5);p.f.legL.rotation.z=sw*.6;p.f.legR.rotation.z=-sw*.6;p.f.armL.rotation.z=-sw*.5;p.f.armR.rotation.z=sw*.5;p.f.g.visible=!isBad()})}
-function stepTown(dt,t){stepMunicipal(dt,t);const h=typeof phHour==="function"?phHour():12,dark=1-daylight(h),show=h>=18&&h<21&&!isBad();
+function stepTown(dt,t){stepMunicipal(dt,t);
+  if(TOWNX.loop&&Math.hypot(cam.tx-TOWN.x,cam.tz-TOWN.z)<90){const {seg,tot}=TOWNX.loop;TOWNX.cars.forEach(c=>{c.u=(c.u+c.sp*dt)%tot;let s2=c.u,k=0;while(s2>seg[k][2]){s2-=seg[k][2];k++}const [a,b2,l]=seg[k],f=s2/l,dx=(b2[0]-a[0])/l,dz=(b2[1]-a[1])/l;
+    c.m.position.set(a[0]+(b2[0]-a[0])*f-dz*.55,0,a[1]+(b2[1]-a[1])*f+dx*.55);c.m.rotation.y=Math.atan2(-dz,dx);if(c.m.userData.wheels)c.m.userData.wheels.forEach(w=>w.rotation.y+=dt*c.sp*4)})}const h=typeof phHour==="function"?phHour():12,dark=1-daylight(h),show=h>=18&&h<21&&!isBad();
   TOWNX.pl.forEach(l=>l.intensity=dark*1.8);if(TOWNX.lit)TOWNX.lit.visible=dark>.35;TOWNX.lights.forEach(m=>{});
   if(TOWNX.stageOn!==show){TOWNX.stageOn=show;TOWNX.band.forEach(b=>b.f.g.visible=show);TOWNX.aud.forEach(a=>a.f.g.visible=show);TOWNX.notes.forEach(n=>n.visible=show);TOWNX.beam.visible=show}
   if(show){TOWNX.band.forEach(b=>{const f=b.f;if(b.role==="mic"){f.armR.rotation.z=2.1+Math.sin(t*2)*.15;f.armL.rotation.z=.6+Math.sin(t*1.5)*.8;f.torso.rotation.x=Math.sin(t*1.6)*.12;f.g.rotation.y=Math.PI+Math.sin(t*.7)*.5}
