@@ -53,6 +53,12 @@ export default async (req) => {
     const emailOk = e => /^[^\s@]{1,64}@[^\s@]{1,190}\.[a-z]{2,24}$/i.test(e);
     const code6 = () => String(100000 + (crypto.getRandomValues(new Uint32Array(1))[0] % 900000));
     const sendMail = async (to, subject, text) => {
+      const gu = process.env.GMAIL_USER, gp = (process.env.GMAIL_APP_PASSWORD || "").replace(/\s+/g, "");
+      if (gu && gp) {
+        try { const nm = (await import("nodemailer")).default; const tr = nm.createTransport({ service: "gmail", auth: { user: gu, pass: gp } });
+          await tr.sendMail({ from: '"Farming" <' + gu + '>', to, subject, text }); return { ok: true } }
+        catch (e) { return { ok: false, error: "Couldn't send the email right now. Try again later." } }
+      }
       const key = process.env.RESEND_API_KEY, from = process.env.MAIL_FROM || "Farming <onboarding@resend.dev>";
       if (!key) return { ok: false, error: "Email isn't set up on the server yet. Please tell the game admin." };
       const r = await fetch("https://api.resend.com/emails", { method: "POST", headers: { "content-type": "application/json", authorization: "Bearer " + key }, body: JSON.stringify({ from, to: [to], subject, text }) });
