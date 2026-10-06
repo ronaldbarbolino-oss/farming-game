@@ -2276,6 +2276,7 @@ function clickAt(e){
   if(p&&p.build!=null&&!SEL){editBuild(p.build);return}
   if(p&&p.worker){selectWorker(SEL===p.worker?null:p.worker);return}
   if(SEL&&!(p&&p.isle!=null)){commandAt(e,p);return}
+  {const gp=(!p||p.tile!=null)?groundPoint(e):null,pk=gp&&penAt(gp.x,gp.z);if(pk&&(TOOL==="move"||TOOL==="care"||TOOL==="harvest")){collectPen(pk,x,y);return}}
   if(!p)return;
   if(p.isle!=null){const s=ISLE.spots[p.isle];toast(s.n+": "+s.d,5500);if(s.v==="boat"&&!ISLE.sailing())goView("tug");else if(s.v==="lab"||s.v==="dorm")ISLE.setRoof(false);return}
   if(p.ftree!=null){if(TOOL==="chop")chopTree(p.ftree,x,y);else if(TOOL==="harvest"||TOOL==="care")pickTree(p.ftree,x,y);else toast("Use Harvest to pick fruit. To cut a tree, tap a helper's 🪓 Chop.");return}
@@ -2351,6 +2352,10 @@ function tap(i,x,y){
     else toast(st.c.n+": "+fmt(st.left)+" left before harvest")}
   after();
 }
+function penAt(x,z){for(const k in PENS){const P=PENS[k];if(x>P.x0&&x<P.x1&&z>P.z0&&z<P.z1)return k}if(typeof POND!=="undefined"&&((x-POND.x)/(POND.rx+.6))**2+((z-POND.z)/(POND.rz+.6))**2<1)return"pond";return null}
+function collectPen(k,x,y){let n=0,soon=1e9,full=false;S.pens.forEach(p=>{const a=animal(p.id);if(!a||!(p.id===k||zoneOf(p.id)===k))return;if(isBaby(p))return;const left=a.t-(now()-p.at);if(left>0){soon=Math.min(soon,left);return}
+    const it=AITEM[a.id];if(it){if(!addItem(it,1,null)){full=true;return}gain(0,a.xp,null)}else gain(a.s,a.xp,null);p.at=now();n++});
+  if(n){floatText("+"+n+" collected",x,y);after();toast("🧺 Collected from "+n+" animal"+(n>1?"s":"")+".",2000)}else if(full)toast("Storage is full! Sell at the stall or build a Warehouse.",3000);else if(soon<1e9)toast("Not ready yet · next in "+fmt(soon),2200);else toast(k==="pond"?"No ducks here yet.":"No grown animals here yet.",2200)}
 function tapPen(i,x,y){const p=S.pens[i],a=animal(p.id);
   if(!p.sick&&isBaby(p))return toast("Still young: "+a.n+". It grows up in "+fmt(GROW_T-(now()-p.born))+".");
   if(p.sick){if(p.heal)return toast(a.n+" is getting medicine. Healthy in "+fmt(p.heal-now())+".");const c=cureCost(a);if(S.coins<c)return toast("You need "+c+" coins for medicine.");S.coins-=c;startHeal(p);floatText("Medicine given −"+c,x,y);const o=animalObjs[i];if(o)burst(o.g.position.x,.7,o.g.position.z,0x7fe08a,14);toast(a.n+" got medicine. It will be healthy in "+fmt(p.heal-now())+".",3200);after();return}
