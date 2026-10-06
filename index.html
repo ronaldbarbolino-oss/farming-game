@@ -273,8 +273,37 @@ body.land .crew{top:calc(64px + env(safe-area-inset-top,0px));max-width:min(28vw
 body.land .crewc:not(.on) .cw-jobs{display:none}
 body.land .cw-lv{font-size:.58rem}body.land .cw-bar{display:none}
 body.land .modeTag{max-width:46vw;font-size:.64rem;opacity:.85}
+
+/* animated splash logo */
+#splash{position:fixed;inset:0;z-index:300;display:grid;place-items:center;overflow:hidden;background:radial-gradient(circle at 50% 38%,#fff6c2 0,#9be3ff 22%,#3fa9f0 60%,#1f6fc8 100%);transition:opacity .6s ease,visibility .6s}
+#splash.out{opacity:0;visibility:hidden}
+#splash .rays{position:absolute;left:50%;top:38%;width:220vmax;height:220vmax;margin:-110vmax 0 0 -110vmax;background:repeating-conic-gradient(rgba(255,255,255,.13) 0 8deg,rgba(255,255,255,0) 8deg 20deg);animation:spRot 24s linear infinite;border-radius:50%}
+#splash .box{position:relative;display:flex;flex-direction:column;align-items:center;gap:2vmin}
+#splash .art{width:min(46vmin,330px);aspect-ratio:1;border-radius:22%;box-shadow:0 18px 40px rgba(0,40,90,.35),inset 0 0 0 4px rgba(255,255,255,.5);background:#5fae3a center/cover;animation:spPop .9s cubic-bezier(.2,1.6,.4,1) both,spBob 3s ease-in-out .9s infinite;position:relative;overflow:hidden}
+#splash .art::after{content:"";position:absolute;inset:-40%;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.55) 50%,transparent 60%);animation:spShine 2.8s ease-in-out 1s infinite}
+#splash .title{display:flex;font-family:var(--display);font-size:min(17vmin,120px);line-height:1;letter-spacing:1px}
+#splash .title span{display:inline-block;color:#ffc72c;background:linear-gradient(180deg,#fff6a8 0%,#ffd84a 45%,#ff8a1a 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;-webkit-text-stroke:3px #4a2508;filter:drop-shadow(0 2px 0 #7a3d10) drop-shadow(0 2px 0 #7a3d10) drop-shadow(0 2px 0 #7a3d10) drop-shadow(0 3px 0 #4a2508) drop-shadow(0 8px 6px rgba(0,0,0,.35));animation:spDrop .7s cubic-bezier(.2,1.7,.45,1) both,spWave 2.4s ease-in-out infinite}
+#splash .spk{position:absolute;width:3vmin;height:3vmin;background:#fff;clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);animation:spTw 1.6s ease-in-out infinite}
+#splash .bar{width:min(50vmin,320px);height:12px;border-radius:8px;background:rgba(255,255,255,.35);border:3px solid #4a2508;overflow:hidden;margin-top:1vmin}
+#splash .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#7ccf4a,#ffd84a);animation:spLoad 2.2s ease-out forwards}
+#splash .hint{font:900 14px Nunito,sans-serif;color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.25)}
+@keyframes spRot{to{transform:rotate(360deg)}}@keyframes spPop{0%{transform:scale(0) rotate(-12deg)}100%{transform:scale(1) rotate(0)}}
+@keyframes spBob{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-2.2vmin) rotate(1.5deg)}}
+@keyframes spShine{0%{transform:translateX(-60%)}55%,100%{transform:translateX(60%)}}
+@keyframes spDrop{0%{transform:translateY(-60vmin) scale(.6);opacity:0}100%{transform:none;opacity:1}}
+@keyframes spWave{0%,100%{translate:0 0}50%{translate:0 -1.2vmin}}
+@keyframes spTw{0%,100%{transform:scale(.2) rotate(0);opacity:0}50%{transform:scale(1) rotate(45deg);opacity:1}}
+@keyframes spLoad{to{width:92%}}
+@media (prefers-reduced-motion:reduce){#splash *,#splash *::after{animation:none!important}#splash .bar i{width:92%}}
+.logo{animation:lgShine 4s ease-in-out infinite}@keyframes lgShine{0%,100%{filter:drop-shadow(0 1px 0 #7a3d10) drop-shadow(0 1px 0 #7a3d10) drop-shadow(0 1px 0 #7a3d10) drop-shadow(0 2px 0 #4a2508) drop-shadow(0 4px 3px rgba(0,0,0,.35)) brightness(1)}50%{filter:drop-shadow(0 1px 0 #7a3d10) drop-shadow(0 1px 0 #7a3d10) drop-shadow(0 1px 0 #7a3d10) drop-shadow(0 2px 0 #4a2508) drop-shadow(0 4px 3px rgba(0,0,0,.35)) brightness(1.18)}}
 </style>
 
+<div id="splash" role="img" aria-label="Farming"><div class="rays"></div>
+  <div class="spk" style="left:14%;top:18%"></div><div class="spk" style="left:82%;top:24%;animation-delay:.5s"></div><div class="spk" style="left:20%;top:72%;animation-delay:.9s"></div><div class="spk" style="left:78%;top:68%;animation-delay:1.3s"></div><div class="spk" style="left:50%;top:9%;animation-delay:.2s"></div>
+  <div class="box"><div class="art" style="background-image:url(icon-512.png?v=2)"></div>
+  <div class="title"><span style="animation-delay:0.35s,1.20s">F</span><span style="animation-delay:0.43s,1.32s">a</span><span style="animation-delay:0.51s,1.44s">r</span><span style="animation-delay:0.59s,1.56s">m</span><span style="animation-delay:0.67s,1.68s">i</span><span style="animation-delay:0.75s,1.80s">n</span><span style="animation-delay:0.83s,1.92s">g</span></div>
+  <div class="bar"><i></i></div><div class="hint" id="spHint">Loading your farm…</div></div></div>
+<script>window.__spT0=performance.now();setTimeout(function(){var e=document.getElementById("splash");if(e){e.classList.add("out");setTimeout(function(){e.remove()},700)}},15000);</script>
 <div class="wrap">
   <header class="hud">
     <div class="who"><h1 class="logo" id="logo">Farming</h1><button class="acct" id="acct" type="button">Guest · Sign up</button><span class="saved" id="acctSave">Saved in this browser</span></div>
@@ -290,6 +319,7 @@ body.land .modeTag{max-width:46vw;font-size:.64rem;opacity:.85}
   <div class="stage" id="stage">
     <canvas id="cv" aria-label="3D farm: drag to rotate, tap a plot to plow, plant or harvest"></canvas>
     <div class="loading" id="loading">Preparing the farm…</div>
+
     <div class="sbtns"><button class="sb" id="menuBtn" type="button">☰ Menu</button><button class="sb" id="gpBtn" type="button" hidden style="display:none">🏝️ GoPyesta Island</button><button class="sb" id="instBtn" type="button" hidden style="background:#3a7a3a;color:#fff">📲 Install</button><button class="sb" id="mapBtn" type="button">🗺️ Map</button><button class="sb" id="sndBtn" type="button" aria-pressed="false">🔇 Sound</button><button class="sb" id="curBtn" type="button" aria-pressed="false">🖱️ Cursor</button><button class="sb" id="hideBtn" type="button" aria-pressed="false">Hide</button><button class="sb" id="rotBtn" type="button">↻ Landscape</button></div>
     <div class="crew" id="crew" role="group" aria-label="Workers"></div>
     <div class="modeTag" id="modeTag">Tap the field to plow, plant and harvest · press and hold anything to move it</div>
@@ -627,7 +657,7 @@ function tileState(t){
 }
 function rnd(seed){let s=seed%2147483647||1;return()=>(s=(s*16807)%2147483647)/2147483647}
 
-if(!window.THREE){$("loading").textContent="Could not load 3D. Please refresh the page.";return}
+if(!window.THREE){$("loading").textContent="Could not load 3D. Please refresh the page.";{const e=$("splash");if(e)e.remove()}return}
 
 /* ================= THREE SETUP ================= */
 const cv=$("cv"),stage=$("stage");
@@ -4190,7 +4220,7 @@ function loop(t){
 }
 function start(){
   makeIcons();resize();buildField();buildSnowLayers();scene.add(sun.target);normalizePens();initFarmer();initHelper();initCrew();renderBuilds();buildBoat();buildJeep();initFolk();shopUI(true);townUI(true);syncAnimals();ui();wxUI();helperUI();applyCam(1);
-  $("loading").hidden=true;requestAnimationFrame(loop);setInterval(ui,1000);setInterval(()=>{invUI(false);townUI(false)},1000);invUI(true);initCloud();
+  $("loading").hidden=true;{const sp=$("splash"),t0=window.__spT0||0,w=Math.max(0,2400-(performance.now()-t0));setTimeout(()=>{if(sp){sp.classList.add("out");setTimeout(()=>sp.remove(),700)}},w)}requestAnimationFrame(loop);setInterval(ui,1000);setInterval(()=>{invUI(false);townUI(false)},1000);invUI(true);initCloud();
 }
 window.claude?.hot?.ready?window.claude.hot.ready(start):start();
 })();
