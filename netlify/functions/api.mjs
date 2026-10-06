@@ -16,7 +16,7 @@ async function adminOk(msg, sig) {
 const pub = m => ({ u: m.u, farm: m.farm, farmer: m.farmer, shirt: m.shirt, lv: m.lv, size: m.size, seen: m.seen });
 
 // a restart time shipped with a deploy: open games reload once after it
-const DEPLOY_RESTART = 1791261830721;
+const DEPLOY_RESTART = 1791268926349;
 export default async (req) => {
   const url = new URL(req.url);
   const path = url.pathname.replace(/^.*?\/api\/?/, "").replace(/^\.netlify\/functions\/api\/?/, "").replace(/\/$/, "");
@@ -47,6 +47,55 @@ export default async (req) => {
       const all = await Promise.all(blobs.slice(0, 2000).map(x => meta.get(x.key, { type: "json" }).catch(() => null)));
       const rs = await ctl.get("restart", { type: "json" });
       return J({ now: Date.now(), restartAt: rs ? rs.at : 0, players: all.filter(Boolean).map(m => ({ u: m.u, farm: m.farm, farmer: m.farmer, lv: m.lv, coins: m.coins || 0, animals: m.animals || 0, size: m.size, plots: m.plots || 0, seen: m.seen, created: m.created, sessions: m.sessions || 0 })) });
+    }
+    // ---- coin shop: players pay by QR, the admin approves, the game redeems the signed code ----
+    const buys = getStore({ name: "buys", consistency: "strong" });
+    const PACKS = { p1500: { coins: 1500, price: 100 }, p5000: { coins: 5000, price: 300 }, p10000: { coins: 10000, price: 500 } };
+    const own = async (u, tok) => { if (u.length < 3 || typeof tok !== "string" || tok.length < 16) return false; const m = await meta.get(u, { type: "json" }); return !!m && m.th === await sha(tok) };
+    if (req.method === "POST" && path === "buy") {
+      let b; try { b = await req.json() } catch { return J({ error: "bad json" }, 400) }
+      const u = norm(b.u), pk = PACKS[b.pack], ref = String(b.ref || "").replace(/[^A-Za-z0-9 -]/g, "").trim().slice(0, 40);
+      if (!pk) return J({ error: "Pick a coin pack." }, 400);
+      if (ref.length < 4) return J({ error: "Type the reference number from your payment." }, 400);
+      if (!await own(u, b.tok)) return J({ error: "Open your farm online first, then try again." }, 403);
+      const { blobs } = await buys.list({ prefix: u + "/" });
+      const mine = await Promise.all(blobs.map(x => buys.get(x.key, { type: "json" }).catch(() => null)));
+      if (mine.filter(x => x && x.status === "pending").length >= 5) return J({ error: "You already have 5 requests waiting. Please wait for the admin." }, 429);
+      if (mine.some(x => x && x.ref === ref)) return J({ error: "That reference number was already sent." }, 409);
+      const m = await meta.get(u, { type: "json" });
+      const id = u + "/" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+      const rec = { id, u, farm: m && m.farm || "", pack: b.pack, coins: pk.coins, price: pk.price, ref, status: "pending", at: Date.now() };
+      await buys.setJSON(id, rec);
+      return J({ ok: true, req: rec });
+    }
+    if (req.method === "POST" && path === "mybuys") {
+      let b; try { b = await req.json() } catch { return J({ error: "bad json" }, 400) }
+      const u = norm(b.u);
+      if (!await own(u, b.tok)) return J({ buys: [] });
+      const { blobs } = await buys.list({ prefix: u + "/" });
+      const mine = (await Promise.all(blobs.map(x => buys.get(x.key, { type: "json" }).catch(() => null)))).filter(Boolean).sort((a, c) => c.at - a.at).slice(0, 20);
+      return J({ buys: mine });
+    }
+    if (req.method === "POST" && path === "admin/buys") {
+      let b; try { b = await req.json() } catch { return J({ error: "bad json" }, 400) }
+      const at = Number(b.at) || 0;
+      if (Math.abs(Date.now() - at) > 5 * 60000) return J({ error: "expired" }, 400);
+      if (!(typeof b.sig === "string" && await adminOk("buys:" + at, b.sig))) return J({ error: "not allowed" }, 403);
+      const { blobs } = await buys.list();
+      const all = (await Promise.all(blobs.slice(0, 1000).map(x => buys.get(x.key, { type: "json" }).catch(() => null)))).filter(Boolean).sort((a, c) => c.at - a.at);
+      return J({ now: Date.now(), buys: all });
+    }
+    if (req.method === "POST" && path === "admin/buyset") {
+      let b; try { b = await req.json() } catch { return J({ error: "bad json" }, 400) }
+      const at = Number(b.at) || 0, id = String(b.id || ""), st = b.status === "approved" ? "approved" : "rejected";
+      if (Math.abs(Date.now() - at) > 5 * 60000) return J({ error: "expired" }, 400);
+      if (!(typeof b.sig === "string" && await adminOk("buyset:" + id + ":" + st + ":" + at, b.sig))) return J({ error: "not allowed" }, 403);
+      const rec = await buys.get(id, { type: "json" });
+      if (!rec) return J({ error: "not found" }, 404);
+      if (st === "approved" && !(typeof b.code === "string" && b.code.startsWith("FARM-"))) return J({ error: "missing code" }, 400);
+      const nr = { ...rec, status: st, code: st === "approved" ? b.code : undefined, done: Date.now() };
+      await buys.setJSON(id, nr);
+      return J({ ok: true, req: nr });
     }
     if (req.method === "GET" && path === "farms") {
       const { blobs } = await meta.list();

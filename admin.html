@@ -56,6 +56,13 @@ ul{padding-left:18px;margin:6px 0 0}li{margin:4px 0;word-break:break-all;font-si
   <div class="tbl"><table><thead><tr><th data-s="u">Username</th><th data-s="farm">Farm</th><th data-s="lv">Level</th><th data-s="coins">Coins</th><th data-s="animals">Animals</th><th data-s="seen">Last seen</th><th data-s="created">Joined</th></tr></thead><tbody id="pBody"><tr><td colspan="7">Unlock to load players.</td></tr></tbody></table></div>
   <p class="err" id="pErr" role="alert"></p>
 </section>
+<section class="card" id="buys" style="grid-column:1/-1">
+  <label>Coin purchases (InstaPay)</label>
+  <p class="note">Check your InstaPay app for the reference number and amount, then press Approve. The coins go to the player's game automatically. Reject anything you didn't receive.</p>
+  <div class="toolsrow"><select id="bFilter" style="font:inherit;padding:6px;border:3px solid var(--wood);border-radius:10px"><option value="pending">Waiting</option><option value="all">All</option></select><button type="button" class="alt" id="bRefresh" style="margin:0">Refresh</button><span id="bCount" class="note" style="margin:0"></span></div>
+  <div class="tbl"><table><thead><tr><th>When</th><th>Username</th><th>Farm</th><th>Pack</th><th>Amount</th><th>Reference no.</th><th>Status</th><th></th></tr></thead><tbody id="bBody"><tr><td colspan="8">Unlock to load purchases.</td></tr></tbody></table></div>
+  <p class="err" id="bErr" role="alert"></p>
+</section>
 </div>
 </main>
 <script>
@@ -67,7 +74,7 @@ $("unlockF").onsubmit=async e=>{e.preventDefault();$("lockErr").textContent="";$
   try{const base=await crypto.subtle.importKey("raw",new TextEncoder().encode($("pw").value.trim()),"PBKDF2",false,["deriveKey"]);
     const key=await crypto.subtle.deriveKey({name:"PBKDF2",salt:b64(ENC.salt),iterations:ENC.it,hash:"SHA-256"},base,{name:"AES-GCM",length:256},false,["decrypt"]);
     const jwk=JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM",iv:b64(ENC.iv)},key,b64(ENC.ct))));
-    SK=await crypto.subtle.importKey("jwk",jwk,{name:"ECDSA",namedCurve:"P-256"},false,["sign"]);$("pw").value="";$("lock").hidden=true;$("adminGrid").hidden=false;$("who").focus();loadPlayers()}
+    SK=await crypto.subtle.importKey("jwk",jwk,{name:"ECDSA",namedCurve:"P-256"},false,["sign"]);$("pw").value="";$("lock").hidden=true;$("adminGrid").hidden=false;$("who").focus();loadPlayers();loadBuys()}
   catch(err){$("lockErr").textContent=window.crypto&&crypto.subtle?"Wrong password.":"Open this page over https."}$("unlockB").disabled=false};
 document.querySelectorAll(".quick button").forEach(b=>b.onclick=()=>{$("amt").value=b.dataset.a});
 const hist=[];
@@ -99,5 +106,16 @@ $("restartB").onclick=async()=>{const m=$("rsMsg");m.style.color="";m.textConten
     const r=await fetch("/api/restart",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({at,sig:b64u(sig)})});const d=await r.json().catch(()=>({}));
     if(!r.ok)throw new Error(d.error||("Error "+r.status));m.style.color="#3f8f2c";m.textContent="Done! Players' games will reload within about 20 seconds."}
   catch(e){m.style.color="";m.textContent="Couldn't restart: "+e.message}$("restartB").disabled=false};
+async function giftCode(u,c,w){const n=[...crypto.getRandomValues(new Uint8Array(6))].map(b=>b.toString(16).padStart(2,"0")).join("");
+  const p=new TextEncoder().encode(JSON.stringify({u,c,...(w?{w}:{}),n,t:Math.floor(Date.now()/1000)}));const sig=new Uint8Array(await crypto.subtle.sign({name:"ECDSA",hash:"SHA-256"},SK,p));return"FARM-"+b64u(p)+"."+b64u(sig)}
+let BL=[];
+async function loadBuys(){$("bErr").textContent="";$("bRefresh").disabled=true;try{const r=await fetch("/api/admin/buys",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(await signed("buys"))});const d=await r.json();if(!r.ok)throw new Error(d.error||"Couldn't load");BL=d.buys||[];drawBuys()}catch(e){$("bErr").textContent=e.message}$("bRefresh").disabled=false}
+function drawBuys(){const f=$("bFilter").value,L=BL.filter(b=>f==="all"||b.status==="pending");$("bCount").textContent=BL.filter(b=>b.status==="pending").length+" waiting";
+  $("bBody").innerHTML=L.length?L.map(b=>`<tr><td>${new Date(b.at).toLocaleString()}</td><td><b>${esc(b.u)}</b></td><td>${esc(b.farm||"")}</td><td class="n">${(b.coins||0).toLocaleString()} coins</td><td class="n">₱${b.price}</td><td><code>${esc(b.ref)}</code></td><td>${b.status==="pending"?"⏳ Waiting":b.status==="approved"?"✅ Approved":"❌ Rejected"}</td><td>${b.status==="pending"?`<button type="button" data-ok="${esc(b.id)}" style="margin:0;padding:4px 10px">Approve</button> <button type="button" class="alt" data-no="${esc(b.id)}" style="margin:0;padding:4px 10px">Reject</button>`:""}</td></tr>`).join(""):'<tr><td colspan="8">No purchases here.</td></tr>';
+  $("bBody").querySelectorAll("[data-ok]").forEach(x=>x.onclick=()=>setBuy(x.dataset.ok,"approved"));$("bBody").querySelectorAll("[data-no]").forEach(x=>x.onclick=()=>setBuy(x.dataset.no,"rejected"))}
+async function setBuy(id,status){const b=BL.find(q=>q.id===id);if(!b)return;if(!confirm((status==="approved"?"Approve ":"Reject ")+b.coins.toLocaleString()+" coins for "+b.u+" (₱"+b.price+", ref "+b.ref+")?"))return;
+  try{const code=status==="approved"?await giftCode(b.u,b.coins):undefined;const s2=await signed("buyset:"+id+":"+status);const r=await fetch("/api/admin/buyset",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({id,status,code,...s2})});const d=await r.json();if(!r.ok)throw new Error(d.error||"Couldn't save");
+    Object.assign(b,d.req);drawBuys()}catch(e){$("bErr").textContent=e.message}}
+$("bRefresh").onclick=loadBuys;$("bFilter").onchange=drawBuys;setInterval(()=>{if(SK)loadBuys()},60000);
 $("lockB").onclick=()=>{SK=null;$("adminGrid").hidden=true;$("out").hidden=true;$("lock").hidden=false;$("pw").focus()};
 </script></body></html>
