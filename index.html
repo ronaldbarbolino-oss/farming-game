@@ -1313,7 +1313,7 @@ function stepAnimals(dt,t){if((nightT-=dt)<=0){nightT=5;NIGHT_NOW=isNight();if(w
     }else{
       if(o.state==="graze"){nkT=U.graze||0;if(U.jaw)U.jaw.position.y=U.jawY-Math.abs(Math.sin(t*9))*.025}
       if(o.state==="look")yawT=Math.sin((o.st)*2.2)*.7;
-      if(o.state==="call"){nkT=.35;yawT=.25;U.moo.visible=o.st>.3;U.moo.position.y=U.h+.25+(1.6-o.st)*.25;U.moo.material.opacity=Math.min(1,o.st*2)}else U.moo.visible=false;
+      if(o.state==="call"){nkT=.35;yawT=.25}U.moo.visible=false;
       if(o.state==="hop"){const ph=(1.3-o.st)/1.3*2;hopY=Math.abs(Math.sin(ph*Math.PI))*.32;g.rotation.y+=dt*1.2}
       if(o.st<=0)pickNext(o);
     }
