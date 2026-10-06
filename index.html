@@ -2753,10 +2753,10 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="155";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
+const GAMEVER="156";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 function cvRect(){return ROT?{left:0,top:0,width:cv.clientWidth,height:cv.clientHeight}:cv.getBoundingClientRect()}
-function setRot(){const want=!!MOBILE&&innerHeight>innerWidth*1.05;if(want!==ROT){ROT=want;document.body.classList.toggle("rot",want)}const r=document.documentElement.style;r.setProperty("--LW",(ROT?innerHeight:innerWidth)+"px");r.setProperty("--LH",(ROT?innerWidth:innerHeight)+"px")}
-let _olTried=false;function tryLockLand(){if(_olTried||!MOBILE||!(innerHeight>innerWidth))return;_olTried=true;try{const d=document.documentElement,go=()=>{if(screen.orientation&&screen.orientation.lock)screen.orientation.lock("landscape").catch(()=>{})};
+function setRot(){const au=document.getElementById("auth"),inAuth=!(typeof LOCAL!=="undefined"&&LOCAL.user)||(au&&!au.hidden);const want=!!MOBILE&&innerHeight>innerWidth*1.05&&!inAuth;if(want!==ROT){ROT=want;document.body.classList.toggle("rot",want)}const r=document.documentElement.style;r.setProperty("--LW",(ROT?innerHeight:innerWidth)+"px");r.setProperty("--LH",(ROT?innerWidth:innerHeight)+"px")}
+let _olTried=false;function tryLockLand(){if(_olTried||!MOBILE||!(innerHeight>innerWidth)||!(typeof LOCAL!=="undefined"&&LOCAL.user))return;_olTried=true;try{const d=document.documentElement,go=()=>{if(screen.orientation&&screen.orientation.lock)screen.orientation.lock("landscape").catch(()=>{})};
   if(!document.fullscreenElement&&d.requestFullscreen&&!/iPhone|iPad|iPod/.test(navigator.userAgent))d.requestFullscreen({navigationUI:"hide"}).then(go).catch(go);else go()}catch(e){}}
 window.addEventListener("pointerdown",tryLockLand,{once:false,passive:true});
 function setLand(){setRot();const b=document.body,land=(innerWidth>innerHeight||ROT)&&(innerHeight<=600||!!(window.matchMedia&&matchMedia("(pointer:coarse)").matches));if(land!==b.classList.contains("land")){b.classList.toggle("land",land);if(!land)b.classList.remove("drawer")}}
@@ -6450,13 +6450,13 @@ async function hashPw(pw,salt){const data=new TextEncoder().encode(salt+":"+pw);
   try{if(window.crypto&&crypto.subtle){const h=await crypto.subtle.digest("SHA-256",data);return[...new Uint8Array(h)].map(b=>b.toString(16).padStart(2,"0")).join("")}}catch(e){}
   let h=5381,h2=52711;for(const b of data){h=((h<<5)+h+b)|0;h2=((h2<<5)+h2^b)|0}return"x"+(h>>>0).toString(16)+(h2>>>0).toString(16)}
 function oldSave(){try{const r=localStorage.getItem("bukid-v1");return r?JSON.parse(r):null}catch(e){return null}}
-function loginLocal(u){const a=accts()[u];if(!a)return;LOCAL.user=u;try{localStorage.setItem(SESS_KEY,u)}catch(e){}
+function loginLocal(u){const a=accts()[u];if(!a)return;setTimeout(()=>{try{relayout()}catch(e){}},60);LOCAL.user=u;try{localStorage.setItem(SESS_KEY,u)}catch(e){}
   CLOUD.local={farm:a.farm,farmer:a.farmer,shirt:a.shirt|0};
   let st=null;try{st=JSON.parse(localStorage.getItem("farming-save-"+u)||"null")}catch(e){}
   if(!(st&&loadState(st)))loadState(fresh());
   applyProfile();$("auth").hidden=true;$("acctSave").textContent="Saved on this device";}
 function logoutLocal(){save();LOCAL.user=null;CLOUD.local=null;try{localStorage.removeItem(SESS_KEY)}catch(e){}$("signup").hidden=true;loadState(fresh());applyProfile();openAuth("login")}
-function openAuth(tab,msg){$("auth").hidden=false;authTab(tab||"signup");$("auErr").textContent=msg||"";$("liErr").textContent="";
+function openAuth(tab,msg){$("auth").hidden=false;setTimeout(()=>{try{relayout()}catch(e){}},30);authTab(tab||"signup");$("auErr").textContent=msg||"";$("liErr").textContent="";
   $("auImportRow").hidden=!oldSave()||Object.keys(accts()).length>0;}
 function authTab(t){$("auSignup").hidden=t!=="signup";$("auLogin").hidden=t!=="login";$("tabSu").classList.toggle("on",t==="signup");$("tabLi").classList.toggle("on",t==="login");
   setTimeout(()=>{const f=t==="signup"?$("auUser"):$("liUser");if(f)f.focus()},60)}
