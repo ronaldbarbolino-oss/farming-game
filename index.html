@@ -2202,7 +2202,8 @@ const TOOLS={move:"Tap the field to plow, plant and harvest · drag to look arou
 let TOOL="move",modeT=0;
 function setTool(k){if(!TOOLS[k])return;TOOL=k;document.querySelectorAll(".tb").forEach(b=>{const on=b.dataset.t===k;b.classList.toggle("on",on);b.setAttribute("aria-pressed",on)});
   const m=$("modeTag");m.textContent=k==="plant"?"Plant: "+crop(S.sel).n+" · tap the soil":TOOLS[k];m.style.opacity=1;clearTimeout(modeT);modeT=setTimeout(()=>m.style.opacity=k==="move"?0:.85,2600)}
-document.querySelectorAll(".tb").forEach(b=>b.onclick=()=>setTool(b.dataset.t));
+document.querySelectorAll(".tb").forEach(b=>b.onclick=()=>{if(SEL)selectWorker(null);setTool(b.dataset.t)});
+window.addEventListener("keydown",e=>{if(e.key==="Escape"&&SEL){selectWorker(null);setTool("move")}});
 window.addEventListener("keydown",e=>{if(e.target&&(e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA"))return;const k={"1":"move","2":"harvest","3":"care"}[e.key];if(k)setTool(k)});
 function toolOk(i){const t=S.tiles[i];if(!t)return null;
   if(TOOL==="move"){if(t.k==="grass"||t.k==="soil")return true;const st=tileState(t);return!!(st&&(st.p>=1||st.dead))}
@@ -2436,7 +2437,7 @@ function initCrew(){
 }
 const SELRING=new THREE.Mesh(new THREE.RingGeometry(.38,.5,28),new THREE.MeshBasicMaterial({color:0xffd84a,transparent:true,opacity:.9,depthWrite:false}));SELRING.rotation.x=-Math.PI/2;scene.add(SELRING);
 function selectWorker(k){SEL=k&&CREW[k]?k:null;renderCrewSel();const m=$("modeTag");
-  m.textContent=SEL?"Orders for "+wName(SEL)+": pick a tool, then tap where":"No worker selected: you will do it yourself";m.style.opacity=1;clearTimeout(modeT);modeT=setTimeout(()=>m.style.opacity=.85,2600)}
+  m.textContent=SEL?"Orders for "+wName(SEL)+": tap where to work · tap Move to stop giving orders":"No worker selected: you will do it yourself";m.style.opacity=1;clearTimeout(modeT);modeT=setTimeout(()=>m.style.opacity=.85,2600)}
 function groundPoint(e){const r=cv.getBoundingClientRect();ndc.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(ndc,camera);
   const v=ray.ray.intersectPlane(GPLANE,_gpv);if(!v)return null;return{x:Math.max(-28,Math.min(17,v.x)),z:Math.max(-24,Math.min(14,v.z))}}
 function taskTarget(q){
@@ -3449,7 +3450,7 @@ function sndSet(on){if(on&&!sndInit()){toast("Sound isn't supported on this devi
   try{localStorage.setItem("farming-sound",on?"1":"0")}catch(e){}if(SND.ctx){if(on&&SND.ctx.state==="suspended")SND.ctx.resume();SND.master.gain.setTargetAtTime(on?.9:0,SND.ctx.currentTime,.4)}}
 $("sndBtn").onclick=()=>sndSet(!SND.on);
 function curSet(on){NORMALCUR=on;const b=$("curBtn");b.textContent=on?"🖱️ Normal cursor":"🎯 Game cursor";b.setAttribute("aria-pressed",on);try{localStorage.setItem("farming-cursor",on?"1":"0")}catch(e){}}
-$("curBtn").onclick=()=>{curSet(!NORMALCUR);toast(NORMALCUR?"Normal mouse pointer on.":"Game cursors on (crosshair, hand, grab).",2000)};
+$("curBtn").onclick=()=>{if(SEL){selectWorker(null);setTool("move")}curSet(!NORMALCUR);toast(NORMALCUR?"Normal mouse pointer on.":"Game cursors on (crosshair, hand, grab).",2000)};
 try{curSet(localStorage.getItem("farming-cursor")==="1")}catch(e){curSet(false)}
 let sndWant=false;try{sndWant=localStorage.getItem("farming-sound")==="1"}catch(e){}
 if(sndWant){const go=()=>{window.removeEventListener("pointerdown",go);if(!SND.on)sndSet(true)};window.addEventListener("pointerdown",go)}
