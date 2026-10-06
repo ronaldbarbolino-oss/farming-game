@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "app.netlify.farming_ph.twa",
+        "sha256_cert_fingerprints": ["E7:62:73:94:1D:D3:CC:11:13:68:9C:E0:38:64:B5:2A:13:33:69:3F:55:FE:1D:73:FD:11:A3:52:28:3F:50:B6"]
+      }
+    }]
