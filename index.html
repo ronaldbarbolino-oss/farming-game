@@ -2895,7 +2895,10 @@ const BUILDS=[
   {id:"kamalig",n:"Big Barn",cost:2500,wood:20,lv:4,r:2.3,inc:15,d:"Red barn with two doors and a hayloft."},
   {id:"kiskisan",n:"Windmill",cost:2000,wood:15,lv:5,r:1.4,inc:12,d:"Mill whose blades turn in the wind."},
   {id:"bato",n:"Stone House",cost:3500,wood:25,lv:6,r:2.1,inc:22,d:"Stone and wood house with capiz windows and a balcony."},
-  {id:"mansyon",n:"Mansion",cost:9000,wood:40,lv:7,r:3.4,inc:45,d:"Grand two-storey white mansion with columns, a balcony, a big front door and a garden."}];
+  {id:"mansyon",n:"Mansion",cost:9000,wood:40,lv:7,r:4.2,inc:45,d:"Grand two-storey white mansion with columns, a balcony, a fountain, lamps and a garden."},
+  {id:"villa",n:"Grand Villa",cost:18000,wood:60,lv:9,r:5,inc:80,d:"Spanish villa with a red tile roof, arches, two wings, a swimming pool and palm trees."},
+  {id:"moderno",n:"Modern Mansion",cost:25000,wood:80,lv:10,r:5,inc:110,d:"Two-storey glass and wood mansion with a roof deck, a garage and an infinity pool."},
+  {id:"palasyo",n:"Palace Mansion",cost:40000,wood:120,lv:12,r:6,inc:160,d:"Three-storey white palace with a golden dome, two towers, grand stairs and a fountain."}];
 const BOATS=[{id:"bangka",n:"Rowboat",cost:600,lv:2,speed:3.6,d:"Rowboat with outriggers. Slow but reliable."},
   {id:"speed",n:"Speed Boat",cost:2500,lv:5,speed:10,d:"Motorboat. Just a few seconds to the island."}];
 const ISLEITEMS=[{id:"isla",n:"Secret Island",cost:100000,lv:3,d:"Buy the whole Secret Island next to the GoPyesta carnival, with a 6×6 field for secret crops. Needs a boat."},
@@ -2907,6 +2910,10 @@ function plotOf(i){for(const a of layout())if(i<a.start+a.n*a.n)return a;return 
 function isIsleTile(i){const a=plotOf(i);return!!(a&&a.p&&a.p.island)}
 function tileY(i){const a=plotOf(i);return a&&a.p&&a.p.y||0}
 /* -- building meshes -- */
+function mLamp(b,x,z){b.add("cyl",0x2b3640,x,.75,z,.05,1.5,.05);b.add("box",0x2b3640,x,1.52,z,.22,.05,.22);b.add("box",0xffe6a0,x,1.42,z,.16,.18,.16);b.add("cone4",0x2b3640,x,1.62,z,.18,.16,.18,0,Math.PI/4,0)}
+function mFountain(b,x,z,s){b.add("cyl",0xd8d2c6,x,.18*s,z,1.1*s,.36*s,1.1*s);b.add("cyl",0x4fc3e8,x,.37*s,z,.98*s,.04,.98*s);b.add("cyl",0xd8d2c6,x,.7*s,z,.14*s,.8*s,.14*s);b.add("cyl",0xd8d2c6,x,1.1*s,z,.5*s,.12*s,.5*s);b.add("sph",0x9be6ff,x,1.3*s,z,.22*s,.3*s,.22*s)}
+function mPalm(b,x,z){for(let k=0;k<5;k++)b.add("cyl",0x9a6a3a,x+k*.05,.3+k*.55,z,.12-k*.012,.6,.12-k*.012,0,0,-.05);for(let k=0;k<6;k++){const a=k/6*Math.PI*2;b.add("box",0x3fa833,x+.25+Math.cos(a)*.55,2.95,z+Math.sin(a)*.55,1.1,.06,.3,0,-a,Math.cos(a)*-.35)}}
+function mHedge(b,x,z0,z1){for(let z=z0;z<=z1+.01;z+=.6)if(Math.abs(z)>.9)b.add("sph",0x3f9a2c,x,.32,z,.36,.34,.36)}
 function makeBuild(id){if(String(id).startsWith("sap_")){const o=makeTreeG(0,0,null,7);o.g.remove(o.hit);o.g.scale.setScalar(.45);const w=new THREE.Group();w.add(o.g);return w}
   const g=new THREE.Group(),b=new Builder(),sn=new Builder();
   if(id==="kubo"){[[-.85,-.85],[.85,-.85],[-.85,.85],[.85,.85]].forEach(([x,z])=>b.add("cyl",0xa8884a,x,.35,z,.08,.7,.08));
@@ -2948,7 +2955,49 @@ function makeBuild(id){if(String(id).startsWith("sap_")){const o=makeTreeG(0,0,n
     sn.add("box",0xffffff,W/2+.62,.24+F+.24,0,1.36,.05,2.6);
     for(let k=0;k<3;k++)b.add("box",0xd8d2c6,W/2+1.0+k*.28,.06+k*.06,0,.3,.12+k*.12,1.4-k*.1);
     [[W/2+1.7,-1.5],[W/2+1.7,1.5]].forEach(([x,z])=>{b.add("cyl",0xc9c2b4,x,.2,z,.28,.4,.28);b.add("sph",0x3fa833,x,.62,z,.32,.3,.32);b.add("sph",0xff7bb0,x+.1,.82,z,.08,.08,.08)});
-    [[-W/2-.1,-1.5],[-W/2-.1,1.5],[0,D/2+.35],[0,-D/2-.35]].forEach(([x,z])=>{b.add("sph",0x2f9029,x,.4,z,.42,.4,.42);b.add("sph",0x6ccf45,x+.1,.58,z,.24,.2,.24)})}
+    [[-W/2-.1,-1.5],[-W/2-.1,1.5],[0,D/2+.35],[0,-D/2-.35]].forEach(([x,z])=>{b.add("sph",0x2f9029,x,.4,z,.42,.4,.42);b.add("sph",0x6ccf45,x+.1,.58,z,.24,.2,.24)});
+    mFountain(b,W/2+3.1,0,.8);[-1.9,1.9].forEach(z=>mLamp(b,W/2+2.1,z));mHedge(b,W/2+4.2,-2.6,2.6,true);g.scale.setScalar(1.18)}
+  else if(id==="villa"){const W=6,D=4.6,F=1.6,WL=0xf3e2c0,TR=0xe8d4a8,RF=0xc65a2a;
+    b.add("box",0xd8c8a8,0,.12,0,W+5,.24,D+4.6);
+    b.add("box",WL,0,.24+F/2,0,W,F,D);b.add("box",TR,0,.24+F+.06,0,W+.16,.12,D+.16);b.add("box",WL,0,.36+F*1.5,0,W,F,D);
+    b.add("cone4",RF,0,.36+F*2+.8,0,W*.78,1.6,D*.78,0,Math.PI/4,0);sn.add("cone4",0xffffff,0,.36+F*2+.98,0,W*.62,1.1,D*.62,0,Math.PI/4,0);
+    [-1,1].forEach(sd=>{const z=sd*(D/2+1.2);b.add("box",WL,-.6,.24+F/2,z,W-1.6,F,2.4);b.add("cone4",RF,-.6,.24+F+.55,z,(W-1.6)*.74,1.1,1.8,0,Math.PI/4,0);
+      for(let k=0;k<3;k++)b.add("box",0x3a5a7a,W/2-.8+.02,.24+F/2+.1,z-.7+k*.7,.04,.7,.4)});
+    for(let k=0;k<5;k++){const z=-1.8+k*.9;b.add("cyl",0xfff6e6,W/2+.9,.24+F/2+.05,z,.12,F+.1,.12);b.add("box",TR,W/2+.9,.24+F+.08,z,.3,.12,.3)}
+    b.add("box",RF,W/2+.6,.24+F+.25,0,1.4,.12,D+.3);
+    for(let fl=0;fl<2;fl++){const y=.24+F/2+fl*(F+.12);for(let k=0;k<5;k++){const z=-1.8+k*.9;if(fl===0&&k===2)continue;b.add("box",0x5a3a1a,W/2+.02,y+.1,z,.05,.86,.5);b.add("box",0x7fb8d8,W/2+.04,y+.1,z,.03,.7,.36)}}
+    b.add("box",0x5a2a1a,W/2+.03,.24+.7,0,.06,1.4,.9);b.add("box",0xe6b84a,W/2+.07,.24+.7,0,.03,1.4,.04);
+    [-1,1].forEach(sd=>{b.add("box",WL,W/2+.1,.24+F+.75,sd*1.2,.1,.5,1.4);for(let k=0;k<6;k++)b.add("cyl",0xfff6e6,W/2+.6,.24+F+.5,sd*(.6+k*.22),.03,.4,.03)});
+    b.add("box",0xe8dcc0,W/2+3.4,.2,0,2.8,.16,4);b.add("box",0x2fa8e0,W/2+3.4,.25,0,2.4,.1,3.6);b.add("box",0x7fdcff,W/2+3.4,.31,0,2.2,.02,3.3);
+    [[W/2+1.6,-2.6],[W/2+1.6,2.6],[W/2+5.2,-2.2],[W/2+5.2,2.2]].forEach(([x,z])=>mPalm(b,x,z));
+    [-1.6,1.6].forEach(z=>mLamp(b,W/2+1.4,z));mHedge(b,W/2+5.9,-3.4,3.4,true);mHedge(b,-W/2-.6,-3.4,3.4,true)}
+  else if(id==="moderno"){const W=6.2,D=4.6,WH=0xf4f4f2,WD=0x6b4a33,GL=0x8fd0ea,DK=0x2b3640;
+    b.add("box",0xcfd3d6,0,.1,0,W+5,.2,D+4.4);
+    b.add("box",WH,-.3,1.0,0,W-.6,1.6,D);b.add("box",GL,W/2-.58,1.0,0,.04,1.4,D-.4);for(let k=0;k<6;k++)b.add("box",DK,W/2-.56,1.0,-D/2+.3+k*(D-.6)/5,.05,1.44,.05);
+    b.add("box",WD,-.9,2.55,-.3,W+.2,1.5,D-.6);b.add("box",GL,W/2-.68,2.55,-.3,.04,1.3,D-1);for(let k=0;k<5;k++)b.add("box",DK,W/2-.66,2.55,-.3-(D-1)/2+k*(D-1)/4,.05,1.34,.05);
+    b.add("box",WH,-.9,3.36,-.3,W+.5,.14,D-.3);b.add("box",WH,-.3,1.86,0,W+.4,.12,D+.3);sn.add("box",0xffffff,-.9,3.45,-.3,W+.4,.05,D-.4);
+    for(let k=0;k<12;k++)b.add("box",GL,-.9-W/2+.1+k*(W+.2)/11,3.6,D/2-.5,.04,.4,.02);b.add("box",GL,-.9,3.6,D/2-.45,W+.3,.36,.02);
+    b.add("box",0x3a4652,-.9,3.75,-1.5,1.2,.6,1);b.add("box",0x5aa83a,1.6,3.48,-.8,1.4,.1,1.4);
+    b.add("box",WH,-W/2-1.2,.9,1.2,2.2,1.4,2.2);b.add("box",DK,-W/2-1.2,.75,2.31,1.8,1.1,.04);
+    b.add("box",0xd8dcde,W/2+2.6,.18,0,3.4,.16,D+.6);b.add("box",0x2fa8e0,W/2+2.6,.24,0,3,.1,D);b.add("box",0x9be6ff,W/2+2.6,.3,0,2.8,.02,D-.3);
+    for(let k=0;k<4;k++)b.add("box",0xf4f4f2,W/2+1.4,.32,-1.2+k*.8,.5,.06,.25);
+    [-2.4,2.4].forEach(z=>{b.add("cyl",0x8a8f93,W/2+.6,.3,z,.3,.6,.3);b.add("sph",0x3f9a2c,W/2+.6,.9,z,.35,.45,.35)});
+    [-1.4,1.4].forEach(z=>mLamp(b,W/2+.4,z+.2))}
+  else if(id==="palasyo"){const W=7,D=5.6,F=1.5,WH=0xfaf7ee,TR=0xe0d6c2,GD=0xe6b84a,RF=0x2f4f7a;
+    b.add("box",0xd8d0c0,0,.12,0,W+6,.24,D+6);b.add("box",TR,0,.3,0,W+.8,.3,D+.8);
+    for(let fl=0;fl<3;fl++){const y=.45+F/2+fl*(F+.1);b.add("box",WH,0,y,0,W-fl*.4,F,D-fl*.4);b.add("box",GD,0,y+F/2+.03,0,W-fl*.4+.16,.08,D-fl*.4+.16);
+      for(let k=0;k<6;k++){const z=-(D-fl*.4)/2+.5+k*((D-fl*.4)-1)/5;if(fl===0&&(k===2||k===3))continue;b.add("box",0xffffff,(W-fl*.4)/2+.02,y+.05,z,.04,.86,.44);b.add("box",0x3a5a7a,(W-fl*.4)/2+.03,y+.05,z,.03,.72,.32);b.add("box",GD,(W-fl*.4)/2+.04,y+.52,z,.03,.08,.5)}
+      for(let k=0;k<7;k++){const x=-(W-fl*.4)/2+.5+k*((W-fl*.4)-1)/6;[-1,1].forEach(sd=>{b.add("box",0x3a5a7a,x,y+.05,sd*((D-fl*.4)/2+.03),.34,.72,.03)})}}
+    const top=.45+3*F+.3;b.add("cyl",WH,0,top+.45,0,1.3,.9,1.3);b.add("cyl",GD,0,top+.92,0,1.36,.08,1.36);b.add("sph",GD,0,top+.95,0,1.25,1.15,1.25);b.add("cyl",GD,0,top+2.2,0,.06,.5,.06);b.add("sph",GD,0,top+2.5,0,.14,.14,.14);
+    sn.add("sph",0xffffff,0,top+1.3,0,1.05,.7,1.05);
+    [-1,1].forEach(sd=>{const z=sd*(D/2+.3),x=W/2-.4;b.add("cyl",WH,x,2.6,z,.8,5.2,.8);b.add("cyl",GD,x,5.25,z,.86,.1,.86);b.add("cone",RF,x,6.1,z,.95,1.7,.95);sn.add("cone",0xffffff,x,6.0,z,.7,1.1,.7);
+      for(let k=0;k<3;k++)b.add("box",0x3a5a7a,x+.78,1.3+k*1.4,z,.04,.7,.3)});
+    for(let k=0;k<6;k++){const z=-1.75+k*.7;b.add("cyl",0xffffff,W/2+1.0,.45+F/2+.2,z,.13,F+.4,.13);b.add("box",TR,W/2+1.0,.5,z,.32,.12,.32)}
+    b.add("box",WH,W/2+.8,.45+F+.45,0,1.8,.2,4.4);b.add("cone4",WH,W/2+1.0,.45+F+.95,0,.1,.8,2.4,0,0,0);b.add("box",GD,W/2+1.0,.45+F+.62,0,.12,.08,4.3);
+    b.add("box",0x5a2a1a,W/2+.03,.45+.75,0,.06,1.5,1.1);b.add("box",GD,W/2+.07,.45+.75,0,.03,1.5,.05);
+    for(let k=0;k<5;k++)b.add("box",0xe8e2d6,W/2+1.6+k*.3,.05+k*.07,0,.32,.1+k*.14,2.4-k*.15);
+    mFountain(b,W/2+4.4,0,1.3);[-2.8,2.8].forEach(z=>{mLamp(b,W/2+2.6,z);mLamp(b,W/2+5.8,z)});mHedge(b,W/2+6.6,-4.2,4.2,true);
+    [[W/2+3.2,-3.6],[W/2+3.2,3.6],[W/2+5.6,-3.6],[W/2+5.6,3.6]].forEach(([x,z])=>{b.add("cyl",0xc9c2b4,x,.25,z,.32,.5,.32);b.add("cone",0x2f7f28,x,1.1,z,.4,1.4,.4)})}
   const m=b.mesh();g.add(m);const s=new THREE.Mesh(sn.geo(),SNOWMAT);g.add(s);return g}
 /* -- placed buildings -- */
 const BUILDG=new THREE.Group();scene.add(BUILDG);
