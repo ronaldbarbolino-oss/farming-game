@@ -600,7 +600,7 @@ const ZLIM={pen:12,pond:8,farm:4};const zoneOf=id=>(ANIMALS.find(a=>a.id===id)||
 const RIPE=600,WILT=60,GQ=20,WQ=10;
 const SIZES=[5,6,7,8], EXPAND=[0,300,900,2500], PLOW=2, MAXPEN=8;
 const xpNeed=l=>Math.round(10*Math.pow(l,1.55));
-const FX0=-3.5, FZ0=-3;                       // field corner
+var FX0=-3.5, FZ0=-3;const FIELD0=[-3.5,-3];function applyFieldPos(){const q=(typeof S!=="undefined"&&S&&S.fieldPos)||FIELD0;FX0=q[0];FZ0=q[1]}                       // field corner
 const PEN={x0:-11.5,x1:-6,z0:-3,z1:4};          // animal pen bounds
 
 function fresh(){return{inTown:false,seeds:[],tools:[],fert:0,basket:0,decor:{},inv:{},shopOpen:true,builds:[],boats:[],boatAt:"farm",guard:false,plots:[],helperOn:true,helpers:1,hspd:0,trees:{},cut:[],ptrees:[],penLv:{},penSz:{},penPos:{},treePos:{},hillPos:{},hillGone:[],free:{},redeemed:[],axe:0,coins:1500,xp:0,lv:1,size:0,sel:"pechay",tiles:Array(25).fill(null).map(()=>({k:"grass"})),pens:[]}}
@@ -685,7 +685,7 @@ const PLOT_DEF={};PLOTS.forEach(p=>PLOT_DEF[p.id]=[p.x0,p.z0]);
 function applyPlotPos(){const P=(typeof S!=="undefined"&&S&&S.plotPos)||{};PLOTS.forEach(p=>{if(p.island)return;const v=P[p.id],d=PLOT_DEF[p.id];p.x0=v?v[0]:d[0];p.z0=v?v[1]:d[1]})}
 function inPlotArea(x,z,m=.6){return PLOTS.some(p=>!p.island&&x>p.x0-m&&x<p.x0+PN+m&&z>p.z0-m&&z<p.z0+PN+m)}
 let _LK="",_LC=null;
-function layout(){const key=S.size+"|"+(S.plots||[]).join(",")+"|"+JSON.stringify(S.plotPos||{});if(key===_LK&&_LC)return _LC;applyPlotPos();
+function layout(){const key=S.size+"|"+(S.plots||[]).join(",")+"|"+JSON.stringify(S.plotPos||{})+"|"+JSON.stringify(S.fieldPos||0);if(key===_LK&&_LC)return _LC;applyPlotPos();applyFieldPos();
   const n=SIZES[S.size],L=[{x0:FX0,z0:FZ0,n,start:0}];let st=n*n;
   (S.plots||[]).forEach(id=>{const p=PLOTS.find(q=>q.id===id);if(p){const m=p.sz||PN;L.push({x0:p.x0,z0:p.z0,n:m,start:st,p,y:p.y||0});st+=m*m}});
   _LK=key;_LC=L;return L}
@@ -1736,7 +1736,10 @@ const FMAT=(()=>{const mk=(w,h,draw)=>{const c=document.createElement("canvas");
   const bg=(x,w,h,a,b)=>{const g=x.createLinearGradient(0,0,0,h);g.addColorStop(0,a);g.addColorStop(1,b);x.fillStyle=g;x.fillRect(0,0,w,h);x.strokeStyle="#3a2615";x.lineWidth=14;x.strokeRect(7,7,w-14,h-14);x.strokeStyle="#ffd84a";x.lineWidth=5;x.strokeRect(20,20,w-40,h-40)};
   const logo=mk(512,256,(x,w,h)=>{bg(x,w,h,"#6fcc3e","#2f8f2c");word(x,"Farming",w/2,h*.44,108,"#ffd84a");x.font="900 30px Nunito, sans-serif";x.fillStyle="#fff6df";x.fillText("🌽 Fresh from the farm 🍅",w/2,h*.8)});
   const full=mk(512,512,(x,w,h)=>{bg(x,w,h,"#3fa8e8","#1f5f9a");word(x,"MW",w/2,h*.3,150,"#fff6df");word(x,"CITY",w/2,h*.58,120,"#ffd84a");x.font="900 34px Nunito, sans-serif";x.fillStyle="#fff6df";x.textAlign="center";x.fillText("Shop · Eat · Play",w/2,h*.83)});
-  return{logo:new THREE.MeshBasicMaterial({map:logo,side:THREE.DoubleSide}),logoF:new THREE.MeshBasicMaterial({map:logo}),full:new THREE.MeshBasicMaterial({map:full}),tex:logo}})();
+  const scr=(a,b,c)=>mk(256,256,(x,w,h)=>{const g=x.createLinearGradient(0,0,w,h);g.addColorStop(0,a);g.addColorStop(.5,b);g.addColorStop(1,c);x.fillStyle=g;x.fillRect(0,0,w,h);for(let i=0;i<14;i++){x.fillStyle="rgba(255,255,255,"+(.06+i%3*.05)+")";x.beginPath();x.arc((i*53)%w,(i*97)%h,18+(i*7)%40,0,7);x.fill()}});
+  const scrA=new THREE.MeshBasicMaterial({map:scr("#ff4fa0","#7a3cff","#2fb8ff")}),scrB=new THREE.MeshBasicMaterial({map:scr("#ffd84a","#ff7a2a","#e2402f")});
+  return{scrA,scrB,logo:new THREE.MeshBasicMaterial({map:logo,side:THREE.DoubleSide}),logoF:new THREE.MeshBasicMaterial({map:logo}),full:new THREE.MeshBasicMaterial({map:full}),tex:logo}})();
+const CRATEMAT=new THREE.MeshBasicMaterial({color:0xc98a4b});
 /* tappable 3D sign buttons */
 const BTN3D=[];
 function btnSprite(text,bg,act){const c=document.createElement("canvas");c.width=512;c.height=128;const x=c.getContext("2d");
@@ -2333,6 +2336,7 @@ cv.addEventListener("pointerdown",e=>{cv.setPointerCapture(e.pointerId);pointers
     else if(p&&p.hill){const H=HILLS.find(q=>q.id===p.hill);if(H)go=()=>{const [x,z]=hillXZ(H);startHillMove(H.id);return[x,z,"hill"]}}
     else if(p&&p.ftree!=null){const T=FTREES[p.ftree];if(T)go=()=>{startTreeMove(p.ftree);return[T.x,T.z,treeName(T)]}}
     else if(pl)go=()=>{startPlotMove(pl.id,true);return[pl.x0+PN/2,pl.z0+PN/2,pl.n]};
+    else if(p&&p.tile!=null&&p.tile<SIZES[S.size]**2)go=()=>{const n=SIZES[S.size];startFieldMove();return[FX0+n/2,FZ0+n/2,"main field"]};
     else if(g0&&(!p||p.pen!=null)){const k=penAt(g0.x,g0.z);if(k&&PENS[k])go=()=>{const P=PENS[k];startPenMove(k);return[(P.x0+P.x1)/2,(P.z0+P.z1)/2,P.n]}}
     if(go)HOLD.t=setTimeout(()=>{if(pointers.size!==1||dragMoved>14||PLACE)return;const r=go();if(!PLACE)return;PLACE.drag=true;PLACE.ox=g0?g0.x-r[0]:0;PLACE.oz=g0?g0.z-r[1]:0;cv.classList.add("drag");try{navigator.vibrate&&navigator.vibrate(30)}catch(err){}
       $("placeTxt").textContent="Drag the "+r[2]+" and let go to drop it"},550)}});
@@ -3035,10 +3039,22 @@ function startPenMove(id){const P=PENS[id];if(!P)return;cancelPlace();const w=P.
 function startTreeMove(k){const T=FTREES[k];if(!T)return;cancelPlace();const g=new THREE.Group(),m=new THREE.Mesh(new THREE.CylinderGeometry(.75,.75,1.6,16),GHOSTMAT);m.position.y=.8;g.add(m);scene.add(g);
   PLACE={tree:T,g,d:{n:treeName(T),r:.8},r:0,ok:false,x:T.x,z:T.z};updateGhost(T.x,T.z);$("placeRot").hidden=true;$("placeBar").hidden=false;$("placeTxt").textContent="Move "+treeName(T)+" · drag it and let go to drop it";setTool("move")}
 function startBuildMove(i){const o=(S.builds||[])[i];if(!o)return;if(typeof EDIT!=="undefined"&&EDIT!=null)endEdit();S.builds.splice(i,1);renderBuilds();startPlace(o.id,false,o)}
+function validField(x0,z0){const N=SIZES[S.size],x1=x0+N,z1=z0+N;if(x0<-33||x1>16.5||z0<-23||z1>50)return"Too close to the edge of the farm.";
+  for(const q of PLOTS)if(!q.island&&(S.plots||[]).includes(q.id)&&x0<q.x0+PN+.2&&x1>q.x0-.2&&z0<q.z0+PN+.2&&z1>q.z0-.2)return"That covers "+q.n+".";
+  if(x0<6.4&&x1>-2&&z0<-6.2&&z1>-11)return"That covers the barn.";
+  for(let x=x0-.2;x<=x1+.21;x+=.5)for(let z=z0-.2;z<=z1+.21;z+=.5){if(farmH(x,z)<-.03)return"Can't put the field on water.";if(inAnyPen(x,z,.2))return"That covers an animal pen.";if(z>-9.6&&z<-6.4&&x<-3.5)return"That covers the road.";
+    for(const [mx,mz,mr] of mtns())if(Math.hypot(x-mx,z-mz)<mr*1.25)return"Too close to the mountain.";if(Math.hypot(x-CF.x,z-CF.z)<1.6)return"That covers the bonfire.";
+    if(((x-POND.x)/(POND.rx+.6))**2+((z-POND.z)/(POND.rz+.6))**2<1)return"That covers the lake."}
+  for(const o of S.builds||[]){const d=BUILDS.find(q=>q.id===o.id),r=(d?d.r:1.5)*.75;if(o.x>x0-r&&o.x<x1+r&&o.z>z0-r&&o.z<z1+r)return(d?d.n:"A building")+" is in the way."}
+  for(const T of FTREES)if(T.x>x0-.3&&T.x<x1+.3&&T.z>z0-.3&&T.z<z1+.3)return"A tree is in the way. Move it or chop it first.";
+  return""}
+function startFieldMove(){const N=SIZES[S.size];cancelPlace();const g=new THREE.Group(),m=new THREE.Mesh(new THREE.BoxGeometry(N,.12,N),GHOSTMAT);m.position.set(N/2,.08,N/2);g.add(m);scene.add(g);
+  PLACE={field:true,N,g,d:{n:"Main Field",r:0},r:0,ok:false,x0:FX0,z0:FZ0};updateGhost(FX0+N/2,FZ0+N/2);$("placeRot").hidden=true;$("placeBar").hidden=false;$("placeTxt").textContent="Move the main field · drag it and let go to drop it";setTool("move")}
 function startPlotMove(id,noCam){const p=PLOTS.find(q=>q.id===id);if(!p)return;cancelPlace();const g=new THREE.Group(),m=new THREE.Mesh(new THREE.BoxGeometry(PN,.12,PN),GHOSTMAT);m.position.set(PN/2,.08,PN/2);g.add(m);scene.add(g);
   PLACE={plot:p,g,d:{n:p.n,r:0},r:0,ok:false,x0:p.x0,z0:p.z0};updateGhost(p.x0+PN/2,p.z0+PN/2);if(!noCam){cam.follow=false;Object.assign(camT,{tx:p.x0+PN/2,tz:p.z0+PN/2,dist:Math.max(camT.dist,30)})}
   $("placeRot").hidden=true;$("placeBar").hidden=false;$("placeTxt").textContent="Move "+p.n+" · tap where it should go (it snaps next to other land) · or press and hold the land to drag it";setTool("move")}
 function updateGhost(x,z){if(!PLACE)return;
+  if(PLACE.field){const x0=Math.round(x-PLACE.N/2),z0=Math.round(z-PLACE.N/2);PLACE.x0=x0;PLACE.z0=z0;PLACE.g.position.set(x0,0,z0);PLACE.why=(x0===FX0&&z0===FZ0)?"":validField(x0,z0);PLACE.ok=!PLACE.why;GHOSTMAT.color.setHex(PLACE.ok?0x7fe08a:0xff6a5a);$("placeOk").disabled=!PLACE.ok;return}
   if(PLACE.hill){PLACE.x=x;PLACE.z=z;PLACE.g.position.set(x,0,z);PLACE.why=validHill(PLACE.hill,x,z);PLACE.ok=!PLACE.why;GHOSTMAT.color.setHex(PLACE.ok?0x7fe08a:0xff6a5a);$("placeOk").disabled=!PLACE.ok;return}
   if(PLACE.pen){const x0=Math.round((x-PLACE.w/2)*2)/2,z0=Math.round((z-PLACE.dd/2)*2)/2;PLACE.x0=x0;PLACE.z0=z0;PLACE.g.position.set(x0,0,z0);PLACE.why=validPen(PLACE.pen,x0,x0+PLACE.w,z0,z0+PLACE.dd);PLACE.ok=!PLACE.why;GHOSTMAT.color.setHex(PLACE.ok?0x7fe08a:0xff6a5a);$("placeOk").disabled=!PLACE.ok;return}
   if(PLACE.tree){PLACE.x=x;PLACE.z=z;PLACE.g.position.set(x,0,z);PLACE.ok=validPlace(x,z,.9,PLACE.tree)&&!inAnyPen(x,z,.6);PLACE.why=PLACE.ok?"":"Can't put the tree there. Pick an empty grassy spot.";GHOSTMAT.color.setHex(PLACE.ok?0x7fe08a:0xff6a5a);$("placeOk").disabled=!PLACE.ok;return}
@@ -3048,6 +3064,8 @@ function updateGhost(x,z){if(!PLACE)return;
     PLACE.x0=x0;PLACE.z0=z0;PLACE.g.position.set(x0,0,z0);PLACE.why=validPlot(PLACE.plot,x0,z0);PLACE.ok=!PLACE.why;GHOSTMAT.color.setHex(PLACE.ok?0x7fe08a:0xff6a5a);$("placeOk").disabled=!PLACE.ok;return}PLACE.x=x;PLACE.z=z;PLACE.g.position.set(x,0,z);PLACE.ok=validPlace(x,z,PLACE.d.r);GHOSTMAT.color.setHex(PLACE.ok?0x7fe08a:0xff6a5a);$("placeOk").disabled=!PLACE.ok}
 function cancelPlace(){$("placeRot").hidden=false;if(PLACE){scene.remove(PLACE.g);if(PLACE.moving){S.builds=(S.builds||[]).concat(PLACE.moving);renderBuilds()}PLACE=null}$("placeBar").hidden=true}
 function confirmPlace(){
+  if(PLACE&&PLACE.field){if(!PLACE.ok)return toast(PLACE.why||"Can't put the field there.");S.fieldPos=[PLACE.x0,PLACE.z0];scene.remove(PLACE.g);PLACE=null;$("placeBar").hidden=true;$("placeRot").hidden=false;
+    _LK="";layout();hovered=null;buildField();if(typeof paintGround==="function")paintGround();if(typeof landDeco==="function")landDeco();after();return toast("📐 Moved the main field.",2400)}
   if(PLACE&&PLACE.hill){if(!PLACE.ok)return toast(PLACE.why||"Can't put the hill there.");const id=PLACE.hill,x=+PLACE.x.toFixed(2),z=+PLACE.z.toFixed(2);S.hillPos=Object.assign({},S.hillPos||{},{[id]:[x,z]});
     scene.remove(PLACE.g);PLACE=null;$("placeBar").hidden=true;$("placeRot").hidden=false;hovered=null;buildHills();try{landDeco()}catch(e){}burst(x,1,z,0x9aa1a4,22,.7);after();return toast("⛰️ Moved the hill.",2200)}
   if(PLACE&&PLACE.pen){if(!PLACE.ok)return toast(PLACE.why||"Can't put the pen there.");const id=PLACE.pen,P=PENS[id],ex=penSz(id)*PENGROW,B=PENS0[id];
@@ -3437,7 +3455,7 @@ const TOWNX={lights:[],pl:[],band:[],aud:[],notes:[],walkers:[],stageOn:null};co
   {const x=T.x+11.5,z=T.z+6,yy=.55;b.add("box",0x6b4422,x,yy/2,z,3.4,yy,4.6);b.add("box",0x3a2615,x,yy+.01,z,3.3,.02,4.5);for(let k=0;k<3;k++)b.add("box",0x8a5a2a,x-1.9-k*.25,.1+k*.15,z,.3,.2+k*.3,1.4);
     [-2.2,2.2].forEach(dz=>{b.add("cyl",0x3a4652,x+1.5,yy+1.7,z+dz,.08,3.4,.08)});b.add("box",0x3a4652,x+1.5,yy+3.4,z,.12,.12,4.6);b.add("box",0x2b1e4a,x+1.62,yy+1.6,z,.06,3,4.3);
     [[-.2,-2],[-.2,2]].forEach(([dx,dz])=>{b.add("box",0x1f1f1f,x+dx,yy+.6,z+dz,.6,1.2,.6);b.add("cyl",0x555555,x+dx-.31,yy+.85,z+dz,.18,.02,.18,0,0,Math.PI/2);b.add("cyl",0x555555,x+dx-.31,yy+.35,z+dz,.12,.02,.12,0,0,Math.PI/2)});
-    const lg=new THREE.Mesh(new THREE.PlaneGeometry(3.2,1.62),FMAT.logoF);lg.position.set(x+1.58,yy+2.2,z);lg.rotation.y=-Math.PI/2;scene.add(lg);
+    const lg=new THREE.Mesh(new THREE.PlaneGeometry(3.2,1.62),FMAT.scrA);lg.position.set(x+1.58,yy+2.2,z);lg.rotation.y=-Math.PI/2;scene.add(lg);
     const SPOT=[0xff4fa0,0x4fc8ff,0xffd84a,0x9cf07a];SPOT.forEach((c,k)=>{const m=new THREE.Mesh(new THREE.ConeGeometry(.14,.24,8),new THREE.MeshBasicMaterial({color:c}));m.position.set(x+1.4,yy+3.25,z-1.6+k*1.07);m.rotation.z=Math.PI/2;scene.add(m);TOWNX.lights.push(m)});
     const beam=new THREE.Mesh(new THREE.ConeGeometry(1.2,3.2,16,1,true),new THREE.MeshBasicMaterial({color:0xfff2b0,transparent:true,opacity:.12,depthWrite:false}));beam.position.set(x,yy+1.6,z);scene.add(beam);TOWNX.beam=beam;
     const mk=(op,px,pz,role)=>{const f=makeFarmer(op);f.g.position.set(px,yy,pz);f.g.rotation.y=Math.PI;scene.add(f.g);const it=new THREE.Group();f.armR.add(it);
@@ -3519,7 +3537,7 @@ const CITY={lights:[],glows:[],pl:[],cabs:[],walkers:[],winMats:[],ferry:null,ad
   const tower=(x,z,w,d,h,y0,mi)=>{const g=new THREE.BoxGeometry(w,h,d),uv=g.attributes.uv,s=[[d,h],[d,h],[0,0],[0,0],[w,h],[w,h]];
     for(let f=0;f<6;f++)for(let k=0;k<4;k++){const i=f*4+k;uv.setXY(i,uv.getX(i)*s[f][0]*.9,uv.getY(i)*s[f][1]*.9)}
     const m=new THREE.Mesh(g,winMat[mi%winMat.length]);m.position.set(X(x),y0+h/2,Z(z));m.castShadow=true;m.receiveShadow=true;addOutline(m);scene.add(m);return m};
-  const adPlane=(x,y,z,w,ry,full)=>{const h=full?w:w/1.98,m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),full?FMAT.full:FMAT.logoF);m.position.set(X(x),y,Z(z));m.rotation.y=ry;scene.add(m);CITY.ads.push(m);
+  const adPlane=(x,y,z,w,ry,full)=>{const h=full?w:w/1.98,m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),full?FMAT.scrB:FMAT.scrA);m.visible=false;m.position.set(X(x),y,Z(z));m.rotation.y=ry;scene.add(m);CITY.ads.push(m);
     const fr=new THREE.Mesh(new THREE.PlaneGeometry(w+.16,h+.16),new THREE.MeshBasicMaterial({color:0x1b1b1b}));fr.position.set(0,0,-.01);m.add(fr);return m};
   // city blocks
   const BX=[[-CHX+1.2,-12.2],[-9.8,-3.2],[-.8,5.8],[8.2,CHX-1.2]],BZ=[[-CHZ+1.2,-6.2],[-3.8,2.8],[5.2,CHZ-1.2]];
@@ -3542,7 +3560,7 @@ const CITY={lights:[],glows:[],pl:[],cabs:[],walkers:[],winMats:[],ferry:null,ad
       const faces=[[0,td/2+.03,0],[0,-td/2-.03,Math.PI],[tw/2+.03,0,Math.PI/2],[-tw/2-.03,0,-Math.PI/2]];
       faces.forEach(([ox,oz,ry],fi)=>{if(r()>.42)return;const fw=(fi<2?tw:td)*.75;const ay=Y+1.6+r()*Math.max(.5,h-3);adPlane(cx+ox,Math.min(ay,top-fw/4-.3),cz+oz,fw,ry,r()<.25)});
       // rooftop billboard
-      if(r()<.3){const bw=Math.min(tw,3.2),ry=r()<.5?0:Math.PI/2;[[-.6],[.6]].forEach(([o])=>b.add("box",0x333a40,X(cx+(ry?0:o*bw)),top+.6,Z(cz+(ry?o*bw:0)),.08,1.2,.08));adPlane(cx,top+1.5,cz+(ry?0:.06),bw,ry,false);adPlane(cx+(ry?-.06:0),top+1.5,cz-(ry?0:.06),bw,ry+Math.PI,false)}
+      if(r()<.3&&false){const bw=Math.min(tw,3.2),ry=r()<.5?0:Math.PI/2;[[-.6],[.6]].forEach(([o])=>b.add("box",0x333a40,X(cx+(ry?0:o*bw)),top+.6,Z(cz+(ry?o*bw:0)),.08,1.2,.08));adPlane(cx,top+1.5,cz+(ry?0:.06),bw,ry,false);adPlane(cx+(ry?-.06:0),top+1.5,cz-(ry?0:.06),bw,ry+Math.PI,false)}
     }}));
   // the tall Art Deco tower with a GoPyesta crown
   {let y=Y+.1;[[4.2,7],[3.4,5],[2.6,4],[1.8,3],[1.1,2]].forEach(([s,h],k)=>{tower(EMP.x,EMP.z,s,s,h,y,5+k%2);y+=h});
@@ -3551,7 +3569,7 @@ const CITY={lights:[],glows:[],pl:[],cabs:[],walkers:[],winMats:[],ferry:null,ad
     const sg=labelSprite("MW Tower");sg.position.set(X(EMP.x),y+4.6,Z(EMP.z));sg.scale.set(2.8,.7,1);scene.add(sg)}
   // Times Square: giant screens around the crossing
   [[TSQ.x-1.6,TSQ.z-1.6],[TSQ.x+1.6,TSQ.z-1.6],[TSQ.x-1.6,TSQ.z+1.6],[TSQ.x+1.6,TSQ.z+1.6]].forEach(([x,z],k)=>{const ry=Math.atan2(TSQ.x-x,TSQ.z-z);
-    const m=adPlane(x+Math.sin(ry)*.25,Y+3+k%2,z+Math.cos(ry)*.25,2.6,ry,k%2===1);m.userData.ts=k;b.add("box",0x22262a,X(x),Y+1.6,Z(z),.14,3.2,.14)});
+    const m=adPlane(x+Math.sin(ry)*.25,Y+3+k%2,z+Math.cos(ry)*.25,2.6,ry,k%2===1);m.visible=true;m.userData.ts=k;b.add("box",0x22262a,X(x),Y+1.6,Z(z),.14,3.2,.14)});
   // Central Park
   {const {x0,x1,z0,z1}=PARK;b.add("box",0x5fb548,X((x0+x1)/2),Y+.06,Z((z0+z1)/2),x1-x0,.1,z1-z0);b.add("box",0xd9c89a,X((x0+x1)/2),Y+.12,Z((z0+z1)/2),x1-x0-.4,.02,.6);b.add("box",0xd9c89a,X((x0+x1)/2),Y+.12,Z((z0+z1)/2),.6,.02,z1-z0-.4);
     b.add("cyl",0x3d9ad8,X(x0+2),Y+.13,Z(z1-2),1.3,.04,1);
@@ -3595,7 +3613,7 @@ const CITY={lights:[],glows:[],pl:[],cabs:[],walkers:[],winMats:[],ferry:null,ad
 function stepCity(dt,t){const near=Math.hypot(cam.tx-CX,cam.tz-CZ)<60;if(!near&&!CITY._was)return;CITY._was=near;
   const h=typeof phHour==="function"?phHour():12,dark=1-daylight(h),bad=isBad();
   CITY.winMats.forEach(m=>m.emissiveIntensity=dark*.9);CITY.glows.forEach(g=>g.material.opacity=dark*.85);CITY.pl.forEach(l=>l.intensity=dark*1.6);
-  CITY.ads.forEach(a=>{if(a.userData.ts!=null)a.material=(Math.floor(t/4+a.userData.ts)%2)?FMAT.full:FMAT.logoF});
+  CITY.ads.forEach(a=>{if(a.userData.ts!=null)a.material=(Math.floor(t/4+a.userData.ts)%2)?FMAT.scrB:FMAT.scrA});
   if(CITY.flame)CITY.flame.scale.setScalar(1+.15*Math.sin(t*9));
   const {LOOP,LL,tot}=CITY.path;CITY.cabs.forEach(c=>{c.u=(c.u+c.dir*c.sp*dt+tot)%tot;let s=c.u,k=0;while(s>LL[k]){s-=LL[k];k++}const a=LOOP[k],b=LOOP[(k+1)%4],f=s/LL[k],dx=(b[0]-a[0])/LL[k],dz=(b[1]-a[1])/LL[k],off=.45*c.dir;
     c.m.position.set(CX+a[0]+(b[0]-a[0])*f-dz*off,1.2,CZ+a[1]+(b[1]-a[1])*f+dx*off);c.m.rotation.y=Math.atan2(-dz*c.dir,dx*c.dir)});
@@ -4051,9 +4069,9 @@ const AD={on:false,t:70+Math.random()*60,g:null,hit:null,chute:null,y:0,land:fal
   for(let k=0;k<4;k++){const a=k/4*Math.PI*2+.4;cb.add("box",0xeeeeee,Math.cos(a)*.42,1.75,Math.sin(a)*.42,.025,1.5,.025,Math.sin(a)*.35,0,-Math.cos(a)*.35)}ch.add(cb.mesh(false,false,true));g.add(ch);
   const ring=new THREE.Mesh(new THREE.RingGeometry(.7,.95,28),new THREE.MeshBasicMaterial({color:0xffd84a,transparent:true,opacity:.8,depthWrite:false}));ring.rotation.x=-Math.PI/2;ring.position.y=.03;g.add(ring);
   const hit=new THREE.Mesh(new THREE.BoxGeometry(1.6,3.2,1.6),new THREE.MeshBasicMaterial({visible:false}));hit.position.y=1.2;hit.userData.drop=true;g.add(hit);
-  const lg=new THREE.Sprite(new THREE.SpriteMaterial({map:FMAT.tex,depthWrite:false}));lg.scale.set(1.5,.76,1);lg.position.y=3.35;ch.add(lg);
-  for(let k=0;k<4;k++){const f=new THREE.Mesh(new THREE.PlaneGeometry(.62,.62),FMAT.full),a=k*Math.PI/2;f.position.set(Math.sin(a)*.435,.4,Math.cos(a)*.435);f.rotation.y=a;g.add(f)}
-  const top=new THREE.Mesh(new THREE.PlaneGeometry(.62,.62),FMAT.full);top.rotation.x=-Math.PI/2;top.position.y=.86;g.add(top);
+  
+  for(let k=0;k<4;k++){const f=new THREE.Mesh(new THREE.PlaneGeometry(.62,.62),CRATEMAT),a=k*Math.PI/2;f.position.set(Math.sin(a)*.435,.4,Math.cos(a)*.435);f.rotation.y=a;g.add(f)}
+  const top=new THREE.Mesh(new THREE.PlaneGeometry(.62,.62),CRATEMAT);top.rotation.x=-Math.PI/2;top.position.y=.86;g.add(top);
   g.visible=false;scene.add(g);AD.g=g;AD.hit=hit;AD.chute=ch;AD.ring=ring})();
 function dropSpot(){for(let k=0;k<60;k++){const x=-24+Math.random()*33,z=-12+Math.random()*22;
   if(inPond(x,z)||inAnyPen(x,z,1)||inPlotArea(x,z,1.2))continue;let rd=1e9;for(let i=0;i<RIVER.length-1;i++)rd=Math.min(rd,segDist(x,z,RIVER[i][0],RIVER[i][1],RIVER[i+1][0],RIVER[i+1][1]));if(rd<2)continue;
