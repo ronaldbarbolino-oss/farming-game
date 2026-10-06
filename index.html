@@ -400,6 +400,7 @@ body.land .cam .cbtn{width:32px;height:32px!important}
       <label for="auPw2">Confirm password</label><input id="auPw2" type="password" maxlength="64" autocomplete="new-password">
       <label for="auFarm">Farm name</label><input id="auFarm" maxlength="40" placeholder="e.g. Sunny Acres">
       <label for="auName">Your farmer name</label><input id="auName" maxlength="24" placeholder="e.g. Farmer Ron">
+      <label for="auEmail">Email <small>(optional, to recover your account)</small></label><input id="auEmail" type="email" maxlength="254" autocapitalize="none" placeholder="you@example.com">
       <span class="lbl">Farmer shirt color</span><div class="sw" id="auShirts"></div>
       <label class="keep" id="auImportRow" hidden><input type="checkbox" id="auImport"> Use the farm already saved on this device</label>
       <p class="err" id="auErr" role="alert"></p>
@@ -410,6 +411,7 @@ body.land .cam .cbtn{width:32px;height:32px!important}
       <label for="liPw">Password</label><input id="liPw" type="password" maxlength="64" autocomplete="current-password">
       <p class="err" id="liErr" role="alert"></p>
       <div class="suRow"><button class="btn" type="submit">Log in</button></div>
+      <p style="text-align:center;margin:6px 0 0"><button type="button" id="forgotBtn" style="background:none;border:0;color:var(--blue,#2f7fb8);font:inherit;font-weight:900;text-decoration:underline;cursor:pointer">Forgot your username or password?</button></p>
     </form>
   </div>
 </div>
@@ -439,6 +441,27 @@ body.land .cam .cbtn{width:32px;height:32px!important}
     <div class="scs" id="tsList" style="max-height:52vh;overflow:auto"></div>
     <div class="suRow"><button class="btn alt" type="button" id="tsJeep"></button><button class="btn" type="button" id="tsClose">Close</button></div>
   </div>
+</div>
+<div class="modal" id="emailM" hidden>
+  <div class="suBox"><h3>📧 Verify your email</h3>
+    <p class="suLead">Add an email so you can get your username and set a new password if you forget them.</p>
+    <div id="emStep1"><label for="emAddr">Email</label><input id="emAddr" type="email" maxlength="254" autocapitalize="none" placeholder="you@example.com">
+      <div class="suRow"><button class="btn" type="button" id="emSend">Send code</button></div></div>
+    <div id="emStep2" hidden><p class="suLead" id="emSent"></p><label for="emCode">6-digit code</label><input id="emCode" inputmode="numeric" maxlength="6" autocomplete="one-time-code">
+      <div class="suRow"><button class="btn alt" type="button" id="emResend">Send again</button><button class="btn" type="button" id="emVerify">Verify</button></div></div>
+    <p class="err" id="emErr" role="alert"></p>
+    <div class="suRow"><button class="btn alt" type="button" id="emClose">Close</button></div></div>
+</div>
+<div class="modal" id="recM" hidden>
+  <div class="suBox"><h3>🔑 Recover your account</h3>
+    <div id="rcStep1"><p class="suLead">Type the email you verified in the game. We'll send your username and a code to set a new password.</p>
+      <label for="rcEmail">Email</label><input id="rcEmail" type="email" maxlength="254" autocapitalize="none"><div class="suRow"><button class="btn" type="button" id="rcSend">Send code</button></div></div>
+    <div id="rcStep2" hidden><p class="suLead" id="rcSent"></p><label for="rcCode">6-digit code from the email</label><input id="rcCode" inputmode="numeric" maxlength="6" autocomplete="one-time-code"><div class="suRow"><button class="btn" type="button" id="rcCheck">Next</button></div></div>
+    <div id="rcStep3" hidden><label for="rcUser">Username</label><select id="rcUser" style="font:inherit;padding:8px;border:3px solid var(--wood-d);border-radius:10px"></select>
+      <label for="rcPw">New password</label><input id="rcPw" type="password" maxlength="64" autocomplete="new-password"><label for="rcPw2">Confirm new password</label><input id="rcPw2" type="password" maxlength="64" autocomplete="new-password">
+      <div class="suRow"><button class="btn" type="button" id="rcFinish">Save &amp; log in</button></div></div>
+    <p class="err" id="rcErr" role="alert"></p>
+    <div class="suRow"><button class="btn alt" type="button" id="rcClose">Cancel</button></div></div>
 </div>
 <div class="modal" id="instM" hidden>
   <div class="suBox"><h3>📲 Install Farming</h3>
@@ -499,6 +522,7 @@ body.land .cam .cbtn{width:32px;height:32px!important}
     <span class="lbl">Farmer's shirt color</span><div class="sw" id="suShirts"></div>
     <label class="keep" id="suKeepRow"><input type="checkbox" id="suKeep" checked> Bring your current progress to the new farm</label>
     <p class="err" id="suErr" role="alert"></p>
+    <p style="margin:2px 0 6px"><button class="btn sm alt" type="button" id="emailBtn">📧 Email &amp; account recovery</button> <small id="emailState"></small></p>
     <div class="suRow"><button class="btn alt" type="button" id="logoutBtn">Log out</button><button class="btn alt" type="button" id="suClose">Close</button><button class="btn alt" type="button" id="suLater" hidden>Later</button><button class="btn" type="submit" id="suGo">Start Farming</button></div>
   </form>
 </div>
@@ -3529,7 +3553,7 @@ function renderBoard(docs,ps){const ol=$("lb");ol.textContent="";$("lbHint").tex
     b.textContent=String(d.farm||"Farm").slice(0,40);sm.textContent=String(d.farmer||"Farmer").slice(0,24)+" · Level "+(Number(d.lv)||1)+" · "+(Number(d.coins)||0).toLocaleString()+" coins · "+(Number(d.animals)||0)+" animals";
     t.append(b,sm);li.append(rk,img,t);ol.append(li)})}
 function watchBoard(){CLOUD.db.collection("players").orderBy("lv","desc").limit(30).onSnapshot(async snap=>{const docs=snap.docs.map(d=>Object.assign({id:d.id},d.data()));let ps=null;try{ps=await CLOUD.user.profiles(docs.map(d=>d.id))}catch(e){}renderBoard(docs,ps)},()=>{})}
-function openSignup(edit){
+function openSignup(edit){setTimeout(emailStateUI,0);
   const p=CLOUD.profile||CLOUD.local;$("suTitle").textContent=edit?"Edit Your Farm":"Create Your Own Farm";$("suGo").textContent=edit?"Save":"Start Farming";
   $("suFarm").value=p?p.farm:"";$("suName").value=p?p.farmer:"";SU_SHIRT=p?(p.shirt|0):0;paintSwatches();
   const hasProgress=S.lv>1||S.pens.length>0||S.coins!==80;$("suKeepRow").hidden=!!edit||!hasProgress;$("suKeep").checked=true;$("suErr").textContent="";$("suGo").disabled=false;$("suLater").hidden=true;$("logoutBtn").hidden=!(edit&&LOCAL.user);$("suClose").hidden=!edit;
@@ -3591,13 +3615,38 @@ function localAuthStart(){$("lbHead").hidden=true;$("lbPanel").hidden=true;let u
     const all=accts();if(all[u])return $("auErr").textContent="That username is already taken on this device. Choose another or log in.";
     const salt=Math.random().toString(36).slice(2)+Date.now().toString(36);all[u]={salt,hash:await hashPw(p1,salt),farm,farmer:name,shirt:SU_SHIRT,created:Date.now()};saveAccts(all);
     if($("auImport").checked&&!$("auImportRow").hidden){const o=oldSave();if(o)try{localStorage.setItem("farming-save-"+u,JSON.stringify(o))}catch(e){}}
-    ["auPw","auPw2"].forEach(k=>$(k).value="");loginLocal(u);toast(farm+" is ready! Start planting.",3200)};
+    ["auPw","auPw2"].forEach(k=>$(k).value="");loginLocal(u);toast(farm+" is ready! Start planting.",3200);
+    const em=$("auEmail").value.trim();$("auEmail").value="";if(em)setTimeout(()=>openEmail(em,true),1200)};
   $("auLogin").onsubmit=async e=>{e.preventDefault();const u=$("liUser").value.trim().toLowerCase(),p=$("liPw").value,a=accts()[u];
     if(!a||await hashPw(p,a.salt)!==a.hash)return $("liErr").textContent="Wrong username or password.";
     $("liPw").value="";loginLocal(u);toast("Welcome back, "+a.farmer+"!",2400)};
   $("logoutBtn").onclick=()=>{if(LOCAL.user)logoutLocal()};
 })();
 
+/* ---- email verification and account recovery ---- */
+const postJ=async(path,body)=>{const r=await fetch(API+path,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});let d={};try{d=await r.json()}catch(e){}if(!r.ok)throw new Error(d.error||"Something went wrong. Try again.");return d};
+function emailStateUI(){const a=myUser()&&accts()[myUser()],el=$("emailState");if(el)el.textContent=a&&a.email?(a.emailOk?"✅ "+a.email:"⏳ "+a.email+" (not verified)"):"No email yet"}
+function openEmail(prefill,auto){if(!API)return toast("Email works in the Farming app at farming-ph.netlify.app.",3200);if(!myUser())return;const a=accts()[myUser()]||{};
+  $("emailM").hidden=false;$("emErr").textContent="";$("emStep1").hidden=false;$("emStep2").hidden=true;$("emAddr").value=prefill||a.email||"";if(auto&&prefill)$("emSend").click()}
+async function emSend(){const email=$("emAddr").value.trim().toLowerCase();$("emErr").textContent="";if(!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(email))return $("emErr").textContent="Type a valid email.";
+  $("emSend").disabled=true;try{await netSend(true);await postJ("email/start",{u:myUser(),tok:myTok(),email});const A=accts();if(A[myUser()]){A[myUser()].email=email;A[myUser()].emailOk=false;saveAccts(A)}
+    $("emStep1").hidden=true;$("emStep2").hidden=false;$("emSent").textContent="We sent a 6-digit code to "+email+". Check your inbox (and spam folder).";$("emCode").value="";setTimeout(()=>$("emCode").focus(),50)}catch(e){$("emErr").textContent=e.message}$("emSend").disabled=false;emailStateUI()}
+$("emSend").onclick=emSend;$("emResend").onclick=()=>{$("emStep1").hidden=false;$("emStep2").hidden=true};
+$("emVerify").onclick=async()=>{$("emErr").textContent="";$("emVerify").disabled=true;try{const d=await postJ("email/verify",{u:myUser(),tok:myTok(),code:$("emCode").value});const A=accts();if(A[myUser()]){A[myUser()].email=d.email;A[myUser()].emailOk=true;saveAccts(A)}
+  $("emailM").hidden=true;toast("✅ Email verified! You can now recover your account with it.",4000)}catch(e){$("emErr").textContent=e.message}$("emVerify").disabled=false;emailStateUI()};
+$("emClose").onclick=()=>{$("emailM").hidden=true};$("emailBtn").onclick=()=>openEmail();
+let RC={email:"",code:""};
+$("forgotBtn").onclick=()=>{if(!API)return $("liErr").textContent="Account recovery works in the Farming app at farming-ph.netlify.app.";$("auth").hidden=true;$("recM").hidden=false;$("rcErr").textContent="";["rcStep2","rcStep3"].forEach(k=>$(k).hidden=true);$("rcStep1").hidden=false;$("rcEmail").value="";setTimeout(()=>$("rcEmail").focus(),50)};
+$("rcClose").onclick=()=>{$("recM").hidden=true;if(!LOCAL.user)openAuth("login")};
+$("rcSend").onclick=async()=>{$("rcErr").textContent="";const email=$("rcEmail").value.trim().toLowerCase();if(!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(email))return $("rcErr").textContent="Type a valid email.";
+  $("rcSend").disabled=true;try{await postJ("recover/start",{email});RC.email=email;$("rcStep1").hidden=true;$("rcStep2").hidden=false;$("rcSent").textContent="If "+email+" is verified on a farm, we sent your username and a 6-digit code. Check your inbox (and spam).";setTimeout(()=>$("rcCode").focus(),50)}catch(e){$("rcErr").textContent=e.message}$("rcSend").disabled=false};
+$("rcCheck").onclick=async()=>{$("rcErr").textContent="";$("rcCheck").disabled=true;try{RC.code=$("rcCode").value;const d=await postJ("recover/finish",{email:RC.email,code:RC.code});const L=d.users||[];if(!L.length)throw new Error("No farm is linked to this email.");
+  $("rcUser").innerHTML=L.map(u=>`<option value="${u}">${u}</option>`).join("");$("rcStep2").hidden=true;$("rcStep3").hidden=false}catch(e){$("rcErr").textContent=e.message}$("rcCheck").disabled=false};
+$("rcFinish").onclick=async()=>{$("rcErr").textContent="";const u=$("rcUser").value,p1=$("rcPw").value,p2=$("rcPw2").value;if(p1.length<4)return $("rcErr").textContent="Password must be at least 4 characters.";if(p1!==p2)return $("rcErr").textContent="The two passwords don't match.";
+  $("rcFinish").disabled=true;try{const r=crypto.getRandomValues(new Uint8Array(16)),tok=[...r].map(b=>b.toString(16).padStart(2,"0")).join("");const d=await postJ("recover/finish",{email:RC.email,code:RC.code,u,tok});
+    const A=accts(),salt=Math.random().toString(36).slice(2)+Date.now().toString(36),old=A[u]||{};A[u]={...old,salt,hash:await hashPw(p1,salt),farm:d.farm||old.farm||u,farmer:d.farmer||old.farmer||u,shirt:d.shirt|0,created:old.created||Date.now(),tok,email:d.email,emailOk:true};saveAccts(A);
+    if(d.state){let cur=null;try{cur=JSON.parse(localStorage.getItem("farming-save-"+u)||"null")}catch(e){}if(!cur||((cur.xp||0)+(cur.lv||0)*1e6<(d.state.xp||0)+(d.state.lv||0)*1e6))try{localStorage.setItem("farming-save-"+u,JSON.stringify({...d.state,seen:Date.now()/1000}))}catch(e){}}
+    ["rcPw","rcPw2","rcCode"].forEach(k=>$(k).value="");$("recM").hidden=true;$("auth").hidden=true;NET.taken=false;loginLocal(u);toast("🔑 Welcome back, "+(d.farmer||u)+"! Your new password is saved.",4200)}catch(e){$("rcErr").textContent=e.message}$("rcFinish").disabled=false};
 async function initCloud(){
   if(!window.claude||!window.claude.use){$("lbHead").hidden=true;$("lbPanel").hidden=true;localAuthStart();return}
   let db=null,user=null;
@@ -3627,7 +3676,7 @@ const API=(/^https?:$/.test(location.protocol)&&!(window.claude&&window.claude.u
 const ONLINE_MS=150000;let NET={ok:null,last:0,lastFull:0,taken:false,list:[],now:Date.now()};
 const myUser=()=>typeof LOCAL!=="undefined"&&LOCAL.user||null;
 function myTok(){const u=myUser();if(!u)return null;const A=accts();if(!A[u])return null;if(!A[u].tok){const r=crypto.getRandomValues(new Uint8Array(16));A[u].tok=[...r].map(b=>b.toString(16).padStart(2,"0")).join("");saveAccts(A)}return A[u].tok}
-function snapState(){const st=JSON.parse(JSON.stringify(S));delete st.redeemed;delete st.free;delete st.inTown;return st}
+function snapState(){const st=JSON.parse(JSON.stringify(S));delete st.free;delete st.inTown;return st}
 async function netSend(full){if(!API||VISIT||NET.taken)return;const u=myUser(),tok=myTok();if(!u||!tok)return;const p=CLOUD.local||{};
   const body={u,tok,farm:p.farm||"",farmer:p.farmer||"",shirt:p.shirt|0,lv:S.lv,size:S.size,coins:Math.floor(S.coins),animals:S.pens.length,plots:(S.plots||[]).length};if(!NET.sentFirst&&full){body.first=1;NET.sentFirst=1}if(full)body.state=snapState();
   try{const r=await fetch(API+(full?"publish":"ping"),{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});

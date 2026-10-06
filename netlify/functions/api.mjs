@@ -16,7 +16,7 @@ async function adminOk(msg, sig) {
 const pub = m => ({ u: m.u, farm: m.farm, farmer: m.farmer, shirt: m.shirt, lv: m.lv, size: m.size, seen: m.seen });
 
 // a restart time shipped with a deploy: open games reload once after it
-const DEPLOY_RESTART = 1791270660129;
+const DEPLOY_RESTART = 1791272358235;
 export default async (req) => {
   const url = new URL(req.url);
   const path = url.pathname.replace(/^.*?\/api\/?/, "").replace(/^\.netlify\/functions\/api\/?/, "").replace(/\/$/, "");
@@ -47,6 +47,75 @@ export default async (req) => {
       const all = await Promise.all(blobs.slice(0, 2000).map(x => meta.get(x.key, { type: "json" }).catch(() => null)));
       const rs = await ctl.get("restart", { type: "json" });
       return J({ now: Date.now(), restartAt: rs ? rs.at : 0, players: all.filter(Boolean).map(m => ({ u: m.u, farm: m.farm, farmer: m.farmer, lv: m.lv, coins: m.coins || 0, animals: m.animals || 0, size: m.size, plots: m.plots || 0, seen: m.seen, created: m.created, sessions: m.sessions || 0 })) });
+    }
+    // ---- email: verify an address for recovery, then recover a lost username/password by code ----
+    const authS = getStore({ name: "auth", consistency: "strong" });
+    const emailOk = e => /^[^\s@]{1,64}@[^\s@]{1,190}\.[a-z]{2,24}$/i.test(e);
+    const code6 = () => String(100000 + (crypto.getRandomValues(new Uint32Array(1))[0] % 900000));
+    const sendMail = async (to, subject, text) => {
+      const key = process.env.RESEND_API_KEY, from = process.env.MAIL_FROM || "Farming <onboarding@resend.dev>";
+      if (!key) return { ok: false, error: "Email isn't set up on the server yet. Please tell the game admin." };
+      const r = await fetch("https://api.resend.com/emails", { method: "POST", headers: { "content-type": "application/json", authorization: "Bearer " + key }, body: JSON.stringify({ from, to: [to], subject, text }) });
+      if (!r.ok) return { ok: false, error: "Couldn't send the email right now. Try again later." };
+      return { ok: true };
+    };
+    const ownU = async (u, tok) => { if (u.length < 3 || typeof tok !== "string" || tok.length < 16) return null; const m = await meta.get(u, { type: "json" }); return m && m.th === await sha(tok) ? m : null };
+    if (req.method === "POST" && path === "email/start") {
+      let b; try { b = await req.json() } catch { return J({ error: "bad json" }, 400) }
+      const u = norm(b.u), email = String(b.email || "").trim().toLowerCase().slice(0, 254);
+      if (!emailOk(email)) return J({ error: "That email doesn't look right." }, 400);
+      const m = await ownU(u, b.tok); if (!m) return J({ error: "Open your farm online first, then try again." }, 403);
+      const prev = await authS.get("v/" + u, { type: "json" });
+      if (prev && Date.now() - prev.at < 60000) return J({ error: "Please wait a minute before asking for another code." }, 429);
+      const code = code6();
+      const sent = await sendMail(email, "Your Farming verification code: " + code, "Hi " + (m.farmer || u) + ",\n\nYour Farming verification code is " + code + "\n\nType it in the game to verify this email for your farm \"" + (m.farm || u) + "\" (username: " + u + "). It expires in 15 minutes.\n\nIf you didn't ask for this, you can ignore this email.");
+      if (!sent.ok) return J({ error: sent.error }, 503);
+      await authS.setJSON("v/" + u, { email, ch: await sha(u + ":" + code), exp: Date.now() + 15 * 60000, tries: 0, at: Date.now() });
+      return J({ ok: true });
+    }
+    if (req.method === "POST" && path === "email/verify") {
+      let b; try { b = await req.json() } catch { return J({ error: "bad json" }, 400) }
+      const u = norm(b.u), code = String(b.code || "").replace(/\D/g, "");
+      const m = await ownU(u, b.tok); if (!m) return J({ error: "Open your farm online first, then try again." }, 403);
+      const v = await authS.get("v/" + u, { type: "json" });
+      if (!v || Date.now() > v.exp) return J({ error: "The code expired. Ask for a new one." }, 400);
+      if (v.tries >= 5) return J({ error: "Too many tries. Ask for a new code." }, 429);
+      if (v.ch !== await sha(u + ":" + code)) { await authS.setJSON("v/" + u, { ...v, tries: v.tries + 1 }); return J({ error: "Wrong code." }, 400) }
+      if (m.email && m.email !== v.email) { const ok = await sha(m.email); const L = (await authS.get("e/" + ok, { type: "json" })) || []; await authS.setJSON("e/" + ok, L.filter(x => x !== u)) }
+      const eh = await sha(v.email); const L = (await authS.get("e/" + eh, { type: "json" })) || []; if (!L.includes(u)) L.push(u); await authS.setJSON("e/" + eh, L.slice(-20));
+      await meta.setJSON(u, { ...m, email: v.email, emailOk: true }); await authS.delete("v/" + u);
+      return J({ ok: true, email: v.email });
+    }
+    if (req.method === "POST" && path === "recover/start") {
+      let b; try { b = await req.json() } catch { return J({ error: "bad json" }, 400) }
+      const email = String(b.email || "").trim().toLowerCase().slice(0, 254);
+      if (!emailOk(email)) return J({ error: "That email doesn't look right." }, 400);
+      const eh = await sha(email), users = (await authS.get("e/" + eh, { type: "json" })) || [];
+      const prev = await authS.get("r/" + eh, { type: "json" });
+      if (prev && Date.now() - prev.at < 60000) return J({ error: "Please wait a minute before asking for another code." }, 429);
+      if (!users.length) return J({ ok: true });
+      const code = code6();
+      const sent = await sendMail(email, "Your Farming recovery code: " + code, "Your Farming recovery code is " + code + "\n\nYour username" + (users.length > 1 ? "s" : "") + ": " + users.join(", ") + "\n\nType the code in the game to set a new password. It expires in 15 minutes.\n\nIf you didn't ask for this, you can ignore this email.");
+      if (!sent.ok) return J({ error: sent.error }, 503);
+      await authS.setJSON("r/" + eh, { ch: await sha(eh + ":" + code), exp: Date.now() + 15 * 60000, tries: 0, at: Date.now(), users });
+      return J({ ok: true });
+    }
+    if (req.method === "POST" && path === "recover/finish") {
+      let b; try { b = await req.json() } catch { return J({ error: "bad json" }, 400) }
+      const email = String(b.email || "").trim().toLowerCase(), code = String(b.code || "").replace(/\D/g, ""), eh = await sha(email);
+      const r = await authS.get("r/" + eh, { type: "json" });
+      if (!r || Date.now() > r.exp) return J({ error: "The code expired. Ask for a new one." }, 400);
+      if (r.tries >= 5) return J({ error: "Too many tries. Ask for a new code." }, 429);
+      if (r.ch !== await sha(eh + ":" + code)) { await authS.setJSON("r/" + eh, { ...r, tries: r.tries + 1 }); return J({ error: "Wrong code." }, 400) }
+      const u = norm(b.u);
+      if (!u) return J({ ok: true, users: r.users });
+      if (!r.users.includes(u)) return J({ error: "That username isn't linked to this email." }, 400);
+      if (typeof b.tok !== "string" || b.tok.length < 16) return J({ error: "bad token" }, 400);
+      const m = await meta.get(u, { type: "json" }); if (!m) return J({ error: "Farm not found." }, 404);
+      await meta.setJSON(u, { ...m, th: await sha(b.tok), seen: Date.now() });
+      const f = await farms.get(u, { type: "json" });
+      await authS.delete("r/" + eh);
+      return J({ ok: true, u, farm: m.farm, farmer: m.farmer, shirt: m.shirt | 0, email, state: f && f.state || null });
     }
     // ---- coin shop: players pay by QR, the admin approves, the game redeems the signed code ----
     const buys = getStore({ name: "buys", consistency: "strong" });
@@ -118,7 +187,7 @@ export default async (req) => {
       const th = await sha(b.tok);
       const m = await meta.get(u, { type: "json" });
       if (m && m.th !== th) return J({ error: "taken" }, 403);
-      const nm = { u, th, farm: String(b.farm || "").slice(0, 40), farmer: String(b.farmer || "").slice(0, 24), shirt: b.shirt | 0, lv: b.lv | 0, size: b.size | 0, coins: Math.max(0, Math.floor(Number(b.coins) || 0)), animals: b.animals | 0, plots: b.plots | 0, seen: Date.now(), created: m ? m.created : Date.now(), sessions: (m && m.sessions || 0) + (path === "publish" && b.first ? 1 : 0) };
+      const nm = { u, th, farm: String(b.farm || "").slice(0, 40), farmer: String(b.farmer || "").slice(0, 24), shirt: b.shirt | 0, lv: b.lv | 0, size: b.size | 0, coins: Math.max(0, Math.floor(Number(b.coins) || 0)), animals: b.animals | 0, plots: b.plots | 0, seen: Date.now(), created: m ? m.created : Date.now(), sessions: (m && m.sessions || 0) + (path === "publish" && b.first ? 1 : 0), ...(m && m.email ? { email: m.email, emailOk: !!m.emailOk } : {}) };
       await meta.setJSON(u, nm);
       if (path === "publish" && b.state && typeof b.state === "object") await farms.setJSON(u, { ...pub(nm), state: b.state });
       return J({ ok: true });
