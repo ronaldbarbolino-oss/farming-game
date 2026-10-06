@@ -514,7 +514,7 @@ const xpNeed=l=>Math.round(10*Math.pow(l,1.55));
 const FX0=-3.5, FZ0=-3;                       // field corner
 const PEN={x0:-11.5,x1:-6,z0:-3,z1:4};          // animal pen bounds
 
-function fresh(){return{inTown:false,seeds:[],tools:[],fert:0,basket:0,decor:{},inv:{},shopOpen:true,builds:[],boats:[],boatAt:"farm",guard:false,plots:[],helperOn:true,helpers:1,hspd:0,trees:{},cut:[],ptrees:[],penLv:{},free:{},redeemed:[],axe:0,coins:80,xp:0,lv:1,size:0,sel:"pechay",tiles:Array(25).fill(null).map(()=>({k:"grass"})),pens:[]}}
+function fresh(){return{inTown:false,seeds:[],tools:[],fert:0,basket:0,decor:{},inv:{},shopOpen:true,builds:[],boats:[],boatAt:"farm",guard:false,plots:[],helperOn:true,helpers:1,hspd:0,trees:{},cut:[],ptrees:[],penLv:{},free:{},redeemed:[],axe:0,coins:1500,xp:0,lv:1,size:0,sel:"pechay",tiles:Array(25).fill(null).map(()=>({k:"grass"})),pens:[]}}
 let S=fresh();
 
 if(window.claude?.hot?.data?.S)S=window.claude.hot.data.S;
@@ -3481,7 +3481,7 @@ function paintSwatches(){document.querySelectorAll("#suShirts button").forEach((
   const box=$("suShirts");SHIRTS.forEach((c,i)=>{const b=document.createElement("button");b.type="button";b.style.background="#"+c.toString(16).padStart(6,"0");b.setAttribute("aria-label","Color "+(i+1));b.onclick=()=>{SU_SHIRT=i;paintSwatches()};box.append(b)});
   $("suClose").onclick=()=>{$("signup").hidden=true};
   $("suLater").onclick=()=>{$("signup").hidden=true;toast("You're playing as a guest. Progress is saved only in this browser.",3500)};
-  const saveLocal=(farm,name,edit,msg)=>{if(!edit&&!$("suKeep").checked)loadState(fresh());const prof={farm,farmer:name,shirt:SU_SHIRT};if(LOCAL.user){const all=accts();if(all[LOCAL.user]){Object.assign(all[LOCAL.user],prof);saveAccts(all)}}
+  const saveLocal=(farm,name,edit,msg)=>{if(!edit&&!$("suKeep").checked){loadState(fresh());setTimeout(()=>toast("🎁 Welcome gift: 1,500 coins to start your farm!",4200),900)}const prof={farm,farmer:name,shirt:SU_SHIRT};if(LOCAL.user){const all=accts();if(all[LOCAL.user]){Object.assign(all[LOCAL.user],prof);saveAccts(all)}}
     CLOUD.local=prof;$("signup").hidden=true;applyProfile();$("acctSave").textContent="Saved on this device";toast(msg||(edit?"Your farm was saved.":"Ready: "+farm+"! Start planting."),3600)};
   $("suForm").onsubmit=async e=>{e.preventDefault();
     const farm=$("suFarm").value.trim().slice(0,40)||"My Farm",name=$("suName").value.trim().slice(0,24)||"Farmer",edit=!!(CLOUD.profile||CLOUD.local);
