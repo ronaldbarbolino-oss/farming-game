@@ -49,7 +49,7 @@ export default async (req) => {
       const { blobs } = await meta.list();
       const all = await Promise.all(blobs.slice(0, 2000).map(x => meta.get(x.key, { type: "json" }).catch(() => null)));
       const rs = await ctl.get("restart", { type: "json" });
-      return J({ now: Date.now(), restartAt: rs ? rs.at : 0, players: all.filter(Boolean).map(m => ({ u: m.u, farm: m.farm, farmer: m.farmer, lv: m.lv, coins: m.coins || 0, animals: m.animals || 0, size: m.size, plots: m.plots || 0, seen: m.seen, created: m.created, sessions: m.sessions || 0 })) });
+      return J({ now: Date.now(), restartAt: rs ? rs.at : 0, players: all.filter(Boolean).map(m => ({ u: m.u, farm: m.farm, farmer: m.farmer, lv: m.lv, coins: m.coins || 0, animals: m.animals || 0, size: m.size, plots: m.plots || 0, seen: m.seen, created: m.created, sessions: m.sessions || 0, app: m.app ? 1 : 0, sync: m.ph ? 1 : 0, devices: Array.isArray(m.ths) ? m.ths.length : (m.th ? 1 : 0), email: m.email || "" })) });
     }
     // ---- email: verify an address for recovery, then recover a lost username/password by code ----
     const authS = getStore({ name: "auth", consistency: "strong" });
