@@ -16,7 +16,7 @@ async function adminOk(msg, sig) {
 const pub = m => ({ u: m.u, farm: m.farm, farmer: m.farmer, shirt: m.shirt, lv: m.lv, size: m.size, seen: m.seen });
 
 // a restart time shipped with a deploy: open games reload once after it
-const DEPLOY_RESTART = 1791278762217;
+const DEPLOY_RESTART = 1791279473847;
 export default async (req) => {
   const url = new URL(req.url);
   const path = url.pathname.replace(/^.*?\/api\/?/, "").replace(/^\.netlify\/functions\/api\/?/, "").replace(/\/$/, "");
@@ -124,6 +124,30 @@ export default async (req) => {
       const f = await farms.get(u, { type: "json" });
       await authS.delete("r/" + eh);
       return J({ ok: true, u, farm: m.farm, farmer: m.farmer, shirt: m.shirt | 0, email, state: f && f.state || null });
+    }
+    // ---- transfer: move a farm to another device or the app with a one-time code ----
+    if (req.method === "POST" && path === "transfer/start") {
+      let b; try { b = await req.json() } catch { return J({ error: "bad json" }, 400) }
+      const u = norm(b.u), aS = getStore({ name: "auth", consistency: "strong" });
+      const m = await meta.get(u, { type: "json" });
+      if (!m || typeof b.tok !== "string" || m.th !== await sha(b.tok)) return J({ error: "Open your farm online first, then try again." }, 403);
+      const A = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789", r = crypto.getRandomValues(new Uint8Array(8));
+      const code = [...r].map(x => A[x % A.length]).join("");
+      await aS.setJSON("t/" + code, { u, exp: Date.now() + 30 * 60000 });
+      return J({ ok: true, code, exp: Date.now() + 30 * 60000 });
+    }
+    if (req.method === "POST" && path === "transfer/finish") {
+      let b; try { b = await req.json() } catch { return J({ error: "bad json" }, 400) }
+      const code = String(b.code || "").toUpperCase().replace(/[^A-Z0-9]/g, ""), aS = getStore({ name: "auth", consistency: "strong" });
+      if (code.length !== 8) return J({ error: "The transfer code has 8 letters and numbers." }, 400);
+      const t = await aS.get("t/" + code, { type: "json" });
+      if (!t || Date.now() > t.exp) return J({ error: "That code is wrong or expired. Make a new one on your old device." }, 400);
+      if (typeof b.tok !== "string" || b.tok.length < 16) return J({ error: "bad token" }, 400);
+      const m = await meta.get(t.u, { type: "json" }); if (!m) return J({ error: "Farm not found." }, 404);
+      await meta.setJSON(t.u, { ...m, th: await sha(b.tok), seen: Date.now() });
+      const f = await farms.get(t.u, { type: "json" });
+      await aS.delete("t/" + code);
+      return J({ ok: true, u: t.u, farm: m.farm, farmer: m.farmer, shirt: m.shirt | 0, email: m.email || "", state: f && f.state || null });
     }
     // ---- coin shop: players pay by QR, the admin approves, the game redeems the signed code ----
     const buys = getStore({ name: "buys", consistency: "strong" });

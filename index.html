@@ -411,6 +411,7 @@ body.land .cam .cbtn{width:32px;height:32px!important}
       <label for="liPw">Password</label><input id="liPw" type="password" maxlength="64" autocomplete="current-password">
       <p class="err" id="liErr" role="alert"></p>
       <div class="suRow"><button class="btn" type="submit">Log in</button></div>
+      <p style="text-align:center;margin:8px 0 0"><button class="btn sm" type="button" id="trInBtn" style="background:#2f7fb8;box-shadow:0 3px 0 #1d5a85">📲 I have a transfer code</button></p>
       <p style="text-align:center;margin:6px 0 0"><button type="button" id="forgotBtn" style="background:none;border:0;color:var(--blue,#2f7fb8);font:inherit;font-weight:900;text-decoration:underline;cursor:pointer">Forgot your username or password?</button></p>
     </form>
   </div>
@@ -441,6 +442,23 @@ body.land .cam .cbtn{width:32px;height:32px!important}
     <div class="scs" id="tsList" style="max-height:52vh;overflow:auto"></div>
     <div class="suRow"><button class="btn alt" type="button" id="tsJeep"></button><button class="btn" type="button" id="tsClose">Close</button></div>
   </div>
+</div>
+<div class="modal" id="trM" hidden>
+  <div class="suBox"><h3>📲 Move your farm</h3>
+    <p class="suLead">Use this code to open your farm in the Farming app or on another phone.</p>
+    <div id="trCode" style="font:900 2rem/1.2 ui-monospace,monospace;letter-spacing:.18em;text-align:center;background:#fff;border:3px dashed var(--wood-d);border-radius:12px;padding:12px;margin:6px 0">…</div>
+    <ol style="margin:4px 0 8px 18px;padding:0;font-weight:700;font-size:.85rem;line-height:1.5"><li>Open the <b>Farming app</b> (or the game on the other phone).</li><li>On the login screen tap <b>📲 I have a transfer code</b>.</li><li>Type this code and choose a password.</li></ol>
+    <p class="suLead" style="font-size:.78rem">The code works once and expires in 30 minutes. After moving, play your farm on the new device. This device will stop saving it online.</p>
+    <p class="err" id="trErr" role="alert"></p>
+    <div class="suRow"><button class="btn alt" type="button" id="trCopy">Copy code</button><button class="btn" type="button" id="trClose">Done</button></div></div>
+</div>
+<div class="modal" id="trInM" hidden>
+  <div class="suBox"><h3>📲 Enter your transfer code</h3>
+    <p class="suLead">On your old phone or browser, open your account (tap your name at the top) and tap <b>Move my farm to the app</b> to get a code.</p>
+    <label for="tiCode">Transfer code</label><input id="tiCode" maxlength="12" autocapitalize="characters" autocomplete="off" style="font:900 1.2rem ui-monospace,monospace;letter-spacing:.15em;text-transform:uppercase">
+    <label for="tiPw">Choose a password</label><input id="tiPw" type="password" maxlength="64" autocomplete="new-password"><label for="tiPw2">Confirm password</label><input id="tiPw2" type="password" maxlength="64" autocomplete="new-password">
+    <p class="err" id="tiErr" role="alert"></p>
+    <div class="suRow"><button class="btn alt" type="button" id="tiClose">Cancel</button><button class="btn" type="button" id="tiGo">Move my farm here</button></div></div>
 </div>
 <div class="modal" id="emailM" hidden>
   <div class="suBox"><h3>📧 Verify your email</h3>
@@ -522,6 +540,7 @@ body.land .cam .cbtn{width:32px;height:32px!important}
     <span class="lbl">Farmer's shirt color</span><div class="sw" id="suShirts"></div>
     <label class="keep" id="suKeepRow"><input type="checkbox" id="suKeep" checked> Bring your current progress to the new farm</label>
     <p class="err" id="suErr" role="alert"></p>
+    <p style="margin:2px 0 6px"><button class="btn sm" type="button" id="trBtn" style="background:#2f7fb8;box-shadow:0 3px 0 #1d5a85">📲 Move my farm to the app / another phone</button></p>
     <p style="margin:2px 0 6px"><button class="btn sm alt" type="button" id="emailBtn">📧 Email &amp; account recovery</button> <small id="emailState"></small></p>
     <div class="suRow"><button class="btn alt" type="button" id="logoutBtn">Log out</button><button class="btn alt" type="button" id="suClose">Close</button><button class="btn alt" type="button" id="suLater" hidden>Later</button><button class="btn" type="submit" id="suGo">Start Farming</button></div>
   </form>
@@ -3647,6 +3666,21 @@ $("rcFinish").onclick=async()=>{$("rcErr").textContent="";const u=$("rcUser").va
     const A=accts(),salt=Math.random().toString(36).slice(2)+Date.now().toString(36),old=A[u]||{};A[u]={...old,salt,hash:await hashPw(p1,salt),farm:d.farm||old.farm||u,farmer:d.farmer||old.farmer||u,shirt:d.shirt|0,created:old.created||Date.now(),tok,email:d.email,emailOk:true};saveAccts(A);
     if(d.state){let cur=null;try{cur=JSON.parse(localStorage.getItem("farming-save-"+u)||"null")}catch(e){}if(!cur||((cur.xp||0)+(cur.lv||0)*1e6<(d.state.xp||0)+(d.state.lv||0)*1e6))try{localStorage.setItem("farming-save-"+u,JSON.stringify({...d.state,seen:Date.now()/1000}))}catch(e){}}
     ["rcPw","rcPw2","rcCode"].forEach(k=>$(k).value="");$("recM").hidden=true;$("auth").hidden=true;NET.taken=false;loginLocal(u);toast("🔑 Welcome back, "+(d.farmer||u)+"! Your new password is saved.",4200)}catch(e){$("rcErr").textContent=e.message}$("rcFinish").disabled=false};
+/* ---- transfer a farm to the app or another device ---- */
+async function adoptAccount(d,pw,tok){const u=d.u,A=accts(),salt=Math.random().toString(36).slice(2)+Date.now().toString(36),old=A[u]||{};
+  A[u]={...old,salt,hash:await hashPw(pw,salt),farm:d.farm||old.farm||u,farmer:d.farmer||old.farmer||u,shirt:d.shirt|0,created:old.created||Date.now(),tok,...(d.email?{email:d.email,emailOk:true}:{})};saveAccts(A);
+  if(d.state)try{localStorage.setItem("farming-save-"+u,JSON.stringify({...d.state,seen:Date.now()/1000}))}catch(e){}
+  NET.taken=false;loginLocal(u)}
+$("trBtn").onclick=async()=>{if(!API)return toast("Moving your farm works in the Farming app at farming-ph.netlify.app.",3200);if(!myUser())return;$("trM").hidden=false;$("trErr").textContent="";$("trCode").textContent="…";
+  try{save();await netSend(true);const d=await postJ("transfer/start",{u:myUser(),tok:myTok()});$("trCode").textContent=d.code.slice(0,4)+"-"+d.code.slice(4)}catch(e){$("trErr").textContent=e.message;$("trCode").textContent="—"}};
+$("trCopy").onclick=async()=>{const t=$("trCode").textContent.replace("-","");try{await navigator.clipboard.writeText(t);$("trCopy").textContent="Copied!"}catch(e){}setTimeout(()=>$("trCopy").textContent="Copy code",1500)};
+$("trClose").onclick=()=>{$("trM").hidden=true};
+$("trInBtn").onclick=()=>{if(!API)return $("liErr").textContent="Moving a farm works in the Farming app at farming-ph.netlify.app.";$("auth").hidden=true;$("trInM").hidden=false;$("tiErr").textContent="";setTimeout(()=>$("tiCode").focus(),50)};
+$("tiClose").onclick=()=>{$("trInM").hidden=true;if(!LOCAL.user)openAuth("login")};
+$("tiGo").onclick=async()=>{$("tiErr").textContent="";const code=$("tiCode").value.toUpperCase().replace(/[^A-Z0-9]/g,""),p1=$("tiPw").value,p2=$("tiPw2").value;
+  if(code.length!==8)return $("tiErr").textContent="The transfer code has 8 letters and numbers.";if(p1.length<4)return $("tiErr").textContent="Password must be at least 4 characters.";if(p1!==p2)return $("tiErr").textContent="The two passwords don't match.";
+  $("tiGo").disabled=true;try{const r=crypto.getRandomValues(new Uint8Array(16)),tok=[...r].map(b=>b.toString(16).padStart(2,"0")).join("");const d=await postJ("transfer/finish",{code,tok});
+    ["tiCode","tiPw","tiPw2"].forEach(k=>$(k).value="");$("trInM").hidden=true;$("auth").hidden=true;await adoptAccount(d,p1,tok);toast("📲 Welcome, "+(d.farmer||d.u)+"! Your farm moved here. Username: "+d.u,5000)}catch(e){$("tiErr").textContent=e.message}$("tiGo").disabled=false};
 async function initCloud(){
   if(!window.claude||!window.claude.use){$("lbHead").hidden=true;$("lbPanel").hidden=true;localAuthStart();return}
   let db=null,user=null;
