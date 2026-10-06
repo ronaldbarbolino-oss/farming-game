@@ -304,6 +304,11 @@ body.land .modeTag{max-width:46vw;font-size:.64rem;opacity:.85}
 @keyframes spLoad{to{width:92%}}
 @media (prefers-reduced-motion:reduce){#splash *,#splash *::after{animation:none!important}#splash .bar i{width:92%}}
 .logo{animation:lgShine 4s ease-in-out infinite}@keyframes lgShine{0%,100%{filter:drop-shadow(0 1px 0 #7a3d10) drop-shadow(0 1px 0 #7a3d10) drop-shadow(0 1px 0 #7a3d10) drop-shadow(0 2px 0 #4a2508) drop-shadow(0 4px 3px rgba(0,0,0,.35)) brightness(1)}50%{filter:drop-shadow(0 1px 0 #7a3d10) drop-shadow(0 1px 0 #7a3d10) drop-shadow(0 1px 0 #7a3d10) drop-shadow(0 2px 0 #4a2508) drop-shadow(0 4px 3px rgba(0,0,0,.35)) brightness(1.18)}}
+
+body.rot{position:fixed;top:0;left:0;width:100vh;height:100vw;transform:rotate(90deg) translateY(-100%);transform-origin:top left;overflow:hidden}
+body.rot.land .stage{width:100vh!important;height:100vw!important}
+body.rot.land .crew{max-height:calc(100vw - 128px)}body.rot.land .sbtns{max-height:calc(100vw - 140px)}
+body.rot.land #below{width:min(460px,62vh)}body.rot.land .crew{max-width:min(28vh,230px)}body.rot.land .hud{max-width:56vh}
 </style>
 
 <div id="splash" role="img" aria-label="Farming"><div class="rays"></div><svg class="land" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
@@ -347,7 +352,7 @@ body.land .modeTag{max-width:46vw;font-size:.64rem;opacity:.85}
     <canvas id="cv" aria-label="3D farm: drag to rotate, tap a plot to plow, plant or harvest"></canvas>
     <div class="loading" id="loading">Preparing the farm…</div>
 
-    <div class="sbtns"><button class="sb" id="menuBtn" type="button">☰ Menu</button><button class="sb" id="gpBtn" type="button" hidden style="display:none">🏝️ GoPyesta Island</button><button class="sb" id="instBtn" type="button" hidden style="background:#3a7a3a;color:#fff">📲 Install</button><button class="sb" id="mapBtn" type="button">🗺️ Map</button><button class="sb" id="sndBtn" type="button" aria-pressed="false">🔇 Sound</button><button class="sb" id="curBtn" type="button" aria-pressed="false">🖱️ Cursor</button><button class="sb" id="hideBtn" type="button" aria-pressed="false">Hide</button><button class="sb" id="rotBtn" type="button">↻ Landscape</button></div>
+    <div class="sbtns"><button class="sb" id="menuBtn" type="button">☰ Menu</button><button class="sb" id="gpBtn" type="button" hidden style="display:none">🏝️ GoPyesta Island</button><button class="sb" id="instBtn" type="button" hidden style="background:#3a7a3a;color:#fff">📲 Install</button><button class="sb" id="mapBtn" type="button">🗺️ Map</button><button class="sb" id="sndBtn" type="button" aria-pressed="false">🔇 Sound</button><button class="sb" id="qBtn" type="button">⚡ Graphics</button><button class="sb" id="curBtn" type="button" aria-pressed="false">🖱️ Cursor</button><button class="sb" id="hideBtn" type="button" aria-pressed="false">Hide</button><button class="sb" id="rotBtn" type="button">↻ Landscape</button></div>
     <div class="crew" id="crew" role="group" aria-label="Workers"></div>
     <div class="modeTag" id="modeTag">Tap the field to plow, plant and harvest · press and hold anything to move it</div>
     <div class="tip" id="tip">Slide to move the view · two fingers to rotate and zoom · right-click or Shift to rotate · scroll to zoom</div>
@@ -688,10 +693,15 @@ if(!window.THREE){$("loading").textContent="Could not load 3D. Please refresh th
 
 /* ================= THREE SETUP ================= */
 const cv=$("cv"),stage=$("stage");
-const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true});
 const MOBILE=!!(window.matchMedia&&window.matchMedia("(pointer:coarse)").matches)||window.innerWidth<640;
-renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,MOBILE?1.5:2));
-renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+/* graphics quality: 0 low (old/cheap phones), 1 medium (phones), 2 high (computers). Auto unless the player picks one. */
+const LOWDEV=MOBILE&&((navigator.deviceMemory||4)<=3||(navigator.hardwareConcurrency||8)<=4);
+const QPICK=(()=>{try{const q=localStorage.getItem("farming-q");return q==null?null:+q}catch(e){return null}})();
+let QLV=QPICK!=null?QPICK:(MOBILE?(LOWDEV?0:1):2);
+const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:QLV>=2,powerPreference:"high-performance"});
+const PRMAX=QLV===0?1:QLV===1?Math.min(window.devicePixelRatio||1,1.25):Math.min(window.devicePixelRatio||1,MOBILE?1.5:2);let PRNOW=PRMAX;
+renderer.setPixelRatio(PRNOW);
+renderer.shadowMap.enabled=QLV>=1;renderer.shadowMap.type=QLV>=2?THREE.PCFSoftShadowMap:THREE.PCFShadowMap;if(QLV<2)renderer.shadowMap.autoUpdate=false;
 const scene=new THREE.Scene();
 const SKY=0xa9dcf2;scene.background=new THREE.Color(SKY);scene.fog=new THREE.Fog(0xc6ebf8,40,88);
 const camera=new THREE.PerspectiveCamera(40,1,.1,420);
@@ -703,10 +713,10 @@ scene.add(sun);
 /* -------- geometry builder: merges many primitives into one vertex-colored mesh -------- */
 const BASE={
   box:new THREE.BoxGeometry(1,1,1).toNonIndexed(),
-  sph:new THREE.SphereGeometry(1,10,7).toNonIndexed(),
+  sph:new THREE.SphereGeometry(1,QLV===0?7:10,QLV===0?5:7).toNonIndexed(),
   ico:new THREE.IcosahedronGeometry(1,0).toNonIndexed(),
   ico1:new THREE.IcosahedronGeometry(1,1).toNonIndexed(),
-  cyl:new THREE.CylinderGeometry(1,1,1,8).toNonIndexed(),
+  cyl:new THREE.CylinderGeometry(1,1,1,QLV===0?6:8).toNonIndexed(),
   cone:new THREE.ConeGeometry(1,1,8).toNonIndexed(),
   cone4:new THREE.ConeGeometry(1,1,4).toNonIndexed(),
   prism:new THREE.CylinderGeometry(1,1,1,3).toNonIndexed()
@@ -834,7 +844,7 @@ const world=new THREE.Group();scene.add(world);
 var GROUND_G=null,paintGround=()=>{},landDeco=()=>{},pondDeco=()=>{},LANDM=null,PONDM=null;
 (function landscape(){
   const r=rnd(11);
-  const gg=new THREE.PlaneGeometry(150,150,300,300),gc=[],gp=gg.attributes.position,c1=new THREE.Color(0x4ca42b),c2=new THREE.Color(0x6fcc3e),cc=new THREE.Color();
+  const GSEG=QLV===0?130:QLV===1?200:300,gg=new THREE.PlaneGeometry(150,150,GSEG,GSEG),gc=[],gp=gg.attributes.position,c1=new THREE.Color(0x4ca42b),c2=new THREE.Color(0x6fcc3e),cc=new THREE.Color();
   GROUND_G=gg;paintGround=()=>{const gc=[];for(let i=0;i<gp.count;i++){const x=gp.getX(i),y=gp.getY(i),n=(Math.sin(x*.35)+Math.sin(y*.29+1.7)+Math.sin((x+y)*.17)*1.3+Math.sin(x*1.3+y*.9)*.35)/4+.5;cc.copy(c1).lerp(c2,Math.max(0,Math.min(1,n)));const fh=farmH(x,-y);gp.setZ(i,fh);if(fh<-.02){if(x>17.5)cc.set(fh>-.6?0xe6d29a:0xc9b07a);else cc.set(0xcdb27a).lerp(_c2.set(0x8a7450),Math.min(1,-fh/.7))}else if(x>16.8)cc.lerp(_c2.set(0xf0dca8),_sm((x-16.8)/1.7));gc.push(cc.r,cc.g,cc.b)}
   gg.setAttribute("color",new THREE.Float32BufferAttribute(gc,3));gp.needsUpdate=true;gg.computeVertexNormals();if(gg.boundingSphere)gg.computeBoundingSphere()};paintGround();
   GROUNDMAT=new THREE.MeshLambertMaterial({vertexColors:true});const ground=new THREE.Mesh(gg,GROUNDMAT);
@@ -842,7 +852,7 @@ var GROUND_G=null,paintGround=()=>{},landDeco=()=>{},pondDeco=()=>{},LANDM=null,
   const sbed=new THREE.Mesh(new THREE.PlaneGeometry(500,500),new THREE.MeshBasicMaterial({color:0xb79e6c}));sbed.rotation.x=-Math.PI/2;sbed.position.set(324,-3.45,0);world.add(sbed);
   landDeco=()=>{const r=rnd(11);if(LANDM)world.remove(LANDM);const b=new Builder();
   // grass tufts & flowers
-  for(let i=0;i<900;i++){
+  for(let i=0,NT=QLV===0?260:QLV===1?520:900;i<NT;i++){
     const a=r()*Math.PI*2,d=Math.sqrt(r())*26,x=Math.cos(a)*d,z=Math.sin(a)*d;
     if(x>FX0-.6&&x<FX0+8.6&&z>FZ0-.6&&z<FZ0+8.6)continue;
     if(inAnyPen(x,z)||inPlotArea(x,z))continue;if(z>-9.4&&z<-6.6&&x<-3.5)continue;if(x>17||farmH(x,z)<-.03)continue;
@@ -1808,7 +1818,7 @@ const IX=80,IZ=4;
 const ISLE=(function(){
 const root=new THREE.Group();root.position.set(IX,0,IZ);scene.add(root);
 const sm=t=>{t=Math.max(0,Math.min(1,t));return t*t*(3-2*t)};
-const BASE={box:new THREE.BoxGeometry(1,1,1).toNonIndexed(),sph:new THREE.SphereGeometry(1,12,8).toNonIndexed(),ico:new THREE.IcosahedronGeometry(1,0).toNonIndexed(),ico1:new THREE.IcosahedronGeometry(1,1).toNonIndexed(),
+const BASE={box:new THREE.BoxGeometry(1,1,1).toNonIndexed(),sph:new THREE.SphereGeometry(1,QLV===0?8:12,QLV===0?6:8).toNonIndexed(),ico:new THREE.IcosahedronGeometry(1,0).toNonIndexed(),ico1:new THREE.IcosahedronGeometry(1,1).toNonIndexed(),
   cyl:new THREE.CylinderGeometry(1,1,1,10).toNonIndexed(),cone:new THREE.ConeGeometry(1,1,10).toNonIndexed(),cone4:new THREE.ConeGeometry(1,1,4).toNonIndexed(),torus:new THREE.TorusGeometry(1,.38,6,12).toNonIndexed()};
 const _m=new THREE.Matrix4(),_q=new THREE.Quaternion(),_e=new THREE.Euler(),_v=new THREE.Vector3(),_s=new THREE.Vector3(),_n=new THREE.Matrix3(),_c=new THREE.Color(),_up=new THREE.Vector3(0,1,0),_a=new THREE.Vector3(),_b=new THREE.Vector3();
 class Builder{
@@ -2385,7 +2395,7 @@ function applyCam(dt){
   if(SKYMESH)SKYMESH.position.copy(camera.position);if(SUNSPRITE)SUNSPRITE.position.copy(camera.position).add(SUNOFF);
 }
 const pointers=new Map();let dragMoved=0,pinch0=0,ang0=0,downAt=null;
-cv.addEventListener("pointerdown",e=>{cv.setPointerCapture(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});dragMoved=0;downAt={x:e.clientX,y:e.clientY};
+cv.addEventListener("pointerdown",e=>{cv.setPointerCapture(e.pointerId);pointers.set(e.pointerId,{x:exy(e).x,y:exy(e).y});dragMoved=0;downAt={x:exy(e).x,y:exy(e).y};
   if(pointers.size===2){const [a,b]=[...pointers.values()];pinch0=Math.hypot(a.x-b.x,a.y-b.y);ang0=Math.atan2(b.y-a.y,b.x-a.x)}hideTip();
   clearTimeout(HOLD.t);if(pointers.size===1&&!PLACE&&!SEL&&!VISIT){const p=pickAt(e),g0=groundPoint(e),pl=p&&p.tile!=null?plotOfTile(p.tile):null;
     let go=null;
@@ -2401,9 +2411,9 @@ const HOLD={t:0};function plotOfTile(i){for(const a of layout())if(a.p&&!a.p.isl
 cv.addEventListener("pointermove",e=>{
   const prev=pointers.get(e.pointerId);
   if(!prev){if(e.pointerType==="mouse")hoverAt(e);return}
-  if(PLACE&&PLACE.drag){pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});const gp=groundPoint(e);if(gp)updateGhost(gp.x-PLACE.ox,gp.z-PLACE.oz);return}
-  const dx=e.clientX-prev.x,dy=e.clientY-prev.y;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
-  if(pointers.size===1){dragMoved+=Math.abs(dx)+Math.abs(dy);if(downAt&&Math.hypot(e.clientX-downAt.x,e.clientY-downAt.y)>(e.pointerType==="mouse"?6:16)){cv.classList.add("drag");if(e.shiftKey||(e.buttons&2)){camT.az-=dx*.008;camT.pol=Math.min(1.35,Math.max(.35,camT.pol-dy*.006));cam.auto=false;setAuto();return}pan(dx,dy)}}
+  if(PLACE&&PLACE.drag){pointers.set(e.pointerId,{x:exy(e).x,y:exy(e).y});const gp=groundPoint(e);if(gp)updateGhost(gp.x-PLACE.ox,gp.z-PLACE.oz);return}
+  const dx=exy(e).x-prev.x,dy=exy(e).y-prev.y;pointers.set(e.pointerId,{x:exy(e).x,y:exy(e).y});
+  if(pointers.size===1){dragMoved+=Math.abs(dx)+Math.abs(dy);if(downAt&&Math.hypot(exy(e).x-downAt.x,exy(e).y-downAt.y)>(e.pointerType==="mouse"?6:16)){cv.classList.add("drag");if(e.shiftKey||(e.buttons&2)){camT.az-=dx*.008;camT.pol=Math.min(1.35,Math.max(.35,camT.pol-dy*.006));cam.auto=false;setAuto();return}pan(dx,dy)}}
   else if(pointers.size===2){const [a,b]=[...pointers.values()],d=Math.hypot(a.x-b.x,a.y-b.y),an=Math.atan2(b.y-a.y,b.x-a.x);if(pinch0){camT.dist=Math.min(90,Math.max(5,camT.dist*pinch0/d));let da=an-ang0;da=Math.atan2(Math.sin(da),Math.cos(da));camT.az+=da;camT.pol=Math.min(1.35,Math.max(.35,camT.pol-dy*.004))}pinch0=d;ang0=an;dragMoved=99;cam.follow=false;cam.auto=false;setAuto()}
 });
 function pan(dx,dy){const k=camT.dist*.0022,sa=Math.sin(cam.az),ca=Math.cos(cam.az);
@@ -2417,7 +2427,7 @@ function checkIsle(){if(ISLE_OPEN&&Math.hypot(camT.tx-IX,camT.tz-IZ)>55&&!(TRIP.
   if(!TRIP.on){if(n)toast("You are at GoPyesta Island.",2200)}}}
 function endPtr(e){clearTimeout(HOLD.t);
   if(PLACE&&PLACE.drag){pointers.delete(e.pointerId);if(!pointers.size){cv.classList.remove("drag");pinch0=0}if(PLACE.ok)confirmPlace();else{toast(PLACE.why||"Can't put it there.",2600);cancelPlace()}return}
-  const tr=e.pointerType==="mouse"?6:16,wasTap=pointers.size===1&&downAt&&Math.hypot(e.clientX-downAt.x,e.clientY-downAt.y)<=tr&&dragMoved<tr*2.5;
+  const tr=e.pointerType==="mouse"?6:16,wasTap=pointers.size===1&&downAt&&Math.hypot(exy(e).x-downAt.x,exy(e).y-downAt.y)<=tr&&dragMoved<tr*2.5;
   pointers.delete(e.pointerId);if(!pointers.size){cv.classList.remove("drag");pinch0=0}
   if(wasTap&&e.type==="pointerup")clickAt(e);
 }
@@ -2438,7 +2448,7 @@ setTimeout(hideTip,7000);
 const ray=new THREE.Raycaster(),ndc=new THREE.Vector2();
 let hovered=null;   // {tile:i} or {pen:i}
 function pickAt(e){
-  const r=cv.getBoundingClientRect();ndc.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(ndc,camera);
+  const r=cvRect(),P=exy(e);ndc.set((P.x-r.left)/r.width*2-1,-(P.y-r.top)/r.height*2+1);ray.setFromCamera(ndc,camera);
   const hits=ray.intersectObjects([...BTN3D.filter(b=>b.visible),...TSHOPHITS,...(AD.hit&&AD.on?[AD.hit]:[]),...FTREES.map(t=>t.hit),...HILLHITS,...BUILDG.children.map(g=>g.userData.hit).filter(Boolean),STALLHIT,...WHITS,...ISLE.hits,...weeds.filter(w=>w.state==="ground").map(w=>w.m),...animalGroup.children,...tileObjs.map(o=>o.hit)],true);
   for(const h of hits){if(h.object.userData.btn3d)return{btn3d:h.object.userData.btn3d};if(h.object.userData.tshop)return{tshop:h.object.userData.tshop};if(h.object.userData.drop)return{drop:true};if(h.object.userData.ftree!=null)return{ftree:h.object.userData.ftree};if(h.object.userData.build!=null)return{build:h.object.userData.build};if(h.object.userData.hill)return{hill:h.object.userData.hill};if(h.object.userData.stall)return{stall:true};if(h.object.userData.worker){const W=CREW[h.object.userData.worker];if(W&&W.g.visible)return{worker:h.object.userData.worker};continue}if(h.object.userData.isle!=null)return{isle:h.object.userData.isle};const pi=h.object.userData.pen;if(pi!=null&&animalObjs[pi]&&!animalObjs[pi].g.visible)continue;if(h.object.userData.weed)return{weed:h.object.userData.weed};if(h.object.userData.pen!=null&&!h.object.isSprite)return{pen:h.object.userData.pen};if(h.object.isSprite&&h.object.userData.pen!=null)return{pen:h.object.userData.pen};if(h.object.userData.tile!=null)return{tile:h.object.userData.tile}}
   return null;
@@ -2498,7 +2508,7 @@ function updateTag(){
 
 /* ================= GAME ACTIONS ================= */
 function gain(coins,xp,x,y){S.coins+=coins;S.xp+=xp;if(x!=null)floatText((coins>0?"+"+coins+" ":"")+(xp?"+"+xp+"xp":""),x,y);while(S.xp>=xpNeed(S.lv)){S.xp-=xpNeed(S.lv);S.lv++;levelUp()}}
-function floatText(txt,x,y){const d=document.createElement("div");d.className="float";d.textContent=txt;d.style.left=x+"px";d.style.top=y+"px";document.body.appendChild(d);setTimeout(()=>d.remove(),1100)}
+function floatText(txt,x,y){[x,y]=S2L(x,y);const d=document.createElement("div");d.className="float";d.textContent=txt;d.style.left=x+"px";d.style.top=y+"px";document.body.appendChild(d);setTimeout(()=>d.remove(),1100)}
 let toastT;function toast(m,ms){let t=document.querySelector(".toast");if(!t){t=document.createElement("div");t.className="toast";document.body.appendChild(t)}t.textContent=m;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,ms||1800)}
 function levelUp(){
   const unl=[...CROPS.filter(c=>c.lv===S.lv).map(c=>c.n),...ANIMALS.filter(a=>a.lv===S.lv).map(a=>a.n)];
@@ -2682,10 +2692,17 @@ $("rotBtn").onclick=async()=>{try{if(!document.fullscreenElement&&document.docum
 function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.querySelector(".toolbar");if(!sb||!tb)return;
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
-function setLand(){const b=document.body,land=innerWidth>innerHeight&&(innerHeight<=600||!!(window.matchMedia&&matchMedia("(pointer:coarse)").matches));if(land!==b.classList.contains("land")){b.classList.toggle("land",land);if(!land)b.classList.remove("drawer")}}
+/* portrait phone: turn the whole game sideways so it always plays in landscape */
+let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
+function cvRect(){return ROT?{left:0,top:0,width:cv.clientWidth,height:cv.clientHeight}:cv.getBoundingClientRect()}
+function setRot(){const want=!!MOBILE&&innerHeight>innerWidth*1.05;if(want!==ROT){ROT=want;document.body.classList.toggle("rot",want)}}
+let _olTried=false;function tryLockLand(){if(_olTried||!MOBILE||!(innerHeight>innerWidth))return;_olTried=true;try{const d=document.documentElement,go=()=>{if(screen.orientation&&screen.orientation.lock)screen.orientation.lock("landscape").catch(()=>{})};
+  if(!document.fullscreenElement&&d.requestFullscreen&&!/iPhone|iPad|iPod/.test(navigator.userAgent))d.requestFullscreen({navigationUI:"hide"}).then(go).catch(go);else go()}catch(e){}}
+window.addEventListener("pointerdown",tryLockLand,{once:false,passive:true});
+function setLand(){setRot();const b=document.body,land=(innerWidth>innerHeight||ROT)&&(innerHeight<=600||!!(window.matchMedia&&matchMedia("(pointer:coarse)").matches));if(land!==b.classList.contains("land")){b.classList.toggle("land",land);if(!land)b.classList.remove("drawer")}}
 let rlT=[];function relayout(){const r=()=>{setLand();try{resize()}catch(e){}placeSbtns()};r();rlT.forEach(clearTimeout);rlT=[120,400,900].map(t=>setTimeout(r,t))}
 window.addEventListener("orientationchange",relayout);document.addEventListener("fullscreenchange",relayout);if(window.visualViewport)visualViewport.addEventListener("resize",relayout);if(window.screen&&screen.orientation&&screen.orientation.addEventListener)screen.orientation.addEventListener("change",relayout);setLand();
-$("tTown").onclick=startJeep;
+$("tTown").onclick=startJeep;{const qb=$("qBtn");if(qb){qb.textContent=qLabel();qb.onclick=()=>{const order=[null,0,1,2],i=order.indexOf(QPICK);const n=order[(i+1)%order.length];toast("Graphics: "+(n==null?"Auto":["Low","Medium","High"][n])+" · reloading…",1500);setTimeout(()=>setQuality(n),600)}}}
 $("sellAll").onclick=sellAll;$("shopOpen").onclick=()=>{S.shopOpen=S.shopOpen===false;save();invUI(true);toast(S.shopOpen?"The stall is open. Buyers will come.":"The stall is closed. No buyers will come.",2600)};$("goMkt").onclick=()=>{goView("market")};
 $("placeRot").onclick=()=>{if(PLACE){PLACE.r=(PLACE.r+Math.PI/2)%(Math.PI*2);PLACE.g.rotation.y=PLACE.r}};$("placeOk").onclick=confirmPlace;$("placeX").onclick=cancelPlace;
 const CD_HARV=120,CD_TREAT=120;const cdLeft=k=>Math.max(0,(k==="harv"?CD_HARV:CD_TREAT)-(now()-((S.cd||{})[k]||0)));
@@ -2707,7 +2724,7 @@ $("tLvl").onclick=()=>{if(S.lv<10){S.lv=10;S.xp=0}save();ui();toast("Level 10: a
 
 /* ================= HELPER: auto-harvests ripe crops ================= */
 let helper=null;const _ts=new THREE.Vector3();
-function toScreen(x,y,z){_ts.set(x,y,z).project(camera);const r=cv.getBoundingClientRect();return{x:r.left+(_ts.x+1)/2*r.width,y:r.top+(1-_ts.y)/2*r.height}}
+function toScreen(x,y,z){_ts.set(x,y,z).project(camera);const r=cvRect(),q=L2S(r.left+(_ts.x+1)/2*r.width,r.top+(1-_ts.y)/2*r.height);return{x:q[0],y:q[1]}}
 const HELPERS=[];
 function makeHelperW(look,x,z,name){const f=makeFarmer(look);f.g.position.set(x,0,z);scene.add(f.g);
   const bk=new THREE.Group();bk.position.set(.22,.05,0);f.torso.add(bk);
@@ -2799,7 +2816,7 @@ function initCrew(){
 const SELRING=new THREE.Mesh(new THREE.RingGeometry(.38,.5,28),new THREE.MeshBasicMaterial({color:0xffd84a,transparent:true,opacity:.9,depthWrite:false}));SELRING.rotation.x=-Math.PI/2;scene.add(SELRING);
 function selectWorker(k){SEL=k&&CREW[k]?k:null;renderCrewSel();const m=$("modeTag");
   m.textContent=SEL?"Orders for "+wName(SEL)+": tap where to work · tap Move to stop giving orders":"No worker selected: you will do it yourself";m.style.opacity=1;clearTimeout(modeT);modeT=setTimeout(()=>m.style.opacity=.85,2600)}
-function groundPoint(e){const r=cv.getBoundingClientRect();ndc.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(ndc,camera);
+function groundPoint(e){const r=cvRect(),P=exy(e);ndc.set((P.x-r.left)/r.width*2-1,-(P.y-r.top)/r.height*2+1);ray.setFromCamera(ndc,camera);
   const v=ray.ray.intersectPlane(GPLANE,_gpv);if(!v)return null;return{x:Math.max(-33,Math.min(17,v.x)),z:Math.max(-24,Math.min(51,v.z))}}
 function taskTarget(q){
   if(q.type==="walk")return[q.x,q.z];
@@ -4235,6 +4252,32 @@ function stepFarm2(dt,t){
   else{const g=AD.g;if(!AD.land){AD.y=Math.max(0,AD.y-dt*1.8);g.position.y=AD.y;g.rotation.y+=dt*.6;g.rotation.z=Math.sin(t*1.7)*.08;if(AD.y<=0){AD.land=true;g.rotation.z=0;AD.chute.visible=false;AD.ring.visible=true;burst(g.position.x,.2,g.position.z,0xd8c8a0,14,.3)}}
     else{AD.ring.material.opacity=.45+.4*Math.sin(t*4);AD.ring.scale.setScalar(1+.08*Math.sin(t*4));AD.life-=dt;if(AD.life<=0){AD.on=false;g.visible=false;AD.t=200+Math.random()*200}}}}
 
+/* ===== performance: only draw what the camera can see, lighter effects on phones ===== */
+const PERF={cull:[],t:0,fr:0,ft:0,sh:0,init:false,meas:0};
+function perfInit(){if(PERF.init)return;PERF.init=true;
+  if(QLV<2){const L=[];scene.traverse(o=>{if(o.isPointLight)L.push(o)});L.forEach(l=>l.parent&&l.parent.remove(l))}
+  if(QLV===0)hideOutlines();
+  // wrap each top-level object so it can be skipped when it is far beyond the fog
+  const rm=scene.remove.bind(scene);scene.remove=function(...a){a.forEach(o=>{if(o&&o.parent&&o.parent.userData.cw&&o.parent.parent===scene){const w=o.parent;w.remove(o);rm(w);PERF.cull=PERF.cull.filter(c=>c.w!==w)}else rm(o)});return this};
+  const box=new THREE.Box3(),sph=new THREE.Sphere();
+  scene.children.slice().forEach(o=>{if(o.isLight||o.isCamera||o.userData.cw||o===camera||o.frustumCulled===false||o.isPoints||o.isLineSegments)return;
+    box.setFromObject(o);if(box.isEmpty())return;box.getBoundingSphere(sph);if(!(sph.radius<70))return;
+    const w=new THREE.Group();w.userData.cw=true;scene.add(w);w.add(o);PERF.cull.push({w,o,off:sph.center.clone().sub(o.position),r:sph.radius})})}
+function hideOutlines(){scene.traverse(o=>{if(o.isMesh&&(o.userData.outline||o.material===OUT||o.material===OUTU))o.visible=false})}
+const _pc=new THREE.Vector3();
+function perfStep(dt,t){{const ff=scene.fog&&scene.fog.far>=50?scene.fog.far:400,want=Math.max(110,Math.min(420,ff+20));if(Math.abs(camera.far-want)>1){camera.far=want;camera.updateProjectionMatrix()}}
+  if(!PERF.init)return;
+  if(QLV<2){PERF.sh+=dt;if(PERF.sh>(QLV===0?.5:.12)){PERF.sh=0;renderer.shadowMap.needsUpdate=true}}
+  PERF.t+=dt;if(PERF.t>.25){PERF.t=0;const far=(scene.fog?scene.fog.far:200)+8,cp=camera.position;
+    for(const c of PERF.cull){_pc.copy(c.o.position).add(c.off);c.w.visible=_pc.distanceTo(cp)-c.r<far}
+    if(QLV===0&&Math.random()<.05)hideOutlines()}
+  // auto: if the phone is slow, lower the resolution a little at a time
+  if(QPICK==null){PERF.fr++;PERF.ft+=dt;if(PERF.ft>4){const fps=PERF.fr/PERF.ft;PERF.fr=0;PERF.ft=0;
+    if(fps<32&&PRNOW>.7){PRNOW=Math.max(.7,+(PRNOW-.15).toFixed(2));renderer.setPixelRatio(PRNOW);try{resize()}catch(e){}}
+    else if(fps>55&&PRNOW<PRMAX){PRNOW=Math.min(PRMAX,+(PRNOW+.1).toFixed(2));renderer.setPixelRatio(PRNOW);try{resize()}catch(e){}}
+    if(fps<22&&sun.castShadow&&MOBILE){sun.castShadow=false}}}}
+function setQuality(q){try{if(q==null)localStorage.removeItem("farming-q");else localStorage.setItem("farming-q",q)}catch(e){}save();location.reload()}
+function qLabel(){return"⚡ Graphics: "+(QPICK==null?"Auto ("+["Low","Medium","High"][QLV]+")":["Low","Medium","High"][QLV])}
 function loop(t){
   const dt=Math.min(.1,(t-last)/1000);last=t;const ts=t/1000;
   applyCam(dt);stepAnimals(dt,ts);stepExtras(dt,ts);stepFarm2(dt,ts);stepFire(dt,ts);stepNet(dt);stepSound(dt);stepFish(dt,ts);ISLE.step(dt,ts);checkIsle();stepCity(dt,ts);checkCity();
@@ -4243,11 +4286,11 @@ function loop(t){
   acc+=dt;if(acc>.2){acc=0;syncField()}
   updateTag();
   {let c;if(cv.classList.contains("drag"))c="grabbing";else if(cv.dataset.worker==="1")c="pointer";else if(TOOL==="move")c=SEL?"cell":"grab";else if(hovered&&hovered.tile!=null)c=toolOk(hovered.tile)?"pointer":"not-allowed";else if(hovered&&(hovered.pen!=null||hovered.weed))c=TOOL==="care"||TOOL==="harvest"?"pointer":"not-allowed";else if(hovered&&hovered.isle!=null)c="help";else if(hovered&&hovered.stall)c="pointer";else if(SEL&&TOOL==="move")c="cell";else c="crosshair";if(NORMALCUR&&!cv.classList.contains("drag"))c="default";if(cv.style.cursor!==c)cv.style.cursor=c}
-  renderer.render(scene,camera);requestAnimationFrame(loop);
+  perfStep(dt,t);renderer.render(scene,camera);requestAnimationFrame(loop);
 }
 function start(){
   makeIcons();resize();buildField();buildSnowLayers();scene.add(sun.target);normalizePens();initFarmer();initHelper();initCrew();renderBuilds();buildBoat();buildJeep();initFolk();shopUI(true);townUI(true);syncAnimals();ui();wxUI();helperUI();applyCam(1);
-  $("loading").hidden=true;{const sp=$("splash"),t0=window.__spT0||0,w=Math.max(0,2400-(performance.now()-t0));setTimeout(()=>{if(sp){sp.classList.add("out");setTimeout(()=>sp.remove(),700)}},w)}requestAnimationFrame(loop);setInterval(ui,1000);setInterval(()=>{invUI(false);townUI(false)},1000);invUI(true);initCloud();
+  $("loading").hidden=true;setTimeout(perfInit,1500);{const sp=$("splash"),t0=window.__spT0||0,w=Math.max(0,2400-(performance.now()-t0));setTimeout(()=>{if(sp){sp.classList.add("out");setTimeout(()=>sp.remove(),700)}},w)}requestAnimationFrame(loop);setInterval(ui,1000);setInterval(()=>{invUI(false);townUI(false)},1000);invUI(true);initCloud();
 }
 window.claude?.hot?.ready?window.claude.hot.ready(start):start();
 })();
