@@ -758,7 +758,7 @@ const _ca=new THREE.Color(),_cb=new THREE.Color();
 const mix=(a,b,t)=>_ca.set(a).lerp(_cb.set(b),Math.max(0,Math.min(1,t))).getHex();
 /* -------- extra farmland parcels -------- */
 const PN=8;
-const IX_=80,IZ_=4;const CX=165,CZ=4,CHX=17,CHZ=14;
+const IX_=80,IZ_=4;const CX=180,CZ=4,CHX=32,CHZ=26;
 const PLOTS=[{id:"isla",n:"Secret Island",x0:IX_-.5,z0:IZ_+31,sz:6,y:1.2,island:true,cost:100000,lv:3},{id:"timog",n:"South Land",x0:-4,z0:12,cost:1500,lv:4},{id:"kanluran",n:"West Land",x0:-17,z0:10,cost:4000,lv:6},{id:"malayo",n:"Far Land",x0:-26.5,z0:10,cost:8000,lv:8},{id:"lambak",n:"Valley Land",x0:-4,z0:21,cost:15000,lv:9},{id:"burol",n:"Hill Land",x0:-17,z0:21,cost:25000,lv:10}];
 const PLOT_DEF={};PLOTS.forEach(p=>PLOT_DEF[p.id]=[p.x0,p.z0]);
 function applyPlotPos(){const P=(typeof S!=="undefined"&&S&&S.plotPos)||{};PLOTS.forEach(p=>{if(p.island)return;const v=P[p.id],d=PLOT_DEF[p.id];p.x0=v?v[0]:d[0];p.z0=v?v[1]:d[1]})}
@@ -1900,7 +1900,7 @@ const SHORE=[];let seaSpark=null,seaSparkM=null;
   const fc=[];for(let z=-46;z<=56;z+=1)fc.push({x:18.9-IX,z:z-IZ,nx:1,nz:0});[0,.33,.66].forEach(ph=>ribbon(fc,false,ph,3.2));
   // MW City seawall
   const sdr=(x,z,hx,hz,rr)=>{const qx=Math.abs(x)-hx+rr,qz=Math.abs(z)-hz+rr;return Math.hypot(Math.max(qx,0),Math.max(qz,0))+Math.min(Math.max(qx,qz),0)-rr};
-  const cl=contour(CX-IX,CZ-IZ,(x,z)=>sdr(x-(CX-IX),z-(CZ-IZ),17,14,4)<.2,160,30);[0,.5].forEach(ph=>ribbon(cl,true,ph,1.4));
+  const cl=contour(CX-IX,CZ-IZ,(x,z)=>sdr(x-(CX-IX),z-(CZ-IZ),CHX,CHZ,4)<.2,260,30);[0,.5].forEach(ph=>ribbon(cl,true,ph,1.4));
 })();
 function stepShore(dt,t){if(seaSpark){seaSpark.offset.x=Math.sin(t*.05)*.4;seaSpark.offset.y=t*.012}
   SHORE.forEach(S0=>{const u=(t*.16+S0.ph)%1,off=(1-u)*S0.amp,P=S0.m.geometry.attributes.position,a=P.array;
@@ -2429,7 +2429,7 @@ cv.addEventListener("pointermove",e=>{
   else if(pointers.size===2){const [a,b]=[...pointers.values()],d=Math.hypot(a.x-b.x,a.y-b.y),an=Math.atan2(b.y-a.y,b.x-a.x);if(pinch0){camT.dist=Math.min(90,Math.max(5,camT.dist*pinch0/d));let da=an-ang0;da=Math.atan2(Math.sin(da),Math.cos(da));camT.az+=da;camT.pol=Math.min(1.35,Math.max(.35,camT.pol-dy*.004))}pinch0=d;ang0=an;dragMoved=99;cam.follow=false;cam.auto=false;setAuto()}
 });
 function pan(dx,dy){const k=camT.dist*.0022,sa=Math.sin(cam.az),ca=Math.cos(cam.az);
-  cam.follow=false;camT.tx=Math.max(-125,Math.min(195,camT.tx-dx*k*ca-dy*k*sa));camT.tz=Math.max(-45,Math.min(50,camT.tz+dx*k*sa-dy*k*ca));cam.auto=false;setAuto()}
+  cam.follow=false;camT.tx=Math.max(-125,Math.min(235,camT.tx-dx*k*ca-dy*k*sa));camT.tz=Math.max(-45,Math.min(50,camT.tz+dx*k*sa-dy*k*ca));cam.auto=false;setAuto()}
 cv.addEventListener("contextmenu",e=>e.preventDefault());
 function goView(k){const v=VIEWS[k];if(!v)return;const {follow,roofOff,...rest}=v;Object.assign(camT,{ty:.6},rest);cam.follow=!!follow;cam.auto=false;setAuto();ISLE.setRoof(!roofOff);if(k==="tug")ISLE.sail();
   document.querySelectorAll(".views .cbtn").forEach(c=>c.classList.toggle("on",c.dataset.v===k));hideTip()}
@@ -2446,7 +2446,7 @@ function endPtr(e){clearTimeout(HOLD.t);
 cv.addEventListener("pointerup",endPtr);cv.addEventListener("pointercancel",endPtr);
 cv.addEventListener("pointerleave",e=>{if(e.pointerType==="mouse")hovered=null});
 cv.addEventListener("wheel",e=>{e.preventDefault();camT.dist=Math.min(90,Math.max(5,camT.dist*(1+Math.sign(e.deltaY)*.1)));hideTip()},{passive:false});
-{const mv=(dx,dz)=>{cam.follow=false;const k=camT.dist*.12;camT.tx=Math.max(-125,Math.min(195,camT.tx+dx*k));camT.tz=Math.max(-45,Math.min(50,camT.tz+dz*k))},zm=f=>{camT.dist=Math.min(90,Math.max(5,camT.dist*f))};
+{const mv=(dx,dz)=>{cam.follow=false;const k=camT.dist*.12;camT.tx=Math.max(-125,Math.min(235,camT.tx+dx*k));camT.tz=Math.max(-45,Math.min(50,camT.tz+dz*k))},zm=f=>{camT.dist=Math.min(90,Math.max(5,camT.dist*f))};
   const hold=(id,fn)=>{const b=$(id);let iv=null;const go=()=>{fn();clearInterval(iv);iv=setInterval(fn,120)},stop=()=>{clearInterval(iv);iv=null};b.addEventListener("pointerdown",e=>{e.preventDefault();go()});["pointerup","pointerleave","pointercancel"].forEach(ev=>b.addEventListener(ev,stop))};
   hold("cU",()=>mv(0,-1));hold("cD",()=>mv(0,1));hold("cLf",()=>mv(-1,0));hold("cRt",()=>mv(1,0));hold("cZi",()=>zm(.88));hold("cZo",()=>zm(1.14));
   window.addEventListener("keydown",e=>{if(e.target&&(e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA"))return;const m={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0]}[e.key];if(m){e.preventDefault();mv(...m)}else if(e.key==="+"||e.key==="=")zm(.88);else if(e.key==="-")zm(1.14)})}
@@ -3709,13 +3709,13 @@ const CITY={lights:[],glows:[],pl:[],cabs:[],walkers:[],winMats:[],ferry:null,ad
 (function buildCity(){const b=new Builder(),r=rnd(9091),Y=1.2;
   const sdr=(x,z,hx,hz,rr)=>{const qx=Math.abs(x)-hx+rr,qz=Math.abs(z)-hz+rr;return Math.hypot(Math.max(qx,0),Math.max(qz,0))+Math.min(Math.max(qx,qz),0)-rr};
   // ground: concrete top with a stone seawall dropping into the sea
-  {const g=new THREE.PlaneGeometry(2*CHX+10,2*CHZ+10,90,76);g.rotateX(-Math.PI/2);const P=g.attributes.position,col=[],c=new THREE.Color(),TOP=new THREE.Color(0xc9c6bd),TOP2=new THREE.Color(0xbdb9ae),WALL=new THREE.Color(0x8b8578),BED=new THREE.Color(0xc9b07a);
+  {const g=new THREE.PlaneGeometry(2*CHX+10,2*CHZ+10,150,124);g.rotateX(-Math.PI/2);const P=g.attributes.position,col=[],c=new THREE.Color(),TOP=new THREE.Color(0xc9c6bd),TOP2=new THREE.Color(0xbdb9ae),WALL=new THREE.Color(0x8b8578),BED=new THREE.Color(0xc9b07a);
     for(let i=0;i<P.count;i++){const x=P.getX(i),z=P.getZ(i),d=sdr(x,z,CHX,CHZ,4);let h;if(d<0)h=Y;else if(d<.9)h=Y-(Y+3.2)*(d/.9);else h=-3.2;P.setY(i,h);
       if(d<0)c.copy(TOP).lerp(TOP2,.5+.5*Math.sin(x*1.7)*Math.sin(z*1.3));else if(h>-.6)c.copy(WALL);else c.copy(BED);col.push(c.r,c.g,c.b)}
     g.setAttribute("color",new THREE.Float32BufferAttribute(col,3));g.computeVertexNormals();const m=new THREE.Mesh(g,GROUNDMAT);m.receiveShadow=true;m.position.set(CX,0,CZ);scene.add(m)}
   const X=x=>CX+x,Z=z=>CZ+z;
   // streets: avenues run north-south, streets east-west
-  const AV=[-11,-2,7],ST=[-5,4],RW=2;
+  const AV=[-27,-19,-11,-2,7,16,24],ST=[-17,-5,4,14],RW=2;
   AV.forEach(a=>{b.add("box",0x3d4247,X(a),Y+.02,Z(0),RW,.03,2*CHZ-2.5);for(let z=-CHZ+2;z<CHZ-2;z+=1.4)b.add("box",0xf2c230,X(a),Y+.04,Z(z),.08,.01,.7)});
   ST.forEach(s=>{b.add("box",0x3d4247,X(0),Y+.02,Z(s),2*CHX-2.5,.03,RW);for(let x=-CHX+2;x<CHX-2;x+=1.4)if(!AV.some(a=>Math.abs(a-x)<1.2))b.add("box",0xf2c230,X(x),Y+.04,Z(s),.7,.01,.08)});
   AV.forEach(a=>ST.forEach(s=>{for(let k=-3;k<=3;k++){b.add("box",0xf4f4f0,X(a+k*.26),Y+.045,Z(s-1.35),.14,.01,.6);b.add("box",0xf4f4f0,X(a+k*.26),Y+.045,Z(s+1.35),.14,.01,.6);b.add("box",0xf4f4f0,X(a-1.35),Y+.045,Z(s+k*.26),.6,.01,.14);b.add("box",0xf4f4f0,X(a+1.35),Y+.045,Z(s+k*.26),.6,.01,.14)}}));
@@ -3736,17 +3736,18 @@ const CITY={lights:[],glows:[],pl:[],cabs:[],walkers:[],winMats:[],ferry:null,ad
   const adPlane=(x,y,z,w,ry,full)=>{const h=full?w:w/1.98,m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),full?FMAT.scrB:FMAT.scrA);m.visible=false;m.position.set(X(x),y,Z(z));m.rotation.y=ry;scene.add(m);CITY.ads.push(m);
     const fr=new THREE.Mesh(new THREE.PlaneGeometry(w+.16,h+.16),new THREE.MeshBasicMaterial({color:0x1b1b1b}));fr.position.set(0,0,-.01);m.add(fr);return m};
   // city blocks
-  const BX=[[-CHX+1.2,-12.2],[-9.8,-3.2],[-.8,5.8],[8.2,CHX-1.2]],BZ=[[-CHZ+1.2,-6.2],[-3.8,2.8],[5.2,CHZ-1.2]];
-  const PARK={x0:8.2,x1:CHX-1.6,z0:5.2,z1:CHZ-2},EMP={x:-6.5,z:-10},TSQ={x:-2,z:4};
+  const span=(L,H)=>{const o=[];let a=-H+1.2;L.forEach(v=>{o.push([a,v-1.2]);a=v+1.2});o.push([a,H-1.2]);return o};
+  const BX=span(AV,CHX),BZ=span(ST,CHZ);
+  const PARK={x0:8.2,x1:14.8,z0:5.2,z1:12.8},EMP={x:-6.5,z:-10},TSQ={x:-2,z:4},STAT={x:-14.5,z:10.5};
   let mi=0;
   BX.forEach(([x0,x1],bi)=>BZ.forEach(([z0,z1],bj)=>{
-    if(bi===3&&bj===2)return;                       // Central Park
+    if(x0>=PARK.x0-.1&&x1<=PARK.x1+1.5&&z0>=PARK.z0-.1&&z1<=PARK.z1+1.5)return;                       // Central Park
     const w=x1-x0,d=z1-z0;b.add("box",0xa9a59b,X((x0+x1)/2),Y+.05,Z((z0+z1)/2),w+.6,.1,d+.6);
     const nx=w>5?2:1,nz=d>5?2:1,lw=w/nx,ld=d/nz;
     for(let i=0;i<nx;i++)for(let j=0;j<nz;j++){const cx=x0+lw*(i+.5),cz=z0+ld*(j+.5);
       if(Math.hypot(cx-EMP.x,cz-EMP.z)<2.6)continue;
-      if(bi===0&&bj===2&&i===0&&j===1)continue;      // plaza for the statue
-      const tw=lw-.5,td=ld-.5,far=Math.abs(cx)>12||Math.abs(cz)>10,h=(far?2.5:4)+r()*(far?4:7)+(Math.hypot(cx-TSQ.x,cz-TSQ.z)<6?3:0);
+      if(Math.hypot(cx-STAT.x,cz-STAT.z)<2.4)continue;      // plaza for the statue
+      const tw=lw-.5,td=ld-.5,far=Math.abs(cx)>12||Math.abs(cz)>10,edge=Math.abs(cx)>22||Math.abs(cz)>18,h=(edge?2:far?2.5:4)+r()*(edge?3:far?4:7)+(Math.hypot(cx-TSQ.x,cz-TSQ.z)<6?3:0);
       tower(cx,cz,tw,td,h,Y+.1,mi++);
       if(r()<.6){const s2=.55+r()*.2;tower(cx,cz,tw*s2,td*s2,1.5+r()*3,Y+.1+h,mi+3)}
       const top=Y+.1+h;
@@ -3774,7 +3775,7 @@ const CITY={lights:[],glows:[],pl:[],cabs:[],walkers:[],winMats:[],ferry:null,ad
     [[x0+1,z0+1.2],[x1-1,z0+1.2]].forEach(([x,z])=>{b.add("box",0x6b4a2c,X(x),Y+.3,Z(z),1,.08,.3);b.add("box",0x6b4a2c,X(x),Y+.5,Z(z+.14),1,.3,.06)});
     const sg=labelSprite("Central Park");sg.position.set(X((x0+x1)/2),Y+2.4,Z(z0+.6));sg.scale.set(2,.5,1);scene.add(sg)}
   // a green torch statue on the south-west plaza
-  {const sx=-14.5,sz=10.5;b.add("box",0x9a958a,X(sx),Y+.5,Z(sz),2.4,1,2.4);b.add("box",0xb0aa9c,X(sx),Y+1.5,Z(sz),1.5,1,1.5);b.add("box",0x9a958a,X(sx),Y+2.1,Z(sz),1.1,.2,1.1);
+  {const sx=STAT.x,sz=STAT.z;b.add("box",0x9a958a,X(sx),Y+.5,Z(sz),2.4,1,2.4);b.add("box",0xb0aa9c,X(sx),Y+1.5,Z(sz),1.5,1,1.5);b.add("box",0x9a958a,X(sx),Y+2.1,Z(sz),1.1,.2,1.1);
     const G=0x6fb39a,y=Y+2.2;b.add("cone",G,X(sx),y+1,Z(sz),.55,2,.55);b.add("cyl",G,X(sx),y+2.1,Z(sz),.25,.4,.25);b.add("sph",G,X(sx),y+2.45,Z(sz),.24,.26,.24);
     for(let k=0;k<7;k++){const a=-Math.PI/2+(k-3)*.35;b.add("cone",G,X(sx+Math.sin(a)*.25),y+2.7,Z(sz+Math.cos(a)*.25),.05,.3,.05,Math.cos(a)*.6,0,-Math.sin(a)*.6)}
     b.add("cyl",G,X(sx+.25),y+2.4,Z(sz),.08,1.1,.08);b.add("cone",0xd9a62a,X(sx+.28),y+3.05,Z(sz),.12,.25,.12,Math.PI);b.add("box",G,X(sx-.25),y+1.6,Z(sz-.15),.3,.4,.06,0,0,.3);
@@ -3794,19 +3795,19 @@ const CITY={lights:[],glows:[],pl:[],cabs:[],walkers:[],winMats:[],ferry:null,ad
     const bb=btnSprite("⛴️ Ride Boat","#2f7fb8","boat");bb.position.set(X(-CHX-1.6),Y+2.6,Z(dz+.2));scene.add(bb)}
   scene.add(b.mesh());
   // yellow cabs looping the avenues
-  const LOOP=[[-11,-5],[7,-5],[7,4],[-11,4]],LL=[];let tot=0;for(let k=0;k<4;k++){const a=LOOP[k],c=LOOP[(k+1)%4],l=Math.hypot(c[0]-a[0],c[1]-a[1]);LL.push(l);tot+=l}
-  for(let k=0;k<7;k++){const cb=new Builder();cb.add("box",0xf2c230,0,.28,0,1.05,.3,.5);cb.add("box",0xf2c230,-.05,.52,0,.6,.22,.46);cb.add("box",0x3c556e,-.05,.52,0,.62,.16,.47);cb.add("box",0xffffff,-.05,.68,0,.22,.08,.14);
-    [[-.32,-.25],[.32,-.25],[-.32,.25],[.32,.25]].forEach(([x,z])=>cb.add("cyl",0x1b1b1b,x,.13,z,.13,.08,.13,Math.PI/2));const m=cb.mesh(true,false,true);scene.add(m);CITY.cabs.push({m,u:k/7*tot,sp:2.2+r()*.8,dir:k%2?1:-1})}
+  const LOOP=[[-19,-17],[16,-17],[16,14],[-19,14]],LL=[];let tot=0;for(let k=0;k<4;k++){const a=LOOP[k],c=LOOP[(k+1)%4],l=Math.hypot(c[0]-a[0],c[1]-a[1]);LL.push(l);tot+=l}
+  for(let k=0;k<12;k++){const cb=new Builder();cb.add("box",0xf2c230,0,.28,0,1.05,.3,.5);cb.add("box",0xf2c230,-.05,.52,0,.6,.22,.46);cb.add("box",0x3c556e,-.05,.52,0,.62,.16,.47);cb.add("box",0xffffff,-.05,.68,0,.22,.08,.14);
+    [[-.32,-.25],[.32,-.25],[-.32,.25],[.32,.25]].forEach(([x,z])=>cb.add("cyl",0x1b1b1b,x,.13,z,.13,.08,.13,Math.PI/2));const m=cb.mesh(true,false,true);scene.add(m);CITY.cabs.push({m,u:k/12*tot,sp:2.2+r()*.8,dir:k%2?1:-1})}
   CITY.path={LOOP,LL,tot};
   // people walking on the sidewalks
   const SH=[0xd94a3a,0x3a7ad9,0x2a9a5a,0xe8a530,0x8a4ad9,0xe86aa0,0x333333,0xf0f0f0,0x4ac0c0],SK=[0xe0a878,0xc68a5a,0x8d5a3a];
-  const SEG=[[[-13,-6.3],[13,-6.3]],[[-13,2.7],[13,2.7]],[[-13,5.3],[5,5.3]],[[-9.7,-12],[-9.7,12]],[[-3.3,-12],[-3.3,12]],[[5.7,-12],[5.7,12]],[[8.3,-12],[8.3,3]],[[-12.3,-12],[-12.3,12]]];
-  for(let k=0;k<16;k++){const f=makeFarmer({shirt:SH[k%9],pants:[0x3b5f9a,0x2b2b3a,0x6b4a2c][k%3],skin:SK[k%3],hat:SH[(k+4)%9]});f.g.scale.setScalar(.85);scene.add(f.g);CITY.walkers.push({f,seg:SEG[k%SEG.length],u:r(),dir:k%2?1:-1,sp:.03+r()*.03,o:{cr:0}})}
+  const SEG=[[[-13,-6.3],[13,-6.3]],[[-13,2.7],[13,2.7]],[[-13,5.3],[5,5.3]],[[-9.7,-12],[-9.7,12]],[[-3.3,-12],[-3.3,12]],[[5.7,-12],[5.7,12]],[[8.3,-12],[8.3,3]],[[-12.3,-12],[-12.3,12]],[[-28,-15.7],[28,-15.7]],[[-28,15.3],[28,15.3]],[[-25.7,-22],[-25.7,22]],[[25.3,-22],[25.3,22]],[[17.3,-22],[17.3,22]],[[-20.3,-22],[-20.3,22]]];
+  for(let k=0;k<(QLV===0?14:28);k++){const f=makeFarmer({shirt:SH[k%9],pants:[0x3b5f9a,0x2b2b3a,0x6b4a2c][k%3],skin:SK[k%3],hat:SH[(k+4)%9]});f.g.scale.setScalar(.85);scene.add(f.g);CITY.walkers.push({f,seg:SEG[k%SEG.length],u:r(),dir:k%2?1:-1,sp:.03+r()*.03,o:{cr:0}})}
   // water taxi between GoPyesta Island's pier and the city dock
   {const fb=new Builder();fb.add("box",0xffffff,0,.3,0,2.4,.5,1.1);fb.add("box",0x2f7fb8,0,.12,0,2.5,.12,1.15);fb.add("box",0xf2c230,-.2,.8,0,1.2,.5,.9);fb.add("box",0x3c556e,-.2,.82,0,1.22,.25,.92);fb.add("cone4",0xffffff,1.45,.3,0,.55,.7,.5,0,Math.PI/4,-Math.PI/2);
     const m=fb.mesh();scene.add(m);const lg=new THREE.Mesh(new THREE.PlaneGeometry(.9,.45),FMAT.logoF);lg.position.set(-.2,.85,.47);m.add(lg);const lg2=lg.clone();lg2.position.z=-.47;lg2.rotation.y=Math.PI;m.add(lg2);m.position.set(IX_+40.3,.05,CZ+4.6);CITY.ferry={m,t:0}}
 })();
-function stepCity(dt,t){const near=Math.hypot(cam.tx-CX,cam.tz-CZ)<60;if(!near&&!CITY._was)return;CITY._was=near;
+function stepCity(dt,t){const near=Math.hypot(cam.tx-CX,cam.tz-CZ)<60+CHX;if(!near&&!CITY._was)return;CITY._was=near;
   const h=typeof phHour==="function"?phHour():12,dark=1-daylight(h),bad=isBad();
   CITY.winMats.forEach(m=>m.emissiveIntensity=dark*.9);CITY.glows.forEach(g=>g.material.opacity=dark*.85);CITY.pl.forEach(l=>l.intensity=dark*1.6);
   CITY.ads.forEach(a=>{if(a.userData.ts!=null)a.material=(Math.floor(t/4+a.userData.ts)%2)?FMAT.scrB:FMAT.scrA});
@@ -6152,8 +6153,8 @@ function openBoatMenu(){if(S.inTown)return toast("Go home to the farm first, the
 document.querySelectorAll("#boatM [data-go]").forEach(b=>b.onclick=()=>{$("boatM").hidden=true;const g=b.dataset.go;if(g==="island")enterIsland();else if(g==="city")enterCity();else{ISLE_OPEN=false;goView("all");toast("🌾 Back on the farm.",2000)}});
 $("boatClose").onclick=()=>{$("boatM").hidden=true};
 function enterCity(){if(S.inTown)return toast("Go home to the farm first, then ride the boat to MW City.",3200);if(TRIP.on||JTRIP.on)return;
-  cam.follow=false;Object.assign(camT,{tx:CX-2,ty:2,tz:CZ+1,dist:34,pol:.9});toast("🏙️ Welcome to MW City!",3000)}
-function checkCity(){const n=Math.hypot(cam.tx-CX,cam.tz-CZ)<26;if(n!==onCity){onCity=n;const b=$("tCity");if(b)b.textContent=n?"Back to the Farm":"Go to MW City"}}
+  cam.follow=false;Object.assign(camT,{tx:CX-2,ty:2,tz:CZ+1,dist:46,pol:.9});toast("🏙️ Welcome to MW City!",3000)}
+function checkCity(){const n=Math.hypot(cam.tx-CX,cam.tz-CZ)<26+CHX*.6;if(n!==onCity){onCity=n;const b=$("tCity");if(b)b.textContent=n?"Back to the Farm":"Go to MW City"}}
 /* townsfolk strolling around the plaza */
 const FOLK=[];
 function initFolk(){for(let k=0;k<8;k++){const f=makeFarmer({shirt:[0xe86a9a,0x3fa8e8,0xf2b632,0x8a4ac0,0x2fb08a,0xe2402f,0xff9a3c,0x7ccf4a][k],pants:[0x3a3a4a,0x6b4a2c,0x2f4f7a,0x3a3a4a][k%4],skin:[0xe0a878,0xc68a5a,0xa8724a,0xe0a878][k%4],hat:[0xd8b860,0xf4f4f0,0xc0392b,0xd8b860][k%4]});scene.add(f.g);FOLK.push({...f,o:{cr:0},a:k*1.6,r:6.8+(k%2)*1.4,sp:(k%2?-1:1)*(.12+k*.02)})}}
