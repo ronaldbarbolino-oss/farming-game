@@ -61,6 +61,20 @@ ul{padding-left:18px;margin:6px 0 0}li{margin:4px 0;word-break:break-all;font-si
   <div class="toolsrow"><input id="tU" placeholder="Username" autocomplete="off"><button type="button" id="tGo" style="margin:0">📲 Make transfer code</button></div>
   <p class="note" id="tOut" role="status" style="font-size:1.05em"></p><p class="err" id="tErr" role="alert"></p>
 </section>
+<section class="card" id="support" style="grid-column:1/-1">
+  <label>Customer support messages</label>
+  <p class="note">Messages players send from 💬 Support. Press <b>Reply</b> to answer from your email (farmgaming.ph@gmail.com). For account moves, press <b>Transfer code</b>, then send the code in your reply.</p>
+  <div class="toolsrow"><select id="spF" style="font:inherit;padding:6px;border:3px solid var(--wood);border-radius:10px"><option value="open">Open</option><option value="all">All</option></select><button type="button" class="alt" id="spRefresh" style="margin:0">Refresh</button><span id="spCount" class="note" style="margin:0"></span></div>
+  <div class="tbl"><table><thead><tr><th>When</th><th>Email</th><th>Username</th><th>Topic</th><th>Message</th><th></th></tr></thead><tbody id="spBody"><tr><td colspan="6">Unlock to load messages.</td></tr></tbody></table></div>
+  <p class="err" id="spErr" role="alert"></p>
+</section>
+<section class="card" id="packs" style="grid-column:1/-1">
+  <label>Coin packs (prices players see)</label>
+  <p class="note">Change how many coins each pack gives and its price in pesos. The game makes the InstaPay QR with the exact amount for each pack. Players see the new packs the next time they open Buy Coins.</p>
+  <div class="tbl"><table><thead><tr><th>Coins</th><th>Price (₱)</th><th>Coins per ₱1</th><th>Label (optional)</th><th></th></tr></thead><tbody id="pkBody"><tr><td colspan="5">Unlock to load packs.</td></tr></tbody></table></div>
+  <div class="toolsrow"><button type="button" class="alt" id="pkAdd" style="margin:0">+ Add pack</button><button type="button" id="pkSave" style="margin:0">Save packs</button><button type="button" class="alt" id="pkReset" style="margin:0">Use suggested prices</button></div>
+  <p class="note" id="pkMsg" role="status"></p><p class="err" id="pkErr" role="alert"></p>
+</section>
 <section class="card" id="buys" style="grid-column:1/-1">
   <label>Coin purchases (InstaPay)</label>
   <p class="note">Check your InstaPay app for the reference number and amount, then press Approve. The coins go to the player's game automatically. Reject anything you didn't receive.</p>
@@ -79,7 +93,7 @@ $("unlockF").onsubmit=async e=>{e.preventDefault();$("lockErr").textContent="";$
   try{const base=await crypto.subtle.importKey("raw",new TextEncoder().encode($("pw").value.trim()),"PBKDF2",false,["deriveKey"]);
     const key=await crypto.subtle.deriveKey({name:"PBKDF2",salt:b64(ENC.salt),iterations:ENC.it,hash:"SHA-256"},base,{name:"AES-GCM",length:256},false,["decrypt"]);
     const jwk=JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM",iv:b64(ENC.iv)},key,b64(ENC.ct))));
-    SK=await crypto.subtle.importKey("jwk",jwk,{name:"ECDSA",namedCurve:"P-256"},false,["sign"]);$("pw").value="";$("lock").hidden=true;$("adminGrid").hidden=false;$("who").focus();loadPlayers();loadBuys()}
+    SK=await crypto.subtle.importKey("jwk",jwk,{name:"ECDSA",namedCurve:"P-256"},false,["sign"]);$("pw").value="";$("lock").hidden=true;$("adminGrid").hidden=false;$("who").focus();loadPlayers();loadBuys();loadPacks();loadSupport()}
   catch(err){$("lockErr").textContent=window.crypto&&crypto.subtle?"Wrong password.":"Open this page over https."}$("unlockB").disabled=false};
 document.querySelectorAll(".quick button").forEach(b=>b.onclick=()=>{$("amt").value=b.dataset.a});
 const hist=[];
@@ -101,6 +115,28 @@ $("tGo").disabled=true;try{const at=Date.now(),sig=new Uint8Array(await crypto.s
 const r=await fetch("/api/admin/transfer",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({u,at,sig:b64u(sig)})});const d=await r.json();if(!r.ok)throw new Error(d.error||r.status);
 const c=d.code.slice(0,4)+"-"+d.code.slice(4);$("tOut").innerHTML="";const b=document.createElement("b");b.textContent=c;$("tOut").append("Code for "+d.u+" ("+(d.farm||"")+"): ",b," · valid until "+new Date(d.exp).toLocaleString("en-PH",{timeZone:"Asia/Manila"}))}
 catch(e){$("tErr").textContent="Couldn't make the code: "+e.message}$("tGo").disabled=false};
+let SP=[];
+async function loadSupport(set){$("spErr").textContent="";try{const at=Date.now(),sig=new Uint8Array(await crypto.subtle.sign({name:"ECDSA",hash:"SHA-256"},SK,new TextEncoder().encode("support:"+at)));
+  const r=await fetch("/api/admin/support",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({at,sig:b64u(sig),...(set?{set}:{})})});const d=await r.json();if(!r.ok)throw new Error(d.error||r.status);SP=d.tickets||[];drawSupport()}catch(e){$("spErr").textContent="Couldn't load messages: "+e.message}}
+function drawSupport(){const f=$("spF").value,L=SP.filter(t=>f==="all"||t.status!=="done"),tb=$("spBody");tb.textContent="";$("spCount").textContent=SP.filter(t=>t.status!=="done").length+" open";
+  if(!L.length){tb.innerHTML='<tr><td colspan="6">No messages.</td></tr>';return}
+  L.forEach(t=>{const tr=document.createElement("tr");const td=x=>{const c=document.createElement("td");c.textContent=x;tr.append(c);return c};
+    td(new Date(t.at).toLocaleString("en-PH",{timeZone:"Asia/Manila"}));td(t.email);td(t.u||"-");td(t.topic);const mc=td(t.msg);mc.style.maxWidth="320px";mc.style.whiteSpace="pre-wrap";
+    const ac=document.createElement("td");ac.style.whiteSpace="nowrap";const a=document.createElement("a");a.className="btn";a.style.cssText="display:inline-block;margin:2px;padding:4px 8px;text-decoration:none";a.textContent="✉️ Reply";
+    a.href="https://mail.google.com/mail/?view=cm&fs=1&to="+encodeURIComponent(t.email)+"&su="+encodeURIComponent("Re: Farming support · "+t.topic)+"&body="+encodeURIComponent("Hi"+(t.u?" "+t.u:"")+",\n\n\n\n— Farming Support\n\n> "+t.msg.replace(/\n/g,"\n> "));a.target="_blank";a.rel="noopener";ac.append(a);
+    if(t.u){const b=document.createElement("button");b.type="button";b.className="alt";b.style.margin="2px";b.textContent="📲 Transfer code";b.onclick=()=>{$("tU").value=t.u;$("tGo").click();$("tU").scrollIntoView({behavior:"smooth",block:"center"})};ac.append(b)}
+    const d=document.createElement("button");d.type="button";d.className="alt";d.style.margin="2px";d.textContent=t.status==="done"?"Reopen":"✓ Done";d.onclick=()=>loadSupport({id:t.id,status:t.status==="done"?"open":"done"});ac.append(d);tr.append(ac);tb.append(tr)})}
+$("spRefresh").onclick=()=>loadSupport();$("spF").onchange=drawSupport;
+let PK=[];const PK_SUG=[{coins:5000,price:100},{coins:10000,price:180,tag:"Popular"},{coins:15000,price:250},{coins:20000,price:320},{coins:50000,price:700,tag:"Best value"}];
+function drawPacks(){const tb=$("pkBody");tb.textContent="";PK.forEach((p,i)=>{const tr=document.createElement("tr");const inp=(k,w,type)=>{const td=document.createElement("td"),e=document.createElement("input");e.type=type||"number";e.value=p[k]==null?"":p[k];e.style.width=w;e.oninput=()=>{p[k]=type==="text"?e.value:+e.value;rate.textContent=p.price>0?Math.round(p.coins/p.price).toLocaleString():"–"};td.append(e);tr.append(td);return e};
+  inp("coins","110px");inp("price","90px");const rt=document.createElement("td"),rate=document.createElement("b");rate.textContent=p.price>0?Math.round(p.coins/p.price).toLocaleString():"–";rt.append(rate);tr.append(rt);inp("tag","120px","text");
+  const td=document.createElement("td"),x=document.createElement("button");x.type="button";x.className="alt";x.textContent="Remove";x.style.margin="0";x.onclick=()=>{PK.splice(i,1);drawPacks()};td.append(x);tr.append(td);tb.append(tr)})}
+async function loadPacks(){$("pkErr").textContent="";try{const r=await fetch("/api/packs",{cache:"no-store"});const d=await r.json();PK=(d.packs||[]).map(p=>({coins:p.coins,price:p.price,tag:p.tag||""}));drawPacks()}catch(e){$("pkErr").textContent="Couldn't load packs: "+e.message}}
+$("pkAdd").onclick=()=>{if(PK.length>=8)return;PK.push({coins:1000,price:50,tag:""});drawPacks()};$("pkReset").onclick=()=>{PK=PK_SUG.map(p=>({...p,tag:p.tag||""}));drawPacks();$("pkMsg").textContent="Suggested prices filled in. Press Save packs to use them."};
+$("pkSave").onclick=async()=>{$("pkErr").textContent="";$("pkMsg").textContent="";const packs=PK.map(p=>({coins:Math.floor(+p.coins),price:Math.floor(+p.price),...(String(p.tag||"").trim()?{tag:String(p.tag).trim()}:{})}));
+  $("pkSave").disabled=true;try{const at=Date.now(),sig=new Uint8Array(await crypto.subtle.sign({name:"ECDSA",hash:"SHA-256"},SK,new TextEncoder().encode("packs:"+at+":"+JSON.stringify(packs))));
+    const r=await fetch("/api/admin/packs",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({packs,at,sig:b64u(sig)})});const d=await r.json();if(!r.ok)throw new Error(d.error||r.status);PK=d.packs.map(p=>({coins:p.coins,price:p.price,tag:p.tag||""}));drawPacks();$("pkMsg").textContent="✅ Saved. Players see the new packs now."}
+  catch(e){$("pkErr").textContent="Couldn't save: "+e.message}$("pkSave").disabled=false};
 async function loadPlayers(){$("pErr").textContent="";$("pRefresh").disabled=true;try{const r=await fetch("/api/admin/players",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(await signed("players"))});const d=await r.json();if(!r.ok)throw new Error(d.error||r.status);PL=d.players||[];PNOW=d.now||Date.now();drawPlayers()}catch(e){$("pErr").textContent="Couldn't load players: "+e.message}$("pRefresh").disabled=false}
 function drawPlayers(){const q=$("pq").value.trim().toLowerCase(),on=p=>PNOW-p.seen<150000,day=new Date(PNOW).toLocaleDateString("en-PH",{timeZone:"Asia/Manila"});
   $("stTotal").textContent=PL.length;$("stOn").textContent=PL.filter(on).length;$("stToday").textContent=PL.filter(p=>p.created&&new Date(p.created).toLocaleDateString("en-PH",{timeZone:"Asia/Manila"})===day).length;$("stAvg").textContent=PL.length?(PL.reduce((a,p)=>a+(p.lv||1),0)/PL.length).toFixed(1):"–";

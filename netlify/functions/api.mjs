@@ -13,10 +13,10 @@ async function adminOk(msg, sig) {
   try { const k = await crypto.subtle.importKey("jwk", ADMIN_KEY, { name: "ECDSA", namedCurve: "P-256" }, false, ["verify"]);
     return await crypto.subtle.verify({ name: "ECDSA", hash: "SHA-256" }, k, b64u(sig), new TextEncoder().encode(msg)) } catch { return false }
 }
-const pub = m => ({ u: m.u, farm: m.farm, farmer: m.farmer, shirt: m.shirt, lv: m.lv, size: m.size, seen: m.seen });
+const pub = m => ({ u: m.u, farm: m.farm, farmer: m.farmer, shirt: m.shirt, lv: m.lv, size: m.size, seen: m.seen, ...(m.app ? { app: 1 } : {}) });
 
 // a restart time shipped with a deploy: open games reload once after it
-const DEPLOY_RESTART = 1791289494078;
+const DEPLOY_RESTART = 1791289781156;
 export default async (req) => {
   const url = new URL(req.url);
   const path = url.pathname.replace(/^.*?\/api\/?/, "").replace(/^\.netlify\/functions\/api\/?/, "").replace(/\/$/, "");
@@ -53,11 +53,11 @@ export default async (req) => {
     const authS = getStore({ name: "auth", consistency: "strong" });
     const emailOk = e => /^[^\s@]{1,64}@[^\s@]{1,190}\.[a-z]{2,24}$/i.test(e);
     const code6 = () => String(100000 + (crypto.getRandomValues(new Uint32Array(1))[0] % 900000));
-    const sendMail = async (to, subject, text) => {
+    const sendMail = async (to, subject, text, replyTo) => {
       const gu = process.env.GMAIL_USER, gp = (process.env.GMAIL_APP_PASSWORD || "").replace(/\s+/g, "");
       if (gu && gp) {
         try { const nm = (await import("nodemailer")).default; const tr = nm.createTransport({ service: "gmail", auth: { user: gu, pass: gp } });
-          await tr.sendMail({ from: '"Farming" <' + gu + '>', to, subject, text }); return { ok: true } }
+          await tr.sendMail({ from: '"Farming" <' + gu + '>', to, subject, text, ...(replyTo ? { replyTo } : {}) }); return { ok: true } }
         catch (e) { const c = String(e && (e.code || e.responseCode) || ""); console.log("mail error", c, String(e && e.message || e).slice(0, 300));
           return { ok: false, error: c === "EAUTH" || /535|Username and Password/i.test(String(e && e.message)) ? "Email login failed: the Gmail address or App Password on the server is wrong." : "Couldn't send the email right now (" + (c || "error") + "). Try again later." } }
       }
@@ -161,13 +161,49 @@ export default async (req) => {
       await aS.delete("t/" + code);
       return J({ ok: true, u: t.u, farm: m.farm, farmer: m.farmer, shirt: m.shirt | 0, email: m.email || "", state: f && f.state || null });
     }
+    // ---- customer support: players send a message with their email; the admin replies from farmgaming.ph@gmail.com ----
+    const SUPPORT_TO = "farmgaming.ph@gmail.com";
+    const sup = getStore({ name: "support", consistency: "strong" });
+    if (req.method === "POST" && path === "support") {
+      let b; try { b = await req.json() } catch { return J({ error: "bad json" }, 400) }
+      const email = String(b.email || "").trim().slice(0, 200), topic = String(b.topic || "Other").replace(/[^\w &/-]/g, "").slice(0, 40), msg = String(b.msg || "").trim().slice(0, 2000), u = norm(b.u || ""), farm = String(b.farm || "").slice(0, 40);
+      if (!emailOk(email)) return J({ error: "Type a real email address so we can reply." }, 400);
+      if (msg.length < 5) return J({ error: "Write your message first." }, 400);
+      const ip = req.headers.get("x-nf-client-connection-ip") || "x", day = new Date().toISOString().slice(0, 10), rk = "rate/" + (await sha(ip + day)).slice(0, 16);
+      const rate = (await sup.get(rk, { type: "json" }).catch(() => null)) || { n: 0 }; if (rate.n >= 8) return J({ error: "Too many messages today. Please wait for our reply." }, 429);
+      await sup.setJSON(rk, { n: rate.n + 1 });
+      const id = "t/" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), rec = { id, email, topic, msg, u, farm, at: Date.now(), status: "open" };
+      await sup.setJSON(id, rec);
+      const m = await sendMail(SUPPORT_TO, "[Farming support] " + topic + (u ? " · " + u : ""), "From: " + email + "\nUsername: " + (u || "(not logged in)") + "\nFarm: " + (farm || "-") + "\nTopic: " + topic + "\n\n" + msg + "\n\n— Reply to this email to answer the player.", email);
+      return J({ ok: true, mailed: !!(m && m.ok) });
+    }
+    if (req.method === "POST" && path === "admin/support") {
+      let b; try { b = await req.json() } catch { return J({ error: "bad json" }, 400) }
+      const at = Number(b.at) || 0; if (Math.abs(Date.now() - at) > 5 * 60000) return J({ error: "expired" }, 400);
+      if (!(typeof b.sig === "string" && await adminOk("support:" + at, b.sig))) return J({ error: "not allowed" }, 403);
+      if (b.set && typeof b.set.id === "string" && b.set.id.startsWith("t/")) { const r = await sup.get(b.set.id, { type: "json" }); if (r) await sup.setJSON(b.set.id, { ...r, status: b.set.status === "done" ? "done" : "open" }) }
+      const { blobs } = await sup.list({ prefix: "t/" });
+      const all = (await Promise.all(blobs.slice(-300).map(x => sup.get(x.key, { type: "json" }).catch(() => null)))).filter(Boolean).sort((a, c) => c.at - a.at);
+      return J({ tickets: all });
+    }
     // ---- coin shop: players pay by QR, the admin approves, the game redeems the signed code ----
     const buys = getStore({ name: "buys", consistency: "strong" });
-    const PACKS = { p1500: { coins: 1500, price: 100 }, p5000: { coins: 5000, price: 300 }, p10000: { coins: 10000, price: 500 } };
+    const DEF_PACKS = [{ id: "c5000", coins: 5000, price: 100 }, { id: "c10000", coins: 10000, price: 180, tag: "Popular" }, { id: "c15000", coins: 15000, price: 250 }, { id: "c20000", coins: 20000, price: 320 }, { id: "c50000", coins: 50000, price: 700, tag: "Best value" }];
+    const getPacks = async () => { const p = await ctl.get("packs", { type: "json" }).catch(() => null); return Array.isArray(p) && p.length ? p : DEF_PACKS };
+    if (req.method === "GET" && path === "packs") return J({ packs: await getPacks() });
+    if (req.method === "POST" && path === "admin/packs") {
+      let b; try { b = await req.json() } catch { return J({ error: "bad json" }, 400) }
+      const at = Number(b.at) || 0; if (Math.abs(Date.now() - at) > 5 * 60000) return J({ error: "expired" }, 400);
+      if (!Array.isArray(b.packs) || b.packs.length < 1 || b.packs.length > 8) return J({ error: "Add 1 to 8 packs." }, 400);
+      const packs = b.packs.map((p, i) => ({ id: "c" + (p.coins | 0) + "_" + i, coins: Math.floor(Number(p.coins)), price: Math.floor(Number(p.price)), ...(p.tag ? { tag: String(p.tag).replace(/[<>&"]/g, "").slice(0, 16) } : {}) }));
+      if (packs.some(p => !(p.coins >= 100 && p.coins <= 10000000 && p.price >= 1 && p.price <= 100000))) return J({ error: "Coins must be 100 to 10,000,000 and the price 1 to 100,000 pesos." }, 400);
+      if (!(typeof b.sig === "string" && await adminOk("packs:" + at + ":" + JSON.stringify(b.packs), b.sig))) return J({ error: "not allowed" }, 403);
+      await ctl.setJSON("packs", packs); return J({ ok: true, packs });
+    }
     const own = async (u, tok) => { if (u.length < 3 || typeof tok !== "string" || tok.length < 16) return false; const m = await meta.get(u, { type: "json" }); return !!m && m.th === await sha(tok) };
     if (req.method === "POST" && path === "buy") {
       let b; try { b = await req.json() } catch { return J({ error: "bad json" }, 400) }
-      const u = norm(b.u), pk = PACKS[b.pack], ref = String(b.ref || "").replace(/[^A-Za-z0-9 -]/g, "").trim().slice(0, 40);
+      const u = norm(b.u), pk = (await getPacks()).find(p => p.id === b.pack), ref = String(b.ref || "").replace(/[^A-Za-z0-9 -]/g, "").trim().slice(0, 40);
       if (!pk) return J({ error: "Pick a coin pack." }, 400);
       if (ref.length < 4) return J({ error: "Type the reference number from your payment." }, 400);
       if (!await own(u, b.tok)) return J({ error: "Open your farm online first, then try again." }, 403);
@@ -231,7 +267,7 @@ export default async (req) => {
       const th = await sha(b.tok);
       const m = await meta.get(u, { type: "json" });
       if (m && m.th !== th) return J({ error: "taken" }, 403);
-      const nm = { u, th, farm: String(b.farm || "").slice(0, 40), farmer: String(b.farmer || "").slice(0, 24), shirt: b.shirt | 0, lv: b.lv | 0, size: b.size | 0, coins: Math.max(0, Math.floor(Number(b.coins) || 0)), animals: b.animals | 0, plots: b.plots | 0, seen: Date.now(), created: m ? m.created : Date.now(), sessions: (m && m.sessions || 0) + (path === "publish" && b.first ? 1 : 0), ...(m && m.email ? { email: m.email, emailOk: !!m.emailOk } : {}) };
+      const nm = { u, th, farm: String(b.farm || "").slice(0, 40), farmer: String(b.farmer || "").slice(0, 24), shirt: b.shirt | 0, lv: b.lv | 0, size: b.size | 0, coins: Math.max(0, Math.floor(Number(b.coins) || 0)), animals: b.animals | 0, plots: b.plots | 0, seen: Date.now(), created: m ? m.created : Date.now(), sessions: (m && m.sessions || 0) + (path === "publish" && b.first ? 1 : 0), ...((b.app || (m && m.app)) ? { app: 1 } : {}), ...(m && m.email ? { email: m.email, emailOk: !!m.emailOk } : {}) };
       await meta.setJSON(u, nm);
       if (path === "publish" && b.state && typeof b.state === "object") await farms.setJSON(u, { ...pub(nm), state: b.state });
       return J({ ok: true });
