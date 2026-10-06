@@ -254,11 +254,10 @@ body.land .stage{width:100vw;height:100vh;height:100dvh}
 .cam{display:grid!important;grid-template-columns:repeat(3,38px);grid-template-rows:repeat(3,38px);gap:4px!important;grid-template-areas:"zi u zo" "l h r" ". d ."}
 .cam .cbtn{min-width:0!important;width:38px;height:38px!important;padding:0!important;font-size:1rem!important;display:grid;place-items:center}
 #cU{grid-area:u}#cD{grid-area:d}#cLf{grid-area:l}#cRt{grid-area:r}#c0{grid-area:h}#cZi{grid-area:zi}#cZo{grid-area:zo}
-@media (max-width:640px){.cam{grid-template-columns:repeat(3,34px);grid-template-rows:repeat(3,34px);top:auto!important;bottom:64px!important}.cam .cbtn{width:34px;height:34px!important}}
+@media (max-width:640px){.cam{grid-template-columns:repeat(3,32px);grid-template-rows:repeat(3,32px);gap:3px!important;top:auto!important;bottom:62px!important;opacity:.92}.cam .cbtn{width:32px;height:32px!important;font-size:.9rem!important}}
 body.land .cam{top:auto!important;bottom:calc(8px + env(safe-area-inset-bottom,0px))!important;grid-template-columns:repeat(3,32px);grid-template-rows:repeat(3,32px)}
 body.land .cam .cbtn{width:32px;height:32px!important}
 
-@media (pointer:coarse){.cam{display:none!important}}
 </style>
 
 <div class="wrap">
