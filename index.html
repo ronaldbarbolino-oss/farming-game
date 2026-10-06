@@ -1550,7 +1550,7 @@ function stepAnimals(dt,t){if((nightT-=dt)<=0){nightT=5;NIGHT_NOW=isNight();if(w
   const g=new THREE.SphereGeometry(95,32,16),col=[],P=g.attributes.position,top=new THREE.Color(0x5fb4e6),hor=new THREE.Color(0xd4f0fb),c=new THREE.Color();
   for(let i=0;i<P.count;i++){const y=P.getY(i)/95;c.copy(hor).lerp(top,Math.pow(Math.max(0,y),.6));col.push(c.r,c.g,c.b)}
   g.setAttribute("color",new THREE.Float32BufferAttribute(col,3));
-  SKYMAT=new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.BackSide,fog:false});SKYMESH=new THREE.Mesh(g,SKYMAT);scene.add(SKYMESH);
+  SKYMAT=new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.BackSide,fog:false,depthWrite:false,depthTest:false});SKYMESH=new THREE.Mesh(g,SKYMAT);SKYMESH.renderOrder=-10;SKYMESH.frustumCulled=false;scene.add(SKYMESH);
   const k=document.createElement("canvas");k.width=k.height=128;const x=k.getContext("2d"),gr=x.createRadialGradient(64,64,4,64,64,64);
   gr.addColorStop(0,"rgba(255,255,240,1)");gr.addColorStop(.25,"rgba(255,245,200,.95)");gr.addColorStop(.5,"rgba(255,230,150,.35)");gr.addColorStop(1,"rgba(255,220,120,0)");x.fillStyle=gr;x.fillRect(0,0,128,128);
   const sp=SUNSPRITE=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(k),fog:false,depthWrite:false,transparent:true}));
@@ -2738,7 +2738,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="142";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
+const GAMEVER="143";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 function cvRect(){return ROT?{left:0,top:0,width:cv.clientWidth,height:cv.clientHeight}:cv.getBoundingClientRect()}
 function setRot(){const want=!!MOBILE&&innerHeight>innerWidth*1.05;if(want!==ROT){ROT=want;document.body.classList.toggle("rot",want)}const r=document.documentElement.style;r.setProperty("--LW",(ROT?innerHeight:innerWidth)+"px");r.setProperty("--LH",(ROT?innerWidth:innerHeight)+"px")}
 let _olTried=false;function tryLockLand(){if(_olTried||!MOBILE||!(innerHeight>innerWidth))return;_olTried=true;try{const d=document.documentElement,go=()=>{if(screen.orientation&&screen.orientation.lock)screen.orientation.lock("landscape").catch(()=>{})};
