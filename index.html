@@ -275,7 +275,7 @@ body.land .cam .cbtn{width:32px;height:32px!important}
   <div class="stage" id="stage">
     <canvas id="cv" aria-label="3D farm: drag to rotate, tap a plot to plow, plant or harvest"></canvas>
     <div class="loading" id="loading">Preparing the farm…</div>
-    <div class="sbtns"><button class="sb" id="menuBtn" type="button">☰ Menu</button><button class="sb" id="gpBtn" type="button" style="background:#d9342b;color:#fff">🏝️ GoPyesta Island</button><button class="sb" id="mapBtn" type="button">🗺️ Map</button><button class="sb" id="sndBtn" type="button" aria-pressed="false">🔇 Sound</button><button class="sb" id="curBtn" type="button" aria-pressed="false">🖱️ Cursor</button><button class="sb" id="hideBtn" type="button" aria-pressed="false">Hide</button><button class="sb" id="rotBtn" type="button">↻ Landscape</button></div>
+    <div class="sbtns"><button class="sb" id="menuBtn" type="button">☰ Menu</button><button class="sb" id="gpBtn" type="button" style="background:#d9342b;color:#fff">🏝️ GoPyesta Island</button><button class="sb" id="instBtn" type="button" hidden style="background:#3a7a3a;color:#fff">📲 Install</button><button class="sb" id="mapBtn" type="button">🗺️ Map</button><button class="sb" id="sndBtn" type="button" aria-pressed="false">🔇 Sound</button><button class="sb" id="curBtn" type="button" aria-pressed="false">🖱️ Cursor</button><button class="sb" id="hideBtn" type="button" aria-pressed="false">Hide</button><button class="sb" id="rotBtn" type="button">↻ Landscape</button></div>
     <div class="crew" id="crew" role="group" aria-label="Workers"></div>
     <div class="modeTag" id="modeTag">Tap the field to plow, plant and harvest · drag to look around</div>
     <div class="tip" id="tip">Slide to move the view · two fingers to rotate and zoom · right-click or Shift to rotate · scroll to zoom</div>
@@ -439,6 +439,13 @@ body.land .cam .cbtn{width:32px;height:32px!important}
     <div class="scs" id="tsList" style="max-height:52vh;overflow:auto"></div>
     <div class="suRow"><button class="btn alt" type="button" id="tsJeep"></button><button class="btn" type="button" id="tsClose">Close</button></div>
   </div>
+</div>
+<div class="modal" id="instM" hidden>
+  <div class="suBox"><h3>📲 Install Farming</h3>
+    <p class="suLead">Put Farming on your home screen so it opens like an app.</p>
+    <ol style="margin:4px 0 8px 18px;padding:0;font-weight:700;font-size:.9rem;line-height:1.5"><li>Open this page in <b>Chrome</b> (not inside Messenger or Facebook).</li><li>Tap <b>⋮</b> at the top right of Chrome.</li><li>Tap <b>Add to Home screen</b> (or <b>Install app</b>), then <b>Install</b>.</li></ol>
+    <p class="suLead" style="font-size:.8rem">Or download the app file: <a href="/farming.apk" download="Farming.apk">Farming.apk</a>. If Play Protect warns you, tap <b>More details → Install anyway</b>.</p>
+    <div class="suRow"><button class="btn" type="button" id="instClose">OK</button></div></div>
 </div>
 <div class="modal" id="coinM" hidden>
   <div class="suBox" style="width:min(460px,100%)">
@@ -3425,9 +3432,13 @@ $("cmSend").onclick=async()=>{const ref=$("cmRef").value.trim();$("cmErr").textC
   $("cmSend").disabled=true;try{await netSend(true);const r=await fetch(API+"buy",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({u:myUser(),tok:myTok(),pack:CM_PACK.id,ref})});const d=await r.json();if(!r.ok)throw new Error(d.error||"Couldn't send. Try again.");
     toast("✅ Sent! The admin will check your payment and your coins will be added automatically.",5000);$("cmStep2").hidden=true;$("cmStep1").hidden=false;loadMyBuys(true)}catch(e){$("cmErr").textContent=e.message}$("cmSend").disabled=false};
 $("cmBack").onclick=()=>{$("cmStep2").hidden=true;$("cmStep1").hidden=false};$("cmClose").onclick=()=>{$("coinM").hidden=true};
-$("tBuyCoins").onclick=openCoins;{let BIP=null;const ga=$("tGetApp");window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();BIP=e;ga.hidden=false;ga.textContent="📲 Install the App";ga.removeAttribute("download")});
-  ga.addEventListener("click",async e=>{if(!BIP)return;e.preventDefault();BIP.prompt();try{const c=await BIP.userChoice;if(c&&c.outcome==="accepted"){toast("📲 Installing Farming… look for it on your home screen.",4200);ga.hidden=true}}catch(err){}BIP=null});
-  window.addEventListener("appinstalled",()=>{ga.hidden=true})}{const inApp=matchMedia("(display-mode: standalone)").matches||document.referrer.startsWith("android-app://");if(/^https?:$/.test(location.protocol)&&!(window.claude&&window.claude.use)&&/Android/i.test(navigator.userAgent)&&!inApp)$("tGetApp").hidden=false}$("coinStat").onclick=openCoins;setInterval(()=>loadMyBuys(false),45000);setTimeout(()=>loadMyBuys(false),8000);
+$("tBuyCoins").onclick=openCoins;{let BIP=null;const ga=$("tGetApp");window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();BIP=e;ga.hidden=false;ga.textContent="📲 Install the App";ga.removeAttribute("download");const b=$("instBtn");if(b)b.hidden=false});
+  const ib=$("instBtn"),inApp=matchMedia("(display-mode: standalone)").matches||matchMedia("(display-mode: fullscreen)").matches||document.referrer.startsWith("android-app://");
+  if(/^https?:$/.test(location.protocol)&&!(window.claude&&window.claude.use)&&/Android/i.test(navigator.userAgent)&&!inApp){ib.hidden=false;ga.removeAttribute("download");ga.href="#"}
+  const doInstall=async e=>{if(e)e.preventDefault();if(BIP){BIP.prompt();try{const c=await BIP.userChoice;if(c&&c.outcome==="accepted"){toast("📲 Installing Farming… look for it on your home screen.",4200);ib.hidden=true;ga.hidden=true}}catch(err){}BIP=null;return}$("instM").hidden=false};
+  ib.onclick=doInstall;$("instClose").onclick=()=>{$("instM").hidden=true};
+  ga.addEventListener("click",doInstall);
+  window.addEventListener("appinstalled",()=>{ga.hidden=true;ib.hidden=true})}{const inApp=matchMedia("(display-mode: standalone)").matches||document.referrer.startsWith("android-app://");if(/^https?:$/.test(location.protocol)&&!(window.claude&&window.claude.use)&&/Android/i.test(navigator.userAgent)&&!inApp)$("tGetApp").hidden=false}$("coinStat").onclick=openCoins;setInterval(()=>loadMyBuys(false),45000);setTimeout(()=>loadMyBuys(false),8000);
 function openBoatMenu(){if(S.inTown)return toast("Go home to the farm first, then ride the boat.",3000);$("boatM").hidden=false}
 document.querySelectorAll("#boatM [data-go]").forEach(b=>b.onclick=()=>{$("boatM").hidden=true;const g=b.dataset.go;if(g==="island")enterIsland();else if(g==="city")enterCity();else{ISLE_OPEN=false;goView("all");toast("🌾 Back on the farm.",2000)}});
 $("boatClose").onclick=()=>{$("boatM").hidden=true};
