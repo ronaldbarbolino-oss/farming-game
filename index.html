@@ -2329,7 +2329,7 @@ cv.addEventListener("pointermove",e=>{
   else if(pointers.size===2){const [a,b]=[...pointers.values()],d=Math.hypot(a.x-b.x,a.y-b.y),an=Math.atan2(b.y-a.y,b.x-a.x);if(pinch0){camT.dist=Math.min(90,Math.max(5,camT.dist*pinch0/d));let da=an-ang0;da=Math.atan2(Math.sin(da),Math.cos(da));camT.az+=da;camT.pol=Math.min(1.35,Math.max(.35,camT.pol-dy*.004))}pinch0=d;ang0=an;dragMoved=99;cam.follow=false;cam.auto=false;setAuto()}
 });
 function pan(dx,dy){const k=camT.dist*.0022,sa=Math.sin(cam.az),ca=Math.cos(cam.az);
-  cam.follow=false;camT.tx=Math.max(-85,Math.min(195,camT.tx-dx*k*ca-dy*k*sa));camT.tz=Math.max(-45,Math.min(50,camT.tz+dx*k*sa-dy*k*ca));cam.auto=false;setAuto()}
+  cam.follow=false;camT.tx=Math.max(-125,Math.min(195,camT.tx-dx*k*ca-dy*k*sa));camT.tz=Math.max(-45,Math.min(50,camT.tz+dx*k*sa-dy*k*ca));cam.auto=false;setAuto()}
 cv.addEventListener("contextmenu",e=>e.preventDefault());
 function goView(k){const v=VIEWS[k];if(!v)return;const {follow,roofOff,...rest}=v;Object.assign(camT,{ty:.6},rest);cam.follow=!!follow;cam.auto=false;setAuto();ISLE.setRoof(!roofOff);if(k==="tug")ISLE.sail();
   document.querySelectorAll(".views .cbtn").forEach(c=>c.classList.toggle("on",c.dataset.v===k));hideTip()}
@@ -2346,7 +2346,7 @@ function endPtr(e){clearTimeout(HOLD.t);
 cv.addEventListener("pointerup",endPtr);cv.addEventListener("pointercancel",endPtr);
 cv.addEventListener("pointerleave",e=>{if(e.pointerType==="mouse")hovered=null});
 cv.addEventListener("wheel",e=>{e.preventDefault();camT.dist=Math.min(90,Math.max(5,camT.dist*(1+Math.sign(e.deltaY)*.1)));hideTip()},{passive:false});
-{const mv=(dx,dz)=>{cam.follow=false;const k=camT.dist*.12;camT.tx=Math.max(-85,Math.min(195,camT.tx+dx*k));camT.tz=Math.max(-45,Math.min(50,camT.tz+dz*k))},zm=f=>{camT.dist=Math.min(90,Math.max(5,camT.dist*f))};
+{const mv=(dx,dz)=>{cam.follow=false;const k=camT.dist*.12;camT.tx=Math.max(-125,Math.min(195,camT.tx+dx*k));camT.tz=Math.max(-45,Math.min(50,camT.tz+dz*k))},zm=f=>{camT.dist=Math.min(90,Math.max(5,camT.dist*f))};
   const hold=(id,fn)=>{const b=$(id);let iv=null;const go=()=>{fn();clearInterval(iv);iv=setInterval(fn,120)},stop=()=>{clearInterval(iv);iv=null};b.addEventListener("pointerdown",e=>{e.preventDefault();go()});["pointerup","pointerleave","pointercancel"].forEach(ev=>b.addEventListener(ev,stop))};
   hold("cU",()=>mv(0,-1));hold("cD",()=>mv(0,1));hold("cLf",()=>mv(-1,0));hold("cRt",()=>mv(1,0));hold("cZi",()=>zm(.88));hold("cZo",()=>zm(1.14));
   window.addEventListener("keydown",e=>{if(e.target&&(e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA"))return;const m={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0]}[e.key];if(m){e.preventDefault();mv(...m)}else if(e.key==="+"||e.key==="=")zm(.88);else if(e.key==="-")zm(1.14)})}
@@ -3240,7 +3240,7 @@ function tryBreed(){let birth=false;
   save();ui()}
 
 /* ================= BAYAN: the town (travel by jeep) ================= */
-const TOWN={x:-64,z:-8},JEEP_FARM={x:-5,z:-8},JEEP_TOWN={x:-54,z:-8};
+const TOWN={x:-94,z:-8},JEEP_FARM={x:-5,z:-8},JEEP_TOWN={x:-84,z:-8};
 const TOWNSEEDS=[{id:"sili",cost:60,lv:2},{id:"pakwan",cost:45,lv:2},{id:"presa",cost:55,lv:3},{id:"ubas",cost:60,lv:5}];
 const TTOOLS=[{id:"pataba",n:"Fertilizer ×10",cost:300,lv:1,d:"Your next 10 crops grow twice as fast."},
   {id:"pandilig",n:"Watering Can",cost:800,lv:2,d:"All crops grow 20% faster. One-time purchase."},
@@ -3384,7 +3384,7 @@ const TOWNX={lights:[],pl:[],band:[],aud:[],notes:[],walkers:[],stageOn:null};co
     for(let k=0;k<8;k++){const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:ntex,transparent:true,depthWrite:false}));sp.scale.set(.5,.5,1);sp.userData={ph:k/8,x0:x-.6,z0:z};scene.add(sp);TOWNX.notes.push(sp)}
     TOWNX.stage={x,z,yy};const lab=labelSprite("GoPyesta Stage");lab.position.set(x+1.5,yy+3.9,z);lab.scale.set(2.4,.6,1);scene.add(lab)}
   // ground extension under the west side of town
-  {const gx=new THREE.Mesh(new THREE.PlaneGeometry(70,110),new THREE.MeshLambertMaterial({color:0x5aa83a}));gx.rotation.x=-Math.PI/2;gx.position.set(T.x-27,-.012,T.z);gx.receiveShadow=true;scene.add(gx);
+  {const gx0=T.x-62,gx1=Math.max(T.x+8,-70),gx=new THREE.Mesh(new THREE.PlaneGeometry(gx1-gx0,110),new THREE.MeshLambertMaterial({color:0x5aa83a}));gx.rotation.x=-Math.PI/2;gx.position.set((gx0+gx1)/2,-.012,T.z);gx.receiveShadow=true;scene.add(gx);
     const r9=rnd(91);for(let k=0;k<40;k++){const x=T.x-34-r9()*24,z=T.z-40+r9()*80;tree(b,x,z,k%4?null:0xe2402f,900+k,.9+r9()*.4)}
     for(let k=0;k<10;k++){const a=k/10*Math.PI*2;b.add("ico1",k%2?0x4f9e31:0x5aa83a,T.x-62+Math.cos(a)*6,-3,T.z+Math.sin(a)*40,12,9,14,0,k,0)}}
   // sidewalk trees and planters
