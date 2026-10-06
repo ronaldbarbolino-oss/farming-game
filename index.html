@@ -60,8 +60,8 @@ body{margin:0;font-family:var(--body);color:var(--ink);background:var(--grass-d)
 .cw-mini.off{background:var(--wood);color:#fff}
 .cw-sel:focus-visible,.cw-mini:focus-visible{outline:3px solid var(--blue);outline-offset:1px}
 @media (max-width:560px){.crew{top:auto;bottom:104px;max-width:calc(100% - 20px)}.cw-sel{flex-basis:120px}.tip{bottom:200px}}
-.modeTag{position:absolute;left:50%;top:54px;transform:translateX(-50%);background:rgba(58,38,21,.78);color:var(--cream);font-weight:900;font-size:.78rem;padding:4px 12px;border-radius:10px;pointer-events:none;white-space:nowrap;transition:opacity .4s}
-@media (max-width:560px){.tb{font-size:.78rem;height:32px;padding:0 7px 0 4px}.tb span{display:none}.modeTag{top:92px}}
+.modeTag{position:absolute;left:50%;top:auto;bottom:62px;transform:translateX(-50%);background:rgba(58,38,21,.78);color:var(--cream);font-weight:900;font-size:.78rem;padding:4px 12px;border-radius:10px;pointer-events:none;white-space:nowrap;transition:opacity .4s}
+@media (max-width:560px){.tb{font-size:.78rem;height:32px;padding:0 7px 0 4px}.tb span{display:none}}
 .cam{position:absolute;right:10px;bottom:10px;display:flex;gap:6px}
 .views{position:absolute;left:10px;bottom:10px;display:flex;gap:6px;flex-wrap:wrap;max-width:calc(100% - 200px)}
 .views .cbtn{font-size:.9rem;height:36px}
@@ -268,7 +268,7 @@ body.land .stage{width:100vw;height:100vh;height:100dvh}
     <div class="loading" id="loading">Preparing the farm…</div>
     <div class="sbtns"><button class="sb" id="menuBtn" type="button">☰ Menu</button><button class="sb" id="gpBtn" type="button" style="background:#d9342b;color:#fff">🏝️ GoPyesta Island</button><button class="sb" id="mapBtn" type="button">🗺️ Map</button><button class="sb" id="sndBtn" type="button" aria-pressed="false">🔇 Sound</button><button class="sb" id="curBtn" type="button" aria-pressed="false">🖱️ Cursor</button><button class="sb" id="hideBtn" type="button" aria-pressed="false">Hide</button><button class="sb" id="rotBtn" type="button">↻ Landscape</button></div>
     <div class="crew" id="crew" role="group" aria-label="Workers"></div>
-    <div class="modeTag" id="modeTag">Move: rotate and pan the view only</div>
+    <div class="modeTag" id="modeTag">Tap the field to plow, plant and harvest · drag to look around</div>
     <div class="tip" id="tip">Slide to move the view · two fingers to rotate and zoom · right-click or Shift to rotate · scroll to zoom</div>
     <div class="views" role="group" aria-label="Go to">
       <button class="cbtn" data-v="all">Whole Farm</button>
@@ -284,11 +284,11 @@ body.land .stage{width:100vw;height:100vh;height:100dvh}
     </div>
     <div class="toolbar" role="toolbar" aria-label="Farm tools">
       <button class="tb on" data-t="move" aria-pressed="true" title="Move (1): rotate and pan the view only"><span>1</span>Move</button>
-      <button class="tb" data-t="plow" aria-pressed="false" title="Plow (2): turn grass into soil"><span>2</span>Plow</button>
-      <button class="tb" data-t="plant" aria-pressed="false" title="Plant (3): plant the selected seed"><span>3</span>Plant</button>
-      <button class="tb" data-t="harvest" aria-pressed="false" title="Harvest (4): harvest ripe crops"><span>4</span>Harvest</button>
-      <button class="tb" data-t="care" aria-pressed="false" title="Care (5): collect from animals, treat them, pull weeds"><span>5</span>Care</button>
-      <button class="tb" data-t="chop" aria-pressed="false" title="Chop (6): cut down a tree for wood and space"><span>6</span>Chop</button>
+      
+      
+      <button class="tb" data-t="harvest" aria-pressed="false" title="Harvest (4): harvest ripe crops"><span>2</span>Harvest</button>
+      <button class="tb" data-t="care" aria-pressed="false" title="Care (5): collect from animals, treat them, pull weeds"><span>3</span>Care</button>
+      
     </div>
     <div class="placeBar" id="editBar" hidden><span id="editTxt"></span><div><button class="cbtn" id="editRot" type="button">⟳ Rotate</button><button class="cbtn" id="editMove" type="button">✥ Move</button><button class="cbtn on" id="editDone" type="button">Done</button></div></div>
     <div class="placeBar" id="placeBar" hidden><span id="placeTxt"></span><div><button class="cbtn" id="placeRot" type="button">Rotate</button><button class="cbtn on" id="placeOk" type="button">Place here</button><button class="cbtn" id="placeX" type="button">Cancel</button></div></div>
@@ -308,6 +308,7 @@ body.land .stage{width:100vw;height:100vh;height:100dvh}
     <button class="btn alt" id="tAll">Harvest All</button>
     <button class="btn" id="tRedeem" style="background:#8a4ac0;box-shadow:0 4px 0 #5e2f88">🎁 Redeem Code</button>
     <button class="btn alt" id="tExpand"></button>
+    <button class="btn alt" id="tLake" style="background:#2f8fc8;box-shadow:0 4px 0 #1d6a98"></button>
     <button class="btn alt" id="tPlot"></button>
     <button class="btn" id="tHelper"></button>
     <button class="btn" id="tHire" style="background:#2f7fb8;box-shadow:0 4px 0 #1d5a85"></button>
@@ -315,8 +316,9 @@ body.land .stage{width:100vw;height:100vh;height:100dvh}
     <button class="btn" id="tCure" style="background:#c0392b;box-shadow:0 4px 0 #8a2a1f">Treat All</button>
     <button class="btn" id="tTown" style="background:#d9342b;box-shadow:0 4px 0 #8a1f17"></button>
     <button class="btn" id="tIsle" style="background:#1f8fb8;box-shadow:0 4px 0 #136583">Go to the Island</button>
-    <button class="btn" id="tCity" style="background:#3a4a6a;box-shadow:0 4px 0 #222c40">Go to GoPyesta City</button>
+    <button class="btn" id="tCity" style="background:#3a4a6a;box-shadow:0 4px 0 #222c40">Go to MW City</button>
     <button class="btn" id="tCheat" hidden style="background:#2f7fb8;box-shadow:0 4px 0 #1d5a85">Test: +100,000 coins</button>
+    <button class="btn" id="tWoodT" hidden style="background:#8a5a2a;box-shadow:0 4px 0 #5a3a1a">Test: +100,000 wood</button>
     <button class="btn" id="tLvl" hidden style="background:#2f7fb8;box-shadow:0 4px 0 #1d5a85">Test: Unlock all</button>
   </div>
 
@@ -421,6 +423,16 @@ body.land .stage{width:100vw;height:100vh;height:100dvh}
     <div class="suRow"><button class="btn alt" type="button" id="tsJeep"></button><button class="btn" type="button" id="tsClose">Close</button></div>
   </div>
 </div>
+<div class="modal" id="boatM" hidden>
+  <div class="suBox">
+    <h3>⛴️ Where to?</h3>
+    <p class="suLead">Pick where the boat takes you.</p>
+    <button class="btn" type="button" data-go="island" style="background:#d9342b;box-shadow:0 4px 0 #9a2019">🎪 GoPyesta Island</button>
+    <button class="btn" type="button" data-go="city" style="background:#3a4a6a;box-shadow:0 4px 0 #222c40">🏙️ MW City (New York)</button>
+    <button class="btn" type="button" data-go="farm" style="background:#3f9a3a;box-shadow:0 4px 0 #2a6e27">🌾 Back to Farm</button>
+    <div class="suRow"><button class="btn alt" type="button" id="boatClose">Cancel</button></div>
+  </div>
+</div>
 <div class="modal" id="redeem" hidden>
   <form class="suBox" id="rdForm" autocomplete="off">
     <h3>Redeem a Gift Code</h3>
@@ -447,23 +459,23 @@ body.land .stage{width:100vw;height:100vh;height:100dvh}
 (function(){
 /* ================= DATA ================= */
 const CROPS=[
- {id:"pechay",n:"Bok Choy",t:120,c:3,s:7,xp:1,lv:1,col:0x86d65a,shape:"leaf"},
- {id:"mais",n:"Corn",t:120,c:4,s:10,xp:2,lv:1,col:0xf5c732,shape:"corn"},
- {id:"kamatis",n:"Tomato",t:120,c:4,s:10,xp:3,lv:2,col:0xe2402f,shape:"ball"},
- {id:"talong",n:"Eggplant",t:120,c:4,s:11,xp:4,lv:3,col:0x7a3f9c,shape:"long"},
- {id:"sitaw",n:"String Beans",t:120,c:5,s:13,xp:6,lv:4,col:0x8fcc3c,shape:"bean"},
- {id:"sampaguita",n:"Jasmine",t:120,c:6,s:15,xp:5,lv:3,col:0xffffff,shape:"flower"},
- {id:"ampalaya",n:"Bitter Gourd",t:120,c:6,s:15,xp:8,lv:5,col:0x4caa3e,shape:"long"},
- {id:"rosas",n:"Rose",t:120,c:7,s:17,xp:10,lv:5,col:0xe2304a,shape:"flower"},
- {id:"kalabasa",n:"Squash",t:120,c:8,s:20,xp:12,lv:6,col:0xf08a24,shape:"pump"},
- {id:"sili",n:"Chili",t:120,c:9,s:23,xp:3,lv:2,col:0xd9342b,shape:"bean",town:true},
- {id:"pakwan",n:"Watermelon",t:120,c:7,s:17,xp:5,lv:2,col:0x3a9a3a,shape:"pump",town:true},
- {id:"presa",n:"Strawberry",t:120,c:8,s:19,xp:6,lv:3,col:0xe8304a,shape:"ball",town:true},
- {id:"ubas",n:"Grapes",t:120,c:8,s:20,xp:9,lv:5,col:0x6a3a9a,shape:"ball",town:true},
- {id:"lilang_dahon",n:"Violet Leaf",t:120,c:7,s:17,xp:10,lv:3,col:0x8a4ac0,shape:"fern",island:true},
- {id:"gintong_bunga",n:"Golden Fruit",t:120,c:14,s:35,xp:16,lv:5,col:0xf2c230,shape:"ball",island:true},
- {id:"bughaw_kabute",n:"Blue Mushroom",t:120,c:10,s:25,xp:24,lv:7,col:0x3fa8e8,shape:"shroom",island:true},
- {id:"pinya",n:"Pineapple",t:120,c:8,s:20,xp:18,lv:8,col:0xf0b62a,shape:"pine"}
+ {id:"pechay",n:"Bok Choy",t:180,c:3,s:7,xp:1,lv:1,col:0x86d65a,shape:"leaf"},
+ {id:"mais",n:"Corn",t:180,c:4,s:10,xp:2,lv:1,col:0xf5c732,shape:"corn"},
+ {id:"kamatis",n:"Tomato",t:180,c:4,s:10,xp:3,lv:2,col:0xe2402f,shape:"ball"},
+ {id:"talong",n:"Eggplant",t:180,c:4,s:11,xp:4,lv:3,col:0x7a3f9c,shape:"long"},
+ {id:"sitaw",n:"String Beans",t:180,c:5,s:13,xp:6,lv:4,col:0x8fcc3c,shape:"bean"},
+ {id:"sampaguita",n:"Jasmine",t:180,c:6,s:15,xp:5,lv:3,col:0xffffff,shape:"flower"},
+ {id:"ampalaya",n:"Bitter Gourd",t:180,c:6,s:15,xp:8,lv:5,col:0x4caa3e,shape:"long"},
+ {id:"rosas",n:"Rose",t:180,c:7,s:17,xp:10,lv:5,col:0xe2304a,shape:"flower"},
+ {id:"kalabasa",n:"Squash",t:180,c:8,s:20,xp:12,lv:6,col:0xf08a24,shape:"pump"},
+ {id:"sili",n:"Chili",t:180,c:9,s:23,xp:3,lv:2,col:0xd9342b,shape:"bean",town:true},
+ {id:"pakwan",n:"Watermelon",t:180,c:7,s:17,xp:5,lv:2,col:0x3a9a3a,shape:"pump",town:true},
+ {id:"presa",n:"Strawberry",t:180,c:8,s:19,xp:6,lv:3,col:0xe8304a,shape:"ball",town:true},
+ {id:"ubas",n:"Grapes",t:180,c:8,s:20,xp:9,lv:5,col:0x6a3a9a,shape:"ball",town:true},
+ {id:"lilang_dahon",n:"Violet Leaf",t:180,c:7,s:17,xp:10,lv:3,col:0x8a4ac0,shape:"fern",island:true},
+ {id:"gintong_bunga",n:"Golden Fruit",t:180,c:14,s:35,xp:16,lv:5,col:0xf2c230,shape:"ball",island:true},
+ {id:"bughaw_kabute",n:"Blue Mushroom",t:180,c:10,s:25,xp:24,lv:7,col:0x3fa8e8,shape:"shroom",island:true},
+ {id:"pinya",n:"Pineapple",t:180,c:8,s:20,xp:18,lv:8,col:0xf0b62a,shape:"pine"}
 ];
 const ANIMALS=[
  {id:"manok",n:"Chicken",item:"Eggs",t:300,cost:120,s:25,xp:2,lv:2},
@@ -560,7 +572,7 @@ const _ca=new THREE.Color(),_cb=new THREE.Color();
 const mix=(a,b,t)=>_ca.set(a).lerp(_cb.set(b),Math.max(0,Math.min(1,t))).getHex();
 /* -------- extra farmland parcels -------- */
 const PN=8;
-const IX_=64,IZ_=4;
+const IX_=80,IZ_=4;
 const PLOTS=[{id:"isla",n:"Secret Island",x0:IX_-.5,z0:IZ_+31,sz:6,y:1.2,island:true,cost:100000,lv:3},{id:"timog",n:"South Land",x0:-4,z0:12,cost:1500,lv:4},{id:"kanluran",n:"West Land",x0:-17,z0:10,cost:4000,lv:6},{id:"malayo",n:"Far Land",x0:-26.5,z0:10,cost:8000,lv:8}];
 function inPlotArea(x,z,m=.6){return PLOTS.some(p=>!p.island&&x>p.x0-m&&x<p.x0+PN+m&&z>p.z0-m&&z<p.z0+PN+m)}
 let _LK="",_LC=null;
@@ -594,7 +606,7 @@ function farmH(x,z){let h=0;
   const pd=Math.hypot((x-PONDS.x)/(2.6*PONDS.s),(z-PONDS.z)/(2.0*PONDS.s));if(pd<1.05)h=Math.min(h,-.72*(1-_sm((pd-.35)/.7)));
   let rd=1e9;for(let i=0;i<RIVER.length-1;i++)rd=Math.min(rd,segDist(x,z,RIVER[i][0],RIVER[i][1],RIVER[i+1][0],RIVER[i+1][1]));
   if(rd<.9)h=Math.min(h,-.42*(1-_sm((rd-.3)/.6)));
-  const qd=Math.hypot((x-12)/1.95,(z+17.5)/1.45);if(qd<1.1)h=Math.min(h,-.65*(1-_sm((qd-.3)/.8)));
+  const qd=Math.hypot((x-12)/3.7,(z+16.9)/2.7);if(qd<1.1)h=Math.min(h,-.65*(1-_sm((qd-.3)/.8)));
   if(x>18.5)h=Math.min(h,-3.4*_sm((x-18.5)/9));
   return h}
 const PENS={manok:{x0:-10.8,x1:-7.2,z0:-6.4,z1:-2.7,n:"Chicken Coop",gate:"s"},kambing:{x0:-10.8,x1:-7.2,z0:1,z1:4.8,n:"Goat Pen",gate:"n"},
@@ -682,11 +694,11 @@ var GROUND_G=null,paintGround=()=>{},landDeco=()=>{},pondDeco=()=>{},LANDM=null,
   [[8.4,7.4],[9.8,8.6],[8.9,9.1],[10.3,7.3]].map(([x,z])=>[PX+(x-9)*K,PZ+(z-8)*K]).forEach(([x,z],k)=>{pb.add("cyl",0x4fa834,x,-.085,z,.3,.02,.3);pb.add("cyl",0x7fd05a,x+.04,-.072,z,.2,.01,.2);if(k%2===0){pb.add("sph",0xff8fb8,x+.08,-.03,z+.05,.08,.06,.08);pb.add("sph",0xffd84a,x+.08,0,z+.05,.03,.03,.03)}});
   PONDM=pb.mesh();world.add(PONDM)};pondDeco();
 })();
-function setPondSize(lv){const k=1+.2*Math.max(0,Math.min(3,lv|0));if(Math.abs(k-PONDS.s)<.001)return;PONDS.s=k;PONDS.x=9+(k-1);PONDS.z=8+(k-1)*1.33;
+function setPondSize(lv){const k=1+.2*Math.max(0,Math.min(5,lv|0));if(Math.abs(k-PONDS.s)<.001)return;PONDS.s=k;PONDS.x=9+(k-1);PONDS.z=8+(k-1)*1.33;
   if(typeof POND!=="undefined"){POND.x=PONDS.x;POND.z=PONDS.z;POND.rx=2.47*k;POND.rz=1.9*k}paintGround();landDeco();pondDeco()}
 
 /* -------- mountains, waterfall & river -------- */
-let wfTex,rvTex,foamT=0;const WF={x:12,z:-18.4,top:6.2,w:1.6};
+let wfTex,rvTex,foamT=0;const WF={x:12,z:-19.2,top:12,w:2.6};
 (function mountains(){
   const b=new Builder(),r=rnd(77);
   // main range (north & north-east)
@@ -698,13 +710,23 @@ let wfTex,rvTex,foamT=0;const WF={x:12,z:-18.4,top:6.2,w:1.6};
     if(h>9)b.add("cone",0xf4f7f8,x,h*.86,z,rad*.3,h*.3,rad*.29,0,0,0);
     for(let q=0;q<9;q++){const a=r()*Math.PI*2,d=rad*(1+r()*.3);b.add("cyl",0x7a4a24,x+Math.cos(a)*d,.3,z+Math.sin(a)*d,.1,.6,.1);b.add("cone",r()<.5?0x2f7f28:0x3d9331,x+Math.cos(a)*d,1.2,z+Math.sin(a)*d,.5,1.6,.5)}
   });
-  // cliff that holds the waterfall
-  const cx=WF.x,cz=WF.z-1.6;
-  [[0,1.4,0,3.2,2.8,2.2],[-1.8,1.1,.3,1.6,2.2,1.8],[1.9,1.2,.2,1.7,2.4,1.9],[-.6,3.6,-.2,2.6,2.4,2],[.9,3.8,-.1,2.2,2.6,1.9],[0,5.4,-.4,2.4,1.8,1.8],[-2.6,3,-.6,1.4,2.2,1.6],[2.7,3.4,-.5,1.5,2.6,1.6]]
-    .forEach(([dx,dy,dz,sx,sy,sz],k)=>b.add("ico",k%2?0x8a9195:0x9aa1a4,cx+dx,dy,cz+dz,sx,sy,sz,0,k*1.3,0));
-  [[-1.5,6.3,-.6],[1.4,6.1,-.4],[0,6.6,-1],[2.6,5.4,-.8],[-2.7,5,-.9]].forEach(([dx,dy,dz],k)=>{b.add("ico",0x3a9a30,cx+dx,dy,cz+dz,.9,.7,.9,0,k,0);b.add("ico",0x2e8628,cx+dx+.4,dy+.3,cz+dz-.3,.6,.6,.6)});
-  // plunge pool rocks
-  for(let i=0;i<16;i++){const a=i/16*Math.PI*2,x=WF.x+Math.cos(a)*1.9,z=WF.z+.9+Math.sin(a)*1.3;if(Math.sin(a)>.6&&Math.abs(Math.cos(a))<.5)continue;b.add("ico",i%3?0x9aa0a0:0xb8bdbd,x,.1,z,.32,.22,.28,0,a,0)}
+  // tall gorge cliff like Pagsanjan Falls: a high rock wall, jungle on top, mossy walls closing in on the plunge pool
+  const cx=WF.x,cz=WF.z-1.4,RK=[0x7f878b,0x8d9497,0x737b7f,0x9aa1a4];
+  for(let k=0;k<5;k++)b.add("ico",RK[k%4],cx+(k-2)*2.1,2+k%2*.6,cz-.6-(k%2)*.5,2.4,3.4,2.2,0,k*1.7,0);
+  for(let k=0;k<5;k++)b.add("ico",RK[(k+1)%4],cx+(k-2)*2,6.3+(k%2)*.5,cz-.9,2.2,3,2,0,k*1.1,0);
+  for(let k=0;k<4;k++)b.add("ico",RK[(k+2)%4],cx+(k-1.5)*2.3,10.2,cz-1.2,2.3,2.6,2,0,k*.9,0);
+  [[-2.2,1],[2.2,1]].forEach(([dx])=>{for(let y=1.5;y<12.5;y+=2.2)b.add("ico",RK[Math.round(y)%4],cx+dx+(r()-.5)*.4,y,cz+.25,1.15,1.5,1.1,0,y,0)});
+  // gorge side walls with moss
+  [-1,1].forEach(sd=>{for(let k=0;k<4;k++){const x=cx+sd*(4.3+k*.25),z=cz+1.8+k*1.6,h=6.5-k*1.3;b.add("ico",RK[k%4],x,h/2,z,1.7,h/2+.6,1.5,0,k+sd,0);
+    b.add("ico",0x3a8a2c,x-sd*.5,h-.1,z,1.2,.6,1.1,0,k,0);for(let q=0;q<3;q++)b.add("box",0x2f7a26,x-sd*1.3,h-1-q*1.1,z+(q-1)*.4,.06,1.2,.06)}});
+  // jungle canopy along the top
+  for(let k=0;k<14;k++){const x=cx+(k-6.5)*.95,z=cz-1.4+(r()-.5)*1.2,y=12.1+r()*.6;if(Math.abs(x-cx)<1.4)continue;b.add("ico",k%2?0x3a9a30:0x2e8628,x,y,z,1+r()*.4,.8,1+r()*.3,0,k,0)}
+  for(let k=0;k<8;k++){const x=cx+(k-3.5)*1.4,z=cz-2.4,y=12.4;b.add("cyl",0x6b4a2c,x,y+.9,z,.08,1.8,.08);b.add("ico",0x2e8a2a,x,y+2,z,.9,.5,.9,0,k,0)}
+  // vines hanging from the lip
+  for(let k=0;k<9;k++){const x=cx+(k-4)*.7;if(Math.abs(x-cx)<1.5)continue;b.add("box",0x2f7a26,x,WF.top-1.2-(k%3)*.5,cz+1.3,.05,2.4+(k%3),.05)}
+  // plunge pool rocks and a bamboo raft
+  for(let i=0;i<24;i++){const a=i/24*Math.PI*2,x=WF.x+Math.cos(a)*3.6,z=-16.9+Math.sin(a)*2.6;if(Math.sin(a)>.55&&Math.abs(Math.cos(a))<.45)continue;if(Math.sin(a)<-.5)continue;b.add("ico",i%3?0x9aa0a0:0xb8bdbd,x,.1,z,.4,.28,.36,0,a,0)}
+  {const rx=WF.x+1.6,rz=-15.8;for(let q=0;q<6;q++)b.add("cyl",q%2?0xc9b06a:0xb59a55,rx,-.02,rz-.5+q*.2,.09,1.9,.09,0,0,Math.PI/2);b.add("box",0x8a6a3a,rx-.6,.05,rz,.06,.05,1.2);b.add("box",0x8a6a3a,rx+.6,.05,rz,.06,.05,1.2);b.add("cyl",0x8a6a3a,rx+.9,.5,rz+.3,.025,1.2,.025,.4,0,.2)}
   world.add(b.mesh());
   // waterfall sheet (scrolling texture)
   const k=document.createElement("canvas");k.width=64;k.height=256;const x=k.getContext("2d");
@@ -715,12 +737,13 @@ let wfTex,rvTex,foamT=0;const WF={x:12,z:-18.4,top:6.2,w:1.6};
   const wf=new THREE.Mesh(new THREE.PlaneGeometry(WF.w,WF.top,1,8),wfMat);
   const wp=wf.geometry.attributes.position;for(let i=0;i<wp.count;i++){const yy=wp.getY(i);wp.setZ(i,Math.pow((WF.top/2-yy)/WF.top,2)*-.2+(yy>WF.top/2-.1?-.4:0))}
   wf.position.set(WF.x,WF.top/2,WF.z);world.add(wf);
+  const wf2=new THREE.Mesh(new THREE.PlaneGeometry(.7,WF.top*.8,1,6),wfMat);wf2.position.set(WF.x-1.75,WF.top*.4,WF.z+.25);world.add(wf2);
   const lip=new THREE.Mesh(new THREE.BoxGeometry(WF.w,.12,.8),new THREE.MeshBasicMaterial({color:0xbfe6f8}));lip.position.set(WF.x,WF.top,WF.z-.4);world.add(lip);
   // pool
-  const pool=new THREE.Mesh(new THREE.CircleGeometry(1.7,24),waterMat(0x3f9fd4));pool.rotation.x=-Math.PI/2;pool.scale.set(1.1,.8,1);pool.position.set(WF.x,-.08,WF.z+.9);world.add(pool);
+  const pool=new THREE.Mesh(new THREE.CircleGeometry(1.7,32),waterMat(0x3f9fd4));pool.rotation.x=-Math.PI/2;pool.scale.set(2.1,1.5,1);pool.position.set(WF.x,-.08,-16.9);world.add(pool);
   // mist
   const mk=document.createElement("canvas");mk.width=mk.height=64;const mx=mk.getContext("2d"),mg=mx.createRadialGradient(32,32,2,32,32,32);mg.addColorStop(0,"rgba(255,255,255,.75)");mg.addColorStop(1,"rgba(255,255,255,0)");mx.fillStyle=mg;mx.fillRect(0,0,64,64);
-  const mist=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(mk),transparent:true,depthWrite:false}));mist.position.set(WF.x,.6,WF.z+.5);mist.scale.set(3.2,1.6,1);world.add(mist);
+  const mist=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(mk),transparent:true,depthWrite:false}));mist.position.set(WF.x,1,WF.z+.9);mist.scale.set(7,3.4,1);world.add(mist);
   // river: from pool to the pond
   const pts=[[12,-16.9],[12.3,-13],[11.4,-9],[11.2,-5],[11.6,-1],[11.1,3],[10.2,5.6],[9.4,6.5]];
   const pos=[],uv=[],idx=[];let L=0;
@@ -743,7 +766,7 @@ let wfTex,rvTex,foamT=0;const WF={x:12,z:-18.4,top:6.2,w:1.6};
 function stepWater(dt){
   if(POND_MESH){const P=POND_MESH.geometry.attributes.position,tt=performance.now()/1000,fz=(typeof WC!=="undefined"&&WC.flow!=null)?Math.min(1,WC.flow*1.2):1;for(let i=0;i<P.count;i++){const x=P.getX(i),z=P.getZ(i),e=1-Math.hypot(x,z)*.6;P.setY(i,fz*e*(.022*Math.sin(x*6+tt*1.8)+.016*Math.sin(z*7-tt*1.3)+.01*Math.sin((x+z)*11+tt*2.6)))}P.needsUpdate=true}
   const fl=(typeof WC!=="undefined"&&WC.flow)||1;if(wfTex)wfTex.offset.y+=dt*1.6*fl;if(rvTex)rvTex.offset.y-=dt*.35*fl;
-  foamT-=dt;if(foamT<=0){foamT=.06/fl;burst(WF.x+(Math.random()-.5)*WF.w,.15,WF.z+.35,0xffffff,1,.45)}
+  foamT-=dt;if(foamT<=0){foamT=.06/fl;burst(WF.x+(Math.random()-.5)*WF.w,.15,WF.z+.6,0xffffff,2,.6)}
 }
 
 /* -------- trees -------- */
@@ -1513,7 +1536,7 @@ function btnSprite(text,bg,act){const c=document.createElement("canvas");c.width
   x.fillStyle="#fff";let fs=46;do{x.font="900 "+fs+"px Nunito, Arial Rounded MT Bold, Arial, sans-serif"}while(x.measureText(text).width>450&&--fs>20);x.textAlign="center";x.textBaseline="middle";x.fillText(text,256,60);
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),depthTest:false,transparent:true}));sp.renderOrder=20;sp.scale.set(4.4,1.1,1);sp.userData.btn3d=act;BTN3D.push(sp);return sp}
 /* ================= RESEARCH ISLAND (east sea) ================= */
-const IX=64,IZ=4;
+const IX=80,IZ=4;
 const ISLE=(function(){
 const root=new THREE.Group();root.position.set(IX,0,IZ);scene.add(root);
 const sm=t=>{t=Math.max(0,Math.min(1,t));return t*t*(3-2*t)};
@@ -1540,7 +1563,7 @@ function trSample(arr,x,z){const fx=(x-TRIL.x0)/TRIL.st,fz=(z-TRIL.z0)/TRIL.st;i
   return g(i,j)*(1-u)*(1-v)+g(i1,j)*u*(1-v)+g(i,j1)*(1-u)*v+g(i1,j1)*u*v}
 const inSecret=(x,z,m=0)=>x>-1.1-m&&x<6.1+m&&z>30.4-m&&z<37.6+m;
 const I2={x:2.6,z:37,rx:15,rz:11.5};const i2d=(x,z)=>Math.hypot((x-I2.x)/I2.rx,(z-I2.z)/I2.rz);
-const ISK=1.3,ISX=x=>x<=-12?x:-12+(x+12)*ISK,ISXi=x=>x<=-12?x:-12+(x+12)/ISK;
+const ISK=1.5,ISX=x=>x<=-12?x:-12+(x+12)*ISK,ISXi=x=>x<=-12?x:-12+(x+12)/ISK;
 function H(x,z){const ix=ISXi(x),iz=z/ISK;let l=trSample(TRL.land,ix,iz);if(inSecret(x,z,1.2)||(x>-17.5&&x<-12&&z>-1.2&&z<2.2))l=Math.max(l,1);
   let h;if(l>.62)h=1.2+trSample(TRL.h,ix,iz)*.9;else if(l>.38)h=1.2-1.12*sm((.62-l)/.24);else h=.08-3.3*sm((.38-l)/.3);
   const d2=i2d(x,z);if(d2<1.45){const h2=d2<.78?1.2+.25*Math.sin(x*.9)*Math.sin(z*.8)*(1-d2):d2<1?1.2-1.12*sm((d2-.78)/.22):.08-3.3*sm((d2-1)/.45);h=Math.max(h,h2)}
@@ -1557,10 +1580,10 @@ function H(x,z){const ix=ISXi(x),iz=z/ISK;let l=trSample(TRL.land,ix,iz);if(inSe
   const m=new THREE.Mesh(g,GROUNDMAT);m.receiveShadow=true;root.add(m)})();
 /* sea */
 let AMP=1,ampT=1;
-function W(x,z,t){const r=Math.hypot(x,z),f=(1-sm((r-62)/22))*sm((x+46)/7);
+function W(x,z,t){const r=Math.hypot(x,z),f=(1-sm((r-70)/22))*sm((x+62)/7);
   return AMP*f*(.22*Math.sin(x*.21+t*1.1)+.16*Math.sin(z*.27-t*.9)+.07*Math.sin((x+z)*.6+t*1.9)+.04*Math.sin((x-z)*1.1-t*2.4))}
 const SEAMAT=new THREE.MeshPhongMaterial({color:0x2a9fd6,flatShading:true,shininess:90,specular:0x9fe2ff,transparent:true,opacity:.86});
-const seaGeo=new THREE.PlaneGeometry(130,170,84,110);seaGeo.rotateX(-Math.PI/2);seaGeo.translate(19,0,0);
+const seaGeo=new THREE.PlaneGeometry(146,170,94,110);seaGeo.rotateX(-Math.PI/2);seaGeo.translate(11,0,0);
 const sea=new THREE.Mesh(seaGeo,SEAMAT);sea.receiveShadow=true;root.add(sea);
 const far=new THREE.Mesh(new THREE.PlaneGeometry(400,600),SEAMAT);far.rotation.x=-Math.PI/2;far.position.set(284,-.03,0);root.add(far);
 const seaP=seaGeo.attributes.position;
@@ -1737,7 +1760,7 @@ const LAMP_POS=[[8,1.4],[12.6,4.4],[22,4.5],[31.2,4.5],[-3,9.6],[6,-4.4]];
 LAMP_POS.forEach(([x,z])=>{const pier=x>16,y=pier?1.45:H(x,z);outer.add("cyl",DARK,x,y+1.2,z,.06,2.4,.06);outer.add("box",DARK,x-.2,y+2.4,z,.5,.06,.06);lamps.add("box",0xffffff,x-.42,y+2.32,z,.22,.1,.18);});
 
 /* -------- pier -------- */
-const PIER={x0:15.5,x1:32,z:3,y:1.45,w:2.4};
+const PIER={x0:ISX(9.15),x1:ISX(21.85),z:3,y:1.45,w:2.4};
 (function(){const b=outer,r=rnd(4);
   for(let x=PIER.x0;x<PIER.x1;x+=.36)b.add("box",r()<.5?0xb98a55:0xa87a48,x+.18,PIER.y,PIER.z,.32,.1,PIER.w);
   [-1,1].forEach(s=>b.add("box",0x7a5432,(PIER.x0+PIER.x1)/2,PIER.y-.15,PIER.z+s*(PIER.w/2-.15),PIER.x1-PIER.x0,.18,.18));
@@ -1926,7 +1949,7 @@ let carnStep=()=>{};
   // circus big top
   {const x=-2.5,z=6,y=gy(x,z);for(let k=0;k<16;k++){const a=k/16*Math.PI*2;cb.add("box",k%2?0xffffff:0xd9342b,x+Math.cos(a)*2.85,y+.8,z+Math.sin(a)*2.85,1.15,1.6,.08,0,-a+Math.PI/2,0)}
     cb.add("cone",0xd9342b,x,y+2.5,z,3.2,1.9,3.2);for(let k=0;k<8;k++){const a=k/8*Math.PI*2;cb.seg(0xffffff,x,y+3.45,z,x+Math.cos(a)*3.15,y+1.6,z+Math.sin(a)*3.15,.09)}
-    cb.add("cyl",0xf5c732,x,y+3.9,z,.04,.9,.04);cb.add("box",0x3fa8e8,x+.25,y+4.2,z,.45,.28,.02);{const eb=btnSprite("🎪 Enter Carnival","#d9342b","carnival");eb.position.set(x,y+5.2,z);eb.scale.set(4.6,1.15,1);C.add(eb)}cb.add("box",0x2b1e14,x+2.86,y+.6,z,.06,1.2,.9);logo(2.2,1.1,x+3.0,y+2.1,z,Math.PI/2);logo(2.2,1.1,x-3.0,y+2.1,z,-Math.PI/2);logo(2.2,1.1,x,y+2.1,z+3.0,0);logo(2.2,1.1,x,y+2.1,z-3.0,Math.PI)}
+    cb.add("cyl",0xf5c732,x,y+3.9,z,.04,.9,.04);cb.add("box",0x3fa8e8,x+.25,y+4.2,z,.45,.28,.02);{const eb=btnSprite("🎪 Enter Carnival","#d9342b","carnival");eb.userData.cloudy=true;eb.position.set(x,y+5.2,z);eb.scale.set(4.6,1.15,1);C.add(eb)}cb.add("box",0x2b1e14,x+2.86,y+.6,z,.06,1.2,.9);logo(2.2,1.1,x+3.0,y+2.1,z,Math.PI/2);logo(2.2,1.1,x-3.0,y+2.1,z,-Math.PI/2);logo(2.2,1.1,x,y+2.1,z+3.0,0);logo(2.2,1.1,x,y+2.1,z-3.0,Math.PI)}
   // food & game stalls with striped awnings
   [[-5.8,-1.4,0xd9342b,"Popcorn"],[-3.9,-1.4,0x3fa8e8,"Cotton Candy"],[-2,-1.4,0x7ccf4a,"Ring Toss"],[-.1,-1.4,0x8a4ac0,"Balloon Darts"]].forEach(([x,z,c,n],k)=>{const y=gy(x,z);
     cb.add("box",0xfff6df,x,y+.5,z,1.6,1,1.2);cb.add("box",0x8a5a2a,x,y+1.02,z+.62,1.62,.08,.1);for(let j=0;j<5;j++)cb.add("box",j%2?0xffffff:c,x-.64+j*.32,y+1.6,z+.75,.32,.06,.7,-.45,0,0);
@@ -2005,12 +2028,16 @@ let carnStep=()=>{};
     (f,t,p)=>{f.armL.rotation.z=1.5+Math.sin(t*5+p)*1.2;f.armR.rotation.z=1.5-Math.sin(t*5+p)*1.2;f.torso.rotation.x=Math.sin(t*5+p)*.25;f.hips.position.y=.55+Math.abs(Math.sin(t*10+p))*.06},
     (f,t,p)=>{f.armL.rotation.z=Math.sin(t*7+p)*1.6;f.armR.rotation.z=-Math.sin(t*7+p)*1.6;f.legL.rotation.z=Math.max(0,Math.sin(t*7+p))*.7;f.legR.rotation.z=-Math.max(0,-Math.sin(t*7+p))*.7;f.hips.position.y=.55+Math.abs(Math.sin(t*7+p))*.08}];
   C.add(cb.mesh());
-  // clouds drifting around and above Island Pyesta
-  const CLD=new THREE.Group();CLD.visible=false;const cmat=new THREE.MeshLambertMaterial({color:0xffffff,transparent:true,opacity:.8,depthWrite:false});const cr=rnd(303);
-  for(let k=0;k<16;k++){const g=new THREE.Group(),n=4+Math.floor(cr()*4);for(let j=0;j<n;j++){const m=new THREE.Mesh(new THREE.SphereGeometry(1,10,8),cmat);const sc=1.2+cr()*1.4;m.scale.set(sc*1.3,sc*.7,sc);m.position.set((j-n/2)*1.5+cr()*.8,cr()*.6,cr()*1.4-.7);g.add(m)}
-    const a=k/16*Math.PI*2+cr()*.3,R=21+cr()*10;g.position.set(Math.cos(a)*R+4,(k%2?6:9)+cr()*3,Math.sin(a)*R*.8);g.userData={a,R,sp:(.02+cr()*.02)*(k%2?1:-1),y:g.position.y,ph:cr()*6};CLD.add(g)}
-  const mist=new THREE.Mesh(new THREE.CircleGeometry(30,40),new THREE.MeshBasicMaterial({color:0xe8eef4,transparent:true,opacity:.18,depthWrite:false}));mist.rotation.x=-Math.PI/2;mist.position.set(4,1.9,2);
-  function stepClouds(dt,t){return;const inside=typeof onIsle!=="undefined"&&onIsle;cmat.opacity+=((inside?0:.8)-cmat.opacity)*Math.min(1,dt*1.5);CLD.visible=cmat.opacity>.02;mist.visible=!inside;CLD.children.forEach(g=>{const u=g.userData;u.a+=u.sp*dt;g.position.set(Math.cos(u.a)*u.R+4,u.y+Math.sin(t*.3+u.ph)*.4,Math.sin(u.a)*u.R*.8)});mist.material.opacity=.14+.06*Math.sin(t*.4)}
+  // thick clouds hide GoPyesta Island until the player rides the boat there
+  const cmat=new THREE.MeshLambertMaterial({vertexColors:true,transparent:true,opacity:1,depthWrite:false});const cr=rnd(303),cb2=new Builder();
+  const inCover=(x,z)=>Math.hypot((x-6)/38,z/29)<1||Math.hypot((x-I2.x)/19,(z-I2.z)/16)<1;
+  for(let gx=-32;gx<=45;gx+=5.5)for(let gz=-30;gz<=54;gz+=5.5){const x=gx+(cr()-.5)*3,z=gz+(cr()-.5)*3;if(!inCover(x,z))continue;
+    [[3.2,3.5],[8.5,2.8],[13.5,2.6]].forEach(([y0,sc0],L)=>{if(L===2&&(z>24||cr()<.25))return;const n=3+Math.floor(cr()*2);for(let j=0;j<n;j++){const sc=sc0*(.8+cr()*.6),g=L?0xffffff:[0xf4f6f8,0xe9edf1,0xffffff][j%3];
+      cb2.add("ico1",g,x+(cr()-.5)*4,y0+cr()*1.6,z+(cr()-.5)*4,sc*1.35,sc*.75,sc*1.2,0,cr()*3,0)}})}
+  const CLD=new THREE.Mesh(cb2.geo(),cmat);CLD.renderOrder=5;T.add(CLD);
+  const mist=new THREE.Mesh(new THREE.CircleGeometry(30,40),new THREE.MeshBasicMaterial({color:0xe8eef4,transparent:true,opacity:.18,depthWrite:false}));mist.visible=false;
+  function stepClouds(dt,t){const open=ISLE_OPEN||(TRIP.on&&TRIP.toIsle);cmat.opacity=Math.max(0,Math.min(1,cmat.opacity+(open?-1:1)*dt*.8));CLD.visible=cmat.opacity>.02;
+    CLD.position.set(Math.sin(t*.07)*1.2,Math.sin(t*.25)*.3+(1-cmat.opacity)*3,Math.cos(t*.05)*.8);BTN3D.forEach(b=>{if(b.userData.cloudy)b.visible=open})}
   carnStep=(dt,t)=>{stepClouds(dt,t);stepPeople(dt,t);DAN.forEach((d,k)=>{MOVES[d.st](d.f,t,d.ph);d.f.g.rotation.y=Math.PI+Math.sin(t*1.2+d.ph)*1.2+(k===0?t*1.5:0)});stepFireworks(dt,t);FW.rotation.x=t*.18;FW.userData.gond.forEach(g=>g.rotation.x=-FW.rotation.x);CAR.rotation.y=t*.55;CAR.userData.horses.forEach((h,k)=>h.position.y=1.1+Math.sin(t*2.2+k*1.3)*.22);
     RC.carts.forEach((g,k)=>{const u=((t*.06)+k*.012)%1,p=RC.cur.getPointAt(u),q=RC.cur.getPointAt((u+.004)%1);g.position.copy(p);g.lookAt(q);g.rotateY(-Math.PI/2)});
     BAL.children.forEach(g=>{g.position.y+=Math.sin(t*1.4+g.userData.ph)*.002});const on=Math.floor(t*2)%2;NEON.forEach((m,i)=>{if(m.userData.b==null)m.userData.b=m.color.getHex();m.color.setHex((i+on)%3?m.userData.b:0xffffff)})};
@@ -2027,7 +2054,7 @@ return{root,spots:SPOTS,hits:hitBoxes,boat,
 })();
 
 /* ================= CAMERA ================= */
-const VIEWS={falls:{tx:11,ty:.6,tz:-14,dist:16,pol:1.05},all:{tx:-3,ty:.6,tz:-1.5,dist:32,pol:.85},field:{tx:.5,ty:.6,tz:1,dist:17,pol:.9},pen:{tx:-15,ty:.6,tz:-.8,dist:25,pol:.9},barn:{tx:2,ty:.6,tz:-7.5,dist:15,pol:1},
+const VIEWS={falls:{tx:11,ty:4,tz:-15,dist:26,pol:1.15},all:{tx:-3,ty:.6,tz:-1.5,dist:32,pol:.85},field:{tx:.5,ty:.6,tz:1,dist:17,pol:.9},pen:{tx:-15,ty:.6,tz:-.8,dist:25,pol:.9},barn:{tx:2,ty:.6,tz:-7.5,dist:15,pol:1},
   isla:{tx:IX,ty:1,tz:IZ,dist:56,pol:.98},bayan:{tx:-62,ty:1,tz:-11,dist:30,pol:.95},market:{tx:9.5,ty:.8,tz:-.7,dist:11,pol:1.02},lab:{tx:IX+1,ty:1.6,tz:IZ-1,dist:12,pol:.5,roofOff:true},tug:{dist:17,pol:1.02,follow:true}};
 const cam={az:.75,pol:.85,dist:32,tx:-3,ty:.6,tz:-1.5,auto:false,follow:false};
 const DEF={...cam};
@@ -2055,13 +2082,13 @@ cv.addEventListener("pointermove",e=>{
   else if(pointers.size===2){const [a,b]=[...pointers.values()],d=Math.hypot(a.x-b.x,a.y-b.y),an=Math.atan2(b.y-a.y,b.x-a.x);if(pinch0){camT.dist=Math.min(90,Math.max(5,camT.dist*pinch0/d));let da=an-ang0;da=Math.atan2(Math.sin(da),Math.cos(da));camT.az+=da;camT.pol=Math.min(1.35,Math.max(.35,camT.pol-dy*.004))}pinch0=d;ang0=an;dragMoved=99;cam.follow=false;cam.auto=false;setAuto()}
 });
 function pan(dx,dy){const k=camT.dist*.0022,sa=Math.sin(cam.az),ca=Math.cos(cam.az);
-  cam.follow=false;camT.tx=Math.max(-85,Math.min(150,camT.tx-dx*k*ca-dy*k*sa));camT.tz=Math.max(-45,Math.min(50,camT.tz+dx*k*sa-dy*k*ca));cam.auto=false;setAuto()}
+  cam.follow=false;camT.tx=Math.max(-85,Math.min(195,camT.tx-dx*k*ca-dy*k*sa));camT.tz=Math.max(-45,Math.min(50,camT.tz+dx*k*sa-dy*k*ca));cam.auto=false;setAuto()}
 cv.addEventListener("contextmenu",e=>e.preventDefault());
 function goView(k){const v=VIEWS[k];if(!v)return;const {follow,roofOff,...rest}=v;Object.assign(camT,{ty:.6},rest);cam.follow=!!follow;cam.auto=false;setAuto();ISLE.setRoof(!roofOff);if(k==="tug")ISLE.sail();
   document.querySelectorAll(".views .cbtn").forEach(c=>c.classList.toggle("on",c.dataset.v===k));hideTip()}
 document.querySelectorAll(".views .cbtn").forEach(b=>b.onclick=()=>goView(b.dataset.v));
-let onIsle=false;
-function checkIsle(){const n=Math.hypot(cam.tx-IX,cam.tz-IZ)<34;$("tIsle").textContent=TRIP.on?"Sailing…":ownBoat()?(S.boatAt==="isla"?"Sail back to the Farm":"Sail to the Island"):(n?"Back to the Farm":"Go to GoPyesta Island");if(n!==onIsle){onIsle=n;
+let onIsle=false,ISLE_OPEN=false;
+function checkIsle(){if(ISLE_OPEN&&Math.hypot(camT.tx-IX,camT.tz-IZ)>55&&!(TRIP.on&&TRIP.toIsle))ISLE_OPEN=false;const n=Math.hypot(cam.tx-IX,cam.tz-IZ)<40;$("tIsle").textContent=TRIP.on?"Sailing…":ownBoat()?(S.boatAt==="isla"?"Sail back to the Farm":"Sail to the Island"):(n?"Back to the Farm":"Go to GoPyesta Island");if(n!==onIsle){onIsle=n;
   if(!TRIP.on){if(n)toast("You are at GoPyesta Island.",2200)}}}
 function endPtr(e){
   const tr=e.pointerType==="mouse"?6:16,wasTap=pointers.size===1&&downAt&&Math.hypot(e.clientX-downAt.x,e.clientY-downAt.y)<=tr&&dragMoved<tr*2.5;
@@ -2094,7 +2121,7 @@ function clickAt(e){
   const p=pickAt(e);hovered=p&&p.worker?null:p;
   const x=e.clientX,y=e.clientY-24;
   if(p&&p.stall){openMarket();return}
-  if(p&&p.btn3d){if(p.btn3d==="island")enterIsland();else if(p.btn3d==="carnival")enterCarnival();else if(p.btn3d==="city")enterCity();return}
+  if(p&&p.btn3d){if(p.btn3d==="island")enterIsland();else if(p.btn3d==="carnival")enterCarnival();else if(p.btn3d==="city")enterCity();else if(p.btn3d==="boat")openBoatMenu();return}
   if(p&&p.drop){openDrop(x,y);return}
   if(p&&p.tshop){openTownShop(p.tshop);return}
   if(p&&p.build!=null&&!SEL){editBuild(p.build);return}
@@ -2102,9 +2129,9 @@ function clickAt(e){
   if(SEL&&!(p&&p.isle!=null)){commandAt(e,p);return}
   if(!p)return;
   if(p.isle!=null){const s=ISLE.spots[p.isle];toast(s.n+": "+s.d,5500);if(s.v==="boat"&&!ISLE.sailing())goView("tug");else if(s.v==="lab"||s.v==="dorm")ISLE.setRoof(false);return}
-  if(p.ftree!=null){if(TOOL==="chop")chopTree(p.ftree,x,y);else if(TOOL==="harvest"||TOOL==="care")pickTree(p.ftree,x,y);else if(TOOL!=="move")toast("Use Harvest to pick fruit, or Chop to cut the tree down.");return}
-  if(TOOL==="chop")return toast("Chop: tap a tree to cut it down.");
-  if(TOOL==="move")return;
+  if(p.ftree!=null){if(TOOL==="chop")chopTree(p.ftree,x,y);else if(TOOL==="harvest"||TOOL==="care")pickTree(p.ftree,x,y);else toast("Use Harvest to pick fruit. To cut a tree, tap a helper's 🪓 Chop.");return}
+  if(TOOL==="chop")return toast("Chop: tap a tree to cut it down.");if(TOOL==="move"&&p.tile==null)return;
+  if(TOOL==="move"&&(p.weed||p.pen!=null))return;
   if(p.weed){if(TOOL==="care"||TOOL==="harvest")playerWeed(p.weed,x,y);else toast("Use Care to pull weeds.")}
   else if(p.pen!=null){if(TOOL==="care"||TOOL==="harvest")tapPen(p.pen,x,y);else toast("Use Care for the animals.")}
   else tap(p.tile,x,y);
@@ -2148,23 +2175,24 @@ function levelUp(){
   o.querySelector("button").onclick=()=>{o.remove();ui();invUI(true)};document.body.appendChild(o);
 }
 function after(){save();syncField();ui()}
-const TOOLS={move:"Move: rotate and pan the view only",plow:"Plow: tap grass to turn it into soil · "+PLOW+" coins",plant:"Plant: tap soil to plant the selected seed",harvest:"Harvest: tap ripe crops",care:"Care: collect from animals, treat them, or pull weeds",chop:"Chop: tap a tree twice to cut it down for wood and space"};
+const TOOLS={move:"Tap the field to plow, plant and harvest · drag to look around",plow:"Plow: tap grass to turn it into soil · "+PLOW+" coins",plant:"Plant: tap soil to plant the selected seed",harvest:"Harvest: tap ripe crops",care:"Care: collect from animals, treat them, or pull weeds",chop:"Chop: tap a tree twice to cut it down for wood and space"};
 let TOOL="move",modeT=0;
 function setTool(k){if(!TOOLS[k])return;TOOL=k;document.querySelectorAll(".tb").forEach(b=>{const on=b.dataset.t===k;b.classList.toggle("on",on);b.setAttribute("aria-pressed",on)});
   const m=$("modeTag");m.textContent=k==="plant"?"Plant: "+crop(S.sel).n+" · tap the soil":TOOLS[k];m.style.opacity=1;clearTimeout(modeT);modeT=setTimeout(()=>m.style.opacity=k==="move"?0:.85,2600)}
 document.querySelectorAll(".tb").forEach(b=>b.onclick=()=>setTool(b.dataset.t));
-window.addEventListener("keydown",e=>{if(e.target&&(e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA"))return;const k={"1":"move","2":"plow","3":"plant","4":"harvest","5":"care","6":"chop"}[e.key];if(k)setTool(k)});
+window.addEventListener("keydown",e=>{if(e.target&&(e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA"))return;const k={"1":"move","2":"harvest","3":"care"}[e.key];if(k)setTool(k)});
 function toolOk(i){const t=S.tiles[i];if(!t)return null;
+  if(TOOL==="move"){if(t.k==="grass"||t.k==="soil")return true;const st=tileState(t);return!!(st&&(st.p>=1||st.dead))}
   if(TOOL==="plow")return t.k==="grass";
-  if(TOOL==="plant")return t.k==="soil"&&!!crop(S.sel).island===isIsleTile(i);
+  if(TOOL==="plant")return (t.k==="grass"||t.k==="soil")&&!!crop(S.sel).island===isIsleTile(i);
   if(TOOL==="harvest"){const st=tileState(t);return!!(st&&st.p>=1)}
   return null}
 function tap(i,x,y){
   const t=S.tiles[i];
-  if(TOOL==="move"||TOOL==="care")return;
+  if(TOOL==="care")return;const smart=TOOL==="move";
   if(TOOL==="plow"&&t.k!=="grass")return toast(t.k==="soil"?"Already plowed. Use Plant to plant here.":"Something is already planted here.");
-  if(TOOL==="plant"&&t.k!=="soil")return toast(t.k==="grass"?"Plow it first with the Plow tool.":"Something is already planted here.");
-  if(TOOL==="plant"){const c=crop(S.sel),isl=isIsleTile(i);if(c.island&&!isl)return toast(c.n+" can only be planted in the Secret Field on the island.");if(!c.island&&isl)return toast("Only secret crops can be planted on the island.")}
+  if(TOOL==="plant"&&t.k==="crop")return toast("Something is already planted here.");
+  if((TOOL==="plant"||smart)&&t.k==="soil"){const c=crop(S.sel),isl=isIsleTile(i);if(c.island&&!isl)return toast(c.n+" can only be planted in the Secret Field on the island.");if(!c.island&&isl)return toast("Only secret crops can be planted on the island.")}
   if(TOOL==="harvest"&&t.k!=="crop")return toast("Nothing is planted here.");
   if(t.k==="grass"){if(S.coins<PLOW)return toast("Not enough coins to plow.");S.coins-=PLOW;t.k="soil";gain(0,1,x,y);burstTile(i,0x8d5a32,12)}
   else if(t.k==="soil"){if(!plantAt(i,S.sel,x,y))return}
@@ -2180,7 +2208,7 @@ function tapPen(i,x,y){const p=S.pens[i],a=animal(p.id);
   const left=a.t-(now()-p.at);if(left>0)return toast(a.item+" in "+fmt(left));const it=AITEM[a.id];if(it){if(!addItem(it,1,x,y))return;gain(0,a.xp,null)}else gain(a.s,a.xp,x,y);p.at=now();after()}
 function harvestAll(){if(cdLeft("harv")>0)return toast("Harvest All is ready again in "+fmt(cdLeft("harv"))+".");
   let xp=0,n=0,cash=0,stop=false;
-  S.tiles.forEach((t,i)=>{if(stop)return;const st=tileState(t);if(st&&!st.dead&&st.left<=0){const q=st.w>.5?0:1;if(q&&!addItem(st.c.id,q,null)){stop=true;return}xp+=st.c.xp;n++;S.tiles[i]={k:"soil"};burstTile(i,st.c.col,8,.4)}});
+  S.tiles.forEach((t,i)=>{if(stop)return;const st=tileState(t);if(st&&st.dead){S.tiles[i]={k:"soil"};n++;burstTile(i,0x8b6b3d,6);return}if(st&&!st.dead&&st.left<=0){const q=st.w>.5?0:1;if(q&&!addItem(st.c.id,q,null)){stop=true;return}xp+=st.c.xp;n++;S.tiles[i]={k:"soil"};burstTile(i,st.c.col,8,.4)}});
   S.pens.forEach(p=>{if(stop)return;const a=animal(p.id);if(!p.sick&&!isBaby(p)&&now()-p.at>=a.t){const it=AITEM[a.id];if(it){if(!addItem(it,1,null)){stop=true;return}}else cash+=a.s;xp+=a.xp;n++;p.at=now()}});
   FTREES.forEach((T,k)=>{if(stop||!T.kind||treeGrow(k)<1||treeLeft(k)>0)return;const q=treeYield(k);if(!addItem(T.kind,q,null)){stop=true;return}S.trees[T.id]=now();xp+=2;n+=q});
   if(!n)return toast(stop?"Storage is full! Sell some at the stall first.":"Nothing is ready to harvest yet.");
@@ -2217,10 +2245,13 @@ function buildPenX(){const key=JSON.stringify(S.penLv||{});if(key===_penxK)retur
     if(lv>=3){lantern(midx+1.2,fz);lantern(midx-1.6,fz);for(let k=0;k<4;k++)b.add("ico",0xc4b8a4,midx+.6,.03,(P.gate==="n"?P.z1+.5:P.z0-.5)+(P.gate==="n"?1:-1)*k*.45,.22,.04,.2,0,k,0)}
     for(let k=0;k<lv;k++){const z=P.z0+.6+k*((P.z1-P.z0-1.2)/2);shed(P.x0-.62,z,id==="manok"?0xd8a25a:0x9b6a3a,0xb5452f,Math.PI)}
     if(lv){const t=labelSprite("Lv "+(lv+1));t.scale.set(.9,.24,1);t.position.set(P.x0-.62,1.7,(P.z0+P.z1)/2);PENX.add(t)}});
-  setPondSize(L.pond|0);if(L.pond){flowers(POND.x-POND.rx-.4,POND.x-POND.rx+.9,POND.z-POND.rz-.5);if(L.pond>=3){lantern(POND.x-POND.rx-.2,POND.z+POND.rz+.4);lantern(POND.x+POND.rx-.6,POND.z+POND.rz+.6)}}
+  setPondSize((L.pond|0)+(S.lakeLv|0));if(L.pond){flowers(POND.x-POND.rx-.4,POND.x-POND.rx+.9,POND.z-POND.rz-.5);if(L.pond>=3){lantern(POND.x-POND.rx-.2,POND.z+POND.rz+.4);lantern(POND.x+POND.rx-.6,POND.z+POND.rz+.6)}}
   for(let k=0;k<(L.pond|0);k++){const a=1.2+k*.8;shed(POND.x+Math.cos(a)*(POND.rx+.9),POND.z+Math.sin(a)*(POND.rz+.9),0xe8e0c8,0x2f7fb8,Math.PI-a)}
   if(L.farm>=2)flag(-2.4,0,-11.6,0xf2b632);for(let k=0;k<(L.farm|0);k++)shed(-1.6+k*1.3,-11.6,0xc98a4b,0x8f3a2a,Math.PI/2);
   PENX.add(b.mesh());PENX.add(new THREE.Mesh(sn.geo(),SNOWMAT))}
+const LAKEUP=[2000,4000];
+function expandLake(){const pl=(S.penLv||{}).pond|0;if(pl<PENUP.length)return expandHouse("pond","Lake");const ll=S.lakeLv|0;if(ll>=LAKEUP.length)return toast("The lake is already at its biggest.");const c=LAKEUP[ll];
+  if(S.coins<c)return toast("You need "+c.toLocaleString()+" coins to expand the lake.");S.coins-=c;S.lakeLv=ll+1;toast("🌊 The lake got bigger!",2600);after();buildPenX();burst(PONDS.x,.4,PONDS.z,0x4fc3e8,26,.6)}
 function expandHouse(k,n){S.penLv=S.penLv||{};const lv=S.penLv[k]|0;if(lv>=PENUP.length)return;const c=PENUP[lv];if(S.coins<c)return toast("You need "+c+" coins to expand the "+n+".");
   S.coins-=c;S.penLv[k]=lv+1;const P=PENS[k];if(P)burst((P.x0+P.x1)/2,.6,(P.z0+P.z1)/2,0xc98a4b,22,.5);toast(n+" upgraded to Level "+(lv+2)+"! It looks better and holds "+PENADD+" more animals.",3200);after();buildPenX()}
 function buyAnimal(a,gender){
@@ -2256,11 +2287,12 @@ function ui(){
     pu.innerHTML=HS.map(h=>{const lv=(S.penLv||{})[h.k]|0,cap=zoneLimit(h.ids[0]),have=h.k==="pond"||h.k==="farm"?S.pens.filter(p=>zoneOf(p.id)===h.k).length:S.pens.filter(p=>p.id===h.k).length,c=PENUP[lv];
       return `<div class="abuy"><b>${h.n}</b><small>${have} / ${cap} · Level ${lv+1}</small>${lv>=PENUP.length?`<small>Max size</small>`:`<button class="btn sm" data-h="${h.k}"${S.coins<c?" disabled":""}>Level up · ${c}</button>`}</div>`}).join("");
     pu.querySelectorAll("[data-h]").forEach(b=>b.onclick=()=>expandHouse(b.dataset.h,HS.find(h=>h.k===b.dataset.h).n))}}
+  {const lb=$("tLake"),pl=(S.penLv||{}).pond|0,ll=S.lakeLv|0,c=pl<PENUP.length?PENUP[pl]:ll<LAKEUP.length?LAKEUP[ll]:0;lb.disabled=!c;lb.textContent=c?"🌊 Expand Lake · "+c.toLocaleString():"🌊 Lake: Max size"}
   const nx=S.size+1,ex=$("tExpand");
   if(nx<SIZES.length){ex.disabled=false;ex.textContent="Expand "+SIZES[nx]+"×"+SIZES[nx]+" · "+EXPAND[nx]}else{ex.disabled=true;ex.textContent="Fully expanded"}
   {const np=nextPlot(),bp=$("tPlot");if(np){bp.disabled=false;bp.textContent="Buy "+np.n+" · "+np.cost.toLocaleString()+(S.lv<np.lv?" · Level "+np.lv:"")}else{bp.disabled=true;bp.textContent="You bought all the land"}}
 }
-$("tPlow").onclick=plowAll;$("tAll").onclick=harvestAll;$("tExpand").onclick=expand;
+$("tPlow").onclick=plowAll;$("tAll").onclick=harvestAll;$("tExpand").onclick=expand;$("tLake").onclick=expandLake;
 $("tHelper").onclick=()=>{S.helperOn=!S.helperOn;helperUI();save();toast(S.helperOn?"The helper is back to work: harvesting and planting your selected seed.":"The helper is resting in the barn.")};
 $("tPlot").onclick=buyPlot;
 const HIRE_COST=1500;
@@ -2295,6 +2327,7 @@ setInterval(rebuildRestUI,2000);
 $("tCure").onclick=()=>{if(!isOwner())return;if(cdLeft("treat")>0)return toast("Treat All is ready again in "+fmt(cdLeft("treat"))+".");const sick=S.pens.map((p,i)=>[p,i]).filter(([p])=>p.sick&&!p.heal);if(!sick.length)return toast(S.pens.some(p=>p.heal)?"The sick animals already got medicine.":"No sick animals.");const cost=sick.reduce((s2,[p])=>s2+cureCost(animal(p.id)),0);if(S.coins<cost)return toast("You need "+cost+" coins to treat all.");S.coins-=cost;sick.forEach(([p,i])=>{startHeal(p);const o=animalObjs[i];if(o)burst(o.g.position.x,.7,o.g.position.z,0x7fe08a,10)});toast(sick.length+" animals got medicine · −"+cost+" coins. They'll be healthy in 2–3 minutes.",3600);S.cd=S.cd||{};S.cd.treat=now();cdUI();after()};
 $("tCity").onclick=()=>{if(onCity)goView("all");else enterCity()};
 $("tIsle").onclick=()=>{if(ownBoat())startTrip();else if(onIsle)goView("all");else enterIsland()};
+$("tWoodT").onclick=e=>{S.woodBank=(S.woodBank|0)+100000;const r=e.currentTarget.getBoundingClientRect();floatText("+100,000 wood",r.left+r.width/2,r.top);save();ui();invUI(true)};
 $("tCheat").onclick=e=>{S.coins+=100000;const r=e.currentTarget.getBoundingClientRect();floatText("+100,000",r.left+r.width/2,r.top);save();ui()};
 $("tLvl").onclick=()=>{if(S.lv<10){S.lv=10;S.xp=0}save();ui();toast("Level 10: all crops and animals unlocked")};
 
@@ -2392,6 +2425,9 @@ function taskTarget(q){
   if(q.tree){const T=FTREES.find(x=>x.id===q.tree);return T?[T.x,T.z]:null}
   if(q.type==="fish")return[q.x,q.z];
   return null}
+function helperHarvestAll(k){const W=CREW[k];if(!W)return;const q=W.o.queue,taken=new Set();Object.values(CREW).forEach(c=>c&&c.o&&c.o.queue.forEach(x=>{if(x.type==="harvest")taken.add(x.tile)}));let n=0;
+  S.tiles.forEach((t,i)=>{if(q.length>=16)return;const st=tileState(t);if(!st||st.p<1||isIsleTile(i)||taken.has(i))return;q.push({type:"harvest",tile:i,crop:t.c});n++});
+  if(!n)return toast("No ripe crops for "+wName(k)+" to harvest yet. Crops are ready 3 minutes after planting.",3200);W.o.resting=false;updateCrewUI();toast("🧺 "+wName(k)+" is harvesting "+n+" ripe crop"+(n>1?"s":"")+".",2600)}
 function commandAt(e,p){
   const W=CREW[SEL];if(!W)return;const q=W.o.queue;if(q.length>=16)return toast("Order list is full for "+wName(SEL)+".");
   let task=null;
@@ -2504,6 +2540,7 @@ function renderCrew(){const box=$("crew");box.textContent="";
     const job=(ic,lbl,tool,tip)=>{const b=document.createElement("button");b.className="cw-mini cw-job";b.type="button";b.textContent=ic+" "+lbl;b.title=tip;
       b.onclick=()=>{selectWorker(k);setTool(tool);const m=$("modeTag");m.textContent=wName(k)+": "+tip;m.style.opacity=1};return b};
     const jr=document.createElement("div");jr.className="cw-jobs";jr.append(job("🪓","Chop","chop","tap a tree to chop it down"),job("🌱","Plant","plant","tap plowed soil to plant your selected seed"),job("🍎","Pick","harvest","tap a fruit tree or ripe crop to pick it"));
+    const hv=document.createElement("button");hv.className="cw-mini cw-job";hv.type="button";hv.textContent="🧺 Harvest";hv.title="Harvest every ripe crop";hv.onclick=()=>helperHarvestAll(k);jr.append(hv);
     const fb=document.createElement("button");fb.className="cw-mini cw-job";fb.type="button";fb.textContent="🎣 Fish";fb.title="Go fishing at the pond";fb.onclick=()=>{const W=CREW[k];if(!W)return;if(W.o.queue.length>=16)return;W.o.resting=false;W.o.queue.push(fishTask(W));updateCrewUI();toast(wName(k)+" grabs a fishing rod and heads to the pond.",2600)};jr.append(fb);
     d.append(sel,au,st,rs,jr);box.append(d)});
   renderCrewSel();updateCrewUI()}
@@ -2529,7 +2566,7 @@ const BOATS=[{id:"bangka",n:"Rowboat",cost:600,lv:2,speed:3.6,d:"Rowboat with ou
   {id:"speed",n:"Speed Boat",cost:2500,lv:5,speed:10,d:"Motorboat. Just a few seconds to the island."}];
 const ISLEITEMS=[{id:"isla",n:"Secret Island",cost:100000,lv:3,d:"Buy the whole Secret Island next to the GoPyesta carnival, with a 6×6 field for secret crops. Needs a boat."},
   {id:"guard",n:"Island Guard",cost:1500,lv:4,d:"Someone guards the field, so patrols come less often."}];
-const FARM_DOCK={x:23.2,z:1.35},ISLE_DOCK={x:42.2,z:3.2};
+const FARM_DOCK={x:23.2,z:1.35},ISLE_DOCK={x:IX_-21.8,z:3.2};
 const ownBoat=()=>{const b=(S.boats||[]);return b.includes("speed")?BOATS[1]:b.includes("bangka")?BOATS[0]:null};
 const ownIsle=()=>(S.plots||[]).includes("isla");
 function plotOf(i){for(const a of layout())if(i<a.start+a.n*a.n)return a;return null}
@@ -2632,7 +2669,7 @@ let incT=0;function stepIncome(dt){if(VISIT)return;incT+=dt;if(incT<60)return;in
 
   scene.add(b.mesh())})();
 /* -- passenger ferry: every 5 minutes from the farm boat terminal to the GoPyesta island -- */
-const FERRY={g:new THREE.Group(),pax:[],walkers:[],phase:"",A:{x:22.6,z:3.9},B:{x:44.6,z:5.9},ARCH:{x:IX_-11.4,z:IZ_+.8}};
+const FERRY={g:new THREE.Group(),pax:[],walkers:[],phase:"",A:{x:22.6,z:3.9},B:{x:IX_-19.4,z:5.9},ARCH:{x:IX_-11.4,z:IZ_+.8}};
 (function(){const b=new Builder(),g=FERRY.g;b.add("box",0xf4f4f0,0,.2,0,4.4,.7,1.7);b.add("box",0xf4f4f0,2.4,.2,0,1.3,.7,1.3,0,Math.PI/4,0);b.add("box",0x2f7fb8,0,.42,0,4.45,.14,1.74);b.add("box",0xd9342b,0,.05,0,4.45,.12,1.74);
   b.add("box",0x8a6a4a,0,.56,0,4.2,.05,1.55);for(let k=0;k<3;k++)b.add("box",0x6b4422,-1.4+k*1.2,.75,0,.3,.3,1.4);b.add("box",0xf5c732,-.2,1.7,0,3.4,.08,1.8);[[-1.8,.8],[-1.8,-.8],[1.4,.8],[1.4,-.8]].forEach(([x,z])=>b.add("cyl",0x9aa3ab,x,1.15,z,.04,1.1,.04));
   b.add("box",0x2b3640,2.2,.95,0,.6,.5,1);b.add("box",0x9fd8f0,2.5,1.05,0,.02,.3,.8);b.add("cyl",0xe8622a,-2.3,.85,.55,.18,.05,.18,Math.PI/2,0,0);
@@ -2640,8 +2677,8 @@ const FERRY={g:new THREE.Group(),pax:[],walkers:[],phase:"",A:{x:22.6,z:3.9},B:{
   const SH=[0xe86a9a,0x3fa8e8,0xf2b632,0x8a4ac0,0x2fb08a,0xe2402f],SK=[0xe0a878,0xc68a5a,0xa8724a];
   for(let k=0;k<6;k++){const p=new Builder(),x=-1.4+Math.floor(k/2)*1.2,z=k%2?.4:-.4;p.add("box",SH[k],0,.32,0,.22,.34,.3);p.add("sph",SK[k%3],0,.6,0,.12,.13,.12);p.add("cyl",SH[(k+2)%6],0,.73,0,.15,.03,.15);const m=p.mesh();m.position.set(x,.7,z);g.add(m);FERRY.pax.push(m)}
   g.position.set(FERRY.A.x,0,FERRY.A.z);scene.add(g);
-  {const eb=btnSprite("⛴️ Ride Boat","#2f7fb8","island");eb.position.set(20.6,3.6,3.9);scene.add(eb)}
-  {const cb=btnSprite("🏙️ Ride Boat to GoPyesta City","#3a4a6a","city");cb.position.set(IX+31,3.4,IZ+1.2);scene.add(cb)}
+  {const eb=btnSprite("⛴️ Ride Boat","#2f7fb8","boat");eb.position.set(20.6,3.6,3.9);scene.add(eb)}
+  {const cb=btnSprite("⛴️ Ride Boat","#3a4a6a","boat");cb.userData.cloudy=true;cb.position.set(IX+37.5,3.4,IZ+1.2);scene.add(cb)}
   const sg=labelSprite("Boat Terminal · Ferry every 5 min");sg.position.set(18.6,2.4,4.2);sg.scale.set(3,.75,1);scene.add(sg);
   const sb=new Builder();sb.add("box",0xa87a48,20.2,.5,4.3,3.2,.1,1.6);[[18.8,3.7],[21.6,3.7],[18.8,4.9],[21.6,4.9]].forEach(([x,z])=>sb.add("cyl",0x6b4a2c,x,-.6,z,.1,2.2,.1));sb.add("box",0x2f7fb8,20.2,1.9,4.3,3.4,.1,1.8);[[18.8,3.6],[21.6,3.6]].forEach(([x,z])=>sb.add("cyl",0x2b3640,x,1.2,z,.05,1.4,.05));scene.add(sb.mesh());
   for(let k=0;k<6;k++){const f=makeFarmer({shirt:SH[k],pants:[0x2b2b3a,0x3b5f9a][k%2],skin:SK[k%3],hat:SH[(k+3)%6]});f.g.visible=false;scene.add(f.g);FERRY.walkers.push({f,o:{cr:0},k})}})();
@@ -2677,7 +2714,7 @@ function stepTrip(dt,t){if(!MYBOAT.visible)return;let x,z,yaw;
     MYBOAT.position.x=x;MYBOAT.position.z=z;let dy=yaw-MYBOAT.rotation.y;dy=Math.atan2(Math.sin(dy),Math.cos(dy));MYBOAT.rotation.y+=dy*Math.min(1,dt*5);
     wakeT-=dt;if(wakeT<=0&&u<.97){wakeT=MYBOAT_ID==="speed"?.04:.12;const c=Math.cos(MYBOAT.rotation.y),s=Math.sin(MYBOAT.rotation.y);burst(x-1.5*c,.05,z+1.5*s,0xffffff,MYBOAT_ID==="speed"?2:1,.35)}
     if(u>=1){TRIP.on=false;S.boatAt=TRIP.toIsle?"isla":"farm";save();cam.follow=false;cam.followFn=null;
-      if(TRIP.toIsle){Object.assign(camT,{tx:IX_-6,ty:1.4,tz:IZ_+2,dist:22,pol:.92});toast("Welcome to GoPyesta Island! Tap 🎪 Enter Carnival above the big tent to visit GoPyesta.com.",4200)}
+      if(TRIP.toIsle){ISLE_OPEN=true;Object.assign(camT,{tx:IX_-6,ty:1.4,tz:IZ_+2,dist:22,pol:.92});toast("Welcome to GoPyesta Island! Tap 🎪 Enter Carnival above the big tent to visit GoPyesta.com.",4200)}
       else{Object.assign(camT,{tx:-3,ty:.6,tz:-1.5,dist:32,pol:.85});toast("You're back at the farm.",2000)}ui()}}
   MYBOAT.position.y=Math.sin(t*1.6+MYBOAT.position.x*.3)*.06-.02;MYBOAT.rotation.z=Math.sin(t*1.3)*.04;MYBOAT.rotation.x=Math.sin(t*1.1+1)*.03;
   if(MYBOAT_ID==="speed"&&TRIP.on&&Math.random()<.3)burst(MYBOAT.position.x,.6,MYBOAT.position.z,0xdddddd,1,.2)}
@@ -3006,7 +3043,7 @@ function stepTown(dt,t){const h=typeof phHour==="function"?phHour():12,dark=1-da
   TOWNX.walkers.forEach(w=>{w.u+=w.dir*w.sp*dt;if(w.u>1){w.u=1;w.dir=-1}if(w.u<0){w.u=0;w.dir=1}const [a,b2]=w.seg,x=a[0]+(b2[0]-a[0])*w.u,z=a[1]+(b2[1]-a[1])*w.u;w.f.g.position.set(x,0,z);
     w.f.g.rotation.y=Math.atan2(-(b2[1]-a[1])*w.dir,(b2[0]-a[0])*w.dir);w.f.g.visible=!isBad();animWorker(w.f,w.o,dt,t,true,0,0,0,0)})}
 /* ================= GOPYESTA CITY: a New York style island east of GoPyesta Island ================= */
-const CX=126,CZ=4,CHX=17,CHZ=14;
+const CX=165,CZ=4,CHX=17,CHZ=14;
 const CITY={lights:[],glows:[],pl:[],cabs:[],walkers:[],winMats:[],ferry:null,ads:[]};
 (function buildCity(){const b=new Builder(),r=rnd(9091),Y=1.2;
   const sdr=(x,z,hx,hz,rr)=>{const qx=Math.abs(x)-hx+rr,qz=Math.abs(z)-hz+rr;return Math.hypot(Math.max(qx,0),Math.max(qz,0))+Math.min(Math.max(qx,qz),0)-rr};
@@ -3092,8 +3129,8 @@ const CITY={lights:[],glows:[],pl:[],cabs:[],walkers:[],winMats:[],ferry:null,ad
   [[-2,4],[-11,-5],[7,-5],[7,4],[-11,4],[-2,-5]].forEach(([x,z])=>{const l=new THREE.PointLight(0xffd9a0,0,12,2);l.position.set(X(x),Y+2.4,Z(z));scene.add(l);CITY.pl.push(l)});
   // ferry dock on the west side, facing GoPyesta Island
   {const dz=3;b.add("box",0xa87a48,X(-CHX-1.6),Y-.05,Z(dz),3.6,.16,2.2);for(let x=-CHX-3.2;x<=-CHX;x+=1.2)[-1,1].forEach(s=>b.add("cyl",0x6b4a2c,X(x),Y-1.6,Z(dz+s*1.05),.12,3.2,.12));
-    const sg=labelSprite("GoPyesta City");sg.position.set(X(-CHX+.4),Y+2.2,Z(dz-1.6));sg.scale.set(2.6,.65,1);scene.add(sg);
-    const bb=btnSprite("⛴️ Ride Boat","#2f7fb8","island");bb.position.set(X(-CHX-1.6),Y+2.6,Z(dz+.2));scene.add(bb)}
+    const sg=labelSprite("MW City");sg.position.set(X(-CHX+.4),Y+2.2,Z(dz-1.6));sg.scale.set(2.6,.65,1);scene.add(sg);
+    const bb=btnSprite("⛴️ Ride Boat","#2f7fb8","boat");bb.position.set(X(-CHX-1.6),Y+2.6,Z(dz+.2));scene.add(bb)}
   scene.add(b.mesh());
   // yellow cabs looping the avenues
   const LOOP=[[-11,-5],[7,-5],[7,4],[-11,4]],LL=[];let tot=0;for(let k=0;k<4;k++){const a=LOOP[k],c=LOOP[(k+1)%4],l=Math.hypot(c[0]-a[0],c[1]-a[1]);LL.push(l);tot+=l}
@@ -3117,12 +3154,15 @@ function stepCity(dt,t){const near=Math.hypot(cam.tx-CX,cam.tz-CZ)<60;if(!near&&
     c.m.position.set(CX+a[0]+(b[0]-a[0])*f-dz*off,1.2,CZ+a[1]+(b[1]-a[1])*f+dx*off);c.m.rotation.y=Math.atan2(-dz*c.dir,dx*c.dir)});
   CITY.walkers.forEach(w=>{w.u+=w.dir*w.sp*dt;if(w.u>1){w.u=1;w.dir=-1}if(w.u<0){w.u=0;w.dir=1}const [a,b2]=w.seg;w.f.g.position.set(CX+a[0]+(b2[0]-a[0])*w.u,1.25,CZ+a[1]+(b2[1]-a[1])*w.u);
     w.f.g.rotation.y=Math.atan2(-(b2[1]-a[1])*w.dir,(b2[0]-a[0])*w.dir);w.f.g.visible=!bad;animWorker(w.f,w.o,dt,t,true,0,0,0,0)});
-  const F=CITY.ferry;if(F){F.t+=dt;const P=40,u=(F.t%P)/P,go=u<.5,v=go?u*2:(u-.5)*2,e=v<.15?0:v>.85?1:(v-.15)/.7,s=e*e*(3-2*e),x0=97.5,x1=CX-CHX-3.6,x=go?x0+(x1-x0)*s:x1+(x0-x1)*s;
+  const F=CITY.ferry;if(F){F.t+=dt;const P=40,u=(F.t%P)/P,go=u<.5,v=go?u*2:(u-.5)*2,e=v<.15?0:v>.85?1:(v-.15)/.7,s=e*e*(3-2*e),x0=IX_+40.3,x1=CX-CHX-3.6,x=go?x0+(x1-x0)*s:x1+(x0-x1)*s;
     F.m.position.set(x,.05+Math.sin(t*2)*.06,CZ+3+1.6);F.m.rotation.y=go?0:Math.PI;F.m.rotation.z=Math.sin(t*1.6)*.03}}
 let onCity=false;
-function enterCity(){if(S.inTown)return toast("Go home to the farm first, then ride the boat to GoPyesta City.",3200);if(TRIP.on||JTRIP.on)return;
-  cam.follow=false;Object.assign(camT,{tx:CX-2,ty:2,tz:CZ+1,dist:34,pol:.9});toast("🏙️ Welcome to GoPyesta City!",3000)}
-function checkCity(){const n=Math.hypot(cam.tx-CX,cam.tz-CZ)<26;if(n!==onCity){onCity=n;const b=$("tCity");if(b)b.textContent=n?"Back to the Farm":"Go to GoPyesta City"}}
+function openBoatMenu(){if(S.inTown)return toast("Go home to the farm first, then ride the boat.",3000);$("boatM").hidden=false}
+document.querySelectorAll("#boatM [data-go]").forEach(b=>b.onclick=()=>{$("boatM").hidden=true;const g=b.dataset.go;if(g==="island")enterIsland();else if(g==="city")enterCity();else{ISLE_OPEN=false;goView("all");toast("🌾 Back on the farm.",2000)}});
+$("boatClose").onclick=()=>{$("boatM").hidden=true};
+function enterCity(){if(S.inTown)return toast("Go home to the farm first, then ride the boat to MW City.",3200);if(TRIP.on||JTRIP.on)return;
+  cam.follow=false;Object.assign(camT,{tx:CX-2,ty:2,tz:CZ+1,dist:34,pol:.9});toast("🏙️ Welcome to MW City!",3000)}
+function checkCity(){const n=Math.hypot(cam.tx-CX,cam.tz-CZ)<26;if(n!==onCity){onCity=n;const b=$("tCity");if(b)b.textContent=n?"Back to the Farm":"Go to MW City"}}
 /* townsfolk strolling around the plaza */
 const FOLK=[];
 function initFolk(){for(let k=0;k<8;k++){const f=makeFarmer({shirt:[0xe86a9a,0x3fa8e8,0xf2b632,0x8a4ac0,0x2fb08a,0xe2402f,0xff9a3c,0x7ccf4a][k],pants:[0x3a3a4a,0x6b4a2c,0x2f4f7a,0x3a3a4a][k%4],skin:[0xe0a878,0xc68a5a,0xa8724a,0xe0a878][k%4],hat:[0xd8b860,0xf4f4f0,0xc0392b,0xd8b860][k%4]});scene.add(f.g);FOLK.push({...f,o:{cr:0},a:k*1.6,r:6.8+(k%2)*1.4,sp:(k%2?-1:1)*(.12+k*.02)})}}
@@ -3278,7 +3318,7 @@ async function initCloud(){
   if(!window.claude||!window.claude.use){$("lbHead").hidden=true;$("lbPanel").hidden=true;localAuthStart();return}
   let db=null,user=null;
   try{[db,user]=await Promise.all([window.claude?.use?.("db"),window.claude?.use?.("user")])}catch(e){}
-  if(user){try{if(await user.isOwner())["tCheat","tLvl"].forEach(k=>{$(k).hidden=false})}catch(e){}}
+  if(user){try{if(await user.isOwner())["tCheat","tWoodT","tLvl"].forEach(k=>{$(k).hidden=false})}catch(e){}}
   if(!db||!user){$("acctSave").textContent="Saved on this device";$("lbHint").textContent="Sign in to Claude to see other farmers";noBoard();localAuthStart();return}
   const id=await user.id();if(!id){$("acctSave").textContent="Saved on this device";$("lbHint").textContent="Sign in to Claude to see other farmers";noBoard();localAuthStart();return}
   CLOUD.db=db;CLOUD.user=user;CLOUD.id=id;
@@ -3416,7 +3456,7 @@ function gpLeave(){clearInterval(gpT);save();if(myUser()&&typeof netSend==="func
   const embedded=window.top!==window||!!(window.claude&&window.claude.use);let w=null;try{w=window.open(GP_URL,"_blank","noopener")}catch(e){}
   if(!w&&!embedded)setTimeout(()=>{location.href=GP_URL},300);else if(!w)toast("Open gopyesta.com in your browser to visit GoPyesta.",4000)}
 function enterIsland(){if(S.inTown)return toast("Go home to the farm first, then take the ferry to GoPyesta Island.",3200);if(TRIP.on||JTRIP.on)return;
-  cam.follow=false;Object.assign(camT,{tx:IX_-2,ty:1.4,tz:IZ_+2,dist:30,pol:.92});toast("⛴️ Welcome to GoPyesta Island! Tap 🎪 Enter Carnival to visit GoPyesta.com.",4200)}
+  ISLE_OPEN=true;cam.follow=false;Object.assign(camT,{tx:IX_-2,ty:1.4,tz:IZ_+2,dist:30,pol:.92});toast("⛴️ Welcome to GoPyesta Island! Tap 🎪 Enter Carnival to visit GoPyesta.com.",4200)}
 function enterCarnival(){toast("🎪 Entering the carnival… opening GoPyesta.com",2400);gpLeave()}
 function gpRedirect(){if(VISIT)return;$("gpImg").src=GP_FULL;let n=5;$("gpN").textContent=n;$("gpGo").hidden=false;clearInterval(gpT);gpT=setInterval(()=>{n--;$("gpN").textContent=n;if(n<=0)gpLeave()},1000)}
 $("gpNow").onclick=gpLeave;$("gpBtn").onclick=enterIsland;$("gpStay").onclick=()=>{clearInterval(gpT);$("gpGo").hidden=true};
