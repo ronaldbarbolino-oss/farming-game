@@ -2477,7 +2477,7 @@ cv.addEventListener("pointermove",e=>{
   else if(pointers.size===2){const [a,b]=[...pointers.values()],d=Math.hypot(a.x-b.x,a.y-b.y),an=Math.atan2(b.y-a.y,b.x-a.x);if(pinch0){camT.dist=Math.min(90,Math.max(5,camT.dist*pinch0/d));let da=an-ang0;da=Math.atan2(Math.sin(da),Math.cos(da));camT.az+=da;camT.pol=Math.min(1.35,Math.max(.35,camT.pol-dy*.004))}pinch0=d;ang0=an;dragMoved=99;cam.follow=false;cam.auto=false;setAuto()}
 });
 function pan(dx,dy){const k=camT.dist*.0022,sa=Math.sin(cam.az),ca=Math.cos(cam.az);
-  cam.follow=false;camT.tx=Math.max(-125,Math.min(235,camT.tx-dx*k*ca-dy*k*sa));camT.tz=Math.max(-45,Math.min(50,camT.tz+dx*k*sa-dy*k*ca));cam.auto=false;setAuto()}
+  cam.follow=false;camT.tx=Math.max(-200,Math.min(235,camT.tx-dx*k*ca-dy*k*sa));camT.tz=Math.max(-45,Math.min(50,camT.tz+dx*k*sa-dy*k*ca));cam.auto=false;setAuto()}
 cv.addEventListener("contextmenu",e=>e.preventDefault());
 function goView(k){const v=VIEWS[k];if(!v)return;const {follow,roofOff,...rest}=v;Object.assign(camT,{ty:.6},rest);cam.follow=!!follow;cam.auto=false;setAuto();ISLE.setRoof(!roofOff);if(k==="tug")ISLE.sail();
   document.querySelectorAll(".views .cbtn").forEach(c=>c.classList.toggle("on",c.dataset.v===k));hideTip()}
@@ -2494,7 +2494,7 @@ function endPtr(e){clearTimeout(HOLD.t);
 cv.addEventListener("pointerup",endPtr);cv.addEventListener("pointercancel",endPtr);
 cv.addEventListener("pointerleave",e=>{if(e.pointerType==="mouse")hovered=null});
 cv.addEventListener("wheel",e=>{e.preventDefault();camT.dist=Math.min(90,Math.max(5,camT.dist*(1+Math.sign(e.deltaY)*.1)));hideTip()},{passive:false});
-{const mv=(dx,dz)=>{cam.follow=false;const k=camT.dist*.12;camT.tx=Math.max(-125,Math.min(235,camT.tx+dx*k));camT.tz=Math.max(-45,Math.min(50,camT.tz+dz*k))},zm=f=>{camT.dist=Math.min(90,Math.max(5,camT.dist*f))};
+{const mv=(dx,dz)=>{cam.follow=false;const k=camT.dist*.12;camT.tx=Math.max(-200,Math.min(235,camT.tx+dx*k));camT.tz=Math.max(-45,Math.min(50,camT.tz+dz*k))},zm=f=>{camT.dist=Math.min(90,Math.max(5,camT.dist*f))};
   const hold=(id,fn)=>{const b=$(id);let iv=null;const go=()=>{fn();clearInterval(iv);iv=setInterval(fn,120)},stop=()=>{clearInterval(iv);iv=null};b.addEventListener("pointerdown",e=>{e.preventDefault();go()});["pointerup","pointerleave","pointercancel"].forEach(ev=>b.addEventListener(ev,stop))};
   hold("cU",()=>mv(0,-1));hold("cD",()=>mv(0,1));hold("cLf",()=>mv(-1,0));hold("cRt",()=>mv(1,0));hold("cZi",()=>zm(.88));hold("cZo",()=>zm(1.14));
   window.addEventListener("keydown",e=>{if(e.target&&(e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA"))return;const m={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0]}[e.key];if(m){e.preventDefault();mv(...m)}else if(e.key==="+"||e.key==="=")zm(.88);else if(e.key==="-")zm(1.14)})}
@@ -2753,7 +2753,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="153";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
+const GAMEVER="154";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 function cvRect(){return ROT?{left:0,top:0,width:cv.clientWidth,height:cv.clientHeight}:cv.getBoundingClientRect()}
 function setRot(){const want=!!MOBILE&&innerHeight>innerWidth*1.05;if(want!==ROT){ROT=want;document.body.classList.toggle("rot",want)}const r=document.documentElement.style;r.setProperty("--LW",(ROT?innerHeight:innerWidth)+"px");r.setProperty("--LH",(ROT?innerWidth:innerHeight)+"px")}
 let _olTried=false;function tryLockLand(){if(_olTried||!MOBILE||!(innerHeight>innerWidth))return;_olTried=true;try{const d=document.documentElement,go=()=>{if(screen.orientation&&screen.orientation.lock)screen.orientation.lock("landscape").catch(()=>{})};
@@ -3766,9 +3766,9 @@ const TOWNX={lights:[],pl:[],band:[],aud:[],notes:[],walkers:[],stageOn:null};co
     for(let k=0;k<8;k++){const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:ntex,transparent:true,depthWrite:false}));sp.scale.set(.5,.5,1);sp.userData={ph:k/8,x0:x-.6,z0:z};scene.add(sp);TOWNX.notes.push(sp)}
     TOWNX.stage={x,z,yy};const lab=labelSprite("Town Stage");lab.position.set(x+1.5,yy+3.9,z);lab.scale.set(2.4,.6,1);scene.add(lab)}
   // ground extension under the west side of town
-  {const gx0=T.x-96,gx1=Math.max(T.x+8,-70),gx=new THREE.Mesh(new THREE.PlaneGeometry(gx1-gx0,130),new THREE.MeshLambertMaterial({color:0x5aa83a}));gx.rotation.x=-Math.PI/2;gx.position.set((gx0+gx1)/2,-.012,T.z);gx.receiveShadow=true;scene.add(gx);
+  {const gx0=T.x-130,gx1=Math.max(T.x+8,-70),gx=new THREE.Mesh(new THREE.PlaneGeometry(gx1-gx0,150),new THREE.MeshLambertMaterial({color:0x5aa83a}));gx.rotation.x=-Math.PI/2;gx.position.set((gx0+gx1)/2,-.012,T.z);gx.receiveShadow=true;scene.add(gx);
     const r9=rnd(91);for(let k=0;k<40;k++){const x=T.x-34-r9()*24,z=T.z-40+r9()*80;if(z>T.z-24&&z<T.z+24)continue;tree(b,x,z,k%4?null:0xe2402f,900+k,.9+r9()*.4)}
-    for(let k=0;k<10;k++){const a=k/10*Math.PI*2;b.add("ico1",k%2?0x4f9e31:0x5aa83a,T.x-80+Math.cos(a)*6,-3,T.z+Math.sin(a)*40,12,9,14,0,k,0)}}
+    for(let k=0;k<10;k++){const a=k/10*Math.PI*2;b.add("ico1",k%2?0x4f9e31:0x5aa83a,T.x-118+Math.cos(a)*6,-3,T.z+Math.sin(a)*46,12,9,14,0,k,0)}}
   // sidewalk trees and planters
   for(let k=0;k<7;k++){const x=T.x-12+k*4,z=T.z+14.2;tree(b,x,z,null,950+k,.7);b.add("box",0x8a5a2a,x,.15,z,.8,.3,.8)}
   for(let k=0;k<4;k++){const x=T.x+17.4,z=T.z-13+k*2.8;if(Math.abs(z-T.z)<2.6)continue;tree(b,x,z,null,970+k,.7)}
@@ -3837,6 +3837,8 @@ const MUNI={flags:[],people:[],lights:[],jets:[],hands:null};
   [-9,-5,5,9].forEach(z=>{[-4.5,7.5].forEach(x=>{b.add("box",0x8a5a2a,X(x),.4,Z(z),.5,.08,1.4);b.add("box",0x8a5a2a,X(x+(x<0?-.22:.22)),.65,Z(z),.06,.4,1.4)})});
   [[-5,-10.5],[-5,10.5],[8,-10.5],[8,10.5],[-5,0-3.5],[8,3.5]].forEach(([x,z])=>mLamp(b,X(x),Z(z)));
   [[-6,-14],[-2,-14.5],[6,-14.5],[-6,14],[-2,14.5],[6,14.5],[12,-6],[12,6]].forEach(([x,z],k)=>tree(b,X(x),Z(z),k%3?null:0xf5c732,700+k));
+  for(let k=0;k<18;k++){const x=-24-(k%6)*3.4-(k>5?1.7:0),z=-15+Math.floor(k/6)*15+((k*7)%5);tree(b,X(x),Z(z),k%4?null:0xe2402f,760+k)}
+  b.add("box",0xc9a46a,X(-19),.02,Z(0),6,.02,1.4);b.add("box",0x5fb548,X(-30),.03,Z(0),14,.04,26);for(let k=0;k<6;k++)b.add("box",0x8a5a2a,X(-26+k*-1.6),.4,Z(-1.4),.5,.08,1.2);
   // police station (north), fire station (south), health center (south-west)
   const house=(cx,cz,w,d,h,c,roof,lab)=>{b.add("box",c,X(cx),h/2,Z(cz),w,h,d);b.add("box",roof,X(cx),h+.08,Z(cz),w+.3,.16,d+.3);sn.add("box",0xffffff,X(cx),h+.2,Z(cz),w+.2,.06,d+.2);const l=labelSprite(lab);l.position.set(X(cx),h+1.1,Z(cz));l.scale.set(2.2,.55,1);scene.add(l)};
   house(3,-17.5,7,4,3,0xe8eef4,0x2f4f8a,"Police Station");for(let k=0;k<5;k++)b.add("box",0x3a5a7a,X(-.2+k*1.6),1.7,Z(-15.48),.8,.7,.04);b.add("box",0x2f4f8a,X(3),.9,Z(-15.47),1.2,1.7,.05);b.add("box",0x2f4f8a,X(3),2.6,Z(-15.46),6.6,.35,.03);
