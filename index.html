@@ -2753,7 +2753,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="156";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
+const GAMEVER="157";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 function cvRect(){return ROT?{left:0,top:0,width:cv.clientWidth,height:cv.clientHeight}:cv.getBoundingClientRect()}
 function setRot(){const au=document.getElementById("auth"),inAuth=!(typeof LOCAL!=="undefined"&&LOCAL.user)||(au&&!au.hidden);const want=!!MOBILE&&innerHeight>innerWidth*1.05&&!inAuth;if(want!==ROT){ROT=want;document.body.classList.toggle("rot",want)}const r=document.documentElement.style;r.setProperty("--LW",(ROT?innerHeight:innerWidth)+"px");r.setProperty("--LH",(ROT?innerWidth:innerHeight)+"px")}
 let _olTried=false;function tryLockLand(){if(_olTried||!MOBILE||!(innerHeight>innerWidth)||!(typeof LOCAL!=="undefined"&&LOCAL.user))return;_olTried=true;try{const d=document.documentElement,go=()=>{if(screen.orientation&&screen.orientation.lock)screen.orientation.lock("landscape").catch(()=>{})};
@@ -6569,7 +6569,9 @@ function showSyncBar(){let b=$("syncBar");if(!b){b=document.createElement("butto
 async function pullSync(go){if(!API||VISIT||!myUser()||NET.taken||SYNC.pulling)return;const u=myUser(),tok=myTok();if(!tok)return;SYNC.pulling=true;try{const d=await postJ("pull",{u,tok});const st=d&&d.state;
   if(st&&(Number(st.seen)||0)>(SYNC.base||0)+5){if(!go&&Date.now()-PULLT0>8000)return showSyncBar();try{localStorage.setItem("farming-save-"+u,JSON.stringify(st))}catch(e){}toast("☁️ Getting your latest farm from your other device…",2500);setTimeout(()=>location.reload(),900);return}}catch(e){}finally{SYNC.pulling=false;SYNC.pulled=true}}
 const PULLT0=Date.now();document.addEventListener("visibilitychange",()=>{if(!document.hidden){SYNC.pulled=false;SYNC.pullT=Date.now();pullSync(Date.now()-PULLT0<8000)}});
-async function linkPw(u,pw){if(!API||!u||!pw)return;try{await netSend(true);await postJ("setpw",{u,tok:myTok(),pw})}catch(e){}}
+async function linkPw(u,pw){if(!API||!u||!pw)return;try{SYNC.pulled=true;await netSend(true);
+  if(NET.taken){try{await postJ("login",{u,pw,tok:myTok()});NET.taken=false;SYNC.base=0;toast("☁️ This device is linked again. Getting your latest farm…",2600);await pullSync(true);return}catch(e){return}}
+  await postJ("setpw",{u,tok:myTok(),pw})}catch(e){}}
 const IS_APP=!!((window.matchMedia&&(matchMedia("(display-mode: standalone)").matches||matchMedia("(display-mode: fullscreen)").matches))||navigator.standalone||/android-app:/.test(document.referrer||""));
 let netT=2;function stepNet(dt){if(!API||VISIT||!myUser())return;netT-=dt;if(netT>0)return;netT=60;const full=Date.now()-NET.lastFull>55000;if(full)NET.lastFull=Date.now();netSend(full)}
 window.addEventListener("pagehide",()=>{if(API&&!VISIT&&myUser()&&navigator.sendBeacon){const u=myUser(),tok=myTok(),p=CLOUD.local||{};try{navigator.sendBeacon(API+"publish",new Blob([JSON.stringify({u,tok,farm:p.farm||"",farmer:p.farmer||"",shirt:p.shirt|0,lv:S.lv,size:S.size,state:snapState()})],{type:"application/json"}))}catch(e){}}});
