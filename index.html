@@ -385,7 +385,7 @@ body.land .cam .cbtn{width:32px;height:32px!important}
   <div class="tray-head"><h2>Animals</h2><span class="hint">Buy a male and a female to breed: the female gets pregnant on her own and gives birth after 30 minutes. Each species has its own pen. They shelter on their own when it rains or snows.</span></div>
   <div class="panel"><div class="tools" id="shop"></div>
     <div class="tools" style="margin-top:8px"><button class="btn" id="tRest" hidden style="background:#6a5acd;box-shadow:0 4px 0 #463a9a">😴 Rest All Animals</button><span class="mktNote" id="restNote" style="margin:0" hidden>Resting animals go inside for 3 minutes. After that they can't get sick for 20 minutes.</span></div>
-    <h4 class="penH">Animal Houses</h4><p class="mktNote">Level up a house to keep more animals (+3 space) and give it a makeover: new roof, flowers, a flag, then lanterns and a stone path.</p><div class="tools" id="penUp"></div></div>
+    <h4 class="penH">Animal Houses</h4><p class="mktNote">Level up a house to keep more animals (+3 space) and give it a makeover. Press 📐 Bigger pen to make the yard wider (+2 space).</p><div class="tools" id="penUp"></div></div>
   </div>
 </div>
 
@@ -587,7 +587,7 @@ const xpNeed=l=>Math.round(10*Math.pow(l,1.55));
 const FX0=-3.5, FZ0=-3;                       // field corner
 const PEN={x0:-11.5,x1:-6,z0:-3,z1:4};          // animal pen bounds
 
-function fresh(){return{inTown:false,seeds:[],tools:[],fert:0,basket:0,decor:{},inv:{},shopOpen:true,builds:[],boats:[],boatAt:"farm",guard:false,plots:[],helperOn:true,helpers:1,hspd:0,trees:{},cut:[],ptrees:[],penLv:{},free:{},redeemed:[],axe:0,coins:1500,xp:0,lv:1,size:0,sel:"pechay",tiles:Array(25).fill(null).map(()=>({k:"grass"})),pens:[]}}
+function fresh(){return{inTown:false,seeds:[],tools:[],fert:0,basket:0,decor:{},inv:{},shopOpen:true,builds:[],boats:[],boatAt:"farm",guard:false,plots:[],helperOn:true,helpers:1,hspd:0,trees:{},cut:[],ptrees:[],penLv:{},penSz:{},free:{},redeemed:[],axe:0,coins:1500,xp:0,lv:1,size:0,sel:"pechay",tiles:Array(25).fill(null).map(()=>({k:"grass"})),pens:[]}}
 let S=fresh();
 
 if(window.claude?.hot?.data?.S)S=window.claude.hot.data.S;
@@ -707,6 +707,13 @@ const PENS={manok:{x0:-10.8,x1:-7.2,z0:-6.4,z1:-2.7,n:"Chicken Coop",gate:"s"},k
   kabayo:{x0:-23.8,x1:-19.2,z0:-4.4,z1:3,n:"Stable",gate:"e"},
   baboy:{x0:-23.8,x1:-19.6,z0:4.4,z1:8.4,n:"Pig Sty",gate:"e"}};
 const PLIM={manok:8,kambing:6,baka:5,kalabaw:5,kabayo:6,baboy:6};
+/* pens can be made bigger: each space level widens the yard and pushes the pens west to make room */
+const PENS0=JSON.parse(JSON.stringify(PENS)),PENCOL={manok:0,kambing:0,baka:1,kalabaw:1,kabayo:2,baboy:2};
+const PENSZ=[600,1500,3000,5000],PENGROW=.5,PENSZADD=2;let PENLABS=[],PENSNOW=null,_plk=null;
+function penSz(id,L){return(L||(S&&S.penSz)||{})[id]|0}
+function penRects(L){const g=id=>penSz(id,L)*PENGROW,cm=[0,0,0];for(const id in PENS0)cm[PENCOL[id]]=Math.max(cm[PENCOL[id]],g(id));
+  const sh=[0,cm[0],cm[0]+cm[1]],out={};for(const id in PENS0){const B=PENS0[id],d=sh[PENCOL[id]];out[id]={x0:B.x0-d-g(id),x1:B.x1-d,z0:B.z0,z1:B.z1}}return out}
+function applyPenLayout(){const R=penRects();for(const id in R)Object.assign(PENS[id],R[id])}
 function inAnyPen(x,z,m=.3){for(const k in PENS){const p=PENS[k];if(x>p.x0-m&&x<p.x1+m&&z>p.z0-m&&z<p.z1+m)return true}return false}
 const SNOWB=new Builder();
 let PONDTEX=null;const PONDRIP=[];let POND_MESH=null,SKYMESH=null,SNOWMESH=null,SNOWG=null,SNOWF=null,sickT=8;
@@ -923,10 +930,10 @@ function bush(b,x,z,flower,seed,sz=1){const r=rnd(seed);[[0,.32,0,.5],[.4,.27,.1
 (function decor(){
   const b=new Builder();
   [[-3.8,-9.6,0xe2402f],[-6.5,-10.5,0xf08a24],[-13.6,-11,0xf5c732],[-14,6.5,null],[-9,8,0xe2402f],[-3.5,9,0xf5c732],[1.5,10,null],[5,9.5,0xf08a24],[13.6,2.6,0xe2402f],[14.2,-3.2,null],[8.6,-7.6,0xf5c732],[-26.5,-1,0xf08a24],[14,8,null],[6.5,-10,0xe2402f]]
-    .forEach(([x,z,f],k)=>{if(Math.hypot(x+5,z+9.4)<2.6)return;BASETREES.push({id:"b"+k,x,z,f,seed:k*37+5})});world.add(TREEG);
+    .forEach(([x,z,f],k)=>{if(Math.hypot(x+5,z+9.4)<2.6||(x<-24.5&&z>-6&&z<9))return;BASETREES.push({id:"b"+k,x,z,f,seed:k*37+5})});world.add(TREEG);
   [[-5,6,0xff7bb0],[7,5.5,0xffd84a],[3.2,-6.5,0xffffff],[13.4,-.8,0xff7bb0],[-1.5,7,0xffffff],
    [-4.6,-2.7,0xffffff,1.3],[-4.7,5.7,null,1.4],[5.4,5.9,0xffffff,1.3],[5.5,-3.7,null,1.2],[2.2,6.6,0xff7bb0,1.1],[-1.2,-4.3,0xffffff,.9],[3.4,-4.5,null,1],[-5.3,2.3,0xffd84a,.9],
-   [-26,-5.5,null,1.3],[-25.6,6.4,0xffffff,1.1],[-8,5,null,1.2],[-13,6.3,0xff7bb0,1.1],[-4,8,null,1.5],[5.8,6.9,0xffffff,1.2],[9.8,-1.2,null,1.1],[-17.5,6.5,0xffffff,1.4]].forEach(([x,z,f,sz],k)=>bush(b,x,z,f,k*13+3,sz||1));
+   [-8,5,null,1.2],[-13,6.3,0xff7bb0,1.1],[-4,8,null,1.5],[5.8,6.9,0xffffff,1.2],[9.8,-1.2,null,1.1],[-17.5,6.5,0xffffff,1.4]].forEach(([x,z,f,sz],k)=>bush(b,x,z,f,k*13+3,sz||1));
   // signpost
   b.add("cyl",0x7a4a24,1.8,.6,-3.9,.05,1.2,.05);b.add("box",0xc98a4b,1.8,1.05,-3.9,.08,.32,.9);b.add("box",0x8f5a2a,1.8,1.05,-3.9,.09,.36,.94);
   // hay bales
@@ -1143,7 +1150,9 @@ function buildFences(){
   const b=new Builder(),n=SIZES[S.size];
   fence(b,FX0-.2,FZ0-.2,FX0+n+.2,FZ0+n+.2,(mx,mz,ei)=>(ei===3&&mz>.0&&mz<1.1)||(ei===0&&mx>.0&&mx<1.1)||(ei===1&&Math.abs(mz)<.6)||(ei===2&&mx>0&&mx<1.1));
   plotDecor(b);
-  if(!penFence){const pb=new Builder(),r=rnd(3);
+  applyPenLayout();const pk=JSON.stringify(S.penSz||{});
+  if(penFence&&penFence._k!==pk){scene.remove(penFence);PENLABS.forEach(l=>scene.remove(l));PENLABS=[];if(PENSNOW)scene.remove(PENSNOW);penFence=null}
+  if(!penFence){const pb=new Builder(),r=rnd(3),snb=new Builder();
     Object.entries(PENS).forEach(([id,P])=>{
       const midz=(P.z0+P.z1)/2,midx=(P.x0+P.x1)/2;
       fence(pb,P.x0,P.z0,P.x1,P.z1,(mx,mz,ei)=>(P.gate==="e"&&ei===1&&Math.abs(mz+.15)<.55)||(P.gate==="s"&&ei===2&&Math.abs(mx-midx-.6)<.55)||(P.gate==="n"&&ei===0&&Math.abs(mx-midx-.6)<.55));
@@ -1154,20 +1163,20 @@ function buildFences(){
       let lab;
       if(id==="manok"){const cx=P.x0+.9,cz=midz;pb.add("box",0xd8a25a,cx,.55,cz,1.2,.8,1.1);pb.add("prism",0xb5452f,cx,1.17,cz,.72,1.2,.45,-Math.PI/2,0,0);pb.add("box",0x3a2615,cx+.61,.45,cz,.02,.35,.3);
         for(let k=0;k<3;k++)pb.add("box",0x9b6a3a,cx+.75+k*.12,.15+k*.1,cz,.12,.03,.25);
-        SNOWB.add("box",0xffffff,cx-.3,1.3,cz,.42,.06,1.24,0,0,.62);SNOWB.add("box",0xffffff,cx+.3,1.3,cz,.42,.06,1.24,0,0,-.62);
+        snb.add("box",0xffffff,cx-.3,1.3,cz,.42,.06,1.24,0,0,.62);snb.add("box",0xffffff,cx+.3,1.3,cz,.42,.06,1.24,0,0,-.62);
         lab=labelSprite(P.n);lab.position.set(cx,2.05,cz);
       }else{const tall=id==="kabayo"?2.3:1.9,sx=P.x0+.95,dep=P.z1-P.z0-.3,WD=0x7a4f2a,m=Math.max(1,Math.round(dep/1.6));
         pb.add("box",0x9b6a3a,P.x0+.12,tall/2,midz,.12,tall,dep);
         pb.add("box",WD,sx,tall*.42,P.z0+.2,1.7,tall*.84,.1);pb.add("box",WD,sx,tall*.42,P.z1-.2,1.7,tall*.84,.1);
         for(let k=0;k<=m;k++)pb.add("box",WD,P.x0+1.75,tall*.45,P.z0+.2+k*(dep-.1)/m,.12,tall*.9,.12);
         pb.add("box",0xb5452f,sx,tall+.05,midz,2.25,.1,dep+.4,0,0,-.13);pb.add("box",0x8f3a2a,sx,tall+.12,midz,2.25,.04,.12,0,0,-.13);
-        SNOWB.add("box",0xffffff,sx-.05,tall+.15,midz,1.95,.08,dep+.15,0,0,-.13);
+        snb.add("box",0xffffff,sx-.05,tall+.15,midz,1.95,.08,dep+.15,0,0,-.13);
         pb.add("box",0xdcb851,P.x0+.45,.3,P.z0+.7,.5,.5,.8);pb.add("box",0xdcb851,P.x0+.45,.3,P.z1-.7,.5,.5,.8);
         lab=labelSprite(P.n);lab.position.set(sx,tall+.85,midz);
       }
-      scene.add(lab);
+      scene.add(lab);PENLABS.push(lab);
     });
-    penFence=pb.mesh();scene.add(penFence)}
+    penFence=pb.mesh();penFence._k=pk;scene.add(penFence);PENSNOW=new THREE.Mesh(snb.geo(),SNOWMAT);PENSNOW.visible=!!(SNOWMESH&&SNOWMESH.visible);scene.add(PENSNOW)}
   fenceMesh=b.mesh();scene.add(fenceMesh);
 }
 
@@ -1661,7 +1670,7 @@ function stepWeather(dt,t){
   if(GROUNDMAT){GROUNDMAT.color.copy(WC.gTint);GROUNDMAT.emissive.setRGB(.9,.94,.98).multiplyScalar(WC.gI)}
   Object.values(AM).forEach(m=>{m.emissive.copy(WC.em).multiplyScalar(WC.emI*.6)});
   if(SUNSPRITE)SUNSPRITE.material.opacity=Math.min(1,WC.sunV);
-  SNOWMAT.opacity=WC.snow;if(SNOWMESH)SNOWMESH.visible=WC.snow>.03;
+  SNOWMAT.opacity=WC.snow;if(SNOWMESH)SNOWMESH.visible=WC.snow>.03;if(PENSNOW)PENSNOW.visible=WC.snow>.03;
   if(SNOWG){SNOWG.material.opacity=WC.snow*.9;SNOWG.visible=WC.snow>.03;const nn=SIZES[S.size];SNOWF.position.set(FX0+nn/2,.19,FZ0+nn/2);SNOWF.scale.set(nn+.2,nn+.2,1);SNOWF.material.opacity=WC.snow*.8;SNOWF.visible=WC.snow>.03}
   ISLE.weather(WX.key,dt);dayNight(dt,t);
   CLOUDMAT.color.copy(WC.cloud);
@@ -2465,7 +2474,10 @@ function expand(){
   S.tiles=tiles.concat(old.slice(oc*oc));Object.values(CREW).forEach(W=>{if(W&&W.o){if(W.o.queue)W.o.queue.length=0;W.o.tile=-1}});S.size=nx;hovered=null;toast("The farm got bigger! "+nc+"×"+nc);save();buildField();ui();
 }
 const PENX=new THREE.Group();scene.add(PENX);let _penxK="";
-function buildPenX(){const key=JSON.stringify(S.penLv||{});if(key===_penxK)return;_penxK=key;while(PENX.children.length)PENX.remove(PENX.children[0]);
+function syncPenLayout(){const k=JSON.stringify(S.penSz||{});if(k===_plk)return;const first=_plk===null;_plk=k;if(first)return;
+  buildFences();_penxK=null;try{landDeco()}catch(e){}
+  animalObjs.forEach(o=>{if(o.g.userData.zone&&o.g.userData.zone!=="pen")return;const [x,z]=randPen(o.r,o.id);o.g.position.set(x,0,z);o.tx=x;o.tz=z})}
+function buildPenX(){syncPenLayout();const key=JSON.stringify([S.penLv||{},S.penSz||{}]);if(key===_penxK)return;_penxK=key;while(PENX.children.length)PENX.remove(PENX.children[0]);
   const b=new Builder(),sn=new Builder(),L=S.penLv||{};
   const shed=(x,z,wall,roof,ry=0)=>{b.add("box",wall,x,.42,z,.9,.84,.8,0,ry,0);b.add("prism",roof,x,.98,z,.6,1.0,.32,-Math.PI/2,ry,0);b.add("box",0x3a2615,x+.46*Math.cos(ry),.32,z-.46*Math.sin(ry),.02,.4,.28,0,ry,0);sn.add("box",0xffffff,x,1.12,z,.7,.05,1.0,0,ry,0)};
   const ROOFS=[0xb5452f,0xe07a2a,0x2f8f9b,0x3a5fc8],TRIM=[0x8f3a2a,0xc95a1a,0x1f6a73,0xf2b632];
@@ -2489,6 +2501,14 @@ function buildPenX(){const key=JSON.stringify(S.penLv||{});if(key===_penxK)retur
 const LAKEUP=[2000,4000];
 function expandLake(){const pl=(S.penLv||{}).pond|0;if(pl<PENUP.length)return expandHouse("pond","Lake");const ll=S.lakeLv|0;if(ll>=LAKEUP.length)return toast("The lake is already at its biggest.");const c=LAKEUP[ll];
   if(S.coins<c)return toast("You need "+c.toLocaleString()+" coins to expand the lake.");S.coins-=c;S.lakeLv=ll+1;toast("🌊 The lake got bigger!",2600);after();buildPenX();burst(PONDS.x,.4,PONDS.z,0x4fc3e8,26,.6)}
+function penSpaceBlock(L){const R=penRects(L);for(const id in R){const P=R[id];if(P.x0<-31.5)return"There's no more room to the west.";
+    for(const p of PLOTS){if(p.island)continue;const m=p.sz||PN;if(P.x0<p.x0+m+.3&&P.x1>p.x0-.3&&P.z0<p.z0+m+.3&&P.z1>p.z0-.3)return p.n+" is in the way. Move that land first (press and hold it)."}
+    for(const o of S.builds||[]){const d=BUILDS.find(q=>q.id===o.id),r=(d?d.r:1.5)*.75;if(o.x>P.x0-r&&o.x<P.x1+r&&o.z>P.z0-r&&o.z<P.z1+r)return(d?d.n:"A building")+" is in the way. Move it first."}}return null}
+function expandSpace(k){S.penSz=S.penSz||{};const lv=S.penSz[k]|0,P=PENS[k];if(!P||lv>=PENSZ.length)return toast("This pen is already at its biggest.");const c=PENSZ[lv];
+  if(S.coins<c)return toast("You need "+c.toLocaleString()+" coins to make the "+P.n+" bigger.");
+  const L={...S.penSz,[k]:lv+1},why=penSpaceBlock(L);if(why)return toast(why,3600);
+  S.coins-=c;S.penSz=L;syncPenLayout();const Q=PENS[k];burst((Q.x0+Q.x1)/2,.6,(Q.z0+Q.z1)/2,0xd9be7a,26,.6);
+  toast("📐 "+P.n+" is bigger now! Room for "+PENSZADD+" more animals.",3200);after()}
 function expandHouse(k,n){S.penLv=S.penLv||{};const lv=S.penLv[k]|0;if(lv>=PENUP.length)return;const c=PENUP[lv];if(S.coins<c)return toast("You need "+c+" coins to expand the "+n+".");
   S.coins-=c;S.penLv[k]=lv+1;const P=PENS[k];if(P)burst((P.x0+P.x1)/2,.6,(P.z0+P.z1)/2,0xc98a4b,22,.5);toast(n+" upgraded to Level "+(lv+2)+"! It looks better and holds "+PENADD+" more animals.",3200);after();buildPenX()}
 function buyAnimal(a,gender){
@@ -2520,10 +2540,11 @@ function ui(){
   if(shop._lv!==S.lv){shop._lv=S.lv;shop.innerHTML=ANIMALS.map(a=>S.lv<a.lv?`<div class="abuy lock"><b>${a.n}</b><small>Level ${a.lv}</small></div>`:`<div class="abuy"><b>${a.n}</b><small>${a.cost} coins</small><button class="btn sm" data-id="${a.id}" data-g="M">♂ Male</button><button class="btn sm" data-id="${a.id}" data-g="F" style="background:#d9568a;box-shadow:0 4px 0 #9a2f5a">♀ Female</button></div>`).join("");
     shop.querySelectorAll("button[data-id]").forEach(b=>b.onclick=()=>buyAnimal(animal(b.dataset.id),b.dataset.g))}
   {const pu=$("penUp"),HS=[...Object.keys(PENS).map(id=>({k:id,n:PENS[id].n,ids:[id]})),{k:"pond",n:"Duck Pond (grows bigger)",ids:["bibe","pato"]},{k:"farm",n:"Dog & Cat Yard",ids:["aso","pusa"]}];
-    const key=JSON.stringify([S.penLv||{},S.pens.length,Math.floor(S.coins/50)]);if(pu&&pu._k!==key){pu._k=key;
+    const key=JSON.stringify([S.penLv||{},S.penSz||{},S.pens.length,Math.floor(S.coins/50)]);if(pu&&pu._k!==key){pu._k=key;
     pu.innerHTML=HS.map(h=>{const lv=(S.penLv||{})[h.k]|0,cap=zoneLimit(h.ids[0]),have=h.k==="pond"||h.k==="farm"?S.pens.filter(p=>zoneOf(p.id)===h.k).length:S.pens.filter(p=>p.id===h.k).length,c=PENUP[lv];
-      return `<div class="abuy"><b>${h.n}</b><small>${have} / ${cap} · Level ${lv+1}</small>${lv>=PENUP.length?`<small>Max size</small>`:`<button class="btn sm" data-h="${h.k}"${S.coins<c?" disabled":""}>Level up · ${c}</button>`}</div>`}).join("");
-    pu.querySelectorAll("[data-h]").forEach(b=>b.onclick=()=>expandHouse(b.dataset.h,HS.find(h=>h.k===b.dataset.h).n))}}
+      const sl=PENS[h.k]?penSz(h.k):-1,sc=PENSZ[sl];
+      return `<div class="abuy"><b>${h.n}</b><small>${have} / ${cap} · Level ${lv+1}</small>${lv>=PENUP.length?`<small>Max level</small>`:`<button class="btn sm" data-h="${h.k}"${S.coins<c?" disabled":""}>Level up · ${c}</button>`}${sl<0?"":sl>=PENSZ.length?`<small>Biggest space</small>`:`<button class="btn sm" data-sz="${h.k}"${S.coins<sc?" disabled":""}>📐 Bigger pen · ${sc.toLocaleString()}</button>`}</div>`}).join("");
+    pu.querySelectorAll("[data-h]").forEach(b=>b.onclick=()=>expandHouse(b.dataset.h,HS.find(h=>h.k===b.dataset.h).n));pu.querySelectorAll("[data-sz]").forEach(b=>b.onclick=()=>expandSpace(b.dataset.sz))}}
   {const lb=$("tLake"),pl=(S.penLv||{}).pond|0,ll=S.lakeLv|0,c=pl<PENUP.length?PENUP[pl]:ll<LAKEUP.length?LAKEUP[ll]:0;lb.disabled=!c;lb.textContent=c?"🌊 Expand Lake · "+c.toLocaleString():"🌊 Lake: Max size"}
   const nx=S.size+1,ex=$("tExpand");
   if(nx<SIZES.length){ex.disabled=false;ex.textContent="Expand "+SIZES[nx]+"×"+SIZES[nx]+" · "+EXPAND[nx]}else{ex.disabled=true;ex.textContent="Fully expanded"}
@@ -2657,7 +2678,7 @@ const SELRING=new THREE.Mesh(new THREE.RingGeometry(.38,.5,28),new THREE.MeshBas
 function selectWorker(k){SEL=k&&CREW[k]?k:null;renderCrewSel();const m=$("modeTag");
   m.textContent=SEL?"Orders for "+wName(SEL)+": tap where to work · tap Move to stop giving orders":"No worker selected: you will do it yourself";m.style.opacity=1;clearTimeout(modeT);modeT=setTimeout(()=>m.style.opacity=.85,2600)}
 function groundPoint(e){const r=cv.getBoundingClientRect();ndc.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(ndc,camera);
-  const v=ray.ray.intersectPlane(GPLANE,_gpv);if(!v)return null;return{x:Math.max(-28,Math.min(17,v.x)),z:Math.max(-24,Math.min(14,v.z))}}
+  const v=ray.ray.intersectPlane(GPLANE,_gpv);if(!v)return null;return{x:Math.max(-33,Math.min(17,v.x)),z:Math.max(-24,Math.min(14,v.z))}}
 function taskTarget(q){
   if(q.type==="walk")return[q.x,q.z];
   if(q.type==="rest")return[1.1,-6.75];
@@ -3142,7 +3163,7 @@ function startHeal(p){p.heal=now()+120+Math.floor(Math.random()*61)}
 function zoneCount(id){const z=zoneOf(id);return z==="pen"?S.pens.filter(p=>p.id===id).length:S.pens.filter(p=>zoneOf(p.id)===z).length}
 const houseKey=id=>{const z=zoneOf(id);return z==="pen"?id:z};
 const PENUP=[150,400,900],PENADD=3;
-function zoneLimit(id){const z=zoneOf(id),base=z==="pen"?(PLIM[id]||5):ZLIM[z];return base+PENADD*((S.penLv||{})[houseKey(id)]|0)}
+function zoneLimit(id){const z=zoneOf(id),base=z==="pen"?(PLIM[id]||5)+PENSZADD*penSz(id):ZLIM[z];return base+PENADD*((S.penLv||{})[houseKey(id)]|0)}
 function normalizePens(){(S.pens||[]).forEach((p,i)=>{if(!p.g)p.g=i%2?"F":"M";if(p.sick){p.sick=false;delete p.sickAt;delete p.heal}})}
 function rebuildAnimals(){animalObjs.forEach(o=>animalGroup.remove(o.g));animalObjs=[];syncAnimals();
   Object.values(CREW).forEach(W=>{if(W&&W.o&&W.o.queue)W.o.queue=W.o.queue.filter(q=>q.type!=="animal")})}
