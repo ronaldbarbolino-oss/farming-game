@@ -13,10 +13,12 @@ async function adminOk(msg, sig) {
   try { const k = await crypto.subtle.importKey("jwk", ADMIN_KEY, { name: "ECDSA", namedCurve: "P-256" }, false, ["verify"]);
     return await crypto.subtle.verify({ name: "ECDSA", hash: "SHA-256" }, k, b64u(sig), new TextEncoder().encode(msg)) } catch { return false }
 }
+const thOk = (m, th) => !!m && (m.th === th || (Array.isArray(m.ths) && m.ths.includes(th)));
+const addTh = (m, th) => { const L = [th, ...((m && m.ths) || (m && m.th ? [m.th] : [])).filter(x => x !== th)].slice(0, 6); return { th, ths: L } };
 const pub = m => ({ u: m.u, farm: m.farm, farmer: m.farmer, shirt: m.shirt, lv: m.lv, size: m.size, seen: m.seen, ...(m.app ? { app: 1 } : {}) });
 
 // a restart time shipped with a deploy: open games reload once after it
-const DEPLOY_RESTART = 1791291654112;
+const DEPLOY_RESTART = 1791291984043;
 export default async (req) => {
   const url = new URL(req.url);
   const path = url.pathname.replace(/^.*?\/api\/?/, "").replace(/^\.netlify\/functions\/api\/?/, "").replace(/\/$/, "");
@@ -67,7 +69,7 @@ export default async (req) => {
       if (!r.ok) return { ok: false, error: "Couldn't send the email right now. Try again later." };
       return { ok: true };
     };
-    const ownU = async (u, tok) => { if (u.length < 3 || typeof tok !== "string" || tok.length < 16) return null; const m = await meta.get(u, { type: "json" }); return m && m.th === await sha(tok) ? m : null };
+    const ownU = async (u, tok) => { if (u.length < 3 || typeof tok !== "string" || tok.length < 16) return null; const m = await meta.get(u, { type: "json" }); return m && thOk(m, await sha(tok)) ? m : null };
     if (req.method === "POST" && path === "email/start") {
       let b; try { b = await req.json() } catch { return J({ error: "bad json" }, 400) }
       const u = norm(b.u), email = String(b.email || "").trim().toLowerCase().slice(0, 254);
@@ -120,17 +122,49 @@ export default async (req) => {
       if (!r.users.includes(u)) return J({ error: "That username isn't linked to this email." }, 400);
       if (typeof b.tok !== "string" || b.tok.length < 16) return J({ error: "bad token" }, 400);
       const m = await meta.get(u, { type: "json" }); if (!m) return J({ error: "Farm not found." }, 404);
-      await meta.setJSON(u, { ...m, th: await sha(b.tok), seen: Date.now() });
+      { const nth = await sha(b.tok); await meta.setJSON(u, { ...m, th: nth, ths: [nth], seen: Date.now() }) }
       const f = await farms.get(u, { type: "json" });
       await authS.delete("r/" + eh);
       return J({ ok: true, u, farm: m.farm, farmer: m.farmer, shirt: m.shirt | 0, email, state: f && f.state || null });
+    }
+    // ---- cloud sync: the same farm on the web and in the app ----
+    if (req.method === "POST" && path === "pull") {
+      let b; try { b = await req.json() } catch { return J({ error: "bad json" }, 400) }
+      const u = norm(b.u), m = await meta.get(u, { type: "json" });
+      if (!m || typeof b.tok !== "string" || !thOk(m, await sha(b.tok))) return J({ error: "not yours" }, 403);
+      const f = await farms.get(u, { type: "json" }).catch(() => null);
+      return J({ ok: true, farm: m.farm, farmer: m.farmer, shirt: m.shirt | 0, email: m.email || "", state: f && f.state || null });
+    }
+    if (req.method === "POST" && path === "setpw") {
+      let b; try { b = await req.json() } catch { return J({ error: "bad json" }, 400) }
+      const u = norm(b.u), pw = String(b.pw || ""), m = await meta.get(u, { type: "json" });
+      if (pw.length < 4 || pw.length > 64) return J({ error: "bad password" }, 400);
+      if (!m || typeof b.tok !== "string" || !thOk(m, await sha(b.tok))) return J({ error: "not yours" }, 403);
+      const ps = crypto.randomUUID(); await meta.setJSON(u, { ...m, ps, ph: await sha(ps + ":" + pw) });
+      return J({ ok: true });
+    }
+    if (req.method === "POST" && path === "login") {
+      let b; try { b = await req.json() } catch { return J({ error: "bad json" }, 400) }
+      const u = norm(b.u), pw = String(b.pw || ""), aS = getStore({ name: "auth", consistency: "strong" });
+      if (typeof b.tok !== "string" || b.tok.length < 16) return J({ error: "bad token" }, 400);
+      const lk = "lt/" + u, lt = (await aS.get(lk, { type: "json" }).catch(() => null)) || { n: 0, at: Date.now() };
+      if (Date.now() - lt.at > 3600000) { lt.n = 0; lt.at = Date.now() }
+      if (lt.n >= 10) return J({ error: "Too many tries. Wait an hour, or use Forgot password." }, 429);
+      const m = await meta.get(u, { type: "json" });
+      if (!m) return J({ error: "No farm with that username online." }, 404);
+      if (!m.ph) return J({ error: "This farm isn't linked for online login yet. On your old device, log out and log in again once, or use a transfer code." }, 409);
+      if (await sha(m.ps + ":" + pw) !== m.ph) { lt.n++; await aS.setJSON(lk, lt); return J({ error: "Wrong username or password." }, 401) }
+      try { await aS.delete(lk) } catch {}
+      await meta.setJSON(u, { ...m, ...addTh(m, await sha(b.tok)), seen: Date.now() });
+      const f = await farms.get(u, { type: "json" }).catch(() => null);
+      return J({ ok: true, u, farm: m.farm, farmer: m.farmer, shirt: m.shirt | 0, email: m.email || "", state: f && f.state || null });
     }
     // ---- transfer: move a farm to another device or the app with a one-time code ----
     if (req.method === "POST" && path === "transfer/start") {
       let b; try { b = await req.json() } catch { return J({ error: "bad json" }, 400) }
       const u = norm(b.u), aS = getStore({ name: "auth", consistency: "strong" });
       const m = await meta.get(u, { type: "json" });
-      if (!m || typeof b.tok !== "string" || m.th !== await sha(b.tok)) return J({ error: "Open your farm online first, then try again." }, 403);
+      if (!m || typeof b.tok !== "string" || !thOk(m, await sha(b.tok))) return J({ error: "Open your farm online first, then try again." }, 403);
       const A = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789", r = crypto.getRandomValues(new Uint8Array(8));
       const code = [...r].map(x => A[x % A.length]).join("");
       await aS.setJSON("t/" + code, { u, exp: Date.now() + 30 * 60000 });
@@ -156,7 +190,7 @@ export default async (req) => {
       if (!t || Date.now() > t.exp) return J({ error: "That code is wrong or expired. Make a new one on your old device." }, 400);
       if (typeof b.tok !== "string" || b.tok.length < 16) return J({ error: "bad token" }, 400);
       const m = await meta.get(t.u, { type: "json" }); if (!m) return J({ error: "Farm not found." }, 404);
-      await meta.setJSON(t.u, { ...m, th: await sha(b.tok), seen: Date.now() });
+      await meta.setJSON(t.u, { ...m, ...addTh(m, await sha(b.tok)), seen: Date.now() });
       const f = await farms.get(t.u, { type: "json" });
       await aS.delete("t/" + code);
       return J({ ok: true, u: t.u, farm: m.farm, farmer: m.farmer, shirt: m.shirt | 0, email: m.email || "", state: f && f.state || null });
@@ -200,7 +234,7 @@ export default async (req) => {
       if (!(typeof b.sig === "string" && await adminOk("packs:" + at + ":" + JSON.stringify(b.packs), b.sig))) return J({ error: "not allowed" }, 403);
       await ctl.setJSON("packs", packs); return J({ ok: true, packs });
     }
-    const own = async (u, tok) => { if (u.length < 3 || typeof tok !== "string" || tok.length < 16) return false; const m = await meta.get(u, { type: "json" }); return !!m && m.th === await sha(tok) };
+    const own = async (u, tok) => { if (u.length < 3 || typeof tok !== "string" || tok.length < 16) return false; const m = await meta.get(u, { type: "json" }); return thOk(m, await sha(tok)) };
     if (req.method === "POST" && path === "buy") {
       let b; try { b = await req.json() } catch { return J({ error: "bad json" }, 400) }
       const u = norm(b.u), pk = (await getPacks()).find(p => p.id === b.pack), ref = String(b.ref || "").replace(/[^A-Za-z0-9 -]/g, "").trim().slice(0, 40);
@@ -266,11 +300,15 @@ export default async (req) => {
       if (u.length < 3 || typeof b.tok !== "string" || b.tok.length < 16) return J({ error: "bad user" }, 400);
       const th = await sha(b.tok);
       const m = await meta.get(u, { type: "json" });
-      if (m && m.th !== th) return J({ error: "taken" }, 403);
-      const nm = { u, th, farm: String(b.farm || "").slice(0, 40), farmer: String(b.farmer || "").slice(0, 24), shirt: b.shirt | 0, lv: b.lv | 0, size: b.size | 0, coins: Math.max(0, Math.floor(Number(b.coins) || 0)), animals: b.animals | 0, plots: b.plots | 0, seen: Date.now(), created: m ? m.created : Date.now(), sessions: (m && m.sessions || 0) + (path === "publish" && b.first ? 1 : 0), ...((b.app || (m && m.app)) ? { app: 1 } : {}), ...(m && m.email ? { email: m.email, emailOk: !!m.emailOk } : {}) };
+      if (m && !thOk(m, th)) return J({ error: "taken" }, 403);
+      const nm = { ...(m || {}), u, th: m ? m.th : th, ...(m ? {} : { ths: [th] }), farm: String(b.farm || "").slice(0, 40), farmer: String(b.farmer || "").slice(0, 24), shirt: b.shirt | 0, lv: b.lv | 0, size: b.size | 0, coins: Math.max(0, Math.floor(Number(b.coins) || 0)), animals: b.animals | 0, plots: b.plots | 0, seen: Date.now(), created: m ? m.created : Date.now(), sessions: (m && m.sessions || 0) + (path === "publish" && b.first ? 1 : 0), ...((b.app || (m && m.app)) ? { app: 1 } : {}), ...(m && m.email ? { email: m.email, emailOk: !!m.emailOk } : {}) };
       await meta.setJSON(u, nm);
-      if (path === "publish" && b.state && typeof b.state === "object") await farms.setJSON(u, { ...pub(nm), state: b.state });
-      return J({ ok: true });
+      let newer = 0;
+      if (path === "publish" && b.state && typeof b.state === "object") {
+        const cur = await farms.get(u, { type: "json" }).catch(() => null), ct = Number(cur && cur.state && cur.state.seen) || 0, nt = Number(b.state.seen) || 0;
+        if (cur && ct > nt + 5) newer = ct; else await farms.setJSON(u, { ...pub(nm), state: b.state });
+      } else { const cur = await farms.get(u, { type: "json" }).catch(() => null); const ct = Number(cur && cur.state && cur.state.seen) || 0; if (ct > (Number(b.seen) || 0) + 5) newer = ct }
+      return J({ ok: true, newer });
     }
     return J({ error: "not found" }, 404);
   } catch (e) {

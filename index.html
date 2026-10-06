@@ -557,6 +557,13 @@ body.land .sbtns .sb{font-size:.6rem!important;padding:3px 6px!important}
     <div id="spDone" hidden><p class="suLead" style="font-size:1.05rem">✅ Message sent! We'll reply to <b id="spTo"></b> from farmgaming.ph@gmail.com. Check your inbox and spam folder.</p><div class="suRow"><button class="btn" type="button" id="spOk">OK</button></div></div>
     <p class="suLead" style="margin-top:8px;font-size:.8rem">You can also email us directly at <b>farmgaming.ph@gmail.com</b>.</p></div>
 </div>
+<div class="modal" id="syM" hidden>
+  <div class="suBox"><h3>☁️ Sync with your other devices</h3>
+    <div id="syForm"><p class="suLead">Type your password once. Then log in on your phone, the app or another computer with the same username and password, and your farm stays the same everywhere.</p>
+    <label for="syPw">Password for <b id="syU"></b></label><input id="syPw" type="password" maxlength="64" autocomplete="current-password"><p class="err" id="syErr" role="alert"></p>
+    <div class="suRow"><button class="btn alt" type="button" id="syClose">Close</button><button class="btn" type="button" id="syGo">Turn on sync</button></div></div>
+    <div id="syDone" hidden><p class="suLead" style="font-size:1.05rem">✅ Sync is on! On your other device, tap <b>Log in</b> and use the same username and password. Progress saves every minute, and the newest save wins.</p><div class="suRow"><button class="btn" type="button" onclick="document.getElementById('syM').hidden=true">OK</button></div></div></div>
+</div>
 <div class="modal" id="trInM" hidden>
   <div class="suBox"><h3>📲 Enter your transfer code</h3>
     <p class="suLead">On your old phone or browser, open your account (tap your name at the top) and tap <b>Move my farm to the app</b> to get a code.</p>
@@ -645,7 +652,7 @@ body.land .sbtns .sb{font-size:.6rem!important;padding:3px 6px!important}
     <span class="lbl">Farmer's shirt color</span><div class="sw" id="suShirts"></div>
     <label class="keep" id="suKeepRow"><input type="checkbox" id="suKeep" checked> Bring your current progress to the new farm</label>
     <p class="err" id="suErr" role="alert"></p>
-    <p style="margin:2px 0 6px"><button class="btn sm" type="button" id="trBtn" style="background:#2f7fb8;box-shadow:0 3px 0 #1d5a85">📲 Move my farm to the app / another phone</button></p>
+    <p style="margin:2px 0 6px"><button class="btn sm" type="button" id="trBtn" style="background:#2f7fb8;box-shadow:0 3px 0 #1d5a85">📲 Move my farm to the app / another phone</button> <button class="btn sm" type="button" id="syncOnBtn" style="background:#3f8f2c;box-shadow:0 3px 0 #2b6a1f">☁️ Sync with my other devices</button></p>
     <p style="margin:2px 0 6px"><button class="btn sm alt" type="button" id="emailBtn">📧 Email &amp; account recovery</button> <small id="emailState"></small></p>
     <div class="suRow"><button class="btn alt" type="button" id="logoutBtn">Log out</button><button class="btn alt" type="button" id="suClose">Close</button><button class="btn alt" type="button" id="suLater" hidden>Later</button><button class="btn" type="submit" id="suGo">Start Farming</button></div>
   </form>
@@ -693,7 +700,7 @@ var FX0=-3.5, FZ0=-3;const FIELD0=[-3.5,-3];function applyFieldPos(){const q=(ty
 const PEN={x0:-11.5,x1:-6,z0:-3,z1:4};          // animal pen bounds
 
 function fresh(){return{inTown:false,seeds:[],tools:[],fert:0,basket:0,decor:{},inv:{},shopOpen:true,builds:[],boats:[],boatAt:"farm",guard:false,plots:[],helperOn:true,helpers:1,hspd:0,trees:{},cut:[],ptrees:[],penLv:{},penSz:{},penPos:{},treePos:{},hillPos:{},hillGone:[],free:{},redeemed:[],axe:0,coins:1500,xp:0,lv:1,size:0,sel:"pechay",tiles:Array(25).fill(null).map(()=>({k:"grass"})),pens:[]}}
-let S=fresh();
+var SYNC={base:0,pulled:false,pullT:0,pulling:false};let S=fresh();
 
 if(window.claude?.hot?.data?.S)S=window.claude.hot.data.S;
 window.claude?.hot?.snapshot?.(()=>({S}));
@@ -2746,7 +2753,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="149";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
+const GAMEVER="152";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 function cvRect(){return ROT?{left:0,top:0,width:cv.clientWidth,height:cv.clientHeight}:cv.getBoundingClientRect()}
 function setRot(){const want=!!MOBILE&&innerHeight>innerWidth*1.05;if(want!==ROT){ROT=want;document.body.classList.toggle("rot",want)}const r=document.documentElement.style;r.setProperty("--LW",(ROT?innerHeight:innerWidth)+"px");r.setProperty("--LH",(ROT?innerWidth:innerHeight)+"px")}
 let _olTried=false;function tryLockLand(){if(_olTried||!MOBILE||!(innerHeight>innerWidth))return;_olTried=true;try{const d=document.documentElement,go=()=>{if(screen.orientation&&screen.orientation.lock)screen.orientation.lock("landscape").catch(()=>{})};
@@ -6372,7 +6379,7 @@ let farmerTag=null,farmerColor=0xd94a3a,SU_SHIRT=0;
 function applyProfile(){const p=CLOUD.profile||CLOUD.local;$("logo").textContent="Farming";$("acct").textContent=p?(p.farmer+" · "+p.farm):"Guest · Sign up";if(p)setFarmerLook(p)}
 function setFarmerLook(p){if(!farmer)return;const c=SHIRTS[p.shirt|0]||SHIRTS[0],from=am(farmerColor),to=am(c);if(from!==to)farmer.g.traverse(o=>{if(o.isMesh&&o.material===from)o.material=to});farmerColor=c;
   if(farmerTag)farmer.g.remove(farmerTag);farmerTag=labelSprite(String(p.farmer||"").slice(0,16));farmerTag.position.y=1.8;farmerTag.scale.set(1.2,.3,1);farmer.g.add(farmerTag)}
-function loadState(st){const n=Object.assign(fresh(),st);if(st&&st.axe===undefined)n.axe=1;if(!VISIT)freezeOffline(n,n.seen);if(!SIZES[n.size]||!Array.isArray(n.tiles)||n.tiles.length!==expectTiles(n)||!Array.isArray(n.pens))return false;
+function loadState(st){SYNC.base=Number(st&&st.seen)||0;SYNC.pulled=false;SYNC.pullT=Date.now();const n=Object.assign(fresh(),st);if(st&&st.axe===undefined)n.axe=1;if(!VISIT)freezeOffline(n,n.seen);if(!SIZES[n.size]||!Array.isArray(n.tiles)||n.tiles.length!==expectTiles(n)||!Array.isArray(n.pens))return false;
   S=n;normalizePens();hovered=null;if(typeof renderBuilds==="function"){renderBuilds();buildBoat();buildJeep();shopUI(true);townUI(true)}if(typeof helperUI==="function")helperUI();animalObjs.forEach(o=>animalGroup.remove(o.g));animalObjs=[];buildField();syncAnimals();ui();save();return true}
 async function cloudSave(force){
   if(!CLOUD.id||CLOUD.readonly||!CLOUD.profile||CLOUD.busy||(!CLOUD.dirty&&!force))return;CLOUD.busy=true;CLOUD.dirty=false;
@@ -6453,11 +6460,14 @@ function localAuthStart(){$("lbHead").hidden=true;$("lbPanel").hidden=true;let u
     const all=accts();if(all[u])return $("auErr").textContent="That username is already taken on this device. Choose another or log in.";
     const salt=Math.random().toString(36).slice(2)+Date.now().toString(36);all[u]={salt,hash:await hashPw(p1,salt),farm,farmer:name,shirt:SU_SHIRT,created:Date.now()};saveAccts(all);
     if($("auImport").checked&&!$("auImportRow").hidden){const o=oldSave();if(o)try{localStorage.setItem("farming-save-"+u,JSON.stringify(o))}catch(e){}}
-    ["auPw","auPw2"].forEach(k=>$(k).value="");loginLocal(u);toast(farm+" is ready! Start planting.",3200);
+    ["auPw","auPw2"].forEach(k=>$(k).value="");loginLocal(u);toast(farm+" is ready! Start planting.",3200);setTimeout(()=>linkPw(u,p1),2500);
     const em=$("auEmail").value.trim();$("auEmail").value="";if(em)setTimeout(()=>openEmail(em,true),1200)};
   $("auLogin").onsubmit=async e=>{e.preventDefault();const u=$("liUser").value.trim().toLowerCase(),p=$("liPw").value,a=accts()[u];
-    if(!a||await hashPw(p,a.salt)!==a.hash)return $("liErr").textContent="Wrong username or password.";
-    $("liPw").value="";loginLocal(u);toast("Welcome back, "+a.farmer+"!",2400)};
+    if(a&&await hashPw(p,a.salt)===a.hash){$("liPw").value="";NET.taken=false;loginLocal(u);toast("Welcome back, "+a.farmer+"!",2400);setTimeout(()=>linkPw(u,p),2500);return}
+    if(!API)return $("liErr").textContent="Wrong username or password.";
+    $("liErr").textContent="Checking online…";try{const r=crypto.getRandomValues(new Uint8Array(16)),tok=[...r].map(b=>b.toString(16).padStart(2,"0")).join("");const d=await postJ("login",{u,pw:p,tok});
+      $("liErr").textContent="";$("liPw").value="";$("auth").hidden=true;await adoptAccount(d,p,tok);toast("☁️ Welcome, "+(d.farmer||d.u)+"! Your farm is synced on this device too.",4500)}
+    catch(err){$("liErr").textContent=err.message||"Wrong username or password."}};
   $("logoutBtn").onclick=()=>{if(LOCAL.user)logoutLocal()};
 })();
 
@@ -6492,6 +6502,9 @@ async function adoptAccount(d,pw,tok){const u=d.u,A=accts(),salt=Math.random().t
   NET.taken=false;loginLocal(u)}
 $("trBtn").onclick=async()=>{if(!API)return toast("Moving your farm works in the Farming app at farming-ph.netlify.app.",3200);if(!myUser())return;$("trM").hidden=false;$("trErr").textContent="";$("trCode").textContent="…";
   try{save();await netSend(true);const d=await postJ("transfer/start",{u:myUser(),tok:myTok()});$("trCode").textContent=d.code.slice(0,4)+"-"+d.code.slice(4)}catch(e){$("trErr").textContent=e.message;$("trCode").textContent="—"}};
+$("syncOnBtn").onclick=()=>{if(!API)return toast("Sync works in the Farming app at farming-ph.netlify.app.",3200);if(!myUser())return;$("syM").hidden=false;$("syErr").textContent="";$("syDone").hidden=true;$("syForm").hidden=false;$("syU").textContent=myUser();setTimeout(()=>$("syPw").focus(),50)};
+$("syClose").onclick=()=>{$("syM").hidden=true};$("syGo").onclick=async()=>{const u=myUser(),a=accts()[u],p=$("syPw").value;$("syErr").textContent="";if(!a||await hashPw(p,a.salt)!==a.hash)return $("syErr").textContent="That's not your password for this farm.";
+  $("syGo").disabled=true;try{await netSend(true);if(NET.taken)throw new Error("This device isn't linked to the farm online. Log out and log in again.");await postJ("setpw",{u,tok:myTok(),pw:p});$("syPw").value="";$("syForm").hidden=true;$("syDone").hidden=false}catch(e){$("syErr").textContent=e.message}$("syGo").disabled=false};
 $("trCopy").onclick=async()=>{const t=$("trCode").textContent.replace("-","");try{await navigator.clipboard.writeText(t);$("trCopy").textContent="Copied!"}catch(e){}setTimeout(()=>$("trCopy").textContent="Copy code",1500)};
 $("trClose").onclick=()=>{$("trM").hidden=true};
 $("trInBtn").onclick=()=>{if(!API)return $("liErr").textContent="Moving a farm works in the Farming app at farming-ph.netlify.app.";$("auth").hidden=true;$("trInM").hidden=false;$("tiErr").textContent="";setTimeout(()=>$("tiCode").focus(),50)};
@@ -6499,7 +6512,7 @@ $("tiClose").onclick=()=>{$("trInM").hidden=true;if(!LOCAL.user)openAuth("login"
 $("tiGo").onclick=async()=>{$("tiErr").textContent="";const code=$("tiCode").value.toUpperCase().replace(/[^A-Z0-9]/g,""),p1=$("tiPw").value,p2=$("tiPw2").value;
   if(code.length!==8)return $("tiErr").textContent="The transfer code has 8 letters and numbers.";if(p1.length<4)return $("tiErr").textContent="Password must be at least 4 characters.";if(p1!==p2)return $("tiErr").textContent="The two passwords don't match.";
   $("tiGo").disabled=true;try{const r=crypto.getRandomValues(new Uint8Array(16)),tok=[...r].map(b=>b.toString(16).padStart(2,"0")).join("");const d=await postJ("transfer/finish",{code,tok});
-    ["tiCode","tiPw","tiPw2"].forEach(k=>$(k).value="");$("trInM").hidden=true;$("auth").hidden=true;await adoptAccount(d,p1,tok);toast("📲 Welcome, "+(d.farmer||d.u)+"! Your farm moved here. Username: "+d.u,5000)}catch(e){$("tiErr").textContent=e.message}$("tiGo").disabled=false};
+    ["tiCode","tiPw","tiPw2"].forEach(k=>$(k).value="");$("trInM").hidden=true;$("auth").hidden=true;await adoptAccount(d,p1,tok);setTimeout(()=>linkPw(d.u,p1),2500);toast("📲 Welcome, "+(d.farmer||d.u)+"! Your farm is now on this device too. Username: "+d.u,5000)}catch(e){$("tiErr").textContent=e.message}$("tiGo").disabled=false};
 async function initCloud(){
   if(!window.claude||!window.claude.use){$("lbHead").hidden=true;$("lbPanel").hidden=true;localAuthStart();return}
   let db=null,user=null;
@@ -6530,12 +6543,20 @@ const ONLINE_MS=150000;let NET={ok:null,last:0,lastFull:0,taken:false,list:[],no
 const myUser=()=>typeof LOCAL!=="undefined"&&LOCAL.user||null;
 function myTok(){const u=myUser();if(!u)return null;const A=accts();if(!A[u])return null;if(!A[u].tok){const r=crypto.getRandomValues(new Uint8Array(16));A[u].tok=[...r].map(b=>b.toString(16).padStart(2,"0")).join("");saveAccts(A)}return A[u].tok}
 function snapState(){const st=JSON.parse(JSON.stringify(S));delete st.free;delete st.inTown;return st}
-async function netSend(full){if(!API||VISIT||NET.taken)return;const u=myUser(),tok=myTok();if(!u||!tok)return;const p=CLOUD.local||{};
-  const body={u,tok,farm:p.farm||"",farmer:p.farmer||"",shirt:p.shirt|0,lv:S.lv,size:S.size,coins:Math.floor(S.coins),animals:S.pens.length,plots:(S.plots||[]).length,app:IS_APP?1:0};if(!NET.sentFirst&&full){body.first=1;NET.sentFirst=1}if(full)body.state=snapState();
+async function netSend(full){if(!API||VISIT||NET.taken)return;if(!SYNC.pulled&&Date.now()-(SYNC.pullT||0)<15000){if(!SYNC.pulling)pullSync(true);return}const u=myUser(),tok=myTok();if(!u||!tok)return;const p=CLOUD.local||{};
+  const body={u,tok,farm:p.farm||"",farmer:p.farmer||"",shirt:p.shirt|0,lv:S.lv,size:S.size,coins:Math.floor(S.coins),animals:S.pens.length,plots:(S.plots||[]).length,app:IS_APP?1:0,seen:S.seen||0};if(!NET.sentFirst&&full){body.first=1;NET.sentFirst=1}if(full)body.state=snapState();
   try{const r=await fetch(API+(full?"publish":"ping"),{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});
-    if(r.status===403){NET.taken=true;toast("Your username is already used online by another player, so your farm can't be shared on the map.",5000)}NET.ok=r.ok||r.status===403}catch(e){NET.ok=false}}
+    if(r.status===403){NET.taken=true;toast("☁️ This farm isn't linked on this device anymore. Log out, then log in with your username and password to sync it here.",6500)}
+    else if(r.ok){try{const d=await r.json();if(d&&d.newer)showSyncBar();else if(full&&body.state)SYNC.base=Number(body.state.seen)||SYNC.base}catch(e){}}NET.ok=r.ok||r.status===403}catch(e){NET.ok=false}}
+/* cloud sync: the same farm on the web and in the app */
+function showSyncBar(){let b=$("syncBar");if(!b){b=document.createElement("button");b.id="syncBar";b.type="button";b.className="btn";b.style.cssText="position:fixed;left:50%;top:calc(58px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:60;background:#2f7fb8;box-shadow:0 4px 0 #1d5a85";
+  b.textContent="☁️ Newer progress from your other device · Sync now";b.onclick=()=>pullSync(true);document.body.appendChild(b)}b.hidden=false}
+async function pullSync(go){if(!API||VISIT||!myUser()||NET.taken||SYNC.pulling)return;const u=myUser(),tok=myTok();if(!tok)return;SYNC.pulling=true;try{const d=await postJ("pull",{u,tok});const st=d&&d.state;
+  if(st&&(Number(st.seen)||0)>(SYNC.base||0)+5){if(!go&&Date.now()-PULLT0>8000)return showSyncBar();try{localStorage.setItem("farming-save-"+u,JSON.stringify(st))}catch(e){}toast("☁️ Getting your latest farm from your other device…",2500);setTimeout(()=>location.reload(),900);return}}catch(e){}finally{SYNC.pulling=false;SYNC.pulled=true}}
+const PULLT0=Date.now();document.addEventListener("visibilitychange",()=>{if(!document.hidden){SYNC.pulled=false;SYNC.pullT=Date.now();pullSync(Date.now()-PULLT0<8000)}});
+async function linkPw(u,pw){if(!API||!u||!pw)return;try{await netSend(true);await postJ("setpw",{u,tok:myTok(),pw})}catch(e){}}
 const IS_APP=!!((window.matchMedia&&(matchMedia("(display-mode: standalone)").matches||matchMedia("(display-mode: fullscreen)").matches))||navigator.standalone||/android-app:/.test(document.referrer||""));
-let netT=2;function stepNet(dt){if(!API||VISIT||!myUser())return;netT-=dt;if(netT>0)return;netT=60;const full=Date.now()-NET.lastFull>170000;if(full)NET.lastFull=Date.now();netSend(full)}
+let netT=2;function stepNet(dt){if(!API||VISIT||!myUser())return;netT-=dt;if(netT>0)return;netT=60;const full=Date.now()-NET.lastFull>55000;if(full)NET.lastFull=Date.now();netSend(full)}
 window.addEventListener("pagehide",()=>{if(API&&!VISIT&&myUser()&&navigator.sendBeacon){const u=myUser(),tok=myTok(),p=CLOUD.local||{};try{navigator.sendBeacon(API+"publish",new Blob([JSON.stringify({u,tok,farm:p.farm||"",farmer:p.farmer||"",shirt:p.shirt|0,lv:S.lv,size:S.size,state:snapState()})],{type:"application/json"}))}catch(e){}}});
 const isOn=f=>NET.now-f.seen<ONLINE_MS;
 const ago=ms=>{const m=Math.floor(ms/60000);return m<1?"just now":m<60?m+"m ago":m<1440?Math.floor(m/60)+"h ago":Math.floor(m/1440)+"d ago"};
