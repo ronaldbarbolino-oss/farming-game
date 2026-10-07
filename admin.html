@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex,nofollow"><title>Farming Admin</title>
+<meta name="robots" content="noindex,nofollow"><title>FarmVerse PH Admin</title>
 <link rel="icon" href="icon-192.png">
 <style>
 :root{--bg:#3f8a26;--card:#fff6df;--ink:#3a2615;--wood:#8f5a2a;--btn:#3f8f2c;--err:#c8382b;color-scheme:light}
@@ -22,7 +22,7 @@ button.alt{background:var(--wood)}button:disabled{opacity:.55;cursor:wait}button
 .quick{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}.quick button{margin:0;padding:6px 10px;font-size:.85rem;background:transparent;color:var(--ink);border:2px solid var(--wood);box-shadow:none}
 ul{padding-left:18px;margin:6px 0 0}li{margin:4px 0;word-break:break-all;font-size:.85rem}
 </style></head><body><main>
-<h1>Farming · Admin</h1>
+<h1>FarmVerse PH · Admin</h1>
 <section class="card" id="lock">
   <form id="unlockF"><label for="pw">Admin password</label><input id="pw" type="password" autocomplete="current-password" required>
   <button type="submit" id="unlockB">Unlock</button><p class="err" id="lockErr" role="alert"></p></form>
@@ -107,7 +107,7 @@ $("giftF").onsubmit=async e=>{e.preventDefault();$("giftErr").textContent="";con
   const sig=new Uint8Array(await signRaw(p));const code="FARM-"+b64u(p)+"."+b64u(sig);
   $("code").value=code;$("out").hidden=false;hist.unshift([c?c.toLocaleString()+" coins":"",w?w.toLocaleString()+" wood":""].filter(Boolean).join(" + ")+" → "+u);$("hist").innerHTML="";hist.forEach(t=>{const li=document.createElement("li");li.textContent=t;$("hist").append(li)})};
 $("copyB").onclick=async()=>{try{await navigator.clipboard.writeText($("code").value);$("copyB").textContent="Copied!"}catch(e){$("code").select();document.execCommand("copy");$("copyB").textContent="Copied!"}setTimeout(()=>$("copyB").textContent="Copy code",1600)};
-$("shareB").onclick=async()=>{const t="Your Farming gift code (open the game, tap 🎁 Redeem Code):\n"+$("code").value;if(navigator.share){try{await navigator.share({text:t})}catch(e){}}else{try{await navigator.clipboard.writeText(t)}catch(e){}$("shareB").textContent="Copied!";setTimeout(()=>$("shareB").textContent="Share",1600)}};
+$("shareB").onclick=async()=>{const t="Your FarmVerse PH gift code (open the game, tap 🎁 Redeem Code):\n"+$("code").value;if(navigator.share){try{await navigator.share({text:t})}catch(e){}}else{try{await navigator.clipboard.writeText(t)}catch(e){}$("shareB").textContent="Copied!";setTimeout(()=>$("shareB").textContent="Share",1600)}};
 let PL=[],PNOW=Date.now(),SORT={k:"seen",d:-1};
 const esc=v=>String(v==null?"":v).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const ago=ms=>{const m=Math.floor(ms/60000);return m<1?"just now":m<60?m+"m ago":m<1440?Math.floor(m/60)+"h ago":Math.floor(m/1440)+"d ago"};
@@ -126,7 +126,7 @@ function drawSupport(){const f=$("spF").value,L=SP.filter(t=>f==="all"||t.status
   L.forEach(t=>{const tr=document.createElement("tr");const td=x=>{const c=document.createElement("td");c.textContent=x;tr.append(c);return c};
     td(new Date(t.at).toLocaleString("en-PH",{timeZone:"Asia/Manila"}));td(t.email);td(t.u||"-");td(t.topic);const mc=td(t.msg);mc.style.maxWidth="320px";mc.style.whiteSpace="pre-wrap";
     const ac=document.createElement("td");ac.style.whiteSpace="nowrap";const a=document.createElement("a");a.className="btn";a.style.cssText="display:inline-block;margin:2px;padding:4px 8px;text-decoration:none";a.textContent="✉️ Reply";
-    a.href="https://mail.google.com/mail/?view=cm&fs=1&to="+encodeURIComponent(t.email)+"&su="+encodeURIComponent("Re: Farming support · "+t.topic)+"&body="+encodeURIComponent("Hi"+(t.u?" "+t.u:"")+",\n\n\n\n— Farming Support\n\n> "+t.msg.replace(/\n/g,"\n> "));a.target="_blank";a.rel="noopener";ac.append(a);
+    a.href="https://mail.google.com/mail/?view=cm&fs=1&to="+encodeURIComponent(t.email)+"&su="+encodeURIComponent("Re: FarmVerse PH support · "+t.topic)+"&body="+encodeURIComponent("Hi"+(t.u?" "+t.u:"")+",\n\n\n\n— FarmVerse PH Support\n\n> "+t.msg.replace(/\n/g,"\n> "));a.target="_blank";a.rel="noopener";ac.append(a);
     if(t.u){const b=document.createElement("button");b.type="button";b.className="alt";b.style.margin="2px";b.textContent="📲 Transfer code";b.onclick=()=>{$("tU").value=t.u;$("tGo").click();$("tU").scrollIntoView({behavior:"smooth",block:"center"})};ac.append(b)}
     const d=document.createElement("button");d.type="button";d.className="alt";d.style.margin="2px";d.textContent=t.status==="done"?"Reopen":"✓ Done";d.onclick=()=>loadSupport({id:t.id,status:t.status==="done"?"open":"done"});ac.append(d);tr.append(ac);tb.append(tr)})}
 $("spRefresh").onclick=()=>loadSupport();$("spF").onchange=drawSupport;

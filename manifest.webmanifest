@@ -1,14 +1,14 @@
 {
  "id": "/",
- "name": "Farming",
- "short_name": "Farming",
- "description": "Farming game: plant crops, raise animals, build houses and sail to the island.",
+ "name": "FarmVerse PH",
+ "short_name": "FarmVerse",
+ "description": "FarmVerse PH: plant crops, raise animals, build your farm and sail to islands and cities.",
  "start_url": "./",
  "scope": "./",
  "display": "fullscreen",
  "orientation": "landscape",
- "background_color": "#3f8a26",
- "theme_color": "#3f8a26",
+ "background_color": "#1f86c8",
+ "theme_color": "#1f86c8",
  "lang": "en",
  "icons": [
   {
@@ -28,10 +28,20 @@
    "sizes": "512x512",
    "type": "image/png",
    "purpose": "maskable"
+  },
+  {
+   "src": "icon-1024.png",
+   "sizes": "1024x1024",
+   "type": "image/png",
+   "purpose": "any"
   }
  ],
  "display_override": [
   "fullscreen",
   "standalone"
+ ],
+ "categories": [
+  "games",
+  "entertainment"
  ]
 }

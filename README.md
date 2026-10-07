@@ -1,8 +1,15 @@
-# Farming
+# FarmVerse PH
 
-3D na larong pagsasaka sa browser: magtanim, mag-alaga ng hayop, magtayo ng gusali, at maglayag papunta sa isla.
+The official FarmVerse PH game (same engine and server mechanism as Farming, with its own data and admin).
 
-- `index.html`: ang buong laro
-- `manifest.webmanifest`, `sw.js`, at mga icon: para ma-install ito bilang app sa phone
+- Game: `index.html` (PWA: `manifest.webmanifest`, `sw.js`, icons)
+- Admin: `admin.html`
+- Server: `netlify/functions/api.mjs` (Netlify Functions + Netlify Blobs)
 
-Naka-host sa Netlify. Kusang nag-a-update ang site sa bawat push sa `main`.
+## Deploy
+Create a new Netlify site from this repository, branch `farmverse`, publish directory `.`.
+Set the same environment variables as the Farming site (email settings) in the new site's settings.
+A new Netlify site keeps its own Blobs, so FarmVerse PH accounts and farms are separate from Farming.
+
+## App stores
+Run the deployed URL through PWABuilder to generate the Android (APK/AAB) and iOS packages.

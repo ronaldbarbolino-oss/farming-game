@@ -1,4 +1,4 @@
-// Farming online API: player directory + farm snapshots for visiting, stored in Netlify Blobs.
+// FarmVerse PH online API: player directory + farm snapshots for visiting, stored in Netlify Blobs.
 import { getStore } from "@netlify/blobs";
 
 const J = (o, s = 200) => new Response(JSON.stringify(o), { status: s, headers: { "content-type": "application/json", "cache-control": "no-store" } });
@@ -24,7 +24,8 @@ export default async (req) => {
   const path = url.pathname.replace(/^.*?\/api\/?/, "").replace(/^\.netlify\/functions\/api\/?/, "").replace(/\/$/, "");
   // test server (branch deploy "test"): its own data, never touching the live farms
   const TEST = /^test--/.test(url.hostname);
-  const gs = (o) => getStore({ ...o, name: (TEST ? "test-" : "") + o.name });
+  const FVB = /^farmverse--/.test(url.hostname);
+  const gs = (o) => getStore({ ...o, name: (FVB ? "fv-" : "") + (TEST ? "test-" : "") + o.name });
   if (path === "health" || path === "") return J({ ok: true, service: "farming-api", path: url.pathname });
   if (path === "mailcheck") { let mod = false; try { await import("nodemailer"); mod = true } catch {} const gp = (process.env.GMAIL_APP_PASSWORD || "").replace(/\s+/g, ""); return J({ gmailUser: !!process.env.GMAIL_USER, gmailPassLength: gp.length, nodemailer: mod, resend: !!process.env.RESEND_API_KEY }) }
   const meta = gs({ name: "meta", consistency: "strong" });
@@ -62,11 +63,11 @@ export default async (req) => {
       const gu = process.env.GMAIL_USER, gp = (process.env.GMAIL_APP_PASSWORD || "").replace(/\s+/g, "");
       if (gu && gp) {
         try { const nm = (await import("nodemailer")).default; const tr = nm.createTransport({ service: "gmail", auth: { user: gu, pass: gp } });
-          await tr.sendMail({ from: '"Farming" <' + gu + '>', to, subject, text, ...(replyTo ? { replyTo } : {}) }); return { ok: true } }
+          await tr.sendMail({ from: '"FarmVerse PH" <' + gu + '>', to, subject, text, ...(replyTo ? { replyTo } : {}) }); return { ok: true } }
         catch (e) { const c = String(e && (e.code || e.responseCode) || ""); console.log("mail error", c, String(e && e.message || e).slice(0, 300));
           return { ok: false, error: c === "EAUTH" || /535|Username and Password/i.test(String(e && e.message)) ? "Email login failed: the Gmail address or App Password on the server is wrong." : "Couldn't send the email right now (" + (c || "error") + "). Try again later." } }
       }
-      const key = process.env.RESEND_API_KEY, from = process.env.MAIL_FROM || "Farming <onboarding@resend.dev>";
+      const key = process.env.RESEND_API_KEY, from = process.env.MAIL_FROM || "FarmVerse PH <onboarding@resend.dev>";
       if (!key) return { ok: false, error: "Email isn't set up on the server yet. Please tell the game admin." };
       const r = await fetch("https://api.resend.com/emails", { method: "POST", headers: { "content-type": "application/json", authorization: "Bearer " + key }, body: JSON.stringify({ from, to: [to], subject, text }) });
       if (!r.ok) return { ok: false, error: "Couldn't send the email right now. Try again later." };
@@ -81,7 +82,7 @@ export default async (req) => {
       const prev = await authS.get("v/" + u, { type: "json" });
       if (prev && Date.now() - prev.at < 60000) return J({ error: "Please wait a minute before asking for another code." }, 429);
       const code = code6();
-      const sent = await sendMail(email, "Your Farming verification code: " + code, "Hi " + (m.farmer || u) + ",\n\nYour Farming verification code is " + code + "\n\nType it in the game to verify this email for your farm \"" + (m.farm || u) + "\" (username: " + u + "). It expires in 15 minutes.\n\nIf you didn't ask for this, you can ignore this email.");
+      const sent = await sendMail(email, "Your FarmVerse PH verification code: " + code, "Hi " + (m.farmer || u) + ",\n\nYour FarmVerse PH verification code is " + code + "\n\nType it in the game to verify this email for your farm \"" + (m.farm || u) + "\" (username: " + u + "). It expires in 15 minutes.\n\nIf you didn't ask for this, you can ignore this email.");
       if (!sent.ok) return J({ error: sent.error }, 503);
       await authS.setJSON("v/" + u, { email, ch: await sha(u + ":" + code), exp: Date.now() + 15 * 60000, tries: 0, at: Date.now() });
       return J({ ok: true });
@@ -108,7 +109,7 @@ export default async (req) => {
       if (prev && Date.now() - prev.at < 60000) return J({ error: "Please wait a minute before asking for another code." }, 429);
       if (!users.length) return J({ ok: true });
       const code = code6();
-      const sent = await sendMail(email, "Your Farming recovery code: " + code, "Your Farming recovery code is " + code + "\n\nYour username" + (users.length > 1 ? "s" : "") + ": " + users.join(", ") + "\n\nType the code in the game to set a new password. It expires in 15 minutes.\n\nIf you didn't ask for this, you can ignore this email.");
+      const sent = await sendMail(email, "Your FarmVerse PH recovery code: " + code, "Your FarmVerse PH recovery code is " + code + "\n\nYour username" + (users.length > 1 ? "s" : "") + ": " + users.join(", ") + "\n\nType the code in the game to set a new password. It expires in 15 minutes.\n\nIf you didn't ask for this, you can ignore this email.");
       if (!sent.ok) return J({ error: sent.error }, 503);
       await authS.setJSON("r/" + eh, { ch: await sha(eh + ":" + code), exp: Date.now() + 15 * 60000, tries: 0, at: Date.now(), users });
       return J({ ok: true });
@@ -251,7 +252,7 @@ export default async (req) => {
       await sup.setJSON(rk, { n: rate.n + 1 });
       const id = "t/" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), rec = { id, email, topic, msg, u, farm, at: Date.now(), status: "open" };
       await sup.setJSON(id, rec);
-      const m = await sendMail(SUPPORT_TO, "[Farming support] " + topic + (u ? " · " + u : ""), "From: " + email + "\nUsername: " + (u || "(not logged in)") + "\nFarm: " + (farm || "-") + "\nTopic: " + topic + "\n\n" + msg + "\n\n— Reply to this email to answer the player.", email);
+      const m = await sendMail(SUPPORT_TO, "[FarmVerse PH support] " + topic + (u ? " · " + u : ""), "From: " + email + "\nUsername: " + (u || "(not logged in)") + "\nFarm: " + (farm || "-") + "\nTopic: " + topic + "\n\n" + msg + "\n\n— Reply to this email to answer the player.", email);
       return J({ ok: true, mailed: !!(m && m.ok) });
     }
     if (req.method === "POST" && path === "admin/support") {
