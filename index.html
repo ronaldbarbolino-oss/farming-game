@@ -2775,7 +2775,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="162";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
+const GAMEVER="163";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 /* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
 (function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
   document.addEventListener("touchstart",e=>{el=null;if(!ROT||e.touches.length!==1)return;el=scroller(e.target);if(el){const q=exy(e.touches[0]);lx=q.x;ly=q.y;mv=0}},{passive:true});
@@ -3890,7 +3890,7 @@ const MUNI={flags:[],people:[],lights:[],jets:[],hands:null};
   // people strolling around the plaza
   const SH=[0x2f7fb8,0xd9568a,0x3f8f2c,0xf2b632,0x8a4fc8,0xe2402f];for(let k=0;k<(QLV===0?5:9);k++){const f=makeFarmer({shirt:SH[k%6],pants:[0x2b2b3a,0x3b5f9a,0x6b4a2c][k%3],skin:[0xe0a878,0xc68a5a,0x8a5a3a][k%3],hat:SH[(k+3)%6]});f.g.scale.setScalar(.9);scene.add(f.g);
     MUNI.people.push({f,a:k/9*Math.PI*2,r:4.6+(k%3)*1.4,sp:(k%2?1:-1)*(.12+.03*(k%4)),cx:X(2.5),cz:Z(0),pause:0})}})();
-function stepMunicipal(dt,t){if(Math.hypot(cam.tx-(TOWN.x-42),cam.tz-TOWN.z)>90)return;const h=typeof phHour==="function"?phHour():12;
+function stepMunicipal(dt,t){if(MUNI.placed&&Math.hypot(cam.tx-(TOWN.x-42),cam.tz-TOWN.z)>90)return;if(MUNI.loop)MUNI.placed=true;const h=typeof phHour==="function"?phHour():12;
   if(MUNI.hands){const hr=h%12;MUNI.hands.hhG.rotation.x=-hr/12*Math.PI*2;MUNI.hands.mmG.rotation.x=-((h%1)*Math.PI*2)}
   MUNI.flags.forEach(F=>{F.piv.rotation.y=Math.sin(t*2.4+F.ph)*.35;F.f.rotation.y=Math.sin(t*5+F.ph)*.2});
   MUNI.jets.forEach(j=>{const k=1+Math.sin(t*6)*.25;j.scale.set(.18*(2-k),.45*k,.18*(2-k))});
@@ -3900,7 +3900,7 @@ function stepMunicipal(dt,t){if(Math.hypot(cam.tx-(TOWN.x-42),cam.tz-TOWN.z)>90)
   MUNI.people.forEach(p=>{if(p.pause>0){p.pause-=dt;p.f.legL.rotation.z=p.f.legR.rotation.z=0;return}if(Math.random()<dt*.05)p.pause=2+Math.random()*3;p.a+=p.sp*dt;const x=p.cx+Math.cos(p.a)*p.r,z=p.cz+Math.sin(p.a)*p.r*1.6,dx=-Math.sin(p.a)*p.sp,dz=Math.cos(p.a)*p.sp*1.6;
     p.f.g.position.set(x,0,z);p.f.g.rotation.y=Math.atan2(-dz,dx);const sw=Math.sin(t*8+p.a*5);p.f.legL.rotation.z=sw*.6;p.f.legR.rotation.z=-sw*.6;p.f.armL.rotation.z=-sw*.5;p.f.armR.rotation.z=sw*.5;p.f.g.visible=!isBad()})}
 function stepTown(dt,t){stepMunicipal(dt,t);
-  if(TOWNX.loop&&Math.hypot(cam.tx-TOWN.x,cam.tz-TOWN.z)<90){const {seg,tot}=TOWNX.loop;TOWNX.cars.forEach(c=>{c.u=(c.u+c.sp*dt)%tot;let s2=c.u,k=0;while(s2>seg[k][2]){s2-=seg[k][2];k++}const [a,b2,l]=seg[k],f=s2/l,dx=(b2[0]-a[0])/l,dz=(b2[1]-a[1])/l;
+  if(TOWNX.loop&&(!TOWNX.placed||Math.hypot(cam.tx-TOWN.x,cam.tz-TOWN.z)<90)){TOWNX.placed=true;const {seg,tot}=TOWNX.loop;TOWNX.cars.forEach(c=>{c.u=(c.u+c.sp*dt)%tot;let s2=c.u,k=0;while(s2>seg[k][2]){s2-=seg[k][2];k++}const [a,b2,l]=seg[k],f=s2/l,dx=(b2[0]-a[0])/l,dz=(b2[1]-a[1])/l;
     c.m.position.set(a[0]+(b2[0]-a[0])*f-dz*.55,0,a[1]+(b2[1]-a[1])*f+dx*.55);c.m.rotation.y=Math.atan2(-dz,dx);if(c.m.userData.wheels)c.m.userData.wheels.forEach(w=>w.rotation.y+=dt*c.sp*4)})}const h=typeof phHour==="function"?phHour():12,dark=1-daylight(h),show=h>=18&&h<21&&!isBad();
   TOWNX.pl.forEach(l=>l.intensity=dark*1.8);if(TOWNX.lit)TOWNX.lit.visible=dark>.35;TOWNX.lights.forEach(m=>{});
   if(TOWNX.stageOn!==show){TOWNX.stageOn=show;TOWNX.band.forEach(b=>b.f.g.visible=show);TOWNX.aud.forEach(a=>a.f.g.visible=show);TOWNX.notes.forEach(n=>n.visible=show);TOWNX.beam.visible=show}
