@@ -2543,7 +2543,7 @@ cv.addEventListener("pointerdown",e=>{cv.setPointerCapture(e.pointerId);pointers
     else if(pl)go=()=>{startPlotMove(pl.id,true);return[pl.x0+PN/2,pl.z0+PN/2,pl.n]};
     else if(p&&p.tile!=null&&p.tile<SIZES[S.size]**2)go=()=>{const n=SIZES[S.size];startFieldMove();return[FX0+n/2,FZ0+n/2,"main field"]};
     else if(g0&&(!p||p.pen!=null)){const k=penAt(g0.x,g0.z);if(k&&PENS[k])go=()=>{const P=PENS[k];startPenMove(k);return[(P.x0+P.x1)/2,(P.z0+P.z1)/2,P.n]}}
-    if(go)HOLD.t=setTimeout(()=>{if(pointers.size!==1||dragMoved>14||PLACE)return;const r=go();if(!PLACE)return;PLACE.drag=true;PLACE.ox=g0?g0.x-r[0]:0;PLACE.oz=g0?g0.z-r[1]:0;cv.classList.add("drag");try{navigator.vibrate&&navigator.vibrate(30)}catch(err){}
+    if(go)HOLD.t=setTimeout(()=>{if(pointers.size!==1||dragMoved>14||PLACE)return;const r=go();if(!PLACE)return;PLACE.drag=true;PLACE.firstHold=true;PLACE.ox=g0?g0.x-r[0]:0;PLACE.oz=g0?g0.z-r[1]:0;cv.classList.add("drag");try{navigator.vibrate&&navigator.vibrate(30)}catch(err){}
       $("placeTxt").textContent="Drag the "+r[2]+" and let go to drop it"+($("placeRot").hidden?"":" · tap Rotate to turn it")},550)}});
 const HOLD={t:0};function plotOfTile(i){for(const a of layout())if(a.p&&!a.p.island&&i>=a.start&&i<a.start+a.n*a.n)return a.p;return null}
 cv.addEventListener("pointermove",e=>{
@@ -2564,7 +2564,8 @@ let onIsle=false,ISLE_OPEN=false;
 function checkIsle(){if(ISLE_OPEN&&Math.hypot(camT.tx-IX,camT.tz-IZ)>55&&!(TRIP.on&&TRIP.toIsle))ISLE_OPEN=false;const n=Math.hypot(cam.tx-IX,cam.tz-IZ)<40;$("tIsle").textContent=TRIP.on?"Sailing…":ownBoat()?(S.boatAt==="isla"?"Sail back to the Farm":"Sail to the Island"):(n?"Back to the Farm":"Go to GoPyesta Island");if(n!==onIsle){onIsle=n;
   if(!TRIP.on){if(n)toast("You are at GoPyesta Island.",2200)}}}
 function endPtr(e){clearTimeout(HOLD.t);
-  if(PLACE&&PLACE.drag){pointers.delete(e.pointerId);if(!pointers.size){cv.classList.remove("drag");pinch0=0}PLACE.drag=false;PLACE.held=true;$("placeTxt").textContent=(PLACE.d&&PLACE.d.n?PLACE.d.n+" · ":"")+"tap a free spot to put it there"+($("placeRot").hidden?"":" (tap Rotate first to turn it)")+", or drag it again";return}
+  if(PLACE&&PLACE.drag){const tapped=!PLACE.firstHold&&downAt&&Math.hypot(exy(e).x-downAt.x,exy(e).y-downAt.y)<=(e.pointerType==="mouse"?6:16);pointers.delete(e.pointerId);if(!pointers.size){cv.classList.remove("drag");pinch0=0}PLACE.drag=false;PLACE.held=true;PLACE.firstHold=false;
+    if(tapped){placePointer(e,true);return}$("placeTxt").textContent=(PLACE.d&&PLACE.d.n?PLACE.d.n+" · ":"")+"tap a free spot to put it there"+($("placeRot").hidden?"":" (tap Rotate first to turn it)")+", or drag it again";return}
   const tr=e.pointerType==="mouse"?6:16,wasTap=pointers.size===1&&downAt&&Math.hypot(exy(e).x-downAt.x,exy(e).y-downAt.y)<=tr&&dragMoved<tr*2.5;
   pointers.delete(e.pointerId);if(!pointers.size){cv.classList.remove("drag");pinch0=0}
   if(wasTap&&e.type==="pointerup")clickAt(e);
@@ -2831,7 +2832,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="183";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
+const GAMEVER="184";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 /* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
 (function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
   document.addEventListener("touchstart",e=>{el=null;if(!ROT||e.touches.length!==1)return;el=scroller(e.target);if(el){const q=exy(e.touches[0]);lx=q.x;ly=q.y;mv=0}},{passive:true});
