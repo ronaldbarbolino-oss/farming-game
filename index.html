@@ -420,7 +420,7 @@ body.land .sbtns .sb{font-size:.6rem!important;padding:3px 6px!important}
     <button class="btn" id="tCity" style="background:#3a4a6a;box-shadow:0 4px 0 #222c40">Go to MW City</button>
     <button class="btn" id="tCheat" hidden style="background:#2f7fb8;box-shadow:0 4px 0 #1d5a85">Test: +100,000 coins</button>
     <button class="btn" id="tWoodT" hidden style="background:#8a5a2a;box-shadow:0 4px 0 #5a3a1a">Test: +100,000 wood</button>
-    <button class="btn" id="tLvl" hidden style="background:#2f7fb8;box-shadow:0 4px 0 #1d5a85">Test: Unlock all</button>
+    <button class="btn" id="tLvl" hidden style="background:#2f7fb8;box-shadow:0 4px 0 #1d5a85">Test: Max farm</button>
   </div>
 
   <div class="tray-head">
@@ -763,6 +763,13 @@ const LOWDEV=MOBILE&&((navigator.deviceMemory||4)<=3||(navigator.hardwareConcurr
 const QPICK=(()=>{try{const q=localStorage.getItem("farming-q");return q==null?null:+q}catch(e){return null}})();
 let QLV=QPICK!=null?QPICK:(MOBILE?(LOWDEV?0:1):2);
 const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:QLV>=2,powerPreference:"high-performance"});
+/* if the device runs out of graphics memory the 3D view turns black: save, offer a restart, and use lighter graphics next time */
+cv.addEventListener("webglcontextlost",e=>{e.preventDefault();try{save();if(typeof CLOUD!=="undefined"&&CLOUD&&CLOUD.id)cloudSave(true)}catch(x){}
+  try{const q=QLV>0?QLV-1:0;localStorage.setItem("farming-q",String(q))}catch(x){}
+  let d=document.getElementById("glLost");if(!d){d=document.createElement("div");d.id="glLost";d.style.cssText="position:fixed;inset:0;z-index:99;display:grid;place-items:center;background:rgba(30,20,10,.75)";
+    d.innerHTML='<div class="suBox" style="text-align:center"><h3>🔄 The farm view stopped</h3><p class="suLead">Your device ran out of graphics memory. Your farm is saved. Tap below to restart it with lighter graphics.</p><button class="btn" type="button" id="glGo">Restart the farm</button></div>';
+    document.body.appendChild(d);d.querySelector("#glGo").onclick=async()=>{try{save();if(typeof CLOUD!=="undefined"&&CLOUD&&CLOUD.id)await cloudSave(true)}catch(x){}location.reload()}}d.hidden=false},false);
+cv.addEventListener("webglcontextrestored",()=>{const d=document.getElementById("glLost");if(d)d.hidden=false},false);
 const RPICK=(()=>{try{const q=localStorage.getItem("farming-res");return q==null?null:+q}catch(e){return null}})();
 const PRMAX=RPICK!=null?Math.max(.5,Math.min(window.devicePixelRatio||1,2)*RPICK):QLV===0?1:QLV===1?Math.min(window.devicePixelRatio||1,1.25):Math.min(window.devicePixelRatio||1,MOBILE?1.5:2);let PRNOW=PRMAX;
 renderer.setPixelRatio(PRNOW);
@@ -2802,7 +2809,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="168";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
+const GAMEVER="169";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 /* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
 (function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
   document.addEventListener("touchstart",e=>{el=null;if(!ROT||e.touches.length!==1)return;el=scroller(e.target);if(el){const q=exy(e.touches[0]);lx=q.x;ly=q.y;mv=0}},{passive:true});
@@ -2846,7 +2853,16 @@ $("tCity").onclick=()=>{if(onCity)goView("all");else enterCity()};
 $("tIsle").onclick=()=>{if(ownBoat())startTrip();else if(onIsle)goView("all");else enterIsland()};
 $("tWoodT").onclick=e=>{S.woodBank=(S.woodBank|0)+100000;const r=e.currentTarget.getBoundingClientRect();floatText("+100,000 wood",r.left+r.width/2,r.top);save();ui();invUI(true)};
 $("tCheat").onclick=e=>{S.coins+=100000;const r=e.currentTarget.getBoundingClientRect();floatText("+100,000",r.left+r.width/2,r.top);save();ui()};
-$("tLvl").onclick=()=>{if(S.lv<10){S.lv=10;S.xp=0}save();ui();toast("Level 10: all crops and animals unlocked")};
+$("tLvl").onclick=()=>{if(VISIT)return;if(S.lv<20){S.lv=20;S.xp=0}
+  while(S.size<SIZES.length-1){const nx=S.size+1;S.coins+=EXPAND[nx];expand()}S.helpers=HMAX;S.hspd=3;S.lakeLv=LAKEUP.length;
+  fixSalePlots();salePlots().forEach(p=>{S.plots=(S.plots||[]).concat(p.id);for(let k=0;k<PN*PN;k++)S.tiles.push({k:"grass"})});
+  while(S.tiles.length<expectTiles(S))S.tiles.push({k:"grass"});
+  S.penLv=S.penLv||{};S.penSz=S.penSz||{};const stuck=[];
+  for(const k in PENS){while((S.penSz[k]|0)<PENSZ.length){const L={...S.penSz,[k]:(S.penSz[k]|0)+1};if(penSpaceBlock(L))break;S.penSz=L}
+    while((S.penLv[k]|0)<PENUP.length){const H={...S.penLv,[k]:(S.penLv[k]|0)+1};if(penSpaceBlock(S.penSz,H)){stuck.push(PENS[k].n);break}S.penLv=H}}
+  S.penLv.pond=UPS("pond").length;S.penLv.farm=UPS("farm").length;
+  _LK="";hovered=null;save();try{ensureHelper2()}catch(e){}buildField();syncPenLayout();buildPenX();ui();
+  toast("⭐ Max farm: Level 20, all land, biggest field and lake, 5 helpers, houses upgraded"+(stuck.length?" (not enough room to grow: "+stuck.join(", ")+")":""),5000)};
 
 /* ================= HELPER: auto-harvests ripe crops ================= */
 let helper=null;const _ts=new THREE.Vector3();
@@ -6973,7 +6989,8 @@ function buyerNo(){const B=VIS.buyer;if(!B)return;B.st="out";B.wp=1;toast("The b
 function catchThief(){const T=VIS.thief;if(!T||T.st==="down"||T.chaser)return;const W=[farmer,...HELPERS.filter((H,i)=>H&&(i===0||CREW[HKEYS[i]])&&H.o.state!=="rest")].filter(Boolean);if(!W.length)return;
   const tp=T.f.g.position;W.sort((a,b)=>Math.hypot(a.g.position.x-tp.x,a.g.position.z-tp.z)-Math.hypot(b.g.position.x-tp.x,b.g.position.z-tp.z));const c=W[0];
   if(c.o.fun)funEnd(c);c.g.visible=true;c.g.position.y=0;c.g.rotation.x=0;c.o.chase=T;T.chaser=c;if(T.st!=="run"){T.st="flee";T.wp=1}toast("🏃 "+(c===farmer?"You are":"Your helper is")+" chasing the thief!",2200)}
-function chaseTick(f,dt,t){const T=f&&f.o.chase;if(!T)return false;if(T.st==="down"||VIS.thief!==T){f.o.chase=null;f.o.state="idle";f.o.st=.6;return false}
+function chaseTick(f,dt,t){try{return chaseTick0(f,dt,t)}catch(e){if(f&&f.o){f.o.chase=null;f.o.state="idle";f.o.st=.5}return false}}
+function chaseTick0(f,dt,t){const T=f&&f.o.chase;if(!T)return false;if(T.st==="down"||VIS.thief!==T){f.o.chase=null;f.o.state="idle";f.o.st=.6;return false}
   const tp=T.f.g.position;npcWalk(f,tp.x,tp.z,3.8,dt);npcAnim(f,t,dt);
   if(Math.hypot(tp.x-f.g.position.x,tp.z-f.g.position.z)<.75)thiefDown(T,f);return true}
 function thiefDown(T,f){T.st="down";T.t=0;f.o.chase=null;f.o.state="idle";f.o.st=1.4;f.armR.rotation.z=2.8;burst(T.f.g.position.x,1.1,T.f.g.position.z,0xffe14a,18);
@@ -7006,7 +7023,7 @@ function stepVisitors(dt,t){
         npcRemove(T);VIS.thief=null}}
       if(T.grab&&VIS.thief){const o=visObj(T.p);if(o){const fx=Math.cos(g.rotation.y),fz=-Math.sin(g.rotation.y);o.g.position.set(g.position.x-fx*.1,.55,g.position.z-fz*.1);o.g.rotation.y=g.rotation.y+Math.PI/2;o.state="idle";o.st=1}aL=aR=2.6}}
     else if(T.st==="down"){f._w=0;g.rotation.z=lerp(g.rotation.z,-1.5,Math.min(1,dt*8));g.position.y=.1;if(T.t>.3&&Math.random()<dt*6)burst(g.position.x,.8,g.position.z,0xffe14a,2,.3);
-      if(T.t>1.8){for(let k=0;k<6;k++)puff(g.position.x+(Math.random()-.5)*.6,.4,g.position.z+(Math.random()-.5)*.6);npcRemove(T);VIS.thief=null}}
+      if(T.t>1.8){burst(g.position.x,.6,g.position.z,0xdddddd,20,.6);npcRemove(T);VIS.thief=null}}
     if(VIS.thief){npcAnim(f,t,dt,aL,aR);
       if(T.st!=="down"){npcBubble(T,T.chaser?'<b>🏃 Chasing the thief…</b>':'<button class="btn sm npcC" type="button">🚨 Catch</button>');if(!T.el._on){T.el._on=1;T.el.onclick=()=>catchThief()}}
       else if(T.el){T.el.remove();T.el=null}
@@ -7014,7 +7031,7 @@ function stepVisitors(dt,t){
 }
 function loop(t){
   const dt=Math.min(.1,(t-last)/1000);last=t;const ts=t/1000;
-  applyCam(dt);stepAnimals(dt,ts);stepVisitors(dt,ts);stepExtras(dt,ts);stepFarm2(dt,ts);stepFire(dt,ts);stepNet(dt);stepSound(dt);stepFish(dt,ts);ISLE.step(dt,ts);checkIsle();stepCity(dt,ts);checkCity();
+  applyCam(dt);stepAnimals(dt,ts);try{stepVisitors(dt,ts)}catch(e){try{if(VIS.thief){const o=visObj(VIS.thief.p);if(o)o.g.position.y=0;npcRemove(VIS.thief);VIS.thief=null}if(VIS.buyer){npcRemove(VIS.buyer);VIS.buyer=null}[farmer,...HELPERS].forEach(f=>{if(f&&f.o)f.o.chase=null})}catch(e2){}}stepExtras(dt,ts);stepFarm2(dt,ts);stepFire(dt,ts);stepNet(dt);stepSound(dt);stepFish(dt,ts);ISLE.step(dt,ts);checkIsle();stepCity(dt,ts);checkCity();
   clouds.forEach(c=>{c.position.x+=c.userData.v*dt;if(c.position.x>130)c.position.x=-60});
   tileObjs.forEach((o,i)=>{if(o.sp.visible){o.sp.rotation.y=ts*2+i;o.sp.position.y=.95+Math.sin(ts*3+i)*.08}});
   acc+=dt;if(acc>.2){acc=0;syncField()}
