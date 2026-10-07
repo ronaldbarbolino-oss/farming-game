@@ -408,16 +408,16 @@ body.land .sbtns .sb{font-size:.6rem!important;padding:3px 6px!important}
     <button class="btn alt" id="tExpand"></button>
     <button class="btn alt" id="tLake" style="background:#2f8fc8;box-shadow:0 4px 0 #1d6a98"></button>
     <a class="btn" id="tGetApp" hidden href="/farming.apk" download="Farming.apk" style="background:#3a7a3a;box-shadow:0 4px 0 #23502a;text-decoration:none">📲 Get the Android App</a>
-    <button class="btn" id="tBuyCoins" style="background:#e8a530;box-shadow:0 4px 0 #a8741a">💰 Buy Coins</button>
+    <button class="btn" id="tBuyCoins" style="display:none!important;background:#e8a530;box-shadow:0 4px 0 #a8741a">💰 Buy Coins</button>
     <button class="btn alt" id="tPlot"></button>
-    <button class="btn alt" id="tMoveLand" hidden>📐 Move Land</button><button class="btn alt" id="tHills" hidden>⛰️ Bring back hills</button>
+    <button class="btn alt" id="tMoveLand" hidden style="display:none!important">📐 Move Land</button><button class="btn alt" id="tHills" hidden>⛰️ Bring back hills</button>
     <button class="btn" id="tHelper"></button>
     <button class="btn" id="tHire" style="background:#2f7fb8;box-shadow:0 4px 0 #1d5a85"></button>
     <button class="btn" id="tHspd" style="background:#e07a2a;box-shadow:0 4px 0 #a5521a"></button>
     <button class="btn" id="tCure" style="background:#c0392b;box-shadow:0 4px 0 #8a2a1f">Treat All</button>
     <button class="btn" id="tTown" style="background:#d9342b;box-shadow:0 4px 0 #8a1f17"></button>
-    <button class="btn" id="tIsle" style="background:#1f8fb8;box-shadow:0 4px 0 #136583">Go to the Island</button>
-    <button class="btn" id="tCity" style="background:#3a4a6a;box-shadow:0 4px 0 #222c40">Go to MW City</button>
+    <button class="btn" id="tIsle" style="display:none!important;background:#1f8fb8;box-shadow:0 4px 0 #136583">Go to the Island</button>
+    <button class="btn" id="tCity" style="display:none!important;background:#3a4a6a;box-shadow:0 4px 0 #222c40">Go to MW City</button>
     <button class="btn" id="tCheat" hidden style="background:#2f7fb8;box-shadow:0 4px 0 #1d5a85">Test: +100,000 coins</button>
     <button class="btn" id="tWoodT" hidden style="background:#8a5a2a;box-shadow:0 4px 0 #5a3a1a">Test: +100,000 wood</button>
     <button class="btn" id="tLvl" hidden style="background:#2f7fb8;box-shadow:0 4px 0 #1d5a85">Test: Max farm</button>
@@ -560,7 +560,7 @@ body.land .sbtns .sb{font-size:.6rem!important;padding:3px 6px!important}
     <p class="suLead" style="margin-top:8px;font-size:.8rem">You can also email us directly at <b>farmgaming.ph@gmail.com</b>.</p></div>
 </div>
 <div class="modal" id="landM" hidden>
-  <div class="suBox"><h3>🗺️ Land for sale</h3><p class="suLead">Buy any land you have the level for. Each one adds an 8×8 field. Tap <b>See it</b> to look at where it is. You can move your land later with 📐 Move Land.</p>
+  <div class="suBox"><h3>🗺️ Land for sale</h3><p class="suLead">Buy any land you have the level for. Each one adds an 8×8 field. Tap <b>See it</b> to look at where it is. You can move your land later: press and hold it, then drag.</p>
     <div id="landList" class="tools" style="flex-direction:column;align-items:stretch"></div>
     <div class="suRow"><button class="btn alt" type="button" onclick="document.getElementById('landM').hidden=true">Close</button></div></div>
 </div>
@@ -2809,7 +2809,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="169";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
+const GAMEVER="170";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 /* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
 (function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
   document.addEventListener("touchstart",e=>{el=null;if(!ROT||e.touches.length!==1)return;el=scroller(e.target);if(el){const q=exy(e.touches[0]);lx=q.x;ly=q.y;mv=0}},{passive:true});
