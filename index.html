@@ -559,6 +559,11 @@ body.land .sbtns .sb{font-size:.6rem!important;padding:3px 6px!important}
     <div id="spDone" hidden><p class="suLead" style="font-size:1.05rem">✅ Message sent! We'll reply to <b id="spTo"></b> from farmgaming.ph@gmail.com. Check your inbox and spam folder.</p><div class="suRow"><button class="btn" type="button" id="spOk">OK</button></div></div>
     <p class="suLead" style="margin-top:8px;font-size:.8rem">You can also email us directly at <b>farmgaming.ph@gmail.com</b>.</p></div>
 </div>
+<div class="modal" id="landM" hidden>
+  <div class="suBox"><h3>🗺️ Land for sale</h3><p class="suLead">Buy any land you have the level for. Each one adds an 8×8 field. Tap <b>See it</b> to look at where it is. You can move your land later with 📐 Move Land.</p>
+    <div id="landList" class="tools" style="flex-direction:column;align-items:stretch"></div>
+    <div class="suRow"><button class="btn alt" type="button" onclick="document.getElementById('landM').hidden=true">Close</button></div></div>
+</div>
 <div class="modal" id="exM" hidden>
   <div class="suBox"><h3>🔑 Set a username &amp; password</h3>
     <p class="suLead">This farm is saved only in this Claude page. To log in on your phone and show up in the game's player list, give it a username and password on <b>farming-ph.netlify.app</b>:</p>
@@ -823,23 +828,34 @@ function layout(){const key=S.size+"|"+(S.plots||[]).join(",")+"|"+JSON.stringif
 function tileXZ(i){const L=layout();for(const a of L){if(i<a.start+a.n*a.n){const j=i-a.start;return[a.x0+(j%a.n)+.5,a.z0+Math.floor(j/a.n)+.5]}}return[0,0]}
 function expectTiles(st){let n=SIZES[st.size]**2;(st.plots||[]).forEach(id=>{const p=PLOTS.find(q=>q.id===id);if(p)n+=(p.sz||PN)**2});return n}
 function nextPlot(){return PLOTS.find(p=>!p.island&&!(S.plots||[]).includes(p.id))}
-function fixNextPlot(){if(VISIT)return;const p=nextPlot();if(!p)return;applyPlotPos();if(!validPlot(p,p.x0,p.z0))return;const d=PLOT_DEF[p.id],C=[];
-  for(let x=-66;x<=8.5;x+=1)for(let z=-21;z<=42;z+=1)C.push([x,z,Math.hypot(x-d[0],z-d[1])]);C.sort((a,b)=>a[2]-b[2]);
-  for(const [x,z] of C){if(!validPlot(p,x,z)){S.plotPos=S.plotPos||{};S.plotPos[p.id]=[x,z];applyPlotPos();_LK="";save();buildField();return}}}
-function buyPlot(){const p=nextPlot();if(!p)return;fixNextPlot();
+function salePlots(){return PLOTS.filter(p=>!p.island&&!(S.plots||[]).includes(p.id))}
+function fixSalePlots(){if(VISIT)return;applyPlotPos();const placed=[];let moved=false;
+  const ov=(x,z)=>placed.some(q=>x<q[0]+PN+.6&&x+PN+.6>q[0]&&z<q[1]+PN+.6&&z+PN+.6>q[1]);
+  for(const p of salePlots()){if(!validPlot(p,p.x0,p.z0)&&!ov(p.x0,p.z0)){placed.push([p.x0,p.z0]);continue}
+    const d=PLOT_DEF[p.id],C=[];for(let x=-66;x<=8.5;x+=1)for(let z=-21;z<=42;z+=1)C.push([x,z,Math.hypot(x-d[0],z-d[1])]);C.sort((a,b)=>a[2]-b[2]);
+    for(const [x,z] of C){if(ov(x,z))continue;if(!validPlot(p,x,z)){S.plotPos=S.plotPos||{};S.plotPos[p.id]=[x,z];placed.push([x,z]);moved=true;break}}}
+  if(moved){applyPlotPos();_LK="";save();buildField()}}
+let _fspT=null;function fixSaleSoon(){clearTimeout(_fspT);_fspT=setTimeout(()=>{try{fixSalePlots()}catch(e){}},600)}
+const fixNextPlot=fixSalePlots;
+function buyPlot(id){const p=id?PLOTS.find(q=>q.id===id&&!q.island):nextPlot();if(!p||(S.plots||[]).includes(p.id))return;fixSalePlots();
   if(S.lv<p.lv)return toast(p.n+" unlocks at Level "+p.lv+".");
   if(S.coins<p.cost)return toast("You need "+p.cost.toLocaleString()+" coins for "+p.n+".");
   S.coins-=p.cost;S.plots=(S.plots||[]).concat(p.id);for(let k=0;k<PN*PN;k++)S.tiles.push({k:"grass"});
-  hovered=null;save();buildField();ui();setTimeout(fixNextPlot,400);toast("You bought "+p.n+"! Head over there now.",2800);
+  hovered=null;save();buildField();ui();fixSaleSoon();const lm=document.getElementById("landM");if(lm)lm.hidden=true;toast("You bought "+p.n+"! Head over there now.",2800);
   Object.assign(camT,{tx:p.x0+PN/2,ty:.6,tz:p.z0+PN/2,dist:20,pol:.9});cam.follow=false}
+function openLandList(){const L=$("landList");if(!L)return buyPlot();L.innerHTML=PLOTS.filter(p=>!p.island).map(p=>{const own=(S.plots||[]).includes(p.id),lock=S.lv<p.lv,poor=S.coins<p.cost;
+    return `<div class="abuy"><b>${p.n}</b><small>${PN}×${PN} · ${p.cost.toLocaleString()} coins · Level ${p.lv}</small>${own?'<small>✅ Yours</small>':lock?`<small>🔒 Unlocks at Level ${p.lv}</small>`:`<button class="btn sm" type="button" data-land="${p.id}"${poor?" disabled":""}>Buy · ${p.cost.toLocaleString()}</button>`}${own?"":`<button class="btn sm alt" type="button" data-see="${p.id}">See it</button>`}</div>`}).join("");
+  L.querySelectorAll("[data-land]").forEach(b=>b.onclick=()=>buyPlot(b.dataset.land));
+  L.querySelectorAll("[data-see]").forEach(b=>b.onclick=()=>{const p=PLOTS.find(q=>q.id===b.dataset.see);$("landM").hidden=true;Object.assign(camT,{tx:p.x0+PN/2,ty:.6,tz:p.z0+PN/2,dist:24,pol:.9});cam.follow=false});
+  $("landM").hidden=false}
 let PLOTLABS=[];
 function plotDecor(b){
   PLOTLABS.forEach(s=>scene.remove(s));PLOTLABS=[];
   PLOTS.forEach(p=>{const own=(S.plots||[]).includes(p.id),m=p.sz||PN,cx=p.x0+m/2,y=p.y||0;
     if(own){fence(b,p.x0-.2,p.z0-.2,p.x0+m+.2,p.z0+m+.2,(mx,mz,ei)=>p.island?(ei===3&&Math.abs(mz-p.z0-.5)<.6):(ei===0&&Math.abs(mx-cx)<.6),y);
       const s=labelSprite(p.n);s.position.set(cx,y+1.35,p.z0-.6);scene.add(s);PLOTLABS.push(s)}
-    else if(p.island||p===nextPlot()){[[0,0],[m,0],[0,m],[m,m]].forEach(([dx,dz])=>{b.add("cyl",0x9b6a3a,p.x0+dx,y+.35,p.z0+dz,.05,.7,.05);b.add("box",0xe8622a,p.x0+dx,y+.62,p.z0+dz,.05,.12,.3)});
-      const s=labelSprite((p.island?"Secret Island for sale · ":"Empty · ")+p.cost.toLocaleString());s.position.set(cx,y+1.1,p.z0+m/2);scene.add(s);PLOTLABS.push(s)}})}
+    else{[[0,0],[m,0],[0,m],[m,m]].forEach(([dx,dz])=>{b.add("cyl",0x9b6a3a,p.x0+dx,y+.35,p.z0+dz,.05,.7,.05);b.add("box",0xe8622a,p.x0+dx,y+.62,p.z0+dz,.05,.12,.3)});
+      const s=labelSprite((p.island?"Secret Island for sale · ":"For sale · ")+p.cost.toLocaleString()+(!p.island&&S.lv<p.lv?" · Lv "+p.lv:""));s.position.set(cx,y+1.1,p.z0+m/2);scene.add(s);PLOTLABS.push(s)}})}
 /* -------- farm terrain shape, pens, snow, helpers -------- */
 const RIVER=[[12,-16.9],[12.3,-13],[11.4,-9],[11.2,-5],[11.6,-1],[11.1,3],[10.2,5.6],[9.4,6.5]];
 const _sm=t=>{t=Math.max(0,Math.min(1,t));return t*t*(3-2*t)};const _c2=new THREE.Color();
@@ -2763,7 +2779,7 @@ function ui(){
   const nx=S.size+1,ex=$("tExpand");
   if(nx<SIZES.length){ex.disabled=false;ex.textContent="Expand "+SIZES[nx]+"×"+SIZES[nx]+" · "+EXPAND[nx]}else{ex.disabled=true;ex.textContent="Fully expanded"}
   {const own=PLOTS.filter(q=>!q.island&&(S.plots||[]).includes(q.id));$("tMoveLand").hidden=!own.length;$("tHills").hidden=!(S.hillGone||[]).some(id=>HILLS.some(H=>H.id===id))||!!VISIT}
-  {const np=nextPlot(),bp=$("tPlot");if(np){bp.disabled=false;bp.textContent="Buy "+np.n+" · "+np.cost.toLocaleString()+(S.lv<np.lv?" · Level "+np.lv:"")}else{bp.disabled=true;bp.textContent="You bought all the land"}}
+  {const n=salePlots().length,bp=$("tPlot");if(n){bp.disabled=false;bp.textContent="🗺️ Buy Land · "+n+" for sale"}else{bp.disabled=true;bp.textContent="You bought all the land"}}
 }
 $("tPlow").onclick=plowAll;$("tAll").onclick=harvestAll;$("tExpand").onclick=expand;
 $("tHills").onclick=restoreHills;$("hillMove").onclick=()=>{const id=HILLSEL;if(id)startHillMove(id)};$("hillRm").onclick=removeHill;$("hillGrow").onclick=growHill;$("hillDone").onclick=closeHill;
@@ -2771,7 +2787,7 @@ $("tMoveLand").onclick=()=>{if(VISIT)return;const own=PLOTS.filter(q=>!q.island&
   own.forEach(q=>{const b=document.createElement("button");b.className="btn";b.type="button";b.textContent=q.n;b.onclick=()=>{$("plotM").hidden=true;startPlotMove(q.id)};L.append(b)});$("plotM").hidden=false};
 $("plotClose").onclick=()=>{$("plotM").hidden=true};$("tLake").onclick=expandLake;
 $("tHelper").onclick=()=>{S.helperOn=!S.helperOn;helperUI();save();toast(S.helperOn?"The helper is back to work: harvesting and planting your selected seed.":"The helper is resting in the barn.")};
-$("tPlot").onclick=buyPlot;
+$("tPlot").onclick=()=>openLandList();
 const HIRE_COST=1500,HIRE_COSTS=[0,1500,3000,5000,8000],HMAX=5;
 function hireUI(){const h=$("tHire"),u=$("tHspd");if(!h||!u)return;const n=Math.max(1,S.helpers|0);h.textContent=n>=HMAX?"Helpers: "+HMAX+" / "+HMAX:"Hire Helper "+(n+1)+" · "+HIRE_COSTS[n].toLocaleString();h.disabled=n>=HMAX;
   const lv=S.hspd|0;u.textContent=lv>=3?"Helper Speed: Max":"Helper Speed Lv "+(lv+2)+" · "+HSPD[lv+1].toLocaleString();u.disabled=lv>=3}
@@ -2786,7 +2802,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="167";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
+const GAMEVER="168";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 /* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
 (function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
   document.addEventListener("touchstart",e=>{el=null;if(!ROT||e.touches.length!==1)return;el=scroller(e.target);if(el){const q=exy(e.touches[0]);lx=q.x;ly=q.y;mv=0}},{passive:true});
@@ -3268,7 +3284,7 @@ function buildMansionRoads(){while(ROADG.children.length)ROADG.remove(ROADG.chil
     const pt=k=>[X0+(k%NX)+.5,Z0+((k/NX)|0)+.5];let a=pt(P[0]),prev=a,dir=null;seg(v.x,v.z,a[0],a[1]);
     for(let i=1;i<P.length;i++){const c=pt(P[i]),nd=(c[0]-prev[0])+","+(c[1]-prev[1]);if(dir!==null&&nd!==dir){seg(a[0],a[1],prev[0],prev[1]);a=prev}dir=nd;prev=c}seg(a[0],a[1],prev[0],prev[1])});
   if(any){const m=b.mesh(false,true,false);ROADG.add(m)}}
-function renderBuilds(){while(BUILDG.children.length)BUILDG.remove(BUILDG.children[0]);(S.builds||[]).forEach((o,i)=>{const g=makeBuild(o.id);g.position.set(o.x,0,o.z);g.rotation.y=o.r||0;
+function renderBuilds(){fixSaleSoon();while(BUILDG.children.length)BUILDG.remove(BUILDG.children[0]);(S.builds||[]).forEach((o,i)=>{const g=makeBuild(o.id);g.position.set(o.x,0,o.z);g.rotation.y=o.r||0;
   const d=BUILDS.find(q=>q.id===o.id),r=d?d.r:1;const hb=new THREE.Mesh(new THREE.BoxGeometry(r*1.5,2.6,r*1.5),new THREE.MeshBasicMaterial({visible:false}));hb.position.y=1.3;hb.userData.build=i;g.add(hb);g.userData.hit=hb;BUILDG.add(g)});buildMansionRoads()}
 let EDIT=-1;
 function editBuild(i){const o=(S.builds||[])[i];if(!o)return;const d=BUILDS.find(q=>q.id===o.id);EDIT=i;$("editTxt").textContent=(d?d.n:"Item")+" · rotate, move or sell it"+(sellPriceB(o)?" (+"+sellPriceB(o).toLocaleString()+")":"");$("editBar").hidden=false;
