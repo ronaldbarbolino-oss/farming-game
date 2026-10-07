@@ -310,6 +310,12 @@ body.rot .modal{overflow:auto}body.rot .suBox{max-height:calc(var(--LH,100vw) - 
 body.rot{position:fixed;top:0;left:0;width:var(--LW,100vh);height:var(--LH,100vw);transform:rotate(90deg) translateY(-100%);transform-origin:top left;overflow:hidden}
 body.rot.land .stage{width:var(--LW,100vh)!important;height:var(--LH,100vw)!important}
 body.rot.land .crew{max-height:calc(var(--LH,100vw) - 128px)}
+#actPad{position:absolute;left:calc(8px + env(safe-area-inset-left,0px));bottom:calc(8px + env(safe-area-inset-bottom,0px));width:168px;height:168px;z-index:7;display:none;pointer-events:none}
+body.mob #actPad{display:block}#actPad[hidden]{display:none!important}
+#actPad .ap{pointer-events:auto;position:absolute;width:58px;height:58px;border-radius:50%;border:3px solid #fff;color:#fff;font:900 .56rem/1.05 var(--display,sans-serif);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;box-shadow:0 4px 0 rgba(0,0,0,.35);touch-action:manipulation;padding:0;text-shadow:0 1px 0 rgba(0,0,0,.35)}
+#actPad .ap b{font-size:1.15rem;line-height:1}#actPad .ap:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.35)}
+#actPad .ap-h{left:55px;top:0;background:#e8a530}#actPad .ap-p{left:0;top:55px;background:#3f9a3a}#actPad .ap-w{left:110px;top:55px;background:#9b6a3a}#actPad .ap-m{left:55px;top:110px;background:#2f7fb8}
+body.mob.land .crew{max-height:calc(100dvh - 128px - 176px)}body.mob.rot.land .crew{max-height:calc(var(--LH,100vw) - 128px - 176px)}
 body.rot.land #below{width:min(460px,calc(var(--LW,100vh)*.62))}body.rot.land .crew{max-width:min(calc(var(--LW,100vh)*.28),230px)}body.rot.land .hud{max-width:calc(var(--LW,100vh)*.56)}
 /* landscape phones: top-right buttons in a compact wrapping row so they always fit */
 body.land .sbtns{flex-direction:row!important;flex-wrap:wrap;justify-content:flex-end;align-items:flex-start;max-width:calc(var(--LW,100vw)*.42);max-height:none!important;gap:3px}
@@ -385,6 +391,7 @@ body.land .sbtns .sb{font-size:.6rem!important;padding:3px 6px!important}
       
     </div>
     <div class="placeBar" id="hillBar" hidden><span id="hillTxt"></span><div><button class="cbtn" id="hillMove" type="button">✥ Move</button><button class="cbtn" id="hillGrow" type="button">⬆ Bigger</button><button class="cbtn" id="hillRm" type="button">🗑 Remove · 500</button><button class="cbtn on" id="hillDone" type="button">Done</button></div></div><div class="placeBar" id="editBar" hidden><span id="editTxt"></span><div><button class="cbtn" id="editRot" type="button">⟳ Rotate</button><button class="cbtn" id="editMove" type="button">✥ Move</button><button class="cbtn" id="editSell" type="button" style="background:#e8a33a;color:#fff">💰 Sell</button><button class="cbtn on" id="editDone" type="button">Done</button></div></div>
+    <div id="actPad" aria-label="Quick actions"><button class="ap ap-h" type="button" data-ap="tAll"><b>🧺</b>Harvest<br>All</button><button class="ap ap-p" type="button" data-ap="tPlantAll"><b>🌱</b>Plant<br>All</button><button class="ap ap-w" type="button" data-ap="tPlow"><b>🚜</b>Plow<br>All</button><button class="ap ap-m" type="button" data-ap="menu"><b>☰</b>Menu</button></div>
     <div class="placeBar" id="placeBar" hidden><span id="placeTxt"></span><div><button class="cbtn" id="placeRot" type="button">Rotate</button><button class="cbtn on" id="placeOk" type="button">Place here</button><button class="cbtn" id="placeX" type="button">Cancel</button></div></div>
     <div class="cam">
       <button class="cbtn" id="cU" aria-label="Move up">▲</button>
@@ -2824,7 +2831,11 @@ function hireUI(){const h=$("tHire"),u=$("tHspd");if(!h||!u)return;const n=Math.
 function hireHelper(){const n=Math.max(1,S.helpers|0);if(n>=HMAX)return;const c=HIRE_COSTS[n];if(S.coins<c)return toast("You need "+c.toLocaleString()+" coins to hire Helper "+(n+1)+".");S.coins-=c;S.helpers=n+1;hOnSet(HKEYS[n],true);ensureHelper2();hireUI();after();toast("Helper "+(n+1)+" joined your farm! They harvest, plant and pick fruit on their own.",3600)};
 function upgradeHelpers(){const lv=S.hspd|0;if(lv>=3)return;const c=HSPD[lv+1];if(S.coins<c)return toast("You need "+c.toLocaleString()+" coins for the speed upgrade.");S.coins-=c;S.hspd=lv+1;hireUI();after();toast("Helpers are now "+Math.round(30*(lv+1))+"% faster!",3000)};
 $("tHire").onclick=hireHelper;$("tHspd").onclick=upgradeHelpers;setInterval(hireUI,1000);
-$("menuBtn").onclick=()=>document.body.classList.toggle("drawer");$("drawerX").onclick=()=>document.body.classList.remove("drawer");
+$("menuBtn").onclick=()=>document.body.classList.toggle("drawer");
+document.body.classList.toggle("mob",!!MOBILE);document.querySelectorAll("#actPad [data-ap]").forEach(b=>b.onclick=e=>{e.stopPropagation();const k=b.dataset.ap;try{navigator.vibrate&&navigator.vibrate(15)}catch(x){}
+  if(k==="menu"){if(document.body.classList.contains("land"))document.body.classList.toggle("drawer");else{const t=document.getElementById("below");if(t)t.scrollIntoView({behavior:"smooth",block:"start"})}return}
+  const t=$(k);if(!t)return;if(t.disabled)return toast(t.textContent,1800);t.click()});
+setInterval(()=>{const p=$("actPad");if(p)p.hidden=!MOBILE||!!VISIT||!$("placeBar").hidden||!$("hillBar").hidden||!$("editBar").hidden},500);$("drawerX").onclick=()=>document.body.classList.remove("drawer");
 $("hideBtn").onclick=()=>{const on=document.body.classList.toggle("hideui");$("hideBtn").textContent=on?"Show":"Hide";$("hideBtn").setAttribute("aria-pressed",on);try{localStorage.setItem("bukid-hideui",on?"1":"0")}catch(e){}};
 try{if(localStorage.getItem("bukid-hideui")==="1"){document.body.classList.add("hideui");$("hideBtn").textContent="Show"}}catch(e){}
 $("rotBtn").onclick=async()=>{try{if(!document.fullscreenElement&&document.documentElement.requestFullscreen)await document.documentElement.requestFullscreen();await screen.orientation.lock("landscape");relayout()}catch(e){relayout();if(innerWidth<innerHeight)toast("Turn your phone sideways for landscape.",3000)}};
@@ -2832,7 +2843,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="184";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
+const GAMEVER="185";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 /* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
 (function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
   document.addEventListener("touchstart",e=>{el=null;if(!ROT||e.touches.length!==1)return;el=scroller(e.target);if(el){const q=exy(e.touches[0]);lx=q.x;ly=q.y;mv=0}},{passive:true});
