@@ -82,7 +82,8 @@ body.visiting #below,body.visiting .toolbar,body.visiting .crew,body.visiting #m
 .visitBar span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.visitBar .btn{flex:none}
 .wmBox{width:min(640px,100%)}.wmMap{position:relative;border:4px solid var(--wood-d);border-radius:14px;overflow:hidden;background:#4aa8d8;aspect-ratio:16/10}
 .wmMap svg{display:block;width:100%;height:100%}.wmPin{cursor:pointer}.wmPin:focus-visible{outline:none}.wmPin:focus-visible circle.ring{stroke:#2f7fb8;stroke-width:4}
-.wmList{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:6px;max-height:34vh;overflow:auto}
+.wmList{list-style:none;margin:8px 0 0;padding:0 2px 0 0;display:flex;flex-direction:column;gap:6px;max-height:58vh;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}.wmBox{display:flex;flex-direction:column;max-height:calc(100dvh - 24px)!important}body.rot .wmBox{max-height:calc(var(--LH,100vw) - 24px)!important}.wmBox .wmList{flex:1 1 auto;min-height:0;max-height:none}
+body.land .wmBox #wmLead{display:none}body.land .wmBox h3{font-size:1.25rem}body.land .wmBox .wmTools input{padding:5px 8px}body.land .wmBox .wmTools .btn{padding:6px 12px}body.land .wmBox .wmList li{padding:4px 8px}body.land .wmBox .suRow{margin-top:4px}.wmList li.wmH{border:none;background:none;padding:4px 2px 0;font-family:var(--display);font-size:1rem;color:var(--leaf)}.wmList li.wmH.off{color:#7a6a5a}
 .wmList li{display:flex;align-items:center;gap:8px;border:3px solid #e2c99a;border-radius:12px;padding:6px 8px;background:#fffaf0}
 .wmList li b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.wmList small{opacity:.8;font-weight:800}
 .dot{width:11px;height:11px;border-radius:50%;flex:none;background:#9aa3ab}.dot.on{background:#3fcf4a;box-shadow:0 0 0 3px rgba(63,207,74,.25)}
@@ -510,10 +511,9 @@ body.land .sbtns .sb{font-size:.6rem!important;padding:3px 6px!important}
 </div>
 <div class="modal" id="worldMap" hidden>
   <div class="suBox wmBox" role="dialog" aria-labelledby="wmTitle">
-    <h3 id="wmTitle">World Map</h3>
-    <p class="suLead" id="wmLead">Visit other farmers, online or offline. Green means they're playing right now.</p>
-    <div class="wmMap"><svg id="wmSvg" viewBox="0 0 640 400" role="img" aria-label="Map of farms"></svg></div>
-    <div class="wmTools" id="wmF" style="margin-bottom:6px"><button class="btn sm" type="button" data-f="all">All</button><button class="btn sm alt" type="button" data-f="on">🟢 Online</button><button class="btn sm alt" type="button" data-f="off">⚪ Offline</button></div>
+    <h3 id="wmTitle">🌍 Farmers</h3>
+    <p class="suLead" id="wmLead">Farmers playing right now are on top. Scroll to see everyone, and tap Visit to see their farm.</p>
+    <svg id="wmSvg" hidden></svg><div id="wmF" hidden></div>
     <div class="wmTools"><input id="wmQ" placeholder="Search a farm or player" aria-label="Search farms"><button class="btn alt" type="button" id="wmRefresh">Refresh</button></div>
     <ul class="wmList" id="wmList"></ul>
     <p class="err" id="wmErr" role="alert"></p>
@@ -2843,7 +2843,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="185";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
+const GAMEVER="187";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 /* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
 (function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
   document.addEventListener("touchstart",e=>{el=null;if(!ROT||e.touches.length!==1)return;el=scroller(e.target);if(el){const q=exy(e.touches[0]);lx=q.x;ly=q.y;mv=0}},{passive:true});
@@ -6757,8 +6757,8 @@ const ago=ms=>{const m=Math.floor(ms/60000);return m<1?"just now":m<60?m+"m ago"
 function pinXY(u){let h=2166136261;for(let i=0;i<u.length;i++){h^=u.charCodeAt(i);h=Math.imul(h,16777619)}h>>>=0;const a=(h%3600)/3600*Math.PI*2,r=.25+((h>>>12)%1000)/1000*.72;return[320+Math.cos(a)*r*250,200+Math.sin(a)*r*140]}
 let WMF="all";document.querySelectorAll("#wmF [data-f]").forEach(b=>b.onclick=()=>{WMF=b.dataset.f;drawMap()});
 function drawMap(){const svg=$("wmSvg"),q=String($("wmQ").value||"").trim().toLowerCase(),me=myUser();
-  const nOn=NET.list.filter(isOn).length;document.querySelectorAll("#wmF [data-f]").forEach(b=>{const k=b.dataset.f;b.classList.toggle("alt",k!==WMF);b.textContent=(k==="all"?"All":k==="on"?"🟢 Online":"⚪ Offline")+" ("+(k==="all"?NET.list.length:k==="on"?nOn:NET.list.length-nOn)+")"});
-  const L=NET.list.filter(f=>(WMF==="all"||(WMF==="on")===isOn(f))&&(!q||(f.farm+" "+f.farmer+" "+f.u).toLowerCase().includes(q))).sort((a,b)=>(isOn(b)-isOn(a))||b.seen-a.seen);
+  const nOn=NET.list.filter(isOn).length;
+  const L=NET.list.filter(f=>(!q||(f.farm+" "+f.farmer+" "+f.u).toLowerCase().includes(q))).sort((a,b)=>(isOn(b)-isOn(a))||b.seen-a.seen);
   let g='<defs><radialGradient id="wmI" cx="50%" cy="50%" r="55%"><stop offset="0" stop-color="#7cc94c"/><stop offset=".85" stop-color="#5fae3a"/><stop offset="1" stop-color="#e8d9a0"/></radialGradient></defs>';
   g+='<ellipse cx="320" cy="200" rx="300" ry="182" fill="#e8d9a0"/><ellipse cx="320" cy="200" rx="288" ry="172" fill="url(#wmI)"/>';
   g+='<path d="M120 90 C200 150 260 120 330 200 S470 260 560 320" stroke="#4aa8d8" stroke-width="9" fill="none" stroke-linecap="round" opacity=".85"/>';
@@ -6769,10 +6769,11 @@ function drawMap(){const svg=$("wmSvg"),q=String($("wmQ").value||"").trim().toLo
       `<rect x="-11" y="-12" width="22" height="16" rx="2" fill="#c8382b" stroke="#5a3a1a" stroke-width="2"/><path d="M-14 -12 L0 -24 L14 -12 Z" fill="#5a3a30" stroke="#3a2615" stroke-width="2"/>`+
       `<circle class="ring" cx="12" cy="-22" r="6" fill="${on?"#3fcf4a":"#9aa3ab"}" stroke="#fff" stroke-width="2"/>`+
       `<rect x="${-Math.min(70,nm.length*3.6+10)}" y="8" width="${Math.min(140,nm.length*7.2+20)}" height="18" rx="9" fill="${mine?"#f2b632":"#fff6df"}" stroke="${c}" stroke-width="3"/><text y="21" text-anchor="middle" font-size="11" font-weight="900" fill="#3a2615">${nm.slice(0,18)}</text></g>`});
-  svg.innerHTML=g;svg.querySelectorAll(".wmPin").forEach(p=>{const go=()=>{if(p.dataset.u===me)return toast("That's your farm!");visitFarm(p.dataset.u)};p.onclick=go;p.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go()}}});
+  if(!svg.hidden)svg.innerHTML=g;svg.querySelectorAll(".wmPin").forEach(p=>{const go=()=>{if(p.dataset.u===me)return toast("That's your farm!");visitFarm(p.dataset.u)};p.onclick=go;p.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go()}}});
   const ul=$("wmList");ul.textContent="";
   if(!L.length){const li=document.createElement("li");li.textContent=NET.list.length?"No farm matches that search.":"No farms on the map yet. Play for a minute and yours will appear.";ul.append(li)}
-  L.forEach(f=>{const li=document.createElement("li"),d=document.createElement("span"),b=document.createElement("b"),sm=document.createElement("small"),bt=document.createElement("button");
+  let hdr=null;L.forEach(f=>{const on=isOn(f);if(hdr!==on){hdr=on;const h=document.createElement("li");h.className="wmH"+(on?"":" off");h.textContent=on?"🟢 Online now ("+L.filter(isOn).length+")":"⚪ Offline ("+L.filter(x=>!isOn(x)).length+")";ul.append(h)}
+    const li=document.createElement("li"),d=document.createElement("span"),b=document.createElement("b"),sm=document.createElement("small"),bt=document.createElement("button");
     d.className="dot"+(isOn(f)?" on":"");b.textContent=(f.farm||f.u)+" · "+(f.farmer||f.u);sm.textContent=(f.app?"📲 App · ":"")+"Lv "+(f.lv||1)+" · "+(isOn(f)?"Online":ago(NET.now-f.seen));
     bt.className="btn sm";bt.type="button";if(f.u===me){bt.textContent="You";bt.disabled=true}else{bt.textContent="Visit";bt.onclick=()=>visitFarm(f.u)}li.append(d,b,sm,bt);ul.append(li)})}
 async function loadMap(){$("wmErr").textContent="";if(!API){$("wmErr").textContent="The world map works in the Farming app at farming-ph.netlify.app.";NET.list=[];drawMap();return}
