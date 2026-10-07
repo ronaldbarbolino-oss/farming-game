@@ -111,6 +111,7 @@ h2{font-family:var(--display);font-weight:400;font-size:1.25rem;margin:0;color:#
 .btn:active{transform:translateY(3px);box-shadow:0 1px 0 #2a6619}
 .btn.alt{background:var(--wood);box-shadow:0 4px 0 var(--wood-d)}
 .btn:disabled{opacity:.5;cursor:not-allowed}
+.npcB{position:fixed;z-index:21;transform:translate(-50%,-100%);background:#fff8e6;color:#3b2a14;border:2px solid #7a5208;border-radius:12px;padding:5px 9px;font-size:.82rem;line-height:1.25;text-align:center;white-space:nowrap;box-shadow:0 3px 0 rgba(0,0,0,.25)}.npcB small{opacity:.7}.npcR{display:flex;gap:6px;justify-content:center;margin-top:4px}.npcB .btn.sm{padding:4px 10px;font-size:.8rem}.npcB .npcC{background:#d23a2a;box-shadow:0 3px 0 #8f2218;animation:npcP 1s infinite}@keyframes npcP{50%{transform:scale(1.08)}}
 .float{position:fixed;pointer-events:none;font-family:var(--display);font-size:1.2rem;color:#fff;text-shadow:0 2px 0 #7a5208,0 0 3px #7a5208;animation:up 1.1s ease-out forwards;z-index:20;white-space:nowrap;transform:translateX(-50%)}
 @keyframes up{to{margin-top:-50px;opacity:0}}
 .toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--cream);padding:8px 16px;border-radius:12px;font-weight:800;z-index:30;max-width:calc(100% - 32px);text-align:center}
@@ -305,6 +306,7 @@ body.land .modeTag{max-width:46vw;font-size:.64rem;opacity:.85}
 @media (prefers-reduced-motion:reduce){#splash *,#splash *::after{animation:none!important}#splash .bar i{width:92%}}
 .logo{animation:lgShine 4s ease-in-out infinite}@keyframes lgShine{0%,100%{filter:drop-shadow(0 1px 0 #7a3d10) drop-shadow(0 1px 0 #7a3d10) drop-shadow(0 1px 0 #7a3d10) drop-shadow(0 2px 0 #4a2508) drop-shadow(0 4px 3px rgba(0,0,0,.35)) brightness(1)}50%{filter:drop-shadow(0 1px 0 #7a3d10) drop-shadow(0 1px 0 #7a3d10) drop-shadow(0 1px 0 #7a3d10) drop-shadow(0 2px 0 #4a2508) drop-shadow(0 4px 3px rgba(0,0,0,.35)) brightness(1.18)}}
 
+body.rot .modal{overflow:auto}body.rot .suBox{max-height:calc(var(--LH,100vw) - 24px)}
 body.rot{position:fixed;top:0;left:0;width:var(--LW,100vh);height:var(--LH,100vw);transform:rotate(90deg) translateY(-100%);transform-origin:top left;overflow:hidden}
 body.rot.land .stage{width:var(--LW,100vh)!important;height:var(--LH,100vw)!important}
 body.rot.land .crew{max-height:calc(var(--LH,100vw) - 128px)}
@@ -556,6 +558,15 @@ body.land .sbtns .sb{font-size:.6rem!important;padding:3px 6px!important}
     <div class="suRow"><button class="btn alt" type="button" id="spClose">Close</button><button class="btn" type="button" id="spSend">Send message</button></div></div>
     <div id="spDone" hidden><p class="suLead" style="font-size:1.05rem">✅ Message sent! We'll reply to <b id="spTo"></b> from farmgaming.ph@gmail.com. Check your inbox and spam folder.</p><div class="suRow"><button class="btn" type="button" id="spOk">OK</button></div></div>
     <p class="suLead" style="margin-top:8px;font-size:.8rem">You can also email us directly at <b>farmgaming.ph@gmail.com</b>.</p></div>
+</div>
+<div class="modal" id="exM" hidden>
+  <div class="suBox"><h3>📲 Move this farm to the Farming website</h3>
+    <p class="suLead">This farm is saved only in this Claude page. Tap the green button to open it on <b>farming-ph.netlify.app</b>. There you make your <b>username and password</b>, then log in with them on your phone.</p>
+    <p class="suLead" id="exInfo" style="font-weight:800"></p>
+    <a class="btn" id="exGo" target="_blank" rel="noopener" href="#" style="text-align:center;text-decoration:none">🌾 Open my farm on the website</a>
+    <label for="exLink" style="display:block;margin-top:6px">If the button doesn't open, copy this link and open it in your browser:</label>
+    <textarea id="exLink" readonly rows="3" style="width:100%;box-sizing:border-box;font-size:.7rem;border:3px solid #e2c99a;border-radius:10px;padding:6px"></textarea>
+    <div class="suRow"><button class="btn alt" type="button" id="exClose">Close</button><button class="btn alt" type="button" id="exCopy">Copy link</button></div></div>
 </div>
 <div class="modal" id="pwM" hidden>
   <div class="suBox"><h3>🔑 Password for phone login</h3>
@@ -1718,7 +1729,7 @@ function funTick(f,dt,t,walkTo){const o=f.o,F=o.fun,g=f.g,P={crT:0,armL:0,armR:0
 const FEAST={fishG:new THREE.SphereGeometry(1,10,8),fishM:new THREE.MeshLambertMaterial({color:0x6aa8d8}),fishCooked:new THREE.MeshLambertMaterial({color:0xc9782a}),stickG:new THREE.CylinderGeometry(.015,.015,.9,5),stickM:new THREE.MeshLambertMaterial({color:0x8a5a2a}),cupG:new THREE.CylinderGeometry(.06,.05,.13,10),cupM:new THREE.MeshLambertMaterial({color:0x8a4a24})};
 const FUNTXT={feast:"Fishing, then grilling fish by the bonfire",swim:"Swimming in the lake",fire:"Warming up by the bonfire",dance:"Dancing",nap:"Napping under a tree"};
 function stepFarmer(dt,t){
-  if(farmer&&farmer.o.fun&&farmer.o.queue&&farmer.o.queue.length)funEnd(farmer);if(!farmer)return;if(runQueue(farmer,dt,t))return;const f=farmer,o=f.o,g=f.g;
+  if(farmer&&farmer.o.fun&&farmer.o.queue&&farmer.o.queue.length)funEnd(farmer);if(!farmer)return;if(chaseTick(farmer,dt,t))return;if(runQueue(farmer,dt,t))return;const f=farmer,o=f.o,g=f.g;
   let walking=false,crT=0,armL=0,armR=0,tug=0,legSpread=0;
   o.st-=dt;
   const walkTo=(x,z,sp)=>{const dx=x-g.position.x,dz=z-g.position.z,d=Math.hypot(dx,dz);if(d<.04)return true;
@@ -2764,7 +2775,12 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="161";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
+const GAMEVER="162";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
+/* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
+(function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
+  document.addEventListener("touchstart",e=>{el=null;if(!ROT||e.touches.length!==1)return;el=scroller(e.target);if(el){const q=exy(e.touches[0]);lx=q.x;ly=q.y;mv=0}},{passive:true});
+  document.addEventListener("touchmove",e=>{if(!ROT||!el||e.touches.length!==1)return;const q=exy(e.touches[0]),dx=q.x-lx,dy=q.y-ly;lx=q.x;ly=q.y;mv+=Math.abs(dx)+Math.abs(dy);el.scrollTop-=dy;el.scrollLeft-=dx;if(e.cancelable)e.preventDefault()},{passive:false});
+  document.addEventListener("touchend",()=>{el=null},{passive:true})})();
 function cvRect(){return ROT?{left:0,top:0,width:cv.clientWidth,height:cv.clientHeight}:cv.getBoundingClientRect()}
 function setRot(){const au=document.getElementById("auth"),inAuth=!(typeof LOCAL!=="undefined"&&LOCAL.user)||(au&&!au.hidden);const want=!!MOBILE&&innerHeight>innerWidth*1.05&&!inAuth;if(want!==ROT){ROT=want;document.body.classList.toggle("rot",want)}const r=document.documentElement.style;r.setProperty("--LW",(ROT?innerHeight:innerWidth)+"px");r.setProperty("--LH",(ROT?innerWidth:innerHeight)+"px")}
 let _olTried=false;function tryLockLand(){if(_olTried||!MOBILE||!(innerHeight>innerWidth)||!(typeof LOCAL!=="undefined"&&LOCAL.user))return;_olTried=true;try{const d=document.documentElement,go=()=>{if(screen.orientation&&screen.orientation.lock)screen.orientation.lock("landscape").catch(()=>{})};
@@ -2847,7 +2863,7 @@ function helperHarvest(i){const t=S.tiles[i],st=tileState(t);if(!st||st.p<1)retu
   after()}
 function helperUI(){const b=$("tHelper");if(!b)return;b.textContent=S.helperOn?"Helper: Working":"Helper: Resting";b.classList.toggle("alt",!S.helperOn)}
 function stepHelper(dt,t){
-  if(helper&&helper.o.fun&&helper.o.queue&&helper.o.queue.length)funEnd(helper);if(!helper)return;if(runQueue(helper,dt,t))return;const f=helper,o=f.o,g=f.g,SP=spdOf(helper);let walking=false,crT=0,armL=0,armR=0;o.st-=dt*SP;
+  if(helper&&helper.o.fun&&helper.o.queue&&helper.o.queue.length)funEnd(helper);if(!helper)return;if(chaseTick(helper,dt,t))return;if(runQueue(helper,dt,t))return;const f=helper,o=f.o,g=f.g,SP=spdOf(helper);let walking=false,crT=0,armL=0,armR=0;o.st-=dt*SP;
   const walkTo=(x,z,sp)=>{sp*=SP;const dx=x-g.position.x,dz=z-g.position.z,d=Math.hypot(dx,dz);if(d<.05)return true;
     const want=Math.atan2(-dz,dx);let da=want-g.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));g.rotation.y+=da*Math.min(1,dt*6);
     if(Math.abs(da)<.8){g.position.x+=dx/d*Math.min(sp*dt,d);g.position.z+=dz/d*Math.min(sp*dt,d)}walking=true;return false};
@@ -6468,7 +6484,17 @@ function saveAccts(a){try{localStorage.setItem(ACCT_KEY,JSON.stringify(a))}catch
 async function hashPw(pw,salt){const data=new TextEncoder().encode(salt+":"+pw);
   try{if(window.crypto&&crypto.subtle){const h=await crypto.subtle.digest("SHA-256",data);return[...new Uint8Array(h)].map(b=>b.toString(16).padStart(2,"0")).join("")}}catch(e){}
   let h=5381,h2=52711;for(const b of data){h=((h<<5)+h+b)|0;h2=((h2<<5)+h2^b)|0}return"x"+(h>>>0).toString(16)+(h2>>>0).toString(16)}
-function oldSave(){try{const r=localStorage.getItem("bukid-v1");return r?JSON.parse(r):null}catch(e){return null}}
+function oldSave(){try{const m=impSave();if(m)return m.state;const r=localStorage.getItem("bukid-v1");return r?JSON.parse(r):null}catch(e){return null}}
+function impSave(){try{const r=localStorage.getItem("farming-import");return r?JSON.parse(r):null}catch(e){return null}}
+const B64U={enc:u8=>{let s="";for(let i=0;i<u8.length;i+=8192)s+=String.fromCharCode.apply(null,u8.subarray(i,i+8192));return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")},
+  dec:t=>{t=t.replace(/-/g,"+").replace(/_/g,"/");while(t.length%4)t+="=";const b=atob(t),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u}};
+async function zipStr(str){if(typeof CompressionStream==="undefined")return "j"+B64U.enc(new TextEncoder().encode(str));const s=new Blob([str]).stream().pipeThrough(new CompressionStream("deflate-raw"));return "z"+B64U.enc(new Uint8Array(await new Response(s).arrayBuffer()))}
+async function unzipStr(t){const k=t[0],u=B64U.dec(t.slice(1));if(k==="j")return new TextDecoder().decode(u);const s=new Blob([u]).stream().pipeThrough(new DecompressionStream("deflate-raw"));return await new Response(s).text()}
+async function openExport(){const u=myUser()||"";const a=(u?accts()[u]:(typeof CLOUD!=="undefined"&&(CLOUD.profile||CLOUD.local)))||{};save();const pay={v:1,farm:a.farm||"",farmer:a.farmer||"",shirt:a.shirt|0,u,state:snapState()};
+  const link="https://farming-ph.netlify.app/#farm="+await zipStr(JSON.stringify(pay));$("exGo").href=link;$("exLink").value=link;
+  $("exInfo").textContent="🌾 "+(a.farm||"Your farm")+" · Level "+S.lv+" · "+Math.floor(S.coins).toLocaleString()+" coins · "+S.pens.length+" animals";$("exM").hidden=false}
+async function takeImport(){const h=location.hash||"";if(!h.startsWith("#farm="))return false;try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}
+  try{const d=JSON.parse(await unzipStr(h.slice(6)));if(!d||!d.state)throw 0;d.at=Date.now();localStorage.setItem("farming-import",JSON.stringify(d));return d}catch(e){toast("That farm link is broken. Copy the whole link and try again.",4000);return false}}
 function loginLocal(u){const a=accts()[u];if(!a)return;setTimeout(()=>{try{relayout()}catch(e){}},60);LOCAL.user=u;try{localStorage.setItem(SESS_KEY,u)}catch(e){}
   CLOUD.local={farm:a.farm,farmer:a.farmer,shirt:a.shirt|0};
   let st=null;try{st=JSON.parse(localStorage.getItem("farming-save-"+u)||"null")}catch(e){}
@@ -6476,10 +6502,12 @@ function loginLocal(u){const a=accts()[u];if(!a)return;setTimeout(()=>{try{relay
   applyProfile();$("auth").hidden=true;$("acctSave").textContent="Saved on this device";}
 function logoutLocal(){save();LOCAL.user=null;CLOUD.local=null;try{localStorage.removeItem(SESS_KEY)}catch(e){}$("signup").hidden=true;loadState(fresh());applyProfile();openAuth("login")}
 function openAuth(tab,msg){$("auth").hidden=false;setTimeout(()=>{try{relayout()}catch(e){}},30);authTab(tab||"signup");$("auErr").textContent=msg||"";$("liErr").textContent="";
-  $("auImportRow").hidden=!oldSave()||Object.keys(accts()).length>0;}
+  const im=impSave();$("auImportRow").hidden=!oldSave()||(!im&&Object.keys(accts()).length>0);if(im){$("auImport").checked=true;$("auImportRow").lastChild.textContent=" Use my farm from Claude: "+(im.farm||"farm")+" · Level "+(im.state.lv||1);if(im.farm&&!$("auFarm").value)$("auFarm").value=im.farm;if(im.farmer&&!$("auName").value)$("auName").value=im.farmer;if(im.u&&!$("auUser").value)$("auUser").value=im.u}}
 function authTab(t){$("auSignup").hidden=t!=="signup";$("auLogin").hidden=t!=="login";$("tabSu").classList.toggle("on",t==="signup");$("tabLi").classList.toggle("on",t==="login");
   setTimeout(()=>{const f=t==="signup"?$("auUser"):$("liUser");if(f)f.focus()},60)}
-function localAuthStart(){$("lbHead").hidden=true;$("lbPanel").hidden=true;let u=null;try{u=localStorage.getItem(SESS_KEY)}catch(e){}
+async function localAuthStart(){$("lbHead").hidden=true;$("lbPanel").hidden=true;
+  if(API&&(location.hash||"").startsWith("#farm=")){const d=await takeImport();if(d){openAuth("signup","🎉 Your farm from Claude is here! Make a username and password to keep it. Then log in on your phone with them.");return}}
+  let u=null;try{u=localStorage.getItem(SESS_KEY)}catch(e){}
   if(u&&accts()[u]){loginLocal(u);toast("Welcome back, "+accts()[u].farmer+"!",2400)}else openAuth(Object.keys(accts()).length?"login":"signup")}
 (function authUI(){
   const box=$("auShirts");SHIRTS.forEach((c,i)=>{const b=document.createElement("button");b.type="button";b.style.background="#"+c.toString(16).padStart(6,"0");b.setAttribute("aria-label","Color "+(i+1));
@@ -6493,7 +6521,7 @@ function localAuthStart(){$("lbHead").hidden=true;$("lbPanel").hidden=true;let u
     if(!farm||!name)return $("auErr").textContent="Enter a farm name and your farmer name.";
     const all=accts();if(all[u])return $("auErr").textContent="That username is already taken on this device. Choose another or log in.";
     const salt=Math.random().toString(36).slice(2)+Date.now().toString(36);all[u]={salt,hash:await hashPw(p1,salt),farm,farmer:name,shirt:SU_SHIRT,created:Date.now()};saveAccts(all);
-    if($("auImport").checked&&!$("auImportRow").hidden){const o=oldSave();if(o)try{localStorage.setItem("farming-save-"+u,JSON.stringify(o))}catch(e){}}
+    if($("auImport").checked&&!$("auImportRow").hidden){const o=oldSave();if(o)try{localStorage.setItem("farming-save-"+u,JSON.stringify(o));localStorage.removeItem("farming-import")}catch(e){}}
     ["auPw","auPw2"].forEach(k=>$(k).value="");loginLocal(u);toast(farm+" is ready! Start planting.",3200);setTimeout(()=>linkPw(u,p1),2500);
     const em=$("auEmail").value.trim();$("auEmail").value="";if(em)setTimeout(()=>openEmail(em,true),1200)};
   $("auLogin").onsubmit=async e=>{e.preventDefault();const u=$("liUser").value.trim().toLowerCase(),p=$("liPw").value,a=accts()[u];
@@ -6507,7 +6535,7 @@ function localAuthStart(){$("lbHead").hidden=true;$("lbPanel").hidden=true;let u
 
 /* ---- email verification and account recovery ---- */
 const postJ=async(path,body)=>{const r=await fetch(API+path,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});let d={};try{d=await r.json()}catch(e){}if(!r.ok)throw new Error(d.error||"Something went wrong. Try again.");return d};
-function emailStateUI(){const a=myUser()&&accts()[myUser()],el=$("emailState");{const pu=$("pwUser");if(pu)pu.textContent=myUser()?"Username: "+myUser():""}if(el)el.textContent=a&&a.email?(a.emailOk?"✅ "+a.email:"⏳ "+a.email+" (not verified)"):"No email yet"}
+function emailStateUI(){const a=myUser()&&accts()[myUser()],el=$("emailState");{const pu=$("pwUser");if(pu)pu.textContent=API&&myUser()?"Username: "+myUser():"";const pb=$("pwBtn");if(pb&&!API)pb.textContent="📲 Move this farm to the website for phone login"}if(el)el.textContent=a&&a.email?(a.emailOk?"✅ "+a.email:"⏳ "+a.email+" (not verified)"):"No email yet"}
 function openEmail(prefill,auto){if(!API)return toast("Email works in the Farming app at farming-ph.netlify.app.",3200);if(!myUser())return;const a=accts()[myUser()]||{};
   $("emailM").hidden=false;$("emErr").textContent="";$("emStep1").hidden=false;$("emStep2").hidden=true;$("emAddr").value=prefill||a.email||"";if(auto&&prefill)$("emSend").click()}
 async function emSend(){const email=$("emAddr").value.trim().toLowerCase();$("emErr").textContent="";if(!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(email))return $("emErr").textContent="Type a valid email.";
@@ -6537,9 +6565,10 @@ async function adoptAccount(d,pw,tok){const u=d.u,A=accts(),salt=Math.random().t
 $("trBtn").onclick=async()=>{if(!API)return toast("Moving your farm works in the Farming app at farming-ph.netlify.app.",3200);if(!myUser())return;$("trM").hidden=false;$("trErr").textContent="";$("trCode").textContent="…";
   try{save();await netSend(true);const d=await postJ("transfer/start",{u:myUser(),tok:myTok()});$("trCode").textContent=d.code.slice(0,4)+"-"+d.code.slice(4)}catch(e){$("trErr").textContent=e.message;$("trCode").textContent="—"}};
 $("syncOnBtn").onclick=()=>{if(!API)return toast("Sync works in the Farming app at farming-ph.netlify.app.",3200);if(!myUser())return;$("syM").hidden=false;$("syErr").textContent="";$("syDone").hidden=true;$("syForm").hidden=false;$("syU").textContent=myUser();setTimeout(()=>$("syPw").focus(),50)};
-$("pwBtn").onclick=()=>{if(!API)return toast("Phone login works in the Farming app at farming-ph.netlify.app.",3200);const u=myUser();if(!u)return;$("pwM").hidden=false;$("pwErr").textContent="";$("pwDone").hidden=true;$("pwForm").hidden=false;$("pwU").textContent=u;$("pwU2").textContent=u;["pwN","pwN2"].forEach(k=>$(k).value="");setTimeout(()=>$("pwN").focus(),50)};
+$("pwBtn").onclick=()=>{if(!API)return openExport();const u=myUser();if(!u)return;$("pwM").hidden=false;$("pwErr").textContent="";$("pwDone").hidden=true;$("pwForm").hidden=false;$("pwU").textContent=u;$("pwU2").textContent=u;["pwN","pwN2"].forEach(k=>$(k).value="");setTimeout(()=>$("pwN").focus(),50)};
 $("pwShow").onchange=()=>{const t=$("pwShow").checked?"text":"password";$("pwN").type=t;$("pwN2").type=t};
 $("pwClose").onclick=()=>{$("pwM").hidden=true};
+$("exClose").onclick=()=>{$("exM").hidden=true};$("exCopy").onclick=async()=>{const t=$("exLink");t.select();let ok=false;try{await navigator.clipboard.writeText(t.value);ok=true}catch(e){try{ok=document.execCommand("copy")}catch(e2){}}toast(ok?"Link copied. Paste it in your browser.":"Press and hold the link to copy it.",2600)};
 $("pwGo").onclick=async()=>{const u=myUser(),p=$("pwN").value,p2=$("pwN2").value;$("pwErr").textContent="";
   if(p.length<4)return $("pwErr").textContent="Use at least 4 letters or numbers.";if(p!==p2)return $("pwErr").textContent="The two passwords don't match.";
   $("pwGo").disabled=true;try{await netSend(true);if(NET.taken)throw new Error("This device isn't linked to the farm online. Log out and log in again with your old password, then try again.");
@@ -6563,7 +6592,9 @@ async function initCloud(){
   if(!db||!user){$("acctSave").textContent="Saved on this device";$("lbHint").textContent="Sign in to Claude to see other farmers";noBoard();localAuthStart();return}
   const id=await user.id();if(!id){$("acctSave").textContent="Saved on this device";$("lbHint").textContent="Sign in to Claude to see other farmers";noBoard();localAuthStart();return}
   CLOUD.db=db;CLOUD.user=user;CLOUD.id=id;
-  let pd=null,sd=null;try{[pd,sd]=await Promise.all([db.doc("players/"+id).get(),db.doc("data/users/"+id+"/save").get()])}catch(e){}
+  let pd=null,sd=null,rok=false;for(let k=0;k<4&&!rok;k++){try{[pd,sd]=await Promise.all([db.doc("players/"+id).get(),db.doc("data/users/"+id+"/save").get()]);rok=true}catch(e){await new Promise(r=>setTimeout(r,1500*(k+1)))}}
+  if(!rok){$("acctSave").textContent="Couldn't load your farm";toast("☁️ Couldn't load your farm right now. Close and open the page again. Your farm is safe.",8000);CLOUD.readonly=true;return}
+  if((!pd||!pd.exists)&&sd&&sd.exists){try{const st=JSON.parse(sd.data().state);loadState(st);CLOUD.profile={farm:"My Farm",farmer:"Farmer",shirt:0,lv:S.lv,coins:Math.round(S.coins),animals:S.pens.length,joined:Date.now(),ts:Date.now()};await db.doc("players/"+id).set(CLOUD.profile);pd={exists:true,data:()=>CLOUD.profile}}catch(e){}}
   if(pd&&pd.exists){CLOUD.profile=Object.assign({},pd.data());const d=CLOUD.profile;CLOUD.lastPub=JSON.stringify([d.lv,d.coins,d.animals]);
     if(sd&&sd.exists){try{loadState(JSON.parse(sd.data().state))}catch(e){}}
     applyProfile();$("acctSave").textContent="Saved to your account";toast("Welcome back, "+d.farmer+"!",2600)}
@@ -6589,7 +6620,7 @@ async function netSend(full){if(!API||VISIT||NET.taken)return;if(!SYNC.pulled&&D
   const body={u,tok,farm:p.farm||"",farmer:p.farmer||"",shirt:p.shirt|0,lv:S.lv,size:S.size,coins:Math.floor(S.coins),animals:S.pens.length,plots:(S.plots||[]).length,app:IS_APP?1:0,seen:S.seen||0};if(!NET.sentFirst&&full){body.first=1;NET.sentFirst=1}if(full)body.state=snapState();
   try{const r=await fetch(API+(full?"publish":"ping"),{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});
     if(r.status===403){NET.taken=true;toast("☁️ This farm isn't linked on this device anymore. Log out, then log in with your username and password to sync it here.",6500)}
-    else if(r.ok){try{const d=await r.json();if(d&&d.newer)showSyncBar();else if(full&&body.state)SYNC.base=Number(body.state.seen)||SYNC.base}catch(e){}}NET.ok=r.ok||r.status===403}catch(e){NET.ok=false}}
+    else if(r.ok){try{const d=await r.json();if(d&&d.newer)showSyncBar();else if(full&&body.state)SYNC.base=Number(body.state.seen)||SYNC.base}catch(e){}if(full&&!NET.lhSent){NET.lhSent=1;const a=accts()[u];if(a&&a.salt&&/^[0-9a-f]{64}$/.test(a.hash||""))postJ("setlh",{u,tok,salt:a.salt,hash:a.hash}).catch(()=>{})}}NET.ok=r.ok||r.status===403}catch(e){NET.ok=false}}
 /* cloud sync: the same farm on the web and in the app */
 function showSyncBar(){let b=$("syncBar");if(!b){b=document.createElement("button");b.id="syncBar";b.type="button";b.className="btn";b.style.cssText="position:fixed;left:50%;top:calc(58px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:60;background:#2f7fb8;box-shadow:0 4px 0 #1d5a85";
   b.textContent="☁️ Newer progress from your other device · Sync now";b.onclick=()=>pullSync(true);document.body.appendChild(b)}b.hidden=false}
@@ -6878,9 +6909,78 @@ function perfStep(dt,t){if(typeof applyBarnPos==="function")applyBarnPos();{cons
     if(fps<22&&sun.castShadow&&MOBILE){sun.castShadow=false}}}}
 function setQuality(q,res){try{if(q==null)localStorage.removeItem("farming-q");else localStorage.setItem("farming-q",q);if(res==null)localStorage.removeItem("farming-res");else localStorage.setItem("farming-res",res)}catch(e){}save();location.reload()}
 function qLabel(){return"⚡ Graphics: "+(QPICK==null?"Auto":["Low","Medium","High"][QLV])+(RPICK!=null?" · "+Math.round(RPICK*100)+"%":"")}
+/* ================= VISITORS: buyers who offer coins for your animals, thieves who try to steal them ================= */
+const VIS={buyT:100+Math.random()*80,thT:200+Math.random()*120,buyer:null,thief:null};
+const VIS_IN=[[-38,-8],[-6,-8]];
+function visOk(){return !VISIT&&!onIsle&&!onCity&&!S.inTown&&!JTRIP.on&&!TRIP.on&&!isNight()&&!isBad()}
+function visTargets(){const L=[];S.pens.forEach((p,i)=>{const o=animalObjs[i];if(o&&o.g.visible&&!o.shelter&&!isBaby(p)&&!p.sick&&!(VIS.thief&&VIS.thief.p===p)&&!(VIS.buyer&&VIS.buyer.p===p))L.push(p)});return L}
+function visObj(p){const i=S.pens.indexOf(p);return i<0?null:animalObjs[i]}
+function npcMake(kind){const f=kind==="thief"?makeFarmer({shirt:0x2a2a2e,pants:0x1c1c20,hat:0x2a2a2e,skin:0xc89068}):makeFarmer({shirt:0x2f7fb8,pants:0x6b4a2a,hat:0xf3efe2,skin:0xd9a070});
+  if(kind==="thief"){part(f.head,gBox,0x111111,.14,.16,0,.05,.06,.31);part(f.torso,gSph,0x8a6a3a,-.2,.25,0,.17,.2,.17)}else{part(f.torso,gBox,0x2b1e14,0,.3,.17,.05,.2,.02);part(f.armL,gBox,0x5a3a22,0,-.42,0,.08,.14,.2)}
+  f.g.position.set(VIS_IN[0][0],0,VIS_IN[0][1]+(Math.random()-.5));f.g.rotation.y=0;scene.add(f.g);return f}
+function npcWalk(f,x,z,sp,dt){const g=f.g,dx=x-g.position.x,dz=z-g.position.z,d=Math.hypot(dx,dz);if(d<.1)return true;const want=Math.atan2(-dz,dx);let da=want-g.rotation.y;da=Math.atan2(Math.sin(da),Math.cos(da));g.rotation.y+=da*Math.min(1,dt*8);
+  g.position.x+=dx/d*Math.min(sp*dt,d);g.position.z+=dz/d*Math.min(sp*dt,d);f._w=sp;return false}
+function npcAnim(f,t,dt,armL,armR){const w=f._w||0,sw=w?Math.sin(t*(5+w*3)):0;f.legL.rotation.z=sw*.7;f.legR.rotation.z=-sw*.7;
+  f.armL.rotation.z=lerp(f.armL.rotation.z,armL!=null?armL:-sw*.5,Math.min(1,dt*12));f.armR.rotation.z=lerp(f.armR.rotation.z,armR!=null?armR:sw*.5,Math.min(1,dt*12));f.hips.position.y=.55+(w?Math.abs(sw)*.03:0);f._w=0}
+function npcBubble(N,html){if(!N.el){const d=document.createElement("div");d.className="npcB";d.addEventListener("pointerdown",e=>e.stopPropagation());document.body.appendChild(d);N.el=d}if(N.html!==html){N.html=html;N.el.innerHTML=html}}
+function npcBubblePos(N){if(!N.el)return;const g=N.f.g,sc=toScreen(g.position.x,2.15,g.position.z),off=_ts.z>1;const [x,y]=S2L(sc.x,sc.y);N.el.style.left=x+"px";N.el.style.top=y+"px";N.el.style.display=off?"none":""}
+function npcRemove(N){if(!N)return;scene.remove(N.f.g);if(N.el)N.el.remove();if(N.carry)scene.remove(N.carry)}
+function npcAway(){return !visOk()&&(onIsle||onCity||S.inTown||JTRIP.on||TRIP.on||VISIT)}
+function visSpawnBuyer(){const L=visTargets();if(!L.length)return;const p=L[Math.floor(Math.random()*L.length)],a=animal(p.id);
+  const offer=Math.max(sellPrice(p)+5,Math.round(a.cost*(.95+Math.random()*.35)/5)*5);VIS.buyer={kind:"buyer",f:npcMake("buyer"),p,offer,st:"in",t:0,wp:0};
+  toast("🧑‍💼 A buyer is coming to your farm to look at your animals.",3200)}
+function visSpawnThief(){const L=visTargets();if(!L.length)return;const p=L[Math.floor(Math.random()*L.length)];VIS.thief={kind:"thief",f:npcMake("thief"),p,st:"in",t:0,wp:0};
+  toast("🚨 A thief is sneaking into your farm! Tap 🚨 Catch above the thief so your helper can stop them.",4500);if(typeof sfx==="function")try{sfx("alarm")}catch(e){}}
+function buyerAccept(){const B=VIS.buyer;if(!B||B.st!=="offer")return;const i=S.pens.indexOf(B.p);if(i<0){B.st="out";return}const a=animal(B.p.id),o=animalObjs[i];
+  if(o)burst(o.g.position.x,.8,o.g.position.z,0xffd84a,14);const c=makeAnimal(B.p.id);paintAnimal(c,B.p.id,B.p.v);c.scale.setScalar(.85);scene.add(c);B.carry=c;
+  S.pens.splice(i,1);S.coins+=B.offer;hovered=null;rebuildAnimals();after();const sc=toScreen(B.f.g.position.x,2,B.f.g.position.z);floatText("+"+B.offer+" 🪙",sc.x,sc.y);
+  toast("💰 Sold your "+a.n+" to the buyer for "+B.offer.toLocaleString()+" coins!",3200);B.st="out";B.wp=1}
+function buyerNo(){const B=VIS.buyer;if(!B)return;B.st="out";B.wp=1;toast("The buyer said goodbye and left.",2000)}
+function catchThief(){const T=VIS.thief;if(!T||T.st==="down"||T.chaser)return;const W=[farmer,...HELPERS.filter((H,i)=>H&&(i===0||CREW[HKEYS[i]])&&H.o.state!=="rest")].filter(Boolean);if(!W.length)return;
+  const tp=T.f.g.position;W.sort((a,b)=>Math.hypot(a.g.position.x-tp.x,a.g.position.z-tp.z)-Math.hypot(b.g.position.x-tp.x,b.g.position.z-tp.z));const c=W[0];
+  if(c.o.fun)funEnd(c);c.g.visible=true;c.g.position.y=0;c.g.rotation.x=0;c.o.chase=T;T.chaser=c;if(T.st!=="run"){T.st="flee";T.wp=1}toast("🏃 "+(c===farmer?"You are":"Your helper is")+" chasing the thief!",2200)}
+function chaseTick(f,dt,t){const T=f&&f.o.chase;if(!T)return false;if(T.st==="down"||VIS.thief!==T){f.o.chase=null;f.o.state="idle";f.o.st=.6;return false}
+  const tp=T.f.g.position;npcWalk(f,tp.x,tp.z,3.8,dt);npcAnim(f,t,dt);
+  if(Math.hypot(tp.x-f.g.position.x,tp.z-f.g.position.z)<.75)thiefDown(T,f);return true}
+function thiefDown(T,f){T.st="down";T.t=0;f.o.chase=null;f.o.state="idle";f.o.st=1.4;f.armR.rotation.z=2.8;burst(T.f.g.position.x,1.1,T.f.g.position.z,0xffe14a,18);
+  const o=visObj(T.p);if(o){o.g.position.y=0;o.g.position.x=T.f.g.position.x+.6;o.g.position.z=T.f.g.position.z+.4;o.state="idle";o.st=.5}
+  S.coins+=100;S.xp=(S.xp||0)+5;after();const sc=toScreen(T.f.g.position.x,2,T.f.g.position.z);floatText("💥 +100 🪙",sc.x,sc.y);
+  toast(T.grab?"💥 "+(f===farmer?"You":"Your helper")+" beat the thief! Your "+animal(T.p.id).n+" is safe. +100 coins":"💥 "+(f===farmer?"You":"Your helper")+" beat the thief! +100 coins",3800)}
+function stepVisitors(dt,t){
+  if(npcAway()){if(VIS.buyer){npcRemove(VIS.buyer);VIS.buyer=null}if(VIS.thief){const o=visObj(VIS.thief.p);if(o)o.g.position.y=0;npcRemove(VIS.thief);VIS.thief=null}return}
+  if(visOk()&&S.pens.length){if(!VIS.buyer&&(VIS.buyT-=dt)<=0){VIS.buyT=150+Math.random()*120;visSpawnBuyer()}if(!VIS.thief&&(VIS.thT-=dt)<=0){VIS.thT=260+Math.random()*200;visSpawnThief()}}
+  const B=VIS.buyer;if(B){const f=B.f,g=f.g;B.t+=dt;let aL=null;
+    if(B.st==="in"){if(npcWalk(f,VIS_IN[1][0],VIS_IN[1][1],1.7,dt))B.st="go"}
+    else if(B.st==="go"){const o=visObj(B.p);if(!o||!o.g.visible){B.st="out";B.wp=1}else{const ap=o.g.position,dx=g.position.x-ap.x,dz=g.position.z-ap.z,d=Math.hypot(dx,dz)||1;if(d<1.4){B.st="offer";B.t=0}else npcWalk(f,ap.x+dx/d*1.2,ap.z+dz/d*1.2,1.7,dt)}}
+    else if(B.st==="offer"){const o=visObj(B.p);if(!o){B.st="out";B.wp=1}else{g.rotation.y=Math.atan2(-(o.g.position.z-g.position.z),o.g.position.x-g.position.x);aL=1.2+Math.sin(t*3)*.15}
+      if(B.t>45){B.st="out";B.wp=1;toast("The buyer waited too long and left.",2200)}}
+    else if(B.st==="out"){const w=VIS_IN[B.wp];if(npcWalk(f,w[0],w[1],1.9,dt)){if(B.wp===0){npcRemove(B);VIS.buyer=null}else B.wp=0}}
+    if(VIS.buyer){if(B.carry){const fx=Math.cos(g.rotation.y),fz=-Math.sin(g.rotation.y);B.carry.position.set(g.position.x-fz*.7,0,g.position.z+fx*.7);B.carry.rotation.y=g.rotation.y;aL=.6}
+      npcAnim(f,t,dt,aL,null);
+      if(B.st==="offer"){const a=animal(B.p.id);npcBubble(B,'<b>🧑‍💼 I\'ll buy your '+a.n+' '+(B.p.g==="F"?"♀":"♂")+'</b><br>for <b>🪙 '+B.offer.toLocaleString()+'</b> <small>(market '+sellPrice(B.p).toLocaleString()+')</small><div class="npcR"><button class="btn sm" type="button" data-v="y">Sell</button><button class="btn sm alt" type="button" data-v="n">No</button></div>');
+        if(!B.el._on){B.el._on=1;B.el.onclick=e=>{const v=e.target.dataset&&e.target.dataset.v;if(v==="y")buyerAccept();else if(v==="n")buyerNo()}}}
+      else if(B.el){B.el.remove();B.el=null;B.html=null}
+      npcBubblePos(B)}}
+  const T=VIS.thief;if(T){const f=T.f,g=f.g;T.t+=dt;let aL=null,aR=null;
+    if(T.st==="in"){if(npcWalk(f,VIS_IN[1][0],VIS_IN[1][1],1.4,dt))T.st="go"}
+    else if(T.st==="go"){const o=visObj(T.p);if(!o||!o.g.visible){T.st="flee";T.wp=1}else{const ap=o.g.position,d=Math.hypot(g.position.x-ap.x,g.position.z-ap.z);if(d<.8){T.st="grab";T.t=0}else npcWalk(f,ap.x,ap.z,1.5,dt)}
+      f.hips.position.y=.45}
+    else if(T.st==="grab"){const o=visObj(T.p);aL=aR=1.1;if(!o){T.st="flee";T.wp=1}else{o.g.position.x+=Math.sin(t*30)*.01;if(T.t>2.5){T.grab=true;T.st="run";T.wp=1;toast("🚨 The thief grabbed your "+animal(T.p.id).n+"! Tap 🚨 Catch now!",3500)}}}
+    else if(T.st==="run"||T.st==="flee"){const w=VIS_IN[T.wp];if(npcWalk(f,w[0],w[1],T.st==="run"?2.3:2.6,dt)){if(T.wp===1)T.wp=0;else{
+        if(T.grab){const i=S.pens.indexOf(T.p);if(i>=0){const a=animal(T.p.id);S.pens.splice(i,1);hovered=null;rebuildAnimals();after();toast("😢 The thief got away with your "+a.n+". Catch them faster next time!",4200)}}
+        else toast("The thief ran away without taking anything.",2400);
+        npcRemove(T);VIS.thief=null}}
+      if(T.grab&&VIS.thief){const o=visObj(T.p);if(o){const fx=Math.cos(g.rotation.y),fz=-Math.sin(g.rotation.y);o.g.position.set(g.position.x-fx*.1,.55,g.position.z-fz*.1);o.g.rotation.y=g.rotation.y+Math.PI/2;o.state="idle";o.st=1}aL=aR=2.6}}
+    else if(T.st==="down"){f._w=0;g.rotation.z=lerp(g.rotation.z,-1.5,Math.min(1,dt*8));g.position.y=.1;if(T.t>.3&&Math.random()<dt*6)burst(g.position.x,.8,g.position.z,0xffe14a,2,.3);
+      if(T.t>1.8){for(let k=0;k<6;k++)puff(g.position.x+(Math.random()-.5)*.6,.4,g.position.z+(Math.random()-.5)*.6);npcRemove(T);VIS.thief=null}}
+    if(VIS.thief){npcAnim(f,t,dt,aL,aR);
+      if(T.st!=="down"){npcBubble(T,T.chaser?'<b>🏃 Chasing the thief…</b>':'<button class="btn sm npcC" type="button">🚨 Catch</button>');if(!T.el._on){T.el._on=1;T.el.onclick=()=>catchThief()}}
+      else if(T.el){T.el.remove();T.el=null}
+      npcBubblePos(T)}}
+}
 function loop(t){
   const dt=Math.min(.1,(t-last)/1000);last=t;const ts=t/1000;
-  applyCam(dt);stepAnimals(dt,ts);stepExtras(dt,ts);stepFarm2(dt,ts);stepFire(dt,ts);stepNet(dt);stepSound(dt);stepFish(dt,ts);ISLE.step(dt,ts);checkIsle();stepCity(dt,ts);checkCity();
+  applyCam(dt);stepAnimals(dt,ts);stepVisitors(dt,ts);stepExtras(dt,ts);stepFarm2(dt,ts);stepFire(dt,ts);stepNet(dt);stepSound(dt);stepFish(dt,ts);ISLE.step(dt,ts);checkIsle();stepCity(dt,ts);checkCity();
   clouds.forEach(c=>{c.position.x+=c.userData.v*dt;if(c.position.x>130)c.position.x=-60});
   tileObjs.forEach((o,i)=>{if(o.sp.visible){o.sp.rotation.y=ts*2+i;o.sp.position.y=.95+Math.sin(ts*3+i)*.08}});
   acc+=dt;if(acc>.2){acc=0;syncField()}

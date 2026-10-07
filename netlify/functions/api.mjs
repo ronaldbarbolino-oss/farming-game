@@ -18,7 +18,7 @@ const addTh = (m, th) => { const L = [th, ...((m && m.ths) || (m && m.th ? [m.th
 const pub = m => ({ u: m.u, farm: m.farm, farmer: m.farmer, shirt: m.shirt, lv: m.lv, size: m.size, seen: m.seen, ...(m.app ? { app: 1 } : {}) });
 
 // a restart time shipped with a deploy: open games reload once after it
-const DEPLOY_RESTART = 1791296351223;
+const DEPLOY_RESTART = 1791335396923;
 export default async (req) => {
   const url = new URL(req.url);
   const path = url.pathname.replace(/^.*?\/api\/?/, "").replace(/^\.netlify\/functions\/api\/?/, "").replace(/\/$/, "");
@@ -49,7 +49,7 @@ export default async (req) => {
       const { blobs } = await meta.list();
       const all = await Promise.all(blobs.slice(0, 2000).map(x => meta.get(x.key, { type: "json" }).catch(() => null)));
       const rs = await ctl.get("restart", { type: "json" });
-      return J({ now: Date.now(), restartAt: rs ? rs.at : 0, players: all.filter(Boolean).map(m => ({ u: m.u, farm: m.farm, farmer: m.farmer, lv: m.lv, coins: m.coins || 0, animals: m.animals || 0, size: m.size, plots: m.plots || 0, seen: m.seen, created: m.created, sessions: m.sessions || 0, app: m.app ? 1 : 0, sync: m.ph ? 1 : 0, devices: Array.isArray(m.ths) ? m.ths.length : (m.th ? 1 : 0), email: m.email || "" })) });
+      return J({ now: Date.now(), restartAt: rs ? rs.at : 0, players: all.filter(Boolean).map(m => ({ u: m.u, farm: m.farm, farmer: m.farmer, lv: m.lv, coins: m.coins || 0, animals: m.animals || 0, size: m.size, plots: m.plots || 0, seen: m.seen, created: m.created, sessions: m.sessions || 0, app: m.app ? 1 : 0, sync: m.ph || m.lh ? 1 : 0, devices: Array.isArray(m.ths) ? m.ths.length : (m.th ? 1 : 0), email: m.email || "" })) });
     }
     // ---- email: verify an address for recovery, then recover a lost username/password by code ----
     const authS = getStore({ name: "auth", consistency: "strong" });
@@ -143,6 +143,15 @@ export default async (req) => {
       const ps = crypto.randomUUID(); await meta.setJSON(u, { ...m, ps, ph: await sha(ps + ":" + pw) });
       return J({ ok: true });
     }
+    if (req.method === "POST" && path === "setlh") {
+      let b; try { b = await req.json() } catch { return J({ error: "bad json" }, 400) }
+      const u = norm(b.u), m = await meta.get(u, { type: "json" }), ls = String(b.salt || ""), lh = String(b.hash || "");
+      if (!m || typeof b.tok !== "string" || !thOk(m, await sha(b.tok))) return J({ error: "not yours" }, 403);
+      if (ls.length < 4 || ls.length > 80 || !/^[0-9a-f]{64}$/.test(lh)) return J({ error: "bad" }, 400);
+      if (m.ph || (m.ls === ls && m.lh === lh)) return J({ ok: true });
+      await meta.setJSON(u, { ...m, ls, lh });
+      return J({ ok: true });
+    }
     if (req.method === "POST" && path === "login") {
       let b; try { b = await req.json() } catch { return J({ error: "bad json" }, 400) }
       const u = norm(b.u), pw = String(b.pw || ""), aS = getStore({ name: "auth", consistency: "strong" });
@@ -152,6 +161,7 @@ export default async (req) => {
       if (lt.n >= 10) return J({ error: "Too many tries. Wait an hour, or use Forgot password." }, 429);
       const m = await meta.get(u, { type: "json" });
       if (!m) return J({ error: "No farm with that username online." }, 404);
+      if (!m.ph && m.lh) { if (await sha(m.ls + ":" + pw) !== m.lh) { lt.n++; await aS.setJSON(lk, lt); return J({ error: "Wrong username or password." }, 401) } const ps = crypto.randomUUID(); m.ps = ps; m.ph = await sha(ps + ":" + pw) }
       if (!m.ph) return J({ error: "This farm isn't linked for online login yet. On your old device, log out and log in again once, or use a transfer code." }, 409);
       if (await sha(m.ps + ":" + pw) !== m.ph) { lt.n++; await aS.setJSON(lk, lt); return J({ error: "Wrong username or password." }, 401) }
       try { await aS.delete(lk) } catch {}
