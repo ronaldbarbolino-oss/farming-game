@@ -2528,7 +2528,10 @@ function applyCam(dt){
   if(SKYMESH)SKYMESH.position.copy(camera.position);if(SUNSPRITE)SUNSPRITE.position.copy(camera.position).add(SUNOFF);
 }
 const pointers=new Map();let dragMoved=0,pinch0=0,ang0=0,downAt=null;
+function placeCenter(){const P=PLACE;if(!P)return null;if(P.barn)return[2.2+(P.dx||0),-8.6+(P.dz||0),4.6];if(P.field)return[P.x0+P.N/2,P.z0+P.N/2,P.N/2+.5];if(P.plot)return[P.x0+PN/2,P.z0+PN/2,PN/2+.5];
+  if(P.pen)return[P.g.position.x,P.g.position.z,Math.max(P.w,P.dd)/2+.6];return[P.g.position.x,P.g.position.z,((P.d&&P.d.r)||1.5)+.8]}
 cv.addEventListener("pointerdown",e=>{cv.setPointerCapture(e.pointerId);pointers.set(e.pointerId,{x:exy(e).x,y:exy(e).y});dragMoved=0;downAt={x:exy(e).x,y:exy(e).y};
+  if(PLACE&&!PLACE.drag&&pointers.size===1){const g0=groundPoint(e),c=placeCenter();if(g0&&c&&Math.hypot(g0.x-c[0],g0.z-c[1])<c[2]){PLACE.drag=true;PLACE.ox=g0.x-c[0];PLACE.oz=g0.z-c[1];cv.classList.add("drag");return}}
   if(pointers.size===2){const [a,b]=[...pointers.values()];pinch0=Math.hypot(a.x-b.x,a.y-b.y);ang0=Math.atan2(b.y-a.y,b.x-a.x)}hideTip();
   clearTimeout(HOLD.t);if(pointers.size===1&&!PLACE&&!SEL&&!VISIT){const p=pickAt(e),g0=groundPoint(e),pl=p&&p.tile!=null?plotOfTile(p.tile):null;
     let go=null;
@@ -2561,7 +2564,7 @@ let onIsle=false,ISLE_OPEN=false;
 function checkIsle(){if(ISLE_OPEN&&Math.hypot(camT.tx-IX,camT.tz-IZ)>55&&!(TRIP.on&&TRIP.toIsle))ISLE_OPEN=false;const n=Math.hypot(cam.tx-IX,cam.tz-IZ)<40;$("tIsle").textContent=TRIP.on?"Sailing…":ownBoat()?(S.boatAt==="isla"?"Sail back to the Farm":"Sail to the Island"):(n?"Back to the Farm":"Go to GoPyesta Island");if(n!==onIsle){onIsle=n;
   if(!TRIP.on){if(n)toast("You are at GoPyesta Island.",2200)}}}
 function endPtr(e){clearTimeout(HOLD.t);
-  if(PLACE&&PLACE.drag){pointers.delete(e.pointerId);if(!pointers.size){cv.classList.remove("drag");pinch0=0}if(PLACE.ok)confirmPlace();else{toast(PLACE.why||"Can't put it there.",2600);cancelPlace()}return}
+  if(PLACE&&PLACE.drag){pointers.delete(e.pointerId);if(!pointers.size){cv.classList.remove("drag");pinch0=0}PLACE.drag=false;PLACE.held=true;$("placeTxt").textContent=(PLACE.d&&PLACE.d.n?PLACE.d.n+" · ":"")+"drag it again"+($("placeRot").hidden?"":", tap Rotate to turn it")+", then tap Place here";return}
   const tr=e.pointerType==="mouse"?6:16,wasTap=pointers.size===1&&downAt&&Math.hypot(exy(e).x-downAt.x,exy(e).y-downAt.y)<=tr&&dragMoved<tr*2.5;
   pointers.delete(e.pointerId);if(!pointers.size){cv.classList.remove("drag");pinch0=0}
   if(wasTap&&e.type==="pointerup")clickAt(e);
@@ -2828,7 +2831,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="175";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
+const GAMEVER="176";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 /* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
 (function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
   document.addEventListener("touchstart",e=>{el=null;if(!ROT||e.touches.length!==1)return;el=scroller(e.target);if(el){const q=exy(e.touches[0]);lx=q.x;ly=q.y;mv=0}},{passive:true});
