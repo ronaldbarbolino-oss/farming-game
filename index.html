@@ -874,9 +874,11 @@ function applyPenLayout(){const R=penRects();for(const id in R)Object.assign(PEN
 function inAnyPen(x,z,m=.3){for(const k in PENS){const p=PENS[k];if(x>p.x0-m&&x<p.x1+m&&z>p.z0-m&&z<p.z1+m)return true}return false}
 const SNOWB=new Builder();
 let PONDTEX=null;const PONDRIP=[];let POND_MESH=null,SKYMESH=null,SNOWMESH=null,SNOWG=null,SNOWF=null,sickT=8;
-function labelSprite(t){const c=document.createElement("canvas");c.width=256;c.height=64;const x=c.getContext("2d");x.fillStyle="#c98a4b";x.strokeStyle="#5a3a1a";x.lineWidth=6;x.beginPath();x.rect(4,4,248,56);x.fill();x.stroke();
-  x.font="900 32px Nunito, Arial Rounded MT Bold, sans-serif";x.fillStyle="#fff6df";x.textAlign="center";x.textBaseline="middle";x.fillText(t,128,34);
-  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c)}));s.scale.set(1.5,.375,1);return s}
+function labelSprite(t){const c=document.createElement("canvas");c.width=256;c.height=64;const x=c.getContext("2d");
+  const draw=()=>{x.clearRect(0,0,256,64);x.fillStyle="#c98a4b";x.strokeStyle="#5a3a1a";x.lineWidth=6;x.beginPath();x.rect(4,4,248,56);x.fill();x.stroke();
+    let fs=32;do{x.font="900 "+fs+"px Nunito, Arial Rounded MT Bold, sans-serif"}while(x.measureText(t).width>226&&--fs>14);x.fillStyle="#fff6df";x.textAlign="center";x.textBaseline="middle";x.fillText(t,128,34,236)};draw();
+  const tex=new THREE.CanvasTexture(c),s=new THREE.Sprite(new THREE.SpriteMaterial({map:tex}));s.scale.set(1.5,.375,1);
+  try{if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{draw();tex.needsUpdate=true})}catch(e){}return s}
 let _sickTex=null;
 function sickTex(){if(_sickTex)return _sickTex;const c=document.createElement("canvas");c.width=c.height=128;const x=c.getContext("2d");
   x.fillStyle="#fff";x.strokeStyle="#8f5a2a";x.lineWidth=6;x.beginPath();x.arc(64,58,48,0,Math.PI*2);x.fill();x.stroke();x.beginPath();x.moveTo(52,102);x.lineTo(64,124);x.lineTo(76,102);x.fill();
@@ -1898,9 +1900,10 @@ const CRATEMAT=new THREE.MeshBasicMaterial({color:0xc98a4b});
 /* tappable 3D sign buttons */
 const BTN3D=[];
 function btnSprite(text,bg,act){const c=document.createElement("canvas");c.width=512;c.height=128;const x=c.getContext("2d");
-  x.fillStyle="rgba(0,0,0,.3)";x.beginPath();x.roundRect?x.roundRect(10,18,492,104,30):x.rect(10,18,492,104);x.fill();x.fillStyle=bg;x.strokeStyle="#ffffff";x.lineWidth=8;x.beginPath();x.roundRect?x.roundRect(8,8,492,100,30):x.rect(8,8,492,100);x.fill();x.stroke();
-  x.fillStyle="#fff";let fs=46;do{x.font="900 "+fs+"px Nunito, Arial Rounded MT Bold, Arial, sans-serif"}while(x.measureText(text).width>450&&--fs>20);x.textAlign="center";x.textBaseline="middle";x.fillText(text,256,60);
-  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),depthTest:false,transparent:true}));sp.renderOrder=20;sp.scale.set(4.4,1.1,1);sp.userData.btn3d=act;BTN3D.push(sp);return sp}
+  const draw=()=>{x.clearRect(0,0,512,128);x.fillStyle="rgba(0,0,0,.3)";x.beginPath();x.roundRect?x.roundRect(10,18,492,104,30):x.rect(10,18,492,104);x.fill();x.fillStyle=bg;x.strokeStyle="#ffffff";x.lineWidth=8;x.beginPath();x.roundRect?x.roundRect(8,8,492,100,30):x.rect(8,8,492,100);x.fill();x.stroke();
+    x.fillStyle="#fff";let fs=46;do{x.font="900 "+fs+"px Nunito, Arial Rounded MT Bold, Arial, sans-serif"}while(x.measureText(text).width>410&&--fs>18);x.textAlign="center";x.textBaseline="middle";x.fillText(text,256,60,440)};draw();
+  const tex=new THREE.CanvasTexture(c),sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,depthTest:false,transparent:true}));sp.renderOrder=20;sp.scale.set(4.4,1.1,1);sp.userData.btn3d=act;BTN3D.push(sp);
+  try{if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{draw();tex.needsUpdate=true});setTimeout(()=>{draw();tex.needsUpdate=true},2500)}catch(e){}return sp}
 /* ================= RESEARCH ISLAND (east sea) ================= */
 const IX=80,IZ=4;
 const ISLE=(function(){
@@ -2782,7 +2785,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="165";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
+const GAMEVER="166";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 /* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
 (function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
   document.addEventListener("touchstart",e=>{el=null;if(!ROT||e.touches.length!==1)return;el=scroller(e.target);if(el){const q=exy(e.touches[0]);lx=q.x;ly=q.y;mv=0}},{passive:true});
