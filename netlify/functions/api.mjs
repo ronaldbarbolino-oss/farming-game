@@ -18,16 +18,19 @@ const addTh = (m, th) => { const L = [th, ...((m && m.ths) || (m && m.th ? [m.th
 const pub = m => ({ u: m.u, farm: m.farm, farmer: m.farmer, shirt: m.shirt, lv: m.lv, size: m.size, seen: m.seen, ...(m.app ? { app: 1 } : {}) });
 
 // a restart time shipped with a deploy: open games reload once after it
-const DEPLOY_RESTART = 1791374013369;
+const DEPLOY_RESTART = 1791374231140;
 export default async (req) => {
   const url = new URL(req.url);
   const path = url.pathname.replace(/^.*?\/api\/?/, "").replace(/^\.netlify\/functions\/api\/?/, "").replace(/\/$/, "");
+  // test server (branch deploy "test"): its own data, never touching the live farms
+  const TEST = /^test--/.test(url.hostname);
+  const gs = (o) => getStore({ ...o, name: (TEST ? "test-" : "") + o.name });
   if (path === "health" || path === "") return J({ ok: true, service: "farming-api", path: url.pathname });
   if (path === "mailcheck") { let mod = false; try { await import("nodemailer"); mod = true } catch {} const gp = (process.env.GMAIL_APP_PASSWORD || "").replace(/\s+/g, ""); return J({ gmailUser: !!process.env.GMAIL_USER, gmailPassLength: gp.length, nodemailer: mod, resend: !!process.env.RESEND_API_KEY }) }
-  const meta = getStore({ name: "meta", consistency: "strong" });
-  const farms = getStore({ name: "farms", consistency: "strong" });
+  const meta = gs({ name: "meta", consistency: "strong" });
+  const farms = gs({ name: "farms", consistency: "strong" });
   try {
-    const ctl = getStore({ name: "control", consistency: "strong" });
+    const ctl = gs({ name: "control", consistency: "strong" });
     if (req.method === "GET" && path === "restart") {
       const r = await ctl.get("restart", { type: "json" });
       const dep = DEPLOY_RESTART <= Date.now() ? DEPLOY_RESTART : 0;
@@ -52,7 +55,7 @@ export default async (req) => {
       return J({ now: Date.now(), restartAt: rs ? rs.at : 0, players: all.filter(Boolean).map(m => ({ u: m.u, farm: m.farm, farmer: m.farmer, lv: m.lv, coins: m.coins || 0, animals: m.animals || 0, size: m.size, plots: m.plots || 0, seen: m.seen, created: m.created, sessions: m.sessions || 0, app: m.app ? 1 : 0, sync: m.ph || m.lh ? 1 : 0, devices: Array.isArray(m.ths) ? m.ths.length : (m.th ? 1 : 0), email: m.email || "" })) });
     }
     // ---- email: verify an address for recovery, then recover a lost username/password by code ----
-    const authS = getStore({ name: "auth", consistency: "strong" });
+    const authS = gs({ name: "auth", consistency: "strong" });
     const emailOk = e => /^[^\s@]{1,64}@[^\s@]{1,190}\.[a-z]{2,24}$/i.test(e);
     const code6 = () => String(100000 + (crypto.getRandomValues(new Uint32Array(1))[0] % 900000));
     const sendMail = async (to, subject, text, replyTo) => {
@@ -158,9 +161,33 @@ export default async (req) => {
       await meta.setJSON(u, { ...m, ls, lh });
       return J({ ok: true });
     }
+    if (req.method === "GET" && path === "server") return J({ test: TEST });
+    if (req.method === "POST" && path === "testcopy") {
+      // copy one farm from the live server into the test server (live data is only read)
+      if (!TEST) return J({ error: "Only on the test server." }, 400);
+      let b; try { b = await req.json() } catch { return J({ error: "bad json" }, 400) }
+      const u = norm(b.u), pw = String(b.pw || ""), aS = gs({ name: "auth", consistency: "strong" });
+      if (typeof b.tok !== "string" || b.tok.length < 16) return J({ error: "bad token" }, 400);
+      const lk = "tc/" + u, lt = (await aS.get(lk, { type: "json" }).catch(() => null)) || { n: 0, at: Date.now() };
+      if (Date.now() - lt.at > 3600000) { lt.n = 0; lt.at = Date.now() }
+      if (lt.n >= 10) return J({ error: "Too many tries. Wait an hour." }, 429);
+      const lm = await getStore({ name: "meta", consistency: "strong" }).get(u, { type: "json" });
+      if (!lm) return J({ error: "No farm with that username on the live server." }, 404);
+      let ok = false;
+      if (lm.ph) ok = await sha(lm.ps + ":" + pw) === lm.ph; else if (lm.lh) ok = await sha(lm.ls + ":" + pw) === lm.lh;
+      else return J({ error: "That farm isn't linked for online login yet. Open it once on your own device first." }, 409);
+      if (!ok) { lt.n++; await aS.setJSON(lk, lt); return J({ error: "Wrong username or password." }, 401) }
+      const lf = await getStore({ name: "farms", consistency: "strong" }).get(u, { type: "json" }).catch(() => null);
+      const th = await sha(b.tok), ps = crypto.randomUUID();
+      const nm = { ...lm, th, ths: [th], ps, ph: await sha(ps + ":" + pw), seen: Date.now(), copiedFromLive: Date.now() };
+      delete nm.ls; delete nm.lh;
+      await meta.setJSON(u, nm);
+      if (lf) await farms.setJSON(u, lf);
+      return J({ ok: true, u, farm: nm.farm, farmer: nm.farmer, shirt: nm.shirt | 0, email: nm.email || "", state: lf && lf.state || null });
+    }
     if (req.method === "POST" && path === "login") {
       let b; try { b = await req.json() } catch { return J({ error: "bad json" }, 400) }
-      const u = norm(b.u), pw = String(b.pw || ""), aS = getStore({ name: "auth", consistency: "strong" });
+      const u = norm(b.u), pw = String(b.pw || ""), aS = gs({ name: "auth", consistency: "strong" });
       if (typeof b.tok !== "string" || b.tok.length < 16) return J({ error: "bad token" }, 400);
       const lk = "lt/" + u, lt = (await aS.get(lk, { type: "json" }).catch(() => null)) || { n: 0, at: Date.now() };
       if (Date.now() - lt.at > 3600000) { lt.n = 0; lt.at = Date.now() }
@@ -178,7 +205,7 @@ export default async (req) => {
     // ---- transfer: move a farm to another device or the app with a one-time code ----
     if (req.method === "POST" && path === "transfer/start") {
       let b; try { b = await req.json() } catch { return J({ error: "bad json" }, 400) }
-      const u = norm(b.u), aS = getStore({ name: "auth", consistency: "strong" });
+      const u = norm(b.u), aS = gs({ name: "auth", consistency: "strong" });
       const m = await meta.get(u, { type: "json" });
       if (!m || typeof b.tok !== "string" || !thOk(m, await sha(b.tok))) return J({ error: "Open your farm online first, then try again." }, 403);
       const A = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789", r = crypto.getRandomValues(new Uint8Array(8));
@@ -188,7 +215,7 @@ export default async (req) => {
     }
     if (req.method === "POST" && path === "admin/transfer") {
       let b; try { b = await req.json() } catch { return J({ error: "bad json" }, 400) }
-      const u = norm(b.u), at = Number(b.at) || 0, aS = getStore({ name: "auth", consistency: "strong" });
+      const u = norm(b.u), at = Number(b.at) || 0, aS = gs({ name: "auth", consistency: "strong" });
       if (Math.abs(Date.now() - at) > 5 * 60000) return J({ error: "expired" }, 400);
       if (!(typeof b.sig === "string" && await adminOk("transfer:" + u + ":" + at, b.sig))) return J({ error: "not allowed" }, 403);
       const m = await meta.get(u, { type: "json" });
@@ -200,7 +227,7 @@ export default async (req) => {
     }
     if (req.method === "POST" && path === "transfer/finish") {
       let b; try { b = await req.json() } catch { return J({ error: "bad json" }, 400) }
-      const code = String(b.code || "").toUpperCase().replace(/[^A-Z0-9]/g, ""), aS = getStore({ name: "auth", consistency: "strong" });
+      const code = String(b.code || "").toUpperCase().replace(/[^A-Z0-9]/g, ""), aS = gs({ name: "auth", consistency: "strong" });
       if (code.length !== 8) return J({ error: "The transfer code has 8 letters and numbers." }, 400);
       const t = await aS.get("t/" + code, { type: "json" });
       if (!t || Date.now() > t.exp) return J({ error: "That code is wrong or expired. Make a new one on your old device." }, 400);
@@ -213,7 +240,7 @@ export default async (req) => {
     }
     // ---- customer support: players send a message with their email; the admin replies from farmgaming.ph@gmail.com ----
     const SUPPORT_TO = "farmgaming.ph@gmail.com";
-    const sup = getStore({ name: "support", consistency: "strong" });
+    const sup = gs({ name: "support", consistency: "strong" });
     if (req.method === "POST" && path === "support") {
       let b; try { b = await req.json() } catch { return J({ error: "bad json" }, 400) }
       const email = String(b.email || "").trim().slice(0, 200), topic = String(b.topic || "Other").replace(/[^\w &/-]/g, "").slice(0, 40), msg = String(b.msg || "").trim().slice(0, 2000), u = norm(b.u || ""), farm = String(b.farm || "").slice(0, 40);
@@ -237,7 +264,7 @@ export default async (req) => {
       return J({ tickets: all });
     }
     // ---- coin shop: players pay by QR, the admin approves, the game redeems the signed code ----
-    const buys = getStore({ name: "buys", consistency: "strong" });
+    const buys = gs({ name: "buys", consistency: "strong" });
     const DEF_PACKS = [{ id: "c5000", coins: 5000, price: 100 }, { id: "c10000", coins: 10000, price: 180, tag: "Popular" }, { id: "c15000", coins: 15000, price: 250 }, { id: "c20000", coins: 20000, price: 320 }, { id: "c50000", coins: 50000, price: 700, tag: "Best value" }];
     const getPacks = async () => { const p = await ctl.get("packs", { type: "json" }).catch(() => null); return Array.isArray(p) && p.length ? p : DEF_PACKS };
     if (req.method === "GET" && path === "packs") return J({ packs: await getPacks() });

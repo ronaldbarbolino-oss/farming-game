@@ -2843,7 +2843,8 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="187";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
+const GAMEVER="188";const TESTSRV=/^test--/.test(location.hostname);
+if(TESTSRV){document.title="🧪 TEST · "+document.title;const tb=document.createElement("div");tb.id="testBar";tb.textContent="🧪 TEST SERVER · changes here don't touch your real farm";tb.style.cssText="position:fixed;left:50%;top:0;transform:translateX(-50%);z-index:9999;background:#7a3fc0;color:#fff;font:900 11px/1.2 sans-serif;padding:3px 10px;border-radius:0 0 10px 10px;pointer-events:none;letter-spacing:.3px";document.addEventListener("DOMContentLoaded",()=>document.body.appendChild(tb));if(document.body)document.body.appendChild(tb)}let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 /* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
 (function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
   document.addEventListener("touchstart",e=>{el=null;if(!ROT||e.touches.length!==1)return;el=scroller(e.target);if(el){const q=exy(e.touches[0]);lx=q.x;ly=q.y;mv=0}},{passive:true});
@@ -6646,7 +6647,8 @@ async function localAuthStart(){$("lbHead").hidden=true;$("lbPanel").hidden=true
   $("auLogin").onsubmit=async e=>{e.preventDefault();const u=$("liUser").value.trim().toLowerCase(),p=$("liPw").value,a=accts()[u];
     if(a&&await hashPw(p,a.salt)===a.hash){$("liPw").value="";NET.taken=false;loginLocal(u);toast("Welcome back, "+a.farmer+"!",2400);setTimeout(()=>linkPw(u,p),2500);return}
     if(!API)return $("liErr").textContent="Wrong username or password.";
-    $("liErr").textContent="Checking online…";try{const r=crypto.getRandomValues(new Uint8Array(16)),tok=[...r].map(b=>b.toString(16).padStart(2,"0")).join("");const d=await postJ("login",{u,pw:p,tok});
+    $("liErr").textContent="Checking online…";try{const r=crypto.getRandomValues(new Uint8Array(16)),tok=[...r].map(b=>b.toString(16).padStart(2,"0")).join("");let d;
+      try{d=await postJ("login",{u,pw:p,tok})}catch(er){if(!TESTSRV)throw er;$("liErr").textContent="Copying your farm from the live server…";d=await postJ("testcopy",{u,pw:p,tok});setTimeout(()=>toast("🧪 Copied your farm from the live server. Changes here won't touch your real farm.",5000),1500)}
       $("liErr").textContent="";$("liPw").value="";$("auth").hidden=true;await adoptAccount(d,p,tok);toast("☁️ Welcome, "+(d.farmer||d.u)+"! Your farm is synced on this device too.",4500)}
     catch(err){$("liErr").textContent=err.message||"Wrong username or password."}};
   $("logoutBtn").onclick=()=>{if(LOCAL.user)logoutLocal()};
