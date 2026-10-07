@@ -8140,9 +8140,9 @@ function setT2BLogo(src){const im=new Image();im.onload=()=>{T2B_LOGO=im;t2bAppl
   const inT=(x,z,m=0)=>Math.abs(x)<HX-1-m&&Math.abs(z)<HZ-1-m;
   const b=new Builder(),r=rnd(2020),Y=TOWNY;
   // streets: two main avenues and a ring
-  const RD=0x34383d,SW=0xbdb8ac,LN=0xf2f2ee;
+  const RZN=MIRROR_TEST;const RD=0x34383d,SW=0xbdb8ac,LN=0xf2f2ee;
   const street=(x0,z0,x1,z1,w)=>{const L=Math.hypot(x1-x0,z1-z0),ry=Math.atan2(-(z1-z0),x1-x0),cx=(x0+x1)/2,cz=(z0+z1)/2;b.add("box",SW,cx,Y+.04,cz,L+.6,.06,w+1.1,0,ry,0);b.add("box",RD,cx,Y+.08,cz,L,.05,w,0,ry,0);for(let k=.8;k<L;k+=1.6)b.add("box",LN,x0+(x1-x0)*k/L,Y+.115,z0+(z1-z0)*k/L,.6,.01,.09,0,ry,0)};
-  street(-HX+.6,0,-6,0,1.8);street(6,0,HX-.6,0,1.8);street(0,-HZ+.6,0,-6,1.8);street(0,6,0,HZ-.6,1.8);street(-HX+.6,-HZ+2,HX-.6,-HZ+2,1.6);street(-HX+.6,HZ-2,HX-.6,HZ-2,1.6);street(-HX+2,-HZ+2,-HX+2,HZ-2,1.6);street(HX-2,-HZ+2,HX-2,HZ-2,1.6);
+  street(-HX+.6,0,-6,0,1.8);street(6,0,HX-.6,0,1.8);street(0,-HZ+.6,0,-6,1.8);street(0,6,0,HZ-.6,1.8);street(-HX+.6,-HZ+2,HX-.6,-HZ+2,1.6);street(RZN?-.6:-HX+.6,HZ-2,HX-.6,HZ-2,1.6);street(-HX+2,-HZ+2,-HX+2,RZN?8.4:HZ-2,1.6);street(HX-2,-HZ+2,HX-2,HZ-2,1.6);
   const RING=[];for(let k=0;k<=32;k++){const a=k/32*Math.PI*2;RING.push([Math.cos(a)*14.5,Math.sin(a)*11])}
   for(let k=0;k<32;k++)street(RING[k][0],RING[k][1],RING[k+1][0],RING[k+1][1],1.5);
   // plaza in the middle with the logo billboard
@@ -8178,13 +8178,13 @@ function setT2BLogo(src){const im=new Image();im.onload=()=>{T2B_LOGO=im;t2bAppl
   const wb=new Builder();
   // London terraces: brick and white stucco row houses packed along every street, slate roofs, chimney stacks
   const BRK=[0x8a3a2a,0x9b4a34,0xa85a3a,0x7a3324,0xb06a48],STU=[0xf2efe6,0xe8e0cc,0xefe6d2],SLATE=[0x3a3f48,0x4a505a,0x2f343c];let k=0;
-  const SX=[-22,-15,15,22],SZ=[-15.5,15.5];SX.forEach(x=>street(x,-HZ+2,x,HZ-2,1.5));SZ.forEach(z=>street(-HX+2,z,HX-2,z,1.5));
+  const SX=[-22,-15,15,22],SZ=[-15.5,15.5];SX.forEach(x=>street(x,-HZ+2,x,RZN&&x<0?8.4:HZ-2,1.5));SZ.forEach(z=>street(RZN&&z>0?-.6:-HX+2,z,HX-2,z,1.5));
   // street lights along every road (they glow at night)
   T2B.lampGlow=[];{const gT=(()=>{const c=document.createElement("canvas");c.width=c.height=64;const x=c.getContext("2d"),g=x.createRadialGradient(32,32,1,32,32,32);g.addColorStop(0,"rgba(255,230,160,1)");g.addColorStop(.4,"rgba(255,200,110,.5)");g.addColorStop(1,"rgba(255,180,80,0)");x.fillStyle=g;x.fillRect(0,0,64,64);return new THREE.CanvasTexture(c)})();
-    const lamp=(x,z)=>{b.add("cyl",0x1b1b1b,x,Y+1.3,z,.06,2.6,.06);b.add("box",0x1b1b1b,x,Y+2.65,z,.3,.12,.3);b.add("sph",0xfff2b0,x,Y+2.5,z,.12,.12,.12);const gs=new THREE.Sprite(new THREE.SpriteMaterial({map:gT,transparent:true,depthWrite:false,opacity:0,blending:THREE.AdditiveBlending}));gs.scale.set(1.8,1.8,1);gs.position.set(x,Y+2.5,z);G.add(gs);T2B.lampGlow.push(gs)};
+    const lamp=(x,z)=>{if((MIRROR_TEST&&(x)<-1.2&&(z)>8.6))return;b.add("cyl",0x1b1b1b,x,Y+1.3,z,.06,2.6,.06);b.add("box",0x1b1b1b,x,Y+2.65,z,.3,.12,.3);b.add("sph",0xfff2b0,x,Y+2.5,z,.12,.12,.12);const gs=new THREE.Sprite(new THREE.SpriteMaterial({map:gT,transparent:true,depthWrite:false,opacity:0,blending:THREE.AdditiveBlending}));gs.scale.set(1.8,1.8,1);gs.position.set(x,Y+2.5,z);G.add(gs);T2B.lampGlow.push(gs)};
     [...SX,0].forEach(x0=>{for(let z=-HZ+3;z<HZ-2;z+=4){if([...SZ,0].some(q=>Math.abs(q-z)<1.6))continue;const e=Math.hypot(x0/14.5,z/11);if(e>.85&&e<1.15)continue;if(Math.abs(x0)<1&&Math.abs(z)<7)continue;lamp(x0+1.15,z);lamp(x0-1.15,z+2)}});
     [...SZ,0,-HZ+2,HZ-2].forEach(z0=>{for(let x=-HX+3;x<HX-2;x+=4){if([...SX,0].some(q=>Math.abs(q-x)<1.6))continue;const e=Math.hypot(x/14.5,z0/11);if(e>.85&&e<1.15)continue;if(Math.abs(z0)<1&&Math.abs(x)<7.5)continue;lamp(x,z0+(z0>0?-1.15:1.15));if(Math.abs(z0)<HZ-3)lamp(x+2,z0+(z0>0?1.15:-1.15))}})}
-  for(let x=-HX+3.6;x<=HX-3.6;x+=2.5){for(let z=-HZ+3.6;z<=HZ-3.6;z+=2.5){if(Math.abs(x)<2.4||Math.abs(z)<2.4)continue;if(SX.some(q=>Math.abs(q-x)<2.2)||SZ.some(q=>Math.abs(q-z)<2.2))continue;const e=Math.hypot(x/14.5,z/11);if(e>.8&&e<1.22)continue;if(Math.abs(x)<7.6&&Math.abs(z)<6.9)continue;if(MIRROR_TEST&&(x>24||z<-17))continue;
+  for(let x=-HX+3.6;x<=HX-3.6;x+=2.5){for(let z=-HZ+3.6;z<=HZ-3.6;z+=2.5){if(Math.abs(x)<2.4||Math.abs(z)<2.4)continue;if(SX.some(q=>Math.abs(q-x)<2.2)||SZ.some(q=>Math.abs(q-z)<2.2))continue;const e=Math.hypot(x/14.5,z/11);if(e>.8&&e<1.22)continue;if(Math.abs(x)<7.6&&Math.abs(z)<6.9)continue;if(MIRROR_TEST&&(x>24||z<-17))continue;if((MIRROR_TEST&&(x)<-1.2&&(z)>8.6))continue;
       const dx=x/e-x,dz=z/e-z;let fx,fz;
       if(Math.abs(x)<4.6){fx=x>0?-1:1;fz=0}else if(Math.abs(z)<4.6){fx=0;fz=z>0?-1:1}else if(Math.abs(x)>HX-5){fx=x>0?1:-1;fz=0}else if(Math.abs(z)>HZ-5){fx=0;fz=z>0?1:-1}else if(Math.abs(dx)>Math.abs(dz)){fx=Math.sign(dx);fz=0}else{fx=0;fz=Math.sign(dz)}
       const stucco=((Math.floor(x/2)+Math.floor(z/6))%3===0),wc=stucco?STU[k%3]:BRK[k%5],h=2.2+((k*13)%5)*.35+(e<.8?0:.4),w=1.7;
@@ -8216,8 +8216,8 @@ function setT2BLogo(src){const im=new Image();im.onload=()=>{T2B_LOGO=im;t2bAppl
         if(k%9===4){b.add("cyl",0xdfe3e5,x+(fz?-.5:0),Y+h+.25,z+(fx?-.5:0),.18,.02,.18,1.1,0,0);b.add("cyl",0x8a8f96,x+(fz?-.5:0),Y+h+.1,z+(fx?-.5:0),.02,.25,.02)}}
       k++}}
   // cars parked along the curbs of the side streets
-  {const PC=[0x1b1b1b,0xf2f2ee,0x7a1f2a,0x1f3a7a,0x8a8f96,0x2f6a3a,0xc0c6cc,0x3a3a46];let q=0;SX.forEach(x0=>{for(let z=-HZ+4;z<HZ-3;z+=3.3){if([...SZ,0].some(v=>Math.abs(v-z)<2.4))continue;if((q*7)%5===3){q++;continue}const car=makeCar(PC[q%PC.length],false);car.scale.setScalar(.5);car.position.set(x0+(q%2?.98:-.98),Y+.08,z);car.rotation.y=Math.PI/2;G.add(car);q++}});
-    SZ.forEach(z0=>{for(let x=-HX+4;x<HX-3;x+=3.3){if([...SX,0].some(v=>Math.abs(v-x)<2.4))continue;if((q*3)%5===1){q++;continue}const car=makeCar(PC[q%PC.length],false);car.scale.setScalar(.5);car.position.set(x,Y+.08,z0+(q%2?.98:-.98));G.add(car);q++}})}
+  {const PC=[0x1b1b1b,0xf2f2ee,0x7a1f2a,0x1f3a7a,0x8a8f96,0x2f6a3a,0xc0c6cc,0x3a3a46];let q=0;SX.forEach(x0=>{for(let z=-HZ+4;z<HZ-3;z+=3.3){if([...SZ,0].some(v=>Math.abs(v-z)<2.4))continue;if(MIRROR_TEST&&x0<0&&z>8)continue;if((q*7)%5===3){q++;continue}const car=makeCar(PC[q%PC.length],false);car.scale.setScalar(.5);car.position.set(x0+(q%2?.98:-.98),Y+.08,z);car.rotation.y=Math.PI/2;G.add(car);q++}});
+    SZ.forEach(z0=>{for(let x=-HX+4;x<HX-3;x+=3.3){if([...SX,0].some(v=>Math.abs(v-x)<2.4))continue;if(MIRROR_TEST&&z0>0&&x<-1)continue;if((q*3)%5===1){q++;continue}const car=makeCar(PC[q%PC.length],false);car.scale.setScalar(.5);car.position.set(x,Y+.08,z0+(q%2?.98:-.98));G.add(car);q++}})}
 
   // industrial strip: warehouses and factories along the east and north edges (test server)
   if(MIRROR_TEST){T2B.smk=[];const sk=document.createElement("canvas");sk.width=sk.height=64;const sx=sk.getContext("2d"),sg=sx.createRadialGradient(32,32,1,32,32,32);sg.addColorStop(0,"rgba(120,120,128,.85)");sg.addColorStop(1,"rgba(120,120,128,0)");sx.fillStyle=sg;sx.fillRect(0,0,64,64);const stx=new THREE.CanvasTexture(sk);
@@ -8295,14 +8295,14 @@ function setT2BLogo(src){const im=new Image();im.onload=()=>{T2B_LOGO=im;t2bAppl
   {T2B.police=[];T2B.polR=new THREE.MeshBasicMaterial({color:0xff2020,toneMapped:false});T2B.polB=new THREE.MeshBasicMaterial({color:0x2050ff,toneMapped:false});
     const gT=(()=>{const k=document.createElement("canvas");k.width=k.height=64;const x=k.getContext("2d"),g=x.createRadialGradient(32,32,1,32,32,32);g.addColorStop(0,"rgba(255,255,255,1)");g.addColorStop(.35,"rgba(255,255,255,.45)");g.addColorStop(1,"rgba(255,255,255,0)");x.fillStyle=g;x.fillRect(0,0,64,64);return new THREE.CanvasTexture(k)})();
     const o5=.5,RT=[[[-22+o5,-15.5+o5],[22-o5,-15.5+o5],[22-o5,15.5-o5],[-22+o5,15.5-o5]],[[-15-o5,15.5+o5],[15+o5,15.5+o5],[15+o5,-15.5-o5],[-15-o5,-15.5-o5]],[[-22-o5,-15.5-o5],[-22-o5,15.5+o5],[22+o5,15.5+o5],[22+o5,-15.5-o5]],[[15-o5,-15.5+o5],[15-o5,15.5-o5],[-15+o5,15.5-o5],[-15+o5,-15.5+o5]]];
-    RT.push(RING.slice(0,32),RING.slice(0,32).reverse());RT.slice(0,QLV===0?3:6).forEach((P,i)=>{const car=makeCar(0xf4f4f0,false);const pb=new Builder();for(let q=0;q<6;q++){pb.add("box",q%2?0x1f4ad8:0xf5d020,-.7+q*.28,.42,.44,.28,.18,.02);pb.add("box",q%2?0x1f4ad8:0xf5d020,-.7+q*.28,.42,-.44,.28,.18,.02)}pb.add("box",0x15213a,-.1,1.0,0,.12,.06,.62);car.add(pb.mesh({outline:false}));
+    if(MIRROR_TEST){RT.length=0;RT.push([[15-o5,-15.5+o5],[22-o5,-15.5+o5],[22-o5,15.5-o5],[15-o5,15.5-o5]],[[22+o5,15.5+o5],[22+o5,-15.5-o5],[15+o5,-15.5-o5],[15+o5,15.5+o5]])}RT.push(RING.slice(0,32),RING.slice(0,32).reverse());RT.slice(0,QLV===0?3:6).forEach((P,i)=>{const car=makeCar(0xf4f4f0,false);const pb=new Builder();for(let q=0;q<6;q++){pb.add("box",q%2?0x1f4ad8:0xf5d020,-.7+q*.28,.42,.44,.28,.18,.02);pb.add("box",q%2?0x1f4ad8:0xf5d020,-.7+q*.28,.42,-.44,.28,.18,.02)}pb.add("box",0x15213a,-.1,1.0,0,.12,.06,.62);car.add(pb.mesh({outline:false}));
       const lr=new THREE.Mesh(new THREE.BoxGeometry(.16,.1,.28),T2B.polR);lr.position.set(-.1,1.08,.17);car.add(lr);const lb=new THREE.Mesh(new THREE.BoxGeometry(.16,.1,.28),T2B.polB);lb.position.set(-.1,1.08,-.17);car.add(lb);
       const mk=c=>{const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:gT,color:c,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));sp.scale.set(1.6,1.6,1);car.add(sp);return sp};const gr=mk(0xff2020),gb=mk(0x2050ff);gr.position.set(-.1,1.15,.2);gb.position.set(-.1,1.15,-.2);
       car.scale.setScalar(.62);car.position.y=Y+.08;G.add(car);const c={m:car,P,k:i%4,u:Math.random(),sp:2.4+i*.3,gr,gb};T2B.cars.push(c);T2B.police.push(c)})}
 
   // ===== TIME 2 RACE: horse racing park on a south island, linked by a London-style tower bridge (test server) =====
-  if(MIRROR_TEST){const RZ0=37,RZ1=79,RC=58,b2=new Builder(),Y2=Y;
-    {const pb=new Builder();pb.add("box",0x8b8578,0,-1,RC,62.4,4.4,RZ1-RZ0+1.2);pb.add("box",0xc9c6bd,0,Y2-.05,RC,62,.1,RZ1-RZ0);G.add(pb.mesh({outline:false}))}
+  if(MIRROR_TEST){const RZ0=37,RZ1=47,RC=16.4,RCX=-14.4,b2=new Builder(),Y2=Y;
+    {const pb=new Builder();pb.add("box",0x8b8578,0,-1,(RZ0+RZ1)/2,22.4,4.4,RZ1-RZ0+1.2);pb.add("box",0x5aa03a,0,Y2-.05,(RZ0+RZ1)/2,22,.1,RZ1-RZ0);for(let k=0;k<6;k++){pb.add("cyl",0x7a5a34,-9+k*3.6,Y2+.5,RZ1-2,.12,1,.12);pb.add("sph",0x3f8f34,-9+k*3.6,Y2+1.3,RZ1-2,.8,.7,.8)}G.add(pb.mesh({outline:false}))}
     // tower bridge over the channel
     {const z0=24.6,z1=RZ0-.6,zm=(z0+z1)/2,ST=0xd8cdb0,BL=0x3a6a9a;b2.add("box",0x34383d,0,Y2+.2,zm,3.4,.3,z1-z0+1);b2.add("box",BL,-1.85,Y2+.6,zm,.15,.6,z1-z0);b2.add("box",BL,1.85,Y2+.6,zm,.15,.6,z1-z0);
       [zm-3.2,zm+3.2].forEach(tz=>{[-2.6,2.6].forEach(dx=>{b2.add("box",ST,dx,Y2+4,tz,1.5,8,1.6);b2.add("cone4",0x5a6a7a,dx,Y2+9,tz,1,2,1,0,Math.PI/4,0);[-.55,.55].forEach(o=>b2.add("cone4",0x5a6a7a,dx+o,Y2+8.3,tz+.6,.18,.8,.18,0,Math.PI/4,0));for(let f=0;f<3;f++)b2.add("box",0x22303c,dx,Y2+2.6+f*1.8,tz+.82,.4,.8,.04)});b2.add("box",ST,0,Y2+1.6,tz,6.6,.6,1.7);b2.add("box",0x5a6a7a,0,Y2+.9,tz,3.6,.12,1.8)});
@@ -8311,27 +8311,27 @@ function setT2BLogo(src){const im=new Image();im.onload=()=>{T2B_LOGO=im;t2bAppl
       for(let k=0;k<6;k++){const zz=z0+.5+k*(z1-z0-1)/5;[-1.7,1.7].forEach(dx=>{b2.add("cyl",0x1b1b1b,dx,Y2+1.2,zz,.04,1.6,.04);b2.add("sph",0xfff2b0,dx,Y2+2.05,zz,.12,.12,.12)})}
       const lab=labelSprite("London Bridge");lab.position.set(0,Y2+10.8,zm);lab.scale.set(3.6,.9,1);G.add(lab)}
     // oval dirt track with white rails, green infield
-    const SL=15,TR=12.5,W=4.2,ov=(u,r2)=>{const per=2*(2*SL)+2*Math.PI*r2;let d=((u%1)+1)%1*per;if(d<2*SL)return[-SL+d,RC+r2,0];d-=2*SL;if(d<Math.PI*r2){const a=d/r2;return[SL+Math.sin(a)*r2,RC+Math.cos(a)*r2,-a]}d-=Math.PI*r2;if(d<2*SL)return[SL-d,RC-r2,Math.PI];d-=2*SL;const a=d/r2;return[-SL-Math.sin(a)*r2,RC-Math.cos(a)*r2,Math.PI-a]};T2B.ov=ov;T2B.rc={SL,TR,RC,W};
-    for(let k=0;k<160;k++){const u=k/160,[x,z,a]=ov(u,TR),[x2,z2]=ov(u+1/160,TR),L=Math.hypot(x2-x,z2-z)+.15;b2.add("box",0xa8784a,(x+x2)/2,Y2+.06,(z+z2)/2,L,.06,W,0,Math.atan2(-(z2-z),x2-x),0);
-      [TR-W/2-.1,TR+W/2+.1].forEach(r2=>{const [px,pz]=ov(u,r2),[qx,qz]=ov(u+1/160,r2);b2.add("box",0xf4f4f2,(px+qx)/2,Y2+.62,(pz+qz)/2,Math.hypot(qx-px,qz-pz)+.05,.08,.08,0,Math.atan2(-(qz-pz),qx-px),0);if(k%2===0)b2.add("box",0xf4f4f2,px,Y2+.32,pz,.07,.6,.07)})}
-    b2.add("box",0x4fa83a,0,Y2+.04,RC,2*SL,.05,2*(TR-W/2)-.4);[-1,1].forEach(sd=>b2.add("cyl",0x4fa83a,sd*SL,Y2+.04,RC,TR-W/2-.2,.05,TR-W/2-.2));
-    b2.add("box",0x3f8f34,0,Y2+.07,RC,2*SL-4,.03,.25);for(let k=0;k<7;k++)b2.add("sph",0x3f8f34,-12+k*4,Y2+.6,RC,.7,.6,.7);
+    const SL=6.6,TR=5.4,W=2.4,ov=(u,r2)=>{const per=2*(2*SL)+2*Math.PI*r2;let d=((u%1)+1)%1*per;if(d<2*SL)return[RCX-SL+d,RC+r2,0];d-=2*SL;if(d<Math.PI*r2){const a=d/r2;return[RCX+SL+Math.sin(a)*r2,RC+Math.cos(a)*r2,-a]}d-=Math.PI*r2;if(d<2*SL)return[RCX+SL-d,RC-r2,Math.PI];d-=2*SL;const a=d/r2;return[RCX-SL-Math.sin(a)*r2,RC-Math.cos(a)*r2,Math.PI-a]};T2B.ov=ov;T2B.rc={SL,TR,RC,W,RCX};b2.add("box",0x3f7a2e,RCX,Y2+.03,RC,27.6,.04,15.4);
+    for(let k=0;k<110;k++){const u=k/110,[x,z,a]=ov(u,TR),[x2,z2]=ov(u+1/110,TR),L=Math.hypot(x2-x,z2-z)+.15;b2.add("box",0xa8784a,(x+x2)/2,Y2+.06,(z+z2)/2,L,.06,W,0,Math.atan2(-(z2-z),x2-x),0);
+      [TR-W/2-.1,TR+W/2+.1].forEach(r2=>{const [px,pz]=ov(u,r2),[qx,qz]=ov(u+1/110,r2);b2.add("box",0xf4f4f2,(px+qx)/2,Y2+.62,(pz+qz)/2,Math.hypot(qx-px,qz-pz)+.05,.08,.08,0,Math.atan2(-(qz-pz),qx-px),0);if(k%2===0)b2.add("box",0xf4f4f2,px,Y2+.32,pz,.07,.6,.07)})}
+    b2.add("box",0x4fa83a,RCX,Y2+.05,RC,2*SL,.05,2*(TR-W/2)-.4);[-1,1].forEach(sd=>b2.add("cyl",0x4fa83a,RCX+sd*SL,Y2+.05,RC,TR-W/2-.2,.05,TR-W/2-.2));
+    b2.add("box",0x3f8f34,RCX,Y2+.08,RC,2*SL-2,.03,.2);for(let k=0;k<4;k++)b2.add("sph",0x3f8f34,RCX-4.5+k*3,Y2+.45,RC,.45,.4,.45);
     // finish post
-    {const fx=0,fz=RC+TR+W/2+.6;b2.add("cyl",0xf4f4f2,fx,Y2+1.6,fz,.1,3.2,.1);b2.add("box",0xd2232a,fx,Y2+3.3,fz,.6,.6,.08);b2.add("box",0xf4f4f2,fx,Y2+.07,RC+TR,.3,.02,W)}
+    {const fx=RCX,fz=RC+TR+W/2+.4;b2.add("cyl",0xf4f4f2,fx,Y2+1.2,fz,.08,2.4,.08);b2.add("box",0xd2232a,fx,Y2+2.5,fz,.5,.5,.06);b2.add("box",0xf4f4f2,fx,Y2+.08,RC+TR,.25,.02,W)}
     // grandstand with roof and crowd
-    {const gz=RC+TR+W/2+5.2;for(let r2=0;r2<5;r2++)b2.add("box",0xd8d2c4,0,Y2+.3+r2*.55,gz+r2*.9,26,.55,.9);b2.add("box",0x1b2f6a,0,Y2+5.2,gz+2.4,27,.25,6.4,-.12,0,0);for(let k=-6;k<=6;k++)b2.add("cyl",0x8a8f96,k*2.1,Y2+2.6,gz+5.4,.1,5.2,.1);
-      const CR=[0xff4d6d,0x5d8bff,0xffcc33,0xeef3ff,0x3ecf8e,0xc38bff,0xff8a3d];T2B.crowd=[];for(let r2=0;r2<5;r2++)for(let k=0;k<(QLV===0?14:24);k++){const x=-12.5+k*(25/((QLV===0?14:24)-1)),z=gz+r2*.9,yy=Y2+.85+r2*.55;b2.add("sph",0xe0a878,x,yy+.42,z,.17,.17,.17);const bd=new THREE.Mesh(new THREE.BoxGeometry(.32,.38,.24),am(CR[(k+r2)%7]));bd.position.set(x,yy+.12,z);G.add(bd);T2B.crowd.push([bd,yy+.12,k+r2*3])}}
+    {const gz=RC-TR-W/2-1.1;for(let r2=0;r2<3;r2++)b2.add("box",0xd8d2c4,RCX,Y2+.25+r2*.45,gz-r2*.7,16,.45,.7);b2.add("box",0x1b2f6a,RCX,Y2+3.2,gz-.9,16.6,.2,3,.12,0,0);for(let k=-4;k<=4;k++)b2.add("cyl",0x8a8f96,RCX+k*2,Y2+1.6,gz-2.1,.08,3.2,.08);
+      const CR=[0xff4d6d,0x5d8bff,0xffcc33,0xeef3ff,0x3ecf8e,0xc38bff,0xff8a3d];T2B.crowd=[];for(let r2=0;r2<3;r2++)for(let k=0;k<(QLV===0?10:16);k++){const x=RCX-7.5+k*(15/((QLV===0?10:16)-1)),z=gz-r2*.7,yy=Y2+.7+r2*.45;b2.add("sph",0xe0a878,x,yy+.42,z,.17,.17,.17);const bd=new THREE.Mesh(new THREE.BoxGeometry(.32,.38,.24),am(CR[(k+r2)%7]));bd.position.set(x,yy+.12,z);G.add(bd);T2B.crowd.push([bd,yy+.12,k+r2*3])}}
     // big TIME 2 RACE board with the live result
-    {const c=document.createElement("canvas");c.width=1024;c.height=384;const tx=new THREE.CanvasTexture(c);T2B.board={c,x:c.getContext("2d"),tx};const m=new THREE.Mesh(new THREE.PlaneGeometry(16,6),new THREE.MeshBasicMaterial({map:tx,toneMapped:false}));m.position.set(0,Y2+8.4,RC-TR-W/2-3.2);G.add(m);
-      b2.add("box",0x0b1a3a,0,Y2+8.4,RC-TR-W/2-3.3,16.6,6.6,.3);[-6.5,6.5].forEach(dx=>b2.add("box",0x5a6070,dx,Y2+2.6,RC-TR-W/2-3.4,.4,5.2,.4))}
+    {const c=document.createElement("canvas");c.width=1024;c.height=384;const tx=new THREE.CanvasTexture(c);T2B.board={c,x:c.getContext("2d"),tx};const m=new THREE.Mesh(new THREE.PlaneGeometry(8,3),new THREE.MeshBasicMaterial({map:tx,toneMapped:false}));m.position.set(RCX-.2,Y2+6.2,RC+TR+W/2+1.42);m.rotation.y=Math.PI;G.add(m);const m2=m.clone();m2.rotation.y=0;m2.position.z=RC+TR+W/2+1.9;G.add(m2);
+      b2.add("box",0x0b1a3a,RCX-.2,Y2+6.2,RC+TR+W/2+1.6,8.4,3.4,.3);[-3.2,3.2].forEach(dx=>b2.add("box",0x5a6070,RCX-.2+dx,Y2+2.3,RC+TR+W/2+1.7,.3,4.6,.3))}
     // stables
-    [[-24,RC-13],[-24,RC+13]].forEach(([x,z])=>{b2.add("box",0xa83a2a,x,Y2+1,z,5,2,3);b2.add("prism",0xf2efe6,x,Y2+2.4,z,1.9,5.2,1,-Math.PI/2,Math.PI/2,0,"YXZ");for(let k=-1;k<=1;k++)b2.add("box",0x5a3a1a,x+k*1.5,Y2+.8,z+1.52,1,1.4,.04)});
+    [].forEach(([x,z])=>{b2.add("box",0xa83a2a,x,Y2+1,z,5,2,3);b2.add("prism",0xf2efe6,x,Y2+2.4,z,1.9,5.2,1,-Math.PI/2,Math.PI/2,0,"YXZ");for(let k=-1;k<=1;k++)b2.add("box",0x5a3a1a,x+k*1.5,Y2+.8,z+1.52,1,1.4,.04)});
     G.add(b2.mesh());
     // the six runners from Time 2 Race
     const HS=[["Lucky Seven",0xffcc33],["Time Keeper",0x5d8bff],["Golden Hour",0xff8a3d],["Last Minute",0x3ecf8e],["Rush Hour",0xff4d6d],["Overtime",0xc38bff]];T2B.horses=[];
-    HS.forEach(([n,c],i)=>{const g=makeAnimal("kabayo");try{paintAnimal(g,"kabayo",i)}catch(e){}g.traverse(o=>{if(o.isSprite)o.visible=false});g.scale.setScalar(1.45);
+    HS.forEach(([n,c],i)=>{const g=makeAnimal("kabayo");try{paintAnimal(g,"kabayo",i)}catch(e){}g.traverse(o=>{if(o.isSprite)o.visible=false});g.scale.setScalar(.85);
       const j=makeFarmer({shirt:c,pants:0xf2f2ee,hat:c,skin:[0xe0a878,0xc68a5a,0xa8724a][i%3]});j.g.scale.setScalar(.42);j.g.position.set(.02,.86,0);j.legL.rotation.x=.9;j.legR.rotation.x=-.9;j.torso.rotation.z=-.5;g.add(j.g);
-      const lb=new THREE.Mesh(new THREE.PlaneGeometry(.34,.24),new THREE.MeshBasicMaterial({color:c,side:THREE.DoubleSide}));lb.position.set(0,.62,.2);g.add(lb);G.add(g);T2B.horses.push({g,j,n,c,lane:TR-W/2+.55+i*.62,d:0,v:0,ph:i})});
+      const lb=new THREE.Mesh(new THREE.PlaneGeometry(.34,.24),new THREE.MeshBasicMaterial({color:c,side:THREE.DoubleSide}));lb.position.set(0,.62,.2);g.add(lb);G.add(g);T2B.horses.push({g,j,n,c,lane:TR-W/2+.35+i*.34,d:0,v:0,ph:i})});
     T2B.race={state:"wait",t:3,winner:null,order:[]}}
   T2B.on=true})();
 
@@ -8342,8 +8342,8 @@ function drawRaceBoard(){const B=T2B.board,R0=T2B.race;if(!B)return;const x=B.x;
 function stepRace(dt,t){if(!T2B.horses)return;const R0=T2B.race,P=T2B.ov,{SL,TR,RC}=T2B.rc,per=2*(2*SL)+2*Math.PI*TR,LAPS=1;
   if(R0.state==="wait"){R0.t-=dt;if(R0.t<=0){R0.state="count";R0.t=3;R0.order=[];T2B.horses.forEach(h=>{h.d=0;h.v=0;h.done=false;h.boost=.9+Math.random()*.25})}}
   else if(R0.state==="count"){R0.t-=dt;if(R0.t<=0)R0.state="run"}
-  else{T2B.horses.forEach(h=>{if(h.done)return;h.boost+=(Math.random()-.5)*dt*.8;h.boost=Math.max(.8,Math.min(1.25,h.boost));h.v+=((7.5*h.boost)-h.v)*Math.min(1,dt*1.5);h.d+=h.v*dt;if(h.d>=per*LAPS){h.done=true;h.d=per*LAPS;R0.order.push(h);if(R0.order.length===1)R0.winner=h.n}});if(T2B.horses.every(h=>h.done)){R0.state="wait";R0.t=10}}
-  T2B.horses.forEach(h=>{const u=h.d/per,[x,z]=P(u,h.lane),[x2,z2]=P(u+.002,h.lane);h.g.position.set(x,1.2+.06,z);h.g.rotation.y=Math.atan2(-(z2-z),x2-x);const run=R0.state==="run"&&!h.done,U=h.g.userData;
+  else{T2B.horses.forEach(h=>{if(h.done)return;h.boost+=(Math.random()-.5)*dt*.8;h.boost=Math.max(.8,Math.min(1.25,h.boost));h.v+=((4.6*h.boost)-h.v)*Math.min(1,dt*1.5);h.d+=h.v*dt;if(h.d>=per*LAPS){h.done=true;h.d=per*LAPS;R0.order.push(h);if(R0.order.length===1)R0.winner=h.n}});if(T2B.horses.every(h=>h.done)){R0.state="wait";R0.t=10}}
+  T2B.horses.forEach(h=>{const u=h.d/per,[x,z]=P(u,h.lane),[x2,z2]=P(u+.002,h.lane);h.g.position.set(x,1.2+.08,z);h.g.rotation.y=Math.atan2(-(z2-z),x2-x);const run=R0.state==="run"&&!h.done,U=h.g.userData;
     if(U.legs)U.legs.forEach((l,k)=>{const ph=(k===0||k===3)?1:-1;l.rotation.z=run?Math.sin(t*16+h.ph)*ph*.8:Math.sin(t*2+h.ph)*.05});if(U.body)U.body.rotation.z=run?Math.sin(t*16+h.ph)*.06:0;h.g.position.y+=run?Math.abs(Math.sin(t*16+h.ph))*.12:0;h.j.g.position.y=.86+(run?Math.abs(Math.sin(t*16+h.ph+1))*.06:0)});
   (T2B.crowd||[]).forEach(([m,y,k])=>{m.position.y=y+(R0.state==="run"?Math.max(0,Math.sin(t*9+k))*.15:0)});
   T2B._bt=(T2B._bt||0)-dt;if(T2B._bt<=0){T2B._bt=.25;drawRaceBoard()}}
