@@ -2831,7 +2831,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="181";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
+const GAMEVER="182";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 /* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
 (function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
   document.addEventListener("touchstart",e=>{el=null;if(!ROT||e.touches.length!==1)return;el=scroller(e.target);if(el){const q=exy(e.touches[0]);lx=q.x;ly=q.y;mv=0}},{passive:true});
@@ -3425,7 +3425,7 @@ function validPlot(p,x0,z0){const N=PN,x1=x0+N,z1=z0+N;if(x0<-71||x1>16.5||z0<-2
   for(const T of FTREES)if(T.x>x0-.3&&T.x<x1+.3&&T.z>z0-.3&&T.z<z1+.3)return"A tree is in the way. Have a helper chop it first.";
   return""}
 function validPen(id,x0,x1,z0,z1){if(x0<-71||x1>16.5||z0<-23||z1>70)return"Too close to the edge of the farm.";
-  for(const k in PENS){if(k===id)continue;const Q=PENS[k];if(x0<Q.x1+.15&&x1>Q.x0-.15&&z0<Q.z1+.15&&z1>Q.z0-.15)return"That covers the "+Q.n+".";}
+  for(const k in PENS){if(k===id)continue;const Q=PENS[k];if(x0<Q.x1-.02&&x1>Q.x0+.02&&z0<Q.z1-.02&&z1>Q.z0+.02)return"That covers the "+Q.n+".";}
   for(const a of layout())if(!(a.p&&a.p.island)&&x0<a.x0+a.n+.4&&x1>a.x0-.4&&z0<a.z0+a.n+.4&&z1>a.z0-.4)return a.p?"That covers "+a.p.n+".":"That covers the main field.";
   for(const q of PLOTS){if(!plotLive(q))continue;const m=q.sz||PN;if(x0<q.x0+m+.3&&x1>q.x0-.3&&z0<q.z0+m+.3&&z1>q.z0-.3)return"That covers "+q.n+" (land for sale).";}
   if(z0<-6.4&&z1>-9.6&&x0<-3.5)return"That covers the road.";if(x0<6.4+barnOff()[0]&&x1>-2+barnOff()[0]&&z0<-6.2+barnOff()[1]&&z1>-11+barnOff()[1])return"That covers the barn.";{const [cx,cz]=stallXZ(),odd=stallRot()&1,hw=odd?2.5:1,hd=odd?1:2.5;if(x0<cx+hw&&x1>cx-hw&&z0<cz+hd&&z1>cz-hd)return"That covers the Market Stall."}
@@ -3478,7 +3478,7 @@ function updateGhost0(x,z){if(!PLACE)return;
   if(PLACE.barn){const dx=Math.round((x-2.2)*2)/2,dz=Math.round((z+8.6)*2)/2;PLACE.dx=dx;PLACE.dz=dz;PLACE.g.position.set(dx,0,dz);const [ox,oz]=barnOff();PLACE.why=(dx===ox&&dz===oz)?"":validBarn(dx,dz);PLACE.ok=!PLACE.why;GHOSTMAT.color.setHex(PLACE.ok?0x7fe08a:0xff6a5a);$("placeOk").disabled=!PLACE.ok;return}
   if(PLACE.field){const x0=Math.round(x-PLACE.N/2),z0=Math.round(z-PLACE.N/2);PLACE.x0=x0;PLACE.z0=z0;PLACE.g.position.set(x0,0,z0);PLACE.why=(x0===FX0&&z0===FZ0)?"":validField(x0,z0);PLACE.ok=!PLACE.why;GHOSTMAT.color.setHex(PLACE.ok?0x7fe08a:0xff6a5a);$("placeOk").disabled=!PLACE.ok;return}
   if(PLACE.hill){PLACE.x=x;PLACE.z=z;PLACE.g.position.set(x,0,z);PLACE.why=validHill(PLACE.hill,x,z);PLACE.ok=!PLACE.why;GHOSTMAT.color.setHex(PLACE.ok?0x7fe08a:0xff6a5a);$("placeOk").disabled=!PLACE.ok;return}
-  if(PLACE.pen){PLACE.lx=x;PLACE.lz=z;const x0=Math.round((x-PLACE.w/2)*2)/2,z0=Math.round((z-PLACE.dd/2)*2)/2;PLACE.x0=x0;PLACE.z0=z0;PLACE.g.position.set(x0+PLACE.w/2,0,z0+PLACE.dd/2);PLACE.why=validPen(PLACE.pen,x0,x0+PLACE.w,z0,z0+PLACE.dd);PLACE.ok=!PLACE.why;GHOSTMAT.color.setHex(PLACE.ok?0x7fe08a:0xff6a5a);$("placeOk").disabled=!PLACE.ok;return}
+  if(PLACE.pen){PLACE.lx=x;PLACE.lz=z;let x0=Math.round((x-PLACE.w/2)*4)/4,z0=Math.round((z-PLACE.dd/2)*4)/4;{const id=PLACE.pen;for(const k in PENS){if(k===id)continue;const Q=PENS[k];const ox=Math.min(x0+PLACE.w,Q.x1)-Math.max(x0,Q.x0),oz=Math.min(z0+PLACE.dd,Q.z1)-Math.max(z0,Q.z0);if(ox>0&&oz>0&&Math.min(ox,oz)<.8){if(ox<oz)x0+=(x0+PLACE.w/2<(Q.x0+Q.x1)/2?-ox:ox);else z0+=(z0+PLACE.dd/2<(Q.z0+Q.z1)/2?-oz:oz)}}if(z0<-6.4&&z0+PLACE.dd>-9.6&&x0<-3.5){const up=-6.4-z0,dn=z0+PLACE.dd+9.6;if(up<.8&&up<dn)z0=-6.4;else if(dn<.8)z0=-9.6-PLACE.dd}}PLACE.x0=x0;PLACE.z0=z0;PLACE.g.position.set(x0+PLACE.w/2,0,z0+PLACE.dd/2);PLACE.why=validPen(PLACE.pen,x0,x0+PLACE.w,z0,z0+PLACE.dd);PLACE.ok=!PLACE.why;GHOSTMAT.color.setHex(PLACE.ok?0x7fe08a:0xff6a5a);$("placeOk").disabled=!PLACE.ok;return}
   if(PLACE.tree){PLACE.x=x;PLACE.z=z;PLACE.g.position.set(x,0,z);PLACE.ok=validPlace(x,z,.9,PLACE.tree)&&!inAnyPen(x,z,.6);PLACE.why=PLACE.ok?"":"Can't put the tree there. Pick an empty grassy spot.";GHOSTMAT.color.setHex(PLACE.ok?0x7fe08a:0xff6a5a);$("placeOk").disabled=!PLACE.ok;return}
   if(PLACE.plot){let x0=Math.round(x-PN/2),z0=Math.round(z-PN/2);
     const a=layout()[0],edges=[a.x0+a.n,a.x0-PN],ez=[a.z0+a.n,a.z0-PN];PLOTS.forEach(q=>{if(q.island||q.id===PLACE.plot.id||!(S.plots||[]).includes(q.id))return;edges.push(q.x0+PN,q.x0-PN);ez.push(q.z0+PN,q.z0-PN)});
