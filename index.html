@@ -2564,7 +2564,7 @@ let onIsle=false,ISLE_OPEN=false;
 function checkIsle(){if(ISLE_OPEN&&Math.hypot(camT.tx-IX,camT.tz-IZ)>55&&!(TRIP.on&&TRIP.toIsle))ISLE_OPEN=false;const n=Math.hypot(cam.tx-IX,cam.tz-IZ)<40;$("tIsle").textContent=TRIP.on?"Sailing…":ownBoat()?(S.boatAt==="isla"?"Sail back to the Farm":"Sail to the Island"):(n?"Back to the Farm":"Go to GoPyesta Island");if(n!==onIsle){onIsle=n;
   if(!TRIP.on){if(n)toast("You are at GoPyesta Island.",2200)}}}
 function endPtr(e){clearTimeout(HOLD.t);
-  if(PLACE&&PLACE.drag){pointers.delete(e.pointerId);if(!pointers.size){cv.classList.remove("drag");pinch0=0}PLACE.drag=false;PLACE.held=true;$("placeTxt").textContent=(PLACE.d&&PLACE.d.n?PLACE.d.n+" · ":"")+"drag it again"+($("placeRot").hidden?"":", tap Rotate to turn it")+", then tap Place here";return}
+  if(PLACE&&PLACE.drag){pointers.delete(e.pointerId);if(!pointers.size){cv.classList.remove("drag");pinch0=0}PLACE.drag=false;PLACE.held=true;$("placeTxt").textContent=(PLACE.d&&PLACE.d.n?PLACE.d.n+" · ":"")+"tap a free spot to put it there"+($("placeRot").hidden?"":" (tap Rotate first to turn it)")+", or drag it again";return}
   const tr=e.pointerType==="mouse"?6:16,wasTap=pointers.size===1&&downAt&&Math.hypot(exy(e).x-downAt.x,exy(e).y-downAt.y)<=tr&&dragMoved<tr*2.5;
   pointers.delete(e.pointerId);if(!pointers.size){cv.classList.remove("drag");pinch0=0}
   if(wasTap&&e.type==="pointerup")clickAt(e);
@@ -2831,7 +2831,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="182";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
+const GAMEVER="183";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 /* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
 (function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
   document.addEventListener("touchstart",e=>{el=null;if(!ROT||e.touches.length!==1)return;el=scroller(e.target);if(el){const q=exy(e.touches[0]);lx=q.x;ly=q.y;mv=0}},{passive:true});
@@ -3507,7 +3507,7 @@ function confirmPlace(){
   if(d.tree){S.ptrees=(S.ptrees||[]).concat({u:Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36),kind:d.tree,x:+p.x.toFixed(2),z:+p.z.toFixed(2),at:now(),seed:Math.floor(Math.random()*9000)+100});buildTrees()}
   else S.builds=(S.builds||[]).concat({id:d.id,x:+p.x.toFixed(2),z:+p.z.toFixed(2),r:PLACE.r});
   burst(p.x,.5,p.z,0xc98a4b,18);gain(0,Math.round(d.cost/100),null);cancelPlace();renderBuilds();try{landDeco()}catch(e){}after();shopUI(true);toast(d.inc?"Built: "+d.n+"! +"+d.inc+" coins per minute.":"Placed: "+d.n+".",3000);townUI(true)}
-function placePointer(e,click){const gp=groundPoint(e);if(!gp||!PLACE)return;updateGhost(gp.x,gp.z);if(click&&e.pointerType==="mouse"&&PLACE.ok)confirmPlace()}
+function placePointer(e,click){const gp=groundPoint(e);if(!gp||!PLACE)return;updateGhost(gp.x,gp.z);if(click&&PLACE.ok)confirmPlace();else if(click&&!PLACE.ok)toast("⛔ "+(PLACE.why||"Can't put it there. Try another spot."),2200)}
 /* -- passive income -- */
 let incT=0;function stepIncome(dt){if(VISIT)return;incT+=dt;if(incT<60)return;incT=0;let v=0;(S.builds||[]).forEach(o=>{const d=BUILDS.find(q=>q.id===o.id);if(d)v+=d.inc});if(v>0){S.coins+=v;save();ui();toast("+"+v+" coins from your buildings",2200)}}
 /* -- piers -- */
