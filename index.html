@@ -1002,7 +1002,7 @@ var GROUND_G=null,paintGround=()=>{},landDeco=()=>{},pondDeco=()=>{},LANDM=null,
   PONDM=pb.mesh();world.add(PONDM)};pondDeco();
 })();
 function setPondSize(lv){const k=1+.2*Math.max(0,Math.min(5,lv|0));if(Math.abs(k-PONDS.s)<.001)return;PONDS.s=k;PONDS.x=9+(k-1);PONDS.z=8+(k-1)*1.33;
-  if(typeof POND!=="undefined"){POND.x=PONDS.x;POND.z=PONDS.z;POND.rx=2.47*k;POND.rz=1.9*k}paintGround();landDeco();pondDeco()}
+  if(typeof POND!=="undefined"){POND.x=PONDS.x;POND.z=PONDS.z;POND.rx=2.47*k;POND.rz=1.9*k}paintGround();landDeco();pondDeco();if(typeof roadsSoon==="function")roadsSoon()}
 
 /* -------- mountains, waterfall & river -------- */
 let wfTex,rvTex,foamT=0;const SPRAY=[];let RIVERW=null,rvTex2=null,wfTex2=null,WFF=null;const RIPPLES=[];const WF={x:12,z:-19.2,top:12,w:2.6};
@@ -2723,7 +2723,7 @@ function expand(){
 }
 const PENX=new THREE.Group();scene.add(PENX);let _penxK="";
 function syncPenLayout(){const k=JSON.stringify([S.penSz||{},S.penPos||{},S.penLv||{},S.penRot||{}]);if(k===_plk)return;const first=_plk===null;_plk=k;if(first)return;
-  buildFences();_penxK=null;try{landDeco()}catch(e){}
+  buildFences();_penxK=null;try{landDeco()}catch(e){}roadsSoon();
   animalObjs.forEach(o=>{if(o.g.userData.zone&&o.g.userData.zone!=="pen")return;const [x,z]=randPen(o.r,o.id);o.g.position.set(x,0,z);o.tx=x;o.tz=z})}
 function buildPenX(){syncPenLayout();const key=JSON.stringify([S.penLv||{},S.penSz||{},S.penPos||{},S.penRot||{}]);if(key===_penxK)return;_penxK=key;while(PENX.children.length)PENX.remove(PENX.children[0]);
   const B0=new Builder(),SN0=new Builder(),L=S.penLv||{};let b=B0,sn=SN0,CW=null;
@@ -2831,7 +2831,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="176";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
+const GAMEVER="177";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 /* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
 (function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
   document.addEventListener("touchstart",e=>{el=null;if(!ROT||e.touches.length!==1)return;el=scroller(e.target);if(el){const q=exy(e.touches[0]);lx=q.x;ly=q.y;mv=0}},{passive:true});
@@ -3286,6 +3286,7 @@ function stepBuildAnim(t){const night=typeof isNight==="function"&&isNight();BUI
 /* -- placed buildings -- */
 const BUILDG=new THREE.Group();scene.add(BUILDG);
 const ROADG=new THREE.Group();scene.add(ROADG);
+let _roadT=null;function roadsSoon(){clearTimeout(_roadT);_roadT=setTimeout(()=>{try{buildMansionRoads()}catch(e){}},500)}
 function buildMansionRoads(){while(ROADG.children.length)ROADG.remove(ROADG.children[0]);const b=new Builder();let any=false;const v=new THREE.Vector3();
   const seg=(x0,z0,x1,z1)=>{const dx=x1-x0,dz=z1-z0,L=Math.hypot(dx,dz);if(L<.05)return;any=true;const cx=(x0+x1)/2,cz=(z0+z1)/2,ry=Math.atan2(-dz,dx);b.add("box",0x4a5058,cx,.022,cz,L+1.7,.03,1.7,0,ry,0);
     for(let k=.6;k<L;k+=1.2)b.add("box",0xf5c732,x0+dx*k/L,.04,z0+dz*k/L,.5,.01,.08,0,ry,0)};
@@ -3295,13 +3296,13 @@ function buildMansionRoads(){while(ROADG.children.length)ROADG.remove(ROADG.chil
   const L=layout(),blds=(S.builds||[]).map(o=>{const d=BUILDS.find(q=>q.id===o.id);return[o.x,o.z,(d?d.r:1.5)*.8+.9]});
   for(let iz=0;iz<NZ;iz++)for(let ix=0;ix<NX;ix++){const x=X0+ix+.5,z=Z0+iz+.5,k=iz*NX+ix;let c=1;
     if(z>-9.4&&z<-6.6&&x<-4){goal[k]=1}
-    if(inAnyPen(x,z,1.1))c=-1;
+    if(inAnyPen(x,z,1.6))c=-1;
     else if(L.some(a=>!(a.p&&a.p.island)&&x>a.x0-1.1&&x<a.x0+a.n+1.1&&z>a.z0-1.1&&z<a.z0+a.n+1.1))c=-1;
     else if(PLOTS.some(q=>plotLive(q)&&x>q.x0-1&&x<q.x0+(q.sz||PN)+1&&z>q.z0-1&&z<q.z0+(q.sz||PN)+1))c=-1;
     else if((S.builds||[]).some(o=>mansCell(o,x,z)===1))c=-1;
     else if((S.builds||[]).some(o=>mansCell(o,x,z)===2))c=.4;
     else if(blds.some(([bx,bz,r],bi)=>!MANS_MD[(S.builds||[])[bi].id]&&Math.hypot(x-bx,z-bz)<r))c=-1;
-    else if(farmH(x,z)<-.03||((x-POND.x)/(POND.rx+1.2))**2+((z-POND.z)/(POND.rz+1.2))**2<1)c=-1;
+    else if(farmH(x,z)<-.03||((x-POND.x)/(POND.rx+2.4))**2+((z-POND.z)/(POND.rz+2.4))**2<1||inStall(x,z,1))c=-1;
     else if(inBarn(x,z,.8)&&!goal[k])c=-1;
     else if(mtns().some(([mx,mz,mr])=>Math.hypot(x-mx,z-mz)<mr*1.25+.8)||Math.hypot(x-CF.x,z-CF.z)<2.4)c=-1;
     else if(FTREES.some(T=>Math.hypot(x-T.x,z-T.z)<1.1))c=6;
@@ -3401,7 +3402,7 @@ function validPlot(p,x0,z0){const N=PN,x1=x0+N,z1=z0+N;if(x0<-68||x1>16.5||z0<-2
   for(const T of FTREES)if(T.x>x0-.3&&T.x<x1+.3&&T.z>z0-.3&&T.z<z1+.3)return"A tree is in the way. Have a helper chop it first.";
   return""}
 function validPen(id,x0,x1,z0,z1){if(x0<-68||x1>16.5||z0<-23||z1>50)return"Too close to the edge of the farm.";
-  for(const k in PENS){if(k===id)continue;const Q=PENS[k];if(x0<Q.x1+.8&&x1>Q.x0-.8&&z0<Q.z1+.8&&z1>Q.z0-.8)return"That covers the "+Q.n+".";}
+  for(const k in PENS){if(k===id)continue;const Q=PENS[k];if(x0<Q.x1+.15&&x1>Q.x0-.15&&z0<Q.z1+.15&&z1>Q.z0-.15)return"That covers the "+Q.n+".";}
   for(const a of layout())if(!(a.p&&a.p.island)&&x0<a.x0+a.n+.4&&x1>a.x0-.4&&z0<a.z0+a.n+.4&&z1>a.z0-.4)return a.p?"That covers "+a.p.n+".":"That covers the main field.";
   for(const q of PLOTS){if(!plotLive(q))continue;const m=q.sz||PN;if(x0<q.x0+m+.3&&x1>q.x0-.3&&z0<q.z0+m+.3&&z1>q.z0-.3)return"That covers "+q.n+" (land for sale).";}
   if(z0<-6.4&&z1>-9.6&&x0<-3.5)return"That covers the road.";if(x0<6.4+barnOff()[0]&&x1>-2+barnOff()[0]&&z0<-6.2+barnOff()[1]&&z1>-11+barnOff()[1])return"That covers the barn.";{const [cx,cz]=stallXZ(),odd=stallRot()&1,hw=odd?2.5:1,hd=odd?1:2.5;if(x0<cx+hw&&x1>cx-hw&&z0<cz+hd&&z1>cz-hd)return"That covers the Market Stall."}
@@ -3462,10 +3463,10 @@ function updateGhost0(x,z){if(!PLACE)return;
     PLACE.x0=x0;PLACE.z0=z0;PLACE.g.position.set(x0,0,z0);PLACE.why=validPlot(PLACE.plot,x0,z0);PLACE.ok=!PLACE.why;GHOSTMAT.color.setHex(PLACE.ok?0x7fe08a:0xff6a5a);$("placeOk").disabled=!PLACE.ok;return}PLACE.x=x;PLACE.z=z;PLACE.g.position.set(x,0,z);PLACE.ok=validPlace(x,z,PLACE.d.r);GHOSTMAT.color.setHex(PLACE.ok?0x7fe08a:0xff6a5a);$("placeOk").disabled=!PLACE.ok}
 function cancelPlace(){{const w=$("placeWhy");if(w)w.textContent=""}$("placeRot").hidden=false;if(PLACE){scene.remove(PLACE.g);if(PLACE.moving){S.builds=(S.builds||[]).concat(PLACE.moving);renderBuilds()}PLACE=null}$("placeBar").hidden=true}
 function confirmPlace(){
-  if(PLACE&&PLACE.stall){if(!PLACE.ok)return toast(PLACE.why||"Can't put the stall there.");S.stallPos=[+(PLACE.x-STALLC[0]).toFixed(2),+(PLACE.z-STALLC[1]).toFixed(2)];S.stallRot=PLACE.rot;applyStall();scene.remove(PLACE.g);PLACE=null;$("placeBar").hidden=true;{const w=$("placeWhy");if(w)w.textContent=""}hovered=null;try{landDeco()}catch(e){}burst(stallXZ()[0],.6,stallXZ()[1],0xc98a4b,18,.5);after();return toast("🧺 Moved the Market Stall.",2200)}
+  if(PLACE&&PLACE.stall){if(!PLACE.ok)return toast(PLACE.why||"Can't put the stall there.");S.stallPos=[+(PLACE.x-STALLC[0]).toFixed(2),+(PLACE.z-STALLC[1]).toFixed(2)];S.stallRot=PLACE.rot;applyStall();roadsSoon();scene.remove(PLACE.g);PLACE=null;$("placeBar").hidden=true;{const w=$("placeWhy");if(w)w.textContent=""}hovered=null;try{landDeco()}catch(e){}burst(stallXZ()[0],.6,stallXZ()[1],0xc98a4b,18,.5);after();return toast("🧺 Moved the Market Stall.",2200)}
   if(PLACE&&PLACE.barn){if(!PLACE.ok)return toast(PLACE.why||"Can't put the barn there.");S.barnPos=[PLACE.dx,PLACE.dz];scene.remove(PLACE.g);PLACE=null;$("placeBar").hidden=true;$("placeRot").hidden=false;hovered=null;applyBarnPos();
     if(typeof paintGround==="function")paintGround();if(typeof landDeco==="function")landDeco();buildMansionRoads();burst(2.2+S.barnPos[0],1,-8.6+S.barnPos[1],0xc98a4b,24,.6);after();return toast("📐 Moved the barn.",2400)}
-  if(PLACE&&PLACE.field){if(!PLACE.ok)return toast(PLACE.why||"Can't put the field there.");S.fieldPos=[PLACE.x0,PLACE.z0];scene.remove(PLACE.g);PLACE=null;$("placeBar").hidden=true;$("placeRot").hidden=false;
+  if(PLACE&&PLACE.field){if(!PLACE.ok)return toast(PLACE.why||"Can't put the field there.");S.fieldPos=[PLACE.x0,PLACE.z0];roadsSoon();scene.remove(PLACE.g);PLACE=null;$("placeBar").hidden=true;$("placeRot").hidden=false;
     _LK="";layout();hovered=null;buildField();if(typeof paintGround==="function")paintGround();if(typeof landDeco==="function")landDeco();after();return toast("📐 Moved the main field.",2400)}
   if(PLACE&&PLACE.hill){if(!PLACE.ok)return toast(PLACE.why||"Can't put the hill there.");const id=PLACE.hill,x=+PLACE.x.toFixed(2),z=+PLACE.z.toFixed(2);S.hillPos=Object.assign({},S.hillPos||{},{[id]:[x,z]});
     scene.remove(PLACE.g);PLACE=null;$("placeBar").hidden=true;$("placeRot").hidden=false;hovered=null;buildHills();try{landDeco()}catch(e){}burst(x,1,z,0x9aa1a4,22,.7);after();return toast("⛰️ Moved the hill.",2200)}
@@ -3475,7 +3476,7 @@ function confirmPlace(){
   if(PLACE&&PLACE.tree){if(!PLACE.ok)return toast(PLACE.why);const T=PLACE.tree,x=+PLACE.x.toFixed(2),z=+PLACE.z.toFixed(2);
     if(T.base)S.treePos=Object.assign({},S.treePos||{},{[T.id]:[x,z]});else{const q=(S.ptrees||[]).find(p=>"p"+p.u===T.id);if(q){q.x=x;q.z=z}}
     scene.remove(PLACE.g);PLACE=null;$("placeBar").hidden=true;$("placeRot").hidden=false;hovered=null;buildTrees();if(typeof landDeco==="function")landDeco();burst(x,.5,z,0x5fae38,14);after();return toast("🌳 Moved the "+treeName(T)+".",2200)}
-  if(PLACE&&PLACE.plot){if(!PLACE.ok)return toast(PLACE.why||"Can't put the land there.");const p=PLACE.plot;S.plotPos=Object.assign({},S.plotPos||{},{[p.id]:[PLACE.x0,PLACE.z0]});
+  if(PLACE&&PLACE.plot){if(!PLACE.ok)return toast(PLACE.why||"Can't put the land there.");const p=PLACE.plot;S.plotPos=Object.assign({},S.plotPos||{},{[p.id]:[PLACE.x0,PLACE.z0]});roadsSoon();
     scene.remove(PLACE.g);PLACE=null;$("placeBar").hidden=true;$("placeRot").hidden=false;_LK="";layout();hovered=null;buildField();if(typeof paintGround==="function")paintGround();if(typeof landDeco==="function")landDeco();after();return toast("📐 Moved "+p.n+".",2400)}
   if(!PLACE||!PLACE.ok)return toast("Can't build here. Pick an empty grassy spot.");const d=PLACE.d,p={x:PLACE.x,z:PLACE.z};
   if(PLACE.moving){S.builds=(S.builds||[]).concat({...PLACE.moving,x:+p.x.toFixed(2),z:+p.z.toFixed(2),r:PLACE.r});PLACE.moving=null;burst(p.x,.5,p.z,0xc98a4b,12);cancelPlace();renderBuilds();try{landDeco()}catch(e){}after();return toast("Moved: "+d.n+".",2200)}
