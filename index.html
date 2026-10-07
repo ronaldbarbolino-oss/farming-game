@@ -807,10 +807,11 @@ const mix=(a,b,t)=>_ca.set(a).lerp(_cb.set(b),Math.max(0,Math.min(1,t))).getHex(
 /* -------- extra farmland parcels -------- */
 const PN=8;
 const IX_=80,IZ_=4;const CX=180,CZ=4,CHX=32,CHZ=26;
-const PLOTS=[{id:"isla",n:"Secret Island",x0:IX_-.5,z0:IZ_+31,sz:6,y:1.2,island:true,cost:100000,lv:3},{id:"timog",n:"South Land",x0:-4,z0:12,cost:1500,lv:4},{id:"kanluran",n:"West Land",x0:-17,z0:10,cost:4000,lv:6},{id:"malayo",n:"Far Land",x0:-26.5,z0:10,cost:8000,lv:8},{id:"lambak",n:"Valley Land",x0:-4,z0:21,cost:15000,lv:9},{id:"burol",n:"Hill Land",x0:-17,z0:21,cost:25000,lv:10}];
+const PLOTS=[{id:"isla",n:"Secret Island",x0:IX_-.5,z0:IZ_+31,sz:6,y:1.2,island:true,cost:100000,lv:3},{id:"timog",n:"South Land",x0:-4,z0:12,cost:1500,lv:4},{id:"kanluran",n:"West Land",x0:-17,z0:10,cost:4000,lv:6},{id:"malayo",n:"Far Land",x0:-26.5,z0:10,cost:8000,lv:8},{id:"lambak",n:"Valley Land",x0:-4,z0:21,cost:15000,lv:9},{id:"burol",n:"Hill Land",x0:-17,z0:21,cost:25000,lv:10},{id:"parang",n:"Meadow Land",x0:-26.5,z0:21,cost:40000,lv:11},{id:"ilog",n:"Riverside Land",x0:-4,z0:30,cost:60000,lv:12},{id:"gubat",n:"Forest Land",x0:-17,z0:30,cost:85000,lv:13},{id:"bukal",n:"Spring Land",x0:-26.5,z0:30,cost:120000,lv:14},{id:"talampas",n:"Plateau Land",x0:-36,z0:10,cost:160000,lv:15},{id:"dulo",n:"Edge Land",x0:-36,z0:21,cost:220000,lv:16}];
+function plotLive(q){if(q.island)return false;try{const own=S.plots||[];return own.includes(q.id)||q===nextPlot()}catch(e){return true}}
 const PLOT_DEF={};PLOTS.forEach(p=>PLOT_DEF[p.id]=[p.x0,p.z0]);
 function applyPlotPos(){const P=(typeof S!=="undefined"&&S&&S.plotPos)||{};PLOTS.forEach(p=>{if(p.island)return;const v=P[p.id],d=PLOT_DEF[p.id];p.x0=v?v[0]:d[0];p.z0=v?v[1]:d[1]})}
-function inPlotArea(x,z,m=.6){return PLOTS.some(p=>!p.island&&x>p.x0-m&&x<p.x0+PN+m&&z>p.z0-m&&z<p.z0+PN+m)}
+function inPlotArea(x,z,m=.6){return PLOTS.some(p=>plotLive(p)&&x>p.x0-m&&x<p.x0+PN+m&&z>p.z0-m&&z<p.z0+PN+m)}
 let _LK="",_LC=null;
 function layout(){const key=S.size+"|"+(S.plots||[]).join(",")+"|"+JSON.stringify(S.plotPos||{})+"|"+JSON.stringify(S.fieldPos||0);if(key===_LK&&_LC)return _LC;applyPlotPos();applyFieldPos();
   const n=SIZES[S.size],L=[{x0:FX0,z0:FZ0,n,start:0}];let st=n*n;
@@ -819,11 +820,14 @@ function layout(){const key=S.size+"|"+(S.plots||[]).join(",")+"|"+JSON.stringif
 function tileXZ(i){const L=layout();for(const a of L){if(i<a.start+a.n*a.n){const j=i-a.start;return[a.x0+(j%a.n)+.5,a.z0+Math.floor(j/a.n)+.5]}}return[0,0]}
 function expectTiles(st){let n=SIZES[st.size]**2;(st.plots||[]).forEach(id=>{const p=PLOTS.find(q=>q.id===id);if(p)n+=(p.sz||PN)**2});return n}
 function nextPlot(){return PLOTS.find(p=>!p.island&&!(S.plots||[]).includes(p.id))}
-function buyPlot(){const p=nextPlot();if(!p)return;
+function fixNextPlot(){if(VISIT)return;const p=nextPlot();if(!p)return;applyPlotPos();if(!validPlot(p,p.x0,p.z0))return;const d=PLOT_DEF[p.id],C=[];
+  for(let x=-66;x<=8.5;x+=1)for(let z=-21;z<=42;z+=1)C.push([x,z,Math.hypot(x-d[0],z-d[1])]);C.sort((a,b)=>a[2]-b[2]);
+  for(const [x,z] of C){if(!validPlot(p,x,z)){S.plotPos=S.plotPos||{};S.plotPos[p.id]=[x,z];applyPlotPos();_LK="";save();buildField();return}}}
+function buyPlot(){const p=nextPlot();if(!p)return;fixNextPlot();
   if(S.lv<p.lv)return toast(p.n+" unlocks at Level "+p.lv+".");
   if(S.coins<p.cost)return toast("You need "+p.cost.toLocaleString()+" coins for "+p.n+".");
   S.coins-=p.cost;S.plots=(S.plots||[]).concat(p.id);for(let k=0;k<PN*PN;k++)S.tiles.push({k:"grass"});
-  hovered=null;save();buildField();ui();toast("You bought "+p.n+"! Head over there now.",2800);
+  hovered=null;save();buildField();ui();setTimeout(fixNextPlot,400);toast("You bought "+p.n+"! Head over there now.",2800);
   Object.assign(camT,{tx:p.x0+PN/2,ty:.6,tz:p.z0+PN/2,dist:20,pol:.9});cam.follow=false}
 let PLOTLABS=[];
 function plotDecor(b){
@@ -831,7 +835,7 @@ function plotDecor(b){
   PLOTS.forEach(p=>{const own=(S.plots||[]).includes(p.id),m=p.sz||PN,cx=p.x0+m/2,y=p.y||0;
     if(own){fence(b,p.x0-.2,p.z0-.2,p.x0+m+.2,p.z0+m+.2,(mx,mz,ei)=>p.island?(ei===3&&Math.abs(mz-p.z0-.5)<.6):(ei===0&&Math.abs(mx-cx)<.6),y);
       const s=labelSprite(p.n);s.position.set(cx,y+1.35,p.z0-.6);scene.add(s);PLOTLABS.push(s)}
-    else{[[0,0],[m,0],[0,m],[m,m]].forEach(([dx,dz])=>{b.add("cyl",0x9b6a3a,p.x0+dx,y+.35,p.z0+dz,.05,.7,.05);b.add("box",0xe8622a,p.x0+dx,y+.62,p.z0+dz,.05,.12,.3)});
+    else if(p.island||p===nextPlot()){[[0,0],[m,0],[0,m],[m,m]].forEach(([dx,dz])=>{b.add("cyl",0x9b6a3a,p.x0+dx,y+.35,p.z0+dz,.05,.7,.05);b.add("box",0xe8622a,p.x0+dx,y+.62,p.z0+dz,.05,.12,.3)});
       const s=labelSprite((p.island?"Secret Island for sale · ":"Empty · ")+p.cost.toLocaleString());s.position.set(cx,y+1.1,p.z0+m/2);scene.add(s);PLOTLABS.push(s)}})}
 /* -------- farm terrain shape, pens, snow, helpers -------- */
 const RIVER=[[12,-16.9],[12.3,-13],[11.4,-9],[11.2,-5],[11.6,-1],[11.1,3],[10.2,5.6],[9.4,6.5]];
@@ -2694,7 +2698,7 @@ const LAKEUP=[2000,4000];
 function expandLake(){const pl=(S.penLv||{}).pond|0;if(pl<PENUP.length)return expandHouse("pond","Lake");const ll=S.lakeLv|0;if(ll>=LAKEUP.length)return toast("The lake is already at its biggest.");const c=LAKEUP[ll];
   if(S.coins<c)return toast("You need "+c.toLocaleString()+" coins to expand the lake.");S.coins-=c;S.lakeLv=ll+1;toast("🌊 The lake got bigger!",2600);after();buildPenX();burst(PONDS.x,.4,PONDS.z,0x4fc3e8,26,.6)}
 function penSpaceBlock(L){const R=penRects(L);for(const id in R){const P=R[id];if(P.x0<-31.5)return"There's no more room to the west.";
-    for(const p of PLOTS){if(p.island)continue;const m=p.sz||PN;if(P.x0<p.x0+m+.3&&P.x1>p.x0-.3&&P.z0<p.z0+m+.3&&P.z1>p.z0-.3)return p.n+" is in the way. Move that land first (press and hold it)."}
+    for(const p of PLOTS){if(!plotLive(p))continue;const m=p.sz||PN;if(P.x0<p.x0+m+.3&&P.x1>p.x0-.3&&P.z0<p.z0+m+.3&&P.z1>p.z0-.3)return p.n+" is in the way. Move that land first (press and hold it)."}
     for(const o of S.builds||[]){const d=BUILDS.find(q=>q.id===o.id),r=(d?d.r:1.5)*.75;if(o.x>P.x0-r&&o.x<P.x1+r&&o.z>P.z0-r&&o.z<P.z1+r)return(d?d.n:"A building")+" is in the way. Move it first."}}return null}
 function expandSpace(k){S.penSz=S.penSz||{};const lv=S.penSz[k]|0,P=PENS[k];if(!P||lv>=PENSZ.length)return toast("This pen is already at its biggest.");const c=PENSZ[lv];
   if(S.coins<c)return toast("You need "+c.toLocaleString()+" coins to make the "+P.n+" bigger.");
@@ -2775,7 +2779,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="163";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
+const GAMEVER="164";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 /* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
 (function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
   document.addEventListener("touchstart",e=>{el=null;if(!ROT||e.touches.length!==1)return;el=scroller(e.target);if(el){const q=exy(e.touches[0]);lx=q.x;ly=q.y;mv=0}},{passive:true});
@@ -3232,7 +3236,7 @@ function buildMansionRoads(){while(ROADG.children.length)ROADG.remove(ROADG.chil
     if(z>-9.4&&z<-6.6&&x<-4){goal[k]=1}
     if(inAnyPen(x,z,1.1))c=-1;
     else if(L.some(a=>!(a.p&&a.p.island)&&x>a.x0-1.1&&x<a.x0+a.n+1.1&&z>a.z0-1.1&&z<a.z0+a.n+1.1))c=-1;
-    else if(PLOTS.some(q=>!q.island&&x>q.x0-1&&x<q.x0+(q.sz||PN)+1&&z>q.z0-1&&z<q.z0+(q.sz||PN)+1))c=-1;
+    else if(PLOTS.some(q=>plotLive(q)&&x>q.x0-1&&x<q.x0+(q.sz||PN)+1&&z>q.z0-1&&z<q.z0+(q.sz||PN)+1))c=-1;
     else if((S.builds||[]).some(o=>mansCell(o,x,z)===1))c=-1;
     else if((S.builds||[]).some(o=>mansCell(o,x,z)===2))c=.4;
     else if(blds.some(([bx,bz,r],bi)=>!MANS_MD[(S.builds||[])[bi].id]&&Math.hypot(x-bx,z-bz)<r))c=-1;
@@ -3296,7 +3300,7 @@ function validHill(id,x,z){const H=HILLS.find(q=>q.id===id),R=H.rad*hs(H)*1.3;if
   if(Math.abs(z+8)<R+1.4&&x<-3)return"That covers the road.";
   for(const [mx,mz,mr] of mtns(id))if(Math.hypot(x-mx,z-mz)<R+mr*1.1)return"Too close to another mountain.";
   for(const a of layout())if(!(a.p&&a.p.island)){const cx=Math.max(a.x0,Math.min(a.x0+a.n,x)),cz=Math.max(a.z0,Math.min(a.z0+a.n,z));if(Math.hypot(x-cx,z-cz)<R+.3)return a.p?"That covers "+a.p.n+".":"That covers the main field."}
-  for(const q of PLOTS){if(q.island)continue;const m=q.sz||PN,cx=Math.max(q.x0,Math.min(q.x0+m,x)),cz=Math.max(q.z0,Math.min(q.z0+m,z));if(Math.hypot(x-cx,z-cz)<R+.3)return"That covers "+q.n+"."}
+  for(const q of PLOTS){if(!plotLive(q))continue;const m=q.sz||PN,cx=Math.max(q.x0,Math.min(q.x0+m,x)),cz=Math.max(q.z0,Math.min(q.z0+m,z));if(Math.hypot(x-cx,z-cz)<R+.3)return"That covers "+q.n+"."}
   for(const k in PENS){const P=PENS[k],cx=Math.max(P.x0,Math.min(P.x1,x)),cz=Math.max(P.z0,Math.min(P.z1,z));if(Math.hypot(x-cx,z-cz)<R+.4)return"That covers the "+P.n+"."}
   for(const o of S.builds||[]){const d=BUILDS.find(q=>q.id===o.id);if(Math.hypot(x-o.x,z-o.z)<R+(d?d.r:1.5)*.75)return(d?d.n:"A building")+" is in the way."}
   for(const T of FTREES)if(Math.hypot(x-T.x,z-T.z)<R)return"A tree is in the way. Move it or chop it first.";
@@ -3309,7 +3313,7 @@ function validPlace(x,z,R0,skipT){const r=R0*.75;
   if(x<-68||x>16.5||z<-23||z>50)return false;if(farmH(x,z)<-.03)return false;
   for(const [mx,mz,mr] of mtns())if(Math.hypot(x-mx,z-mz)<mr*1.25+r)return false;
   for(const a of layout())if(!(a.p&&a.p.island)&&x>a.x0-r-.2&&x<a.x0+a.n+r+.2&&z>a.z0-r-.2&&z<a.z0+a.n+r+.2)return false;
-  for(const p of PLOTS)if(!p.island&&x>p.x0-r-.2&&x<p.x0+(p.sz||PN)+r+.2&&z>p.z0-r-.2&&z<p.z0+(p.sz||PN)+r+.2)return false;
+  for(const p of PLOTS)if(plotLive(p)&&x>p.x0-r-.2&&x<p.x0+(p.sz||PN)+r+.2&&z>p.z0-r-.2&&z<p.z0+(p.sz||PN)+r+.2)return false;
   if(inAnyPen(x,z,r+.2))return false;
   if(((x-POND.x)/(POND.rx+.8+r))**2+((z-POND.z)/(POND.rz+.8+r))**2<1||Math.hypot(x-12,z+17.5)<2.6+r)return false;
   for(let i=0;i<RIVER.length-1;i++)if(segDist(x,z,RIVER[i][0],RIVER[i][1],RIVER[i+1][0],RIVER[i+1][1])<r+.9)return false;
@@ -3338,7 +3342,7 @@ function validPlot(p,x0,z0){const N=PN,x1=x0+N,z1=z0+N;if(x0<-68||x1>16.5||z0<-2
 function validPen(id,x0,x1,z0,z1){if(x0<-68||x1>16.5||z0<-23||z1>50)return"Too close to the edge of the farm.";
   for(const k in PENS){if(k===id)continue;const Q=PENS[k];if(x0<Q.x1+.8&&x1>Q.x0-.8&&z0<Q.z1+.8&&z1>Q.z0-.8)return"That covers the "+Q.n+".";}
   for(const a of layout())if(!(a.p&&a.p.island)&&x0<a.x0+a.n+.4&&x1>a.x0-.4&&z0<a.z0+a.n+.4&&z1>a.z0-.4)return a.p?"That covers "+a.p.n+".":"That covers the main field.";
-  for(const q of PLOTS){if(q.island)continue;const m=q.sz||PN;if(x0<q.x0+m+.3&&x1>q.x0-.3&&z0<q.z0+m+.3&&z1>q.z0-.3)return"That covers "+q.n+" (land for sale).";}
+  for(const q of PLOTS){if(!plotLive(q))continue;const m=q.sz||PN;if(x0<q.x0+m+.3&&x1>q.x0-.3&&z0<q.z0+m+.3&&z1>q.z0-.3)return"That covers "+q.n+" (land for sale).";}
   if(z0<-6.4&&z1>-9.6&&x0<-3.5)return"That covers the road.";if(x0<6.4+barnOff()[0]&&x1>-2+barnOff()[0]&&z0<-6.2+barnOff()[1]&&z1>-11+barnOff()[1])return"That covers the barn.";if(x0<8.6&&x1>6.6&&z0<1.6&&z1>-3.2)return"Something is in the way.";
   for(let x=x0;x<=x1+.01;x+=.5)for(let z=z0;z<=z1+.01;z+=.5){if(farmH(x,z)<-.03)return"Can't put a pen on water.";for(const [mx,mz,mr] of mtns())if(Math.hypot(x-mx,z-mz)<mr*1.25)return"Too close to the mountain.";
     if(Math.hypot(x-CF.x,z-CF.z)<1.8)return"That covers the bonfire.";if(((x-POND.x)/(POND.rx+.8))**2+((z-POND.z)/(POND.rz+.8))**2<1)return"That covers the lake."}
@@ -3350,7 +3354,7 @@ function startPenMove(id){const P=PENS[id];if(!P)return;cancelPlace();const w=P.
 function applyBarnPos(){const [dx,dz]=barnOff();BARNG.position.set(dx,0,dz)}
 function validBarn(dx,dz){const x0=-2+dx,x1=6.4+dx,z0=-11+dz,z1=-6.2+dz;if(x0<-68||x1>16.5||z0<-23||z1>50)return"Too close to the edge of the farm.";
   for(const a of layout())if(!(a.p&&a.p.island)&&x0<a.x0+a.n+.3&&x1>a.x0-.3&&z0<a.z0+a.n+.3&&z1>a.z0-.3)return a.p?"That covers "+a.p.n+".":"That covers the main field.";
-  for(const q of PLOTS){if(q.island)continue;const m=q.sz||PN;if(x0<q.x0+m&&x1>q.x0&&z0<q.z0+m&&z1>q.z0)return"That covers "+q.n+".";}
+  for(const q of PLOTS){if(!plotLive(q))continue;const m=q.sz||PN;if(x0<q.x0+m&&x1>q.x0&&z0<q.z0+m&&z1>q.z0)return"That covers "+q.n+".";}
   for(const k in PENS){const P=PENS[k];if(x0<P.x1+.5&&x1>P.x0-.5&&z0<P.z1+.5&&z1>P.z0-.5)return"That covers the "+P.n+".";}
   if(z0<-6.6&&z1>-9.4&&x0<-3.5)return"That covers the road.";
   for(let x=x0;x<=x1+.01;x+=.6)for(let z=z0;z<=z1+.01;z+=.6){if(farmH(x,z)<-.03)return"Can't put the barn on water.";for(const [mx,mz,mr] of mtns())if(Math.hypot(x-mx,z-mz)<mr*1.2)return"Too close to the mountain.";if(Math.hypot(x-CF.x,z-CF.z)<1.8)return"That covers the bonfire.";if(((x-POND.x)/(POND.rx+.6))**2+((z-POND.z)/(POND.rz+.6))**2<1)return"That covers the lake."}
@@ -6990,7 +6994,7 @@ function loop(t){
 }
 function start(){
   makeIcons();resize();buildField();buildSnowLayers();scene.add(sun.target);normalizePens();applyBarnPos();initFarmer();initHelper();initCrew();renderBuilds();buildBoat();buildJeep();initFolk();shopUI(true);townUI(true);syncAnimals();ui();wxUI();helperUI();applyCam(1);
-  $("loading").hidden=true;setTimeout(perfInit,1500);{const sp=$("splash"),t0=window.__spT0||0,w=Math.max(0,2400-(performance.now()-t0));setTimeout(()=>{if(sp){sp.classList.add("out");setTimeout(()=>sp.remove(),700)}},w)}requestAnimationFrame(loop);setInterval(ui,1000);setInterval(()=>{invUI(false);townUI(false)},1000);invUI(true);initCloud();
+  $("loading").hidden=true;setTimeout(perfInit,1500);{const sp=$("splash"),t0=window.__spT0||0,w=Math.max(0,2400-(performance.now()-t0));setTimeout(()=>{if(sp){sp.classList.add("out");setTimeout(()=>sp.remove(),700)}},w)}requestAnimationFrame(loop);setTimeout(()=>{try{fixNextPlot()}catch(e){}},2000);setInterval(ui,1000);setInterval(()=>{invUI(false);townUI(false)},1000);invUI(true);initCloud();
 }
 window.claude?.hot?.ready?window.claude.hot.ready(start):start();
 })();
