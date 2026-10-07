@@ -427,6 +427,7 @@ body.land .sbtns .sb{font-size:.6rem!important;padding:3px 6px!important}
     <button class="btn" id="tIsle" style="display:none!important;background:#1f8fb8;box-shadow:0 4px 0 #136583">Go to the Island</button>
     <button class="btn" id="tCity" style="display:none!important;background:#3a4a6a;box-shadow:0 4px 0 #222c40">Go to MW City</button>
     <button class="btn" id="tCheat" hidden style="background:#2f7fb8;box-shadow:0 4px 0 #1d5a85">Test: +100,000 coins</button>
+    <button class="btn" id="tTestSrv" hidden style="background:#7a3fc0;box-shadow:0 4px 0 #52288a">🧪 Go to Test Server</button>
     <button class="btn" id="tWoodT" hidden style="background:#8a5a2a;box-shadow:0 4px 0 #5a3a1a">Test: +100,000 wood</button>
     <button class="btn" id="tLvl" hidden style="background:#2f7fb8;box-shadow:0 4px 0 #1d5a85">Test: Max farm</button>
   </div>
@@ -2843,7 +2844,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="188";const TESTSRV=/^test--/.test(location.hostname);
+const GAMEVER="189";const TESTSRV=/^test--/.test(location.hostname);
 if(TESTSRV){document.title="🧪 TEST · "+document.title;const tb=document.createElement("div");tb.id="testBar";tb.textContent="🧪 TEST SERVER · changes here don't touch your real farm";tb.style.cssText="position:fixed;left:50%;top:0;transform:translateX(-50%);z-index:9999;background:#7a3fc0;color:#fff;font:900 11px/1.2 sans-serif;padding:3px 10px;border-radius:0 0 10px 10px;pointer-events:none;letter-spacing:.3px";document.addEventListener("DOMContentLoaded",()=>document.body.appendChild(tb));if(document.body)document.body.appendChild(tb)}let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 /* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
 (function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
@@ -2888,6 +2889,7 @@ $("tCity").onclick=()=>{if(onCity)goView("all");else enterCity()};
 $("tIsle").onclick=()=>{if(ownBoat())startTrip();else if(onIsle)goView("all");else enterIsland()};
 $("tWoodT").onclick=e=>{S.woodBank=(S.woodBank|0)+100000;const r=e.currentTarget.getBoundingClientRect();floatText("+100,000 wood",r.left+r.width/2,r.top);save();ui();invUI(true)};
 $("tCheat").onclick=e=>{S.coins+=100000;const r=e.currentTarget.getBoundingClientRect();floatText("+100,000",r.left+r.width/2,r.top);save();ui()};
+$("tTestSrv").onclick=()=>openTestServer();
 $("tLvl").onclick=()=>{if(VISIT)return;if(S.lv<20){S.lv=20;S.xp=0}
   while(S.size<SIZES.length-1){const nx=S.size+1;S.coins+=EXPAND[nx];expand()}S.helpers=HMAX;S.hspd=3;S.lakeLv=LAKEUP.length;
   fixSalePlots();salePlots().forEach(p=>{S.plots=(S.plots||[]).concat(p.id);for(let k=0;k<PN*PN;k++)S.tiles.push({k:"grass"})});
@@ -6605,10 +6607,16 @@ const B64U={enc:u8=>{let s="";for(let i=0;i<u8.length;i+=8192)s+=String.fromChar
   dec:t=>{t=t.replace(/-/g,"+").replace(/_/g,"/");while(t.length%4)t+="=";const b=atob(t),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u}};
 async function zipStr(str){if(typeof CompressionStream==="undefined")return "j"+B64U.enc(new TextEncoder().encode(str));const s=new Blob([str]).stream().pipeThrough(new CompressionStream("deflate-raw"));return "z"+B64U.enc(new Uint8Array(await new Response(s).arrayBuffer()))}
 async function unzipStr(t){const k=t[0],u=B64U.dec(t.slice(1));if(k==="j")return new TextDecoder().decode(u);const s=new Blob([u]).stream().pipeThrough(new DecompressionStream("deflate-raw"));return await new Response(s).text()}
+let EXPORT_TEST=false;
 async function exportLink(){const u0=myUser()||"",a=(u0?accts()[u0]:(typeof CLOUD!=="undefined"&&(CLOUD.profile||CLOUD.local)))||{},uu=($("exU").value||"").trim().toLowerCase();
   $("exErr").textContent=uu&&!/^[a-z0-9_]{3,20}$/.test(uu)?"Use 3 to 20 letters, numbers or _ (no spaces).":"";
   const pay={v:1,farm:a.farm||"",farmer:a.farmer||"",shirt:a.shirt|0,u:/^[a-z0-9_]{3,20}$/.test(uu)?uu:u0,state:snapState()};
-  const link="https://farming-ph.netlify.app/#farm="+await zipStr(JSON.stringify(pay));$("exGo").href=link;$("exLink").value=link}
+  const link=(EXPORT_TEST?"https://test--farming-ph.netlify.app":"https://farming-ph.netlify.app")+"/#farm="+await zipStr(JSON.stringify(pay));$("exGo").href=link;$("exLink").value=link}
+async function openTestServer(){if(API&&!/^test--/.test(location.hostname)&&!myUser()){location.href="https://test--farming-ph.netlify.app/";return}EXPORT_TEST=true;await openExport();
+  const m=$("exM"),ld=m.querySelector(".suLead");if(!m._orig)m._orig=[m.querySelector("h3").textContent,$("exGo").textContent,ld.innerHTML];
+  m.querySelector("h3").textContent="🧪 Move this farm to the Test Server";$("exGo").textContent="🧪 Open my farm on the Test Server";
+  ld.innerHTML="This copies your farm to the <b>Test Server</b> (test--farming-ph.netlify.app). Anything you do there won't change your real farm. Make a username and password there to keep the test copy."}
+function exportReset(){EXPORT_TEST=false;const m=$("exM");if(m&&m._orig){m.querySelector("h3").textContent=m._orig[0];$("exGo").textContent=m._orig[1];m.querySelector(".suLead").innerHTML=m._orig[2]}}
 async function openExport(){const u=myUser()||"";const a=(u?accts()[u]:(typeof CLOUD!=="undefined"&&(CLOUD.profile||CLOUD.local)))||{};save();
   if(!$("exU").value)$("exU").value=(u||String(a.farm||"").toLowerCase().replace(/[^a-z0-9_]+/g,"").slice(0,20));$("exU").oninput=()=>{clearTimeout(exportLink._t);exportLink._t=setTimeout(exportLink,250)};await exportLink();
   $("exInfo").textContent="🌾 "+(a.farm||"Your farm")+" · Level "+S.lv+" · "+Math.floor(S.coins).toLocaleString()+" coins · "+S.pens.length+" animals";$("exM").hidden=false}
@@ -6686,10 +6694,10 @@ async function adoptAccount(d,pw,tok){const u=d.u,A=accts(),salt=Math.random().t
 $("trBtn").onclick=async()=>{if(!API)return toast("Moving your farm works in the Farming app at farming-ph.netlify.app.",3200);if(!myUser())return;$("trM").hidden=false;$("trErr").textContent="";$("trCode").textContent="…";
   try{save();await netSend(true);const d=await postJ("transfer/start",{u:myUser(),tok:myTok()});$("trCode").textContent=d.code.slice(0,4)+"-"+d.code.slice(4)}catch(e){$("trErr").textContent=e.message;$("trCode").textContent="—"}};
 $("syncOnBtn").onclick=()=>{if(!API)return toast("Sync works in the Farming app at farming-ph.netlify.app.",3200);if(!myUser())return;$("syM").hidden=false;$("syErr").textContent="";$("syDone").hidden=true;$("syForm").hidden=false;$("syU").textContent=myUser();setTimeout(()=>$("syPw").focus(),50)};
-$("pwBtn").onclick=()=>{if(!API)return openExport();const u=myUser();if(!u)return;$("pwM").hidden=false;$("pwErr").textContent="";$("pwDone").hidden=true;$("pwForm").hidden=false;$("pwU").textContent=u;$("pwU2").textContent=u;["pwN","pwN2"].forEach(k=>$(k).value="");setTimeout(()=>$("pwN").focus(),50)};
+$("pwBtn").onclick=()=>{if(!API){exportReset();return openExport()}const u=myUser();if(!u)return;$("pwM").hidden=false;$("pwErr").textContent="";$("pwDone").hidden=true;$("pwForm").hidden=false;$("pwU").textContent=u;$("pwU2").textContent=u;["pwN","pwN2"].forEach(k=>$(k).value="");setTimeout(()=>$("pwN").focus(),50)};
 $("pwShow").onchange=()=>{const t=$("pwShow").checked?"text":"password";$("pwN").type=t;$("pwN2").type=t};
 $("pwClose").onclick=()=>{$("pwM").hidden=true};
-$("exClose").onclick=()=>{$("exM").hidden=true};$("exCopy").onclick=async()=>{const t=$("exLink");t.select();let ok=false;try{await navigator.clipboard.writeText(t.value);ok=true}catch(e){try{ok=document.execCommand("copy")}catch(e2){}}toast(ok?"Link copied. Paste it in your browser.":"Press and hold the link to copy it.",2600)};
+$("exClose").onclick=()=>{$("exM").hidden=true;exportReset()};$("exCopy").onclick=async()=>{const t=$("exLink");t.select();let ok=false;try{await navigator.clipboard.writeText(t.value);ok=true}catch(e){try{ok=document.execCommand("copy")}catch(e2){}}toast(ok?"Link copied. Paste it in your browser.":"Press and hold the link to copy it.",2600)};
 $("pwGo").onclick=async()=>{const u=myUser(),p=$("pwN").value,p2=$("pwN2").value;$("pwErr").textContent="";
   if(p.length<4)return $("pwErr").textContent="Use at least 4 letters or numbers.";if(p!==p2)return $("pwErr").textContent="The two passwords don't match.";
   $("pwGo").disabled=true;try{await netSend(true);if(NET.taken)throw new Error("This device isn't linked to the farm online. Log out and log in again with your old password, then try again.");
@@ -6709,7 +6717,7 @@ async function initCloud(){
   if(!window.claude||!window.claude.use){$("lbHead").hidden=true;$("lbPanel").hidden=true;localAuthStart();return}
   let db=null,user=null;
   try{[db,user]=await Promise.all([window.claude?.use?.("db"),window.claude?.use?.("user")])}catch(e){}
-  if(user){try{if(await user.isOwner())["tCheat","tWoodT","tLvl"].forEach(k=>{$(k).hidden=false})}catch(e){}}
+  if(user){try{if(await user.isOwner())["tCheat","tWoodT","tLvl","tTestSrv"].forEach(k=>{$(k).hidden=false})}catch(e){}}
   if(!db||!user){$("acctSave").textContent="Saved on this device";$("lbHint").textContent="Sign in to Claude to see other farmers";noBoard();localAuthStart();return}
   const id=await user.id();if(!id){$("acctSave").textContent="Saved on this device";$("lbHint").textContent="Sign in to Claude to see other farmers";noBoard();localAuthStart();return}
   CLOUD.db=db;CLOUD.user=user;CLOUD.id=id;
