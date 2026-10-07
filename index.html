@@ -2844,8 +2844,9 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="189";const TESTSRV=/^test--/.test(location.hostname);
-if(TESTSRV){document.title="🧪 TEST · "+document.title;const tb=document.createElement("div");tb.id="testBar";tb.textContent="🧪 TEST SERVER · changes here don't touch your real farm";tb.style.cssText="position:fixed;left:50%;top:0;transform:translateX(-50%);z-index:9999;background:#7a3fc0;color:#fff;font:900 11px/1.2 sans-serif;padding:3px 10px;border-radius:0 0 10px 10px;pointer-events:none;letter-spacing:.3px";document.addEventListener("DOMContentLoaded",()=>document.body.appendChild(tb));if(document.body)document.body.appendChild(tb)}let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
+const MIRROR_TEST=false,MAIN_ART="https://claude.ai/artifact/UyPMu4gvJm8nFYiZ8snZbo",TEST_ART="https://claude.ai/artifact/FXF22kREKnNuiM4FxwxmGY";
+const GAMEVER="190";const TESTSRV=/^test--/.test(location.hostname)||MIRROR_TEST;
+if(TESTSRV){document.title="🧪 TEST · "+document.title;const tb=document.createElement("div");tb.id="testBar";tb.textContent=MIRROR_TEST?"🧪 TEST SERVER · a copy of your farm · changes here don't touch your real farm":"🧪 TEST SERVER · changes here don't touch your real farm";tb.style.cssText="position:fixed;left:50%;top:0;transform:translateX(-50%);z-index:9999;background:#7a3fc0;color:#fff;font:900 11px/1.2 sans-serif;padding:3px 10px;border-radius:0 0 10px 10px;pointer-events:none;letter-spacing:.3px";document.addEventListener("DOMContentLoaded",()=>document.body.appendChild(tb));if(document.body)document.body.appendChild(tb)}let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 /* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
 (function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
   document.addEventListener("touchstart",e=>{el=null;if(!ROT||e.touches.length!==1)return;el=scroller(e.target);if(el){const q=exy(e.touches[0]);lx=q.x;ly=q.y;mv=0}},{passive:true});
@@ -2889,7 +2890,7 @@ $("tCity").onclick=()=>{if(onCity)goView("all");else enterCity()};
 $("tIsle").onclick=()=>{if(ownBoat())startTrip();else if(onIsle)goView("all");else enterIsland()};
 $("tWoodT").onclick=e=>{S.woodBank=(S.woodBank|0)+100000;const r=e.currentTarget.getBoundingClientRect();floatText("+100,000 wood",r.left+r.width/2,r.top);save();ui();invUI(true)};
 $("tCheat").onclick=e=>{S.coins+=100000;const r=e.currentTarget.getBoundingClientRect();floatText("+100,000",r.left+r.width/2,r.top);save();ui()};
-$("tTestSrv").onclick=()=>openTestServer();
+$("tTestSrv").onclick=()=>openTestServer();if(MIRROR_TEST)$("tTestSrv").textContent="⬅ Back to my real farm";
 $("tLvl").onclick=()=>{if(VISIT)return;if(S.lv<20){S.lv=20;S.xp=0}
   while(S.size<SIZES.length-1){const nx=S.size+1;S.coins+=EXPAND[nx];expand()}S.helpers=HMAX;S.hspd=3;S.lakeLv=LAKEUP.length;
   fixSalePlots();salePlots().forEach(p=>{S.plots=(S.plots||[]).concat(p.id);for(let k=0;k<PN*PN;k++)S.tiles.push({k:"grass"})});
@@ -6612,7 +6613,8 @@ async function exportLink(){const u0=myUser()||"",a=(u0?accts()[u0]:(typeof CLOU
   $("exErr").textContent=uu&&!/^[a-z0-9_]{3,20}$/.test(uu)?"Use 3 to 20 letters, numbers or _ (no spaces).":"";
   const pay={v:1,farm:a.farm||"",farmer:a.farmer||"",shirt:a.shirt|0,u:/^[a-z0-9_]{3,20}$/.test(uu)?uu:u0,state:snapState()};
   const link=(EXPORT_TEST?"https://test--farming-ph.netlify.app":"https://farming-ph.netlify.app")+"/#farm="+await zipStr(JSON.stringify(pay));$("exGo").href=link;$("exLink").value=link}
-async function openTestServer(){if(API&&!/^test--/.test(location.hostname)&&!myUser()){location.href="https://test--farming-ph.netlify.app/";return}EXPORT_TEST=true;await openExport();
+function openLink(u){const a=document.createElement("a");a.href=u;a.target="_blank";a.rel="noopener";document.body.appendChild(a);a.click();a.remove()}
+async function openTestServer(){if(!API||MIRROR_TEST){if(MIRROR_TEST)return openLink(MAIN_ART);if(/^https:/.test(TEST_ART))return openLink(TEST_ART);return toast("The test server isn't ready yet.")}if(API&&!/^test--/.test(location.hostname)&&!myUser()){location.href="https://test--farming-ph.netlify.app/";return}EXPORT_TEST=true;await openExport();
   const m=$("exM"),ld=m.querySelector(".suLead");if(!m._orig)m._orig=[m.querySelector("h3").textContent,$("exGo").textContent,ld.innerHTML];
   m.querySelector("h3").textContent="🧪 Move this farm to the Test Server";$("exGo").textContent="🧪 Open my farm on the Test Server";
   ld.innerHTML="This copies your farm to the <b>Test Server</b> (test--farming-ph.netlify.app). Anything you do there won't change your real farm. Make a username and password there to keep the test copy."}
