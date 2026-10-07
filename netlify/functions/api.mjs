@@ -18,7 +18,7 @@ const addTh = (m, th) => { const L = [th, ...((m && m.ths) || (m && m.th ? [m.th
 const pub = m => ({ u: m.u, farm: m.farm, farmer: m.farmer, shirt: m.shirt, lv: m.lv, size: m.size, seen: m.seen, ...(m.app ? { app: 1 } : {}) });
 
 // a restart time shipped with a deploy: open games reload once after it
-const DEPLOY_RESTART = 1791335989635;
+const DEPLOY_RESTART = 1791336373812;
 export default async (req) => {
   const url = new URL(req.url);
   const path = url.pathname.replace(/^.*?\/api\/?/, "").replace(/^\.netlify\/functions\/api\/?/, "").replace(/\/$/, "");
@@ -142,6 +142,12 @@ export default async (req) => {
       if (!m || typeof b.tok !== "string" || !thOk(m, await sha(b.tok))) return J({ error: "not yours" }, 403);
       const ps = crypto.randomUUID(); await meta.setJSON(u, { ...m, ps, ph: await sha(ps + ":" + pw) });
       return J({ ok: true });
+    }
+    if (req.method === "POST" && path === "avail") {
+      let b; try { b = await req.json() } catch { return J({ error: "bad json" }, 400) }
+      const u = norm(b.u); if (u.length < 3) return J({ ok: false });
+      const m = await meta.get(u, { type: "json" });
+      return J({ ok: !m });
     }
     if (req.method === "POST" && path === "setlh") {
       let b; try { b = await req.json() } catch { return J({ error: "bad json" }, 400) }

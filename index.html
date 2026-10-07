@@ -560,10 +560,13 @@ body.land .sbtns .sb{font-size:.6rem!important;padding:3px 6px!important}
     <p class="suLead" style="margin-top:8px;font-size:.8rem">You can also email us directly at <b>farmgaming.ph@gmail.com</b>.</p></div>
 </div>
 <div class="modal" id="exM" hidden>
-  <div class="suBox"><h3>📲 Move this farm to the Farming website</h3>
-    <p class="suLead">This farm is saved only in this Claude page. Tap the green button to open it on <b>farming-ph.netlify.app</b>. There you make your <b>username and password</b>, then log in with them on your phone.</p>
+  <div class="suBox"><h3>🔑 Set a username &amp; password</h3>
+    <p class="suLead">This farm is saved only in this Claude page. To log in on your phone and show up in the game's player list, give it a username and password on <b>farming-ph.netlify.app</b>:</p>
     <p class="suLead" id="exInfo" style="font-weight:800"></p>
-    <a class="btn" id="exGo" target="_blank" rel="noopener" href="#" style="text-align:center;text-decoration:none">🌾 Open my farm on the website</a>
+    <label for="exU" style="display:block">1. Pick a username (letters, numbers or _)</label><input id="exU" maxlength="20" autocomplete="off" style="display:block;width:100%;box-sizing:border-box" placeholder="e.g. godsfarm">
+    <p class="err" id="exErr" role="alert"></p>
+    <p class="suLead" style="margin:4px 0 2px"><b>2.</b> Tap the green button. The website opens with this farm and your username filled in.<br><b>3.</b> Type your new password twice there and tap <b>Create account</b>.<br><b>4.</b> On your phone, open Farming, tap <b>Log in</b>, and use that username and password.</p>
+    <a class="btn" id="exGo" target="_blank" rel="noopener" href="#" style="text-align:center;text-decoration:none">🌾 Open my farm and set my password</a>
     <label for="exLink" style="display:block;margin-top:6px">If the button doesn't open, copy this link and open it in your browser:</label>
     <textarea id="exLink" readonly rows="3" style="width:100%;box-sizing:border-box;font-size:.7rem;border:3px solid #e2c99a;border-radius:10px;padding:6px"></textarea>
     <div class="suRow"><button class="btn alt" type="button" id="exClose">Close</button><button class="btn alt" type="button" id="exCopy">Copy link</button></div></div>
@@ -2779,7 +2782,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="164";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
+const GAMEVER="165";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 /* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
 (function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
   document.addEventListener("touchstart",e=>{el=null;if(!ROT||e.touches.length!==1)return;el=scroller(e.target);if(el){const q=exy(e.touches[0]);lx=q.x;ly=q.y;mv=0}},{passive:true});
@@ -6494,8 +6497,12 @@ const B64U={enc:u8=>{let s="";for(let i=0;i<u8.length;i+=8192)s+=String.fromChar
   dec:t=>{t=t.replace(/-/g,"+").replace(/_/g,"/");while(t.length%4)t+="=";const b=atob(t),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u}};
 async function zipStr(str){if(typeof CompressionStream==="undefined")return "j"+B64U.enc(new TextEncoder().encode(str));const s=new Blob([str]).stream().pipeThrough(new CompressionStream("deflate-raw"));return "z"+B64U.enc(new Uint8Array(await new Response(s).arrayBuffer()))}
 async function unzipStr(t){const k=t[0],u=B64U.dec(t.slice(1));if(k==="j")return new TextDecoder().decode(u);const s=new Blob([u]).stream().pipeThrough(new DecompressionStream("deflate-raw"));return await new Response(s).text()}
-async function openExport(){const u=myUser()||"";const a=(u?accts()[u]:(typeof CLOUD!=="undefined"&&(CLOUD.profile||CLOUD.local)))||{};save();const pay={v:1,farm:a.farm||"",farmer:a.farmer||"",shirt:a.shirt|0,u,state:snapState()};
-  const link="https://farming-ph.netlify.app/#farm="+await zipStr(JSON.stringify(pay));$("exGo").href=link;$("exLink").value=link;
+async function exportLink(){const u0=myUser()||"",a=(u0?accts()[u0]:(typeof CLOUD!=="undefined"&&(CLOUD.profile||CLOUD.local)))||{},uu=($("exU").value||"").trim().toLowerCase();
+  $("exErr").textContent=uu&&!/^[a-z0-9_]{3,20}$/.test(uu)?"Use 3 to 20 letters, numbers or _ (no spaces).":"";
+  const pay={v:1,farm:a.farm||"",farmer:a.farmer||"",shirt:a.shirt|0,u:/^[a-z0-9_]{3,20}$/.test(uu)?uu:u0,state:snapState()};
+  const link="https://farming-ph.netlify.app/#farm="+await zipStr(JSON.stringify(pay));$("exGo").href=link;$("exLink").value=link}
+async function openExport(){const u=myUser()||"";const a=(u?accts()[u]:(typeof CLOUD!=="undefined"&&(CLOUD.profile||CLOUD.local)))||{};save();
+  if(!$("exU").value)$("exU").value=(u||String(a.farm||"").toLowerCase().replace(/[^a-z0-9_]+/g,"").slice(0,20));$("exU").oninput=()=>{clearTimeout(exportLink._t);exportLink._t=setTimeout(exportLink,250)};await exportLink();
   $("exInfo").textContent="🌾 "+(a.farm||"Your farm")+" · Level "+S.lv+" · "+Math.floor(S.coins).toLocaleString()+" coins · "+S.pens.length+" animals";$("exM").hidden=false}
 async function takeImport(){const h=location.hash||"";if(!h.startsWith("#farm="))return false;try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}
   try{const d=JSON.parse(await unzipStr(h.slice(6)));if(!d||!d.state)throw 0;d.at=Date.now();localStorage.setItem("farming-import",JSON.stringify(d));return d}catch(e){toast("That farm link is broken. Copy the whole link and try again.",4000);return false}}
@@ -6524,6 +6531,7 @@ async function localAuthStart(){$("lbHead").hidden=true;$("lbPanel").hidden=true
     if(p1!==p2)return $("auErr").textContent="The two passwords don't match.";
     if(!farm||!name)return $("auErr").textContent="Enter a farm name and your farmer name.";
     const all=accts();if(all[u])return $("auErr").textContent="That username is already taken on this device. Choose another or log in.";
+    if(API){try{const r=await postJ("avail",{u});if(r&&r.ok===false)return $("auErr").textContent="That username is already used by another farm. Choose another, or tap Log in if it's yours.";}catch(e){}}
     const salt=Math.random().toString(36).slice(2)+Date.now().toString(36);all[u]={salt,hash:await hashPw(p1,salt),farm,farmer:name,shirt:SU_SHIRT,created:Date.now()};saveAccts(all);
     if($("auImport").checked&&!$("auImportRow").hidden){const o=oldSave();if(o)try{localStorage.setItem("farming-save-"+u,JSON.stringify(o));localStorage.removeItem("farming-import")}catch(e){}}
     ["auPw","auPw2"].forEach(k=>$(k).value="");loginLocal(u);toast(farm+" is ready! Start planting.",3200);setTimeout(()=>linkPw(u,p1),2500);
@@ -6539,7 +6547,7 @@ async function localAuthStart(){$("lbHead").hidden=true;$("lbPanel").hidden=true
 
 /* ---- email verification and account recovery ---- */
 const postJ=async(path,body)=>{const r=await fetch(API+path,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});let d={};try{d=await r.json()}catch(e){}if(!r.ok)throw new Error(d.error||"Something went wrong. Try again.");return d};
-function emailStateUI(){const a=myUser()&&accts()[myUser()],el=$("emailState");{const pu=$("pwUser");if(pu)pu.textContent=API&&myUser()?"Username: "+myUser():"";const pb=$("pwBtn");if(pb&&!API)pb.textContent="📲 Move this farm to the website for phone login"}if(el)el.textContent=a&&a.email?(a.emailOk?"✅ "+a.email:"⏳ "+a.email+" (not verified)"):"No email yet"}
+function emailStateUI(){const a=myUser()&&accts()[myUser()],el=$("emailState");{const pu=$("pwUser");if(pu)pu.textContent=API&&myUser()?"Username: "+myUser():"";const pb=$("pwBtn");if(pb&&!API)pb.textContent="🔑 Set password for phone login"}if(el)el.textContent=a&&a.email?(a.emailOk?"✅ "+a.email:"⏳ "+a.email+" (not verified)"):"No email yet"}
 function openEmail(prefill,auto){if(!API)return toast("Email works in the Farming app at farming-ph.netlify.app.",3200);if(!myUser())return;const a=accts()[myUser()]||{};
   $("emailM").hidden=false;$("emErr").textContent="";$("emStep1").hidden=false;$("emStep2").hidden=true;$("emAddr").value=prefill||a.email||"";if(auto&&prefill)$("emSend").click()}
 async function emSend(){const email=$("emAddr").value.trim().toLowerCase();$("emErr").textContent="";if(!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(email))return $("emErr").textContent="Type a valid email.";
