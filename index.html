@@ -805,6 +805,8 @@ function addOutline(m,mat){const o=new THREE.Mesh(m.geometry,mat||OUT);o.userDat
 const _m=new THREE.Matrix4(),_q=new THREE.Quaternion(),_e=new THREE.Euler(),_v=new THREE.Vector3(),_s=new THREE.Vector3(),_n=new THREE.Matrix3(),_c=new THREE.Color();
 class Builder{
   constructor(){this.p=[];this.n=[];this.c=[]}
+  addM(g,col,M){const geo=BASE[g],P=geo.attributes.position,N=geo.attributes.normal,nm=new THREE.Matrix3().getNormalMatrix(M),cc=new THREE.Color(col),a=new THREE.Vector3(),b=new THREE.Vector3();
+    for(let i=0;i<P.count;i++){a.fromBufferAttribute(P,i).applyMatrix4(M);b.fromBufferAttribute(N,i).applyMatrix3(nm).normalize();this.p.push(a.x,a.y,a.z);this.n.push(b.x,b.y,b.z);this.c.push(cc.r,cc.g,cc.b)}return this}
   add(g,col,x,y,z,sx,sy,sz,rx=0,ry=0,rz=0,order){
     const geo=BASE[g];_e.set(rx,ry,rz,order||"XYZ");_q.setFromEuler(_e);_m.compose(_v.set(x,y,z),_q,_s.set(sx,sy,sz));_n.getNormalMatrix(_m);
     const P=geo.attributes.position,N=geo.attributes.normal;_c.set(col);
@@ -823,7 +825,7 @@ const mix=(a,b,t)=>_ca.set(a).lerp(_cb.set(b),Math.max(0,Math.min(1,t))).getHex(
 const PN=8;
 const IX_=80,IZ_=4;const CX=180,CZ=4,CHX=32,CHZ=26;
 const PLOTS=[{id:"isla",n:"Secret Island",x0:IX_-.5,z0:IZ_+31,sz:6,y:1.2,island:true,cost:100000,lv:3},{id:"timog",n:"South Land",x0:-4,z0:12,cost:1500,lv:4},{id:"kanluran",n:"West Land",x0:-17,z0:10,cost:4000,lv:6},{id:"malayo",n:"Far Land",x0:-26.5,z0:10,cost:8000,lv:8},{id:"lambak",n:"Valley Land",x0:-4,z0:21,cost:15000,lv:9},{id:"burol",n:"Hill Land",x0:-17,z0:21,cost:25000,lv:10},{id:"parang",n:"Meadow Land",x0:-26.5,z0:21,cost:40000,lv:11},{id:"ilog",n:"Riverside Land",x0:-4,z0:30,cost:60000,lv:12},{id:"gubat",n:"Forest Land",x0:-17,z0:30,cost:85000,lv:13},{id:"bukal",n:"Spring Land",x0:-26.5,z0:30,cost:120000,lv:14},{id:"talampas",n:"Plateau Land",x0:-36,z0:10,cost:160000,lv:15},{id:"dulo",n:"Edge Land",x0:-36,z0:21,cost:220000,lv:16}];
-function plotLive(q){if(q.island)return false;try{const own=S.plots||[];return own.includes(q.id)||q===nextPlot()}catch(e){return true}}
+function plotLive(q){if(q.island)return false;try{return(S.plots||[]).includes(q.id)}catch(e){return true}}
 const PLOT_DEF={};PLOTS.forEach(p=>PLOT_DEF[p.id]=[p.x0,p.z0]);
 function applyPlotPos(){const P=(typeof S!=="undefined"&&S&&S.plotPos)||{};PLOTS.forEach(p=>{if(p.island)return;const v=P[p.id],d=PLOT_DEF[p.id];p.x0=v?v[0]:d[0];p.z0=v?v[1]:d[1]})}
 function inPlotArea(x,z,m=.6){return PLOTS.some(p=>plotLive(p)&&x>p.x0-m&&x<p.x0+PN+m&&z>p.z0-m&&z<p.z0+PN+m)}
@@ -893,7 +895,14 @@ function houseGrow(id,HL){const lv=((HL||(S&&S.penLv)||{})[id])|0;return Math.ma
 function penRects(L,PP,HL){PP=PP||(S&&S.penPos)||{};const g=id=>penSz(id,L)*PENGROW+houseGrow(id,HL),cm=[0,0,0];for(const id in PENS0)if(!PP[id])cm[PENCOL[id]]=Math.max(cm[PENCOL[id]],g(id));
   const sh=[0,cm[0],cm[0]+cm[1]],out={};for(const id in PENS0){const B=PENS0[id],q=PP[id];
     if(q){out[id]={x0:q[0]-(B.x1-B.x0)-g(id),x1:q[0],z0:q[1],z1:q[1]+(B.z1-B.z0)};continue}
-    const d=sh[PENCOL[id]];out[id]={x0:B.x0-d-g(id),x1:B.x1-d,z0:B.z0,z1:B.z1}}return out}
+    const d=sh[PENCOL[id]];out[id]={x0:B.x0-d-g(id),x1:B.x1-d,z0:B.z0,z1:B.z1}}
+  for(const id in out)if(penRot(id)&1){const P=out[id],cx=(P.x0+P.x1)/2,cz=(P.z0+P.z1)/2,hw=(P.z1-P.z0)/2,hd=(P.x1-P.x0)/2;out[id]={x0:cx-hw,x1:cx+hw,z0:cz-hd,z1:cz+hd}}return out}
+function penRot(id){return((S&&S.penRot)||{})[id]|0}
+function penU(id,P){if(!(penRot(id)&1))return P;const cx=(P.x0+P.x1)/2,cz=(P.z0+P.z1)/2,hw=(P.z1-P.z0)/2,hd=(P.x1-P.x0)/2;return{...P,x0:cx-hw,x1:cx+hw,z0:cz-hd,z1:cz+hd}}
+const _RW=new THREE.Matrix4(),_RT=new THREE.Matrix4(),_RM=new THREE.Matrix4(),_RQ=new THREE.Quaternion(),_RE=new THREE.Euler(),_RV=new THREE.Vector3(),_RS=new THREE.Vector3();
+function penW(id,P){const r=penRot(id);if(!r)return null;const cx=(P.x0+P.x1)/2,cz=(P.z0+P.z1)/2,M=new THREE.Matrix4().makeTranslation(cx,0,cz);M.multiply(_RT.makeRotationY(-r*Math.PI/2));M.multiply(new THREE.Matrix4().makeTranslation(-cx,0,-cz));return M}
+function rotB(B,W){if(!W)return B;return{add(g,col,x,y,z,sx,sy,sz,rx=0,ry=0,rz=0){_RE.set(rx,ry,rz);_RQ.setFromEuler(_RE);_RM.compose(_RV.set(x,y,z),_RQ,_RS.set(sx,sy,sz));_RM.premultiply(W);B.addM(g,col,_RM);return this},addM(g,col,M){B.addM(g,col,M.clone().premultiply(W));return this}}}
+function rotP(v,W){if(W)v.applyMatrix4(W);return v}
 function applyPenLayout(){const R=penRects();for(const id in R)Object.assign(PENS[id],R[id])}
 function inAnyPen(x,z,m=.3){for(const k in PENS){const p=PENS[k];if(x>p.x0-m&&x<p.x1+m&&z>p.z0-m&&z<p.z1+m)return true}return false}
 const SNOWB=new Builder();
@@ -926,11 +935,11 @@ const STALLS=null;
 function shelterSpot(o,i){const z=o.g.userData.zone,id=o.id;
   if(z==="pond")return[11.4+(Math.random()-.5)*.3,10.45,true];
   if(z==="farm"){const [bx,bz]=barnOff();return[.5+bx+(Math.random()-.5)*.6,-6.75+bz,true]}
-  const P=PENS[id]||PENS.kambing,midz=(P.z0+P.z1)/2;
-  if(id==="manok")return[P.x0+1.55,midz+(Math.random()-.5)*.3,true];
+  const P0=PENS[id]||PENS.kambing,P=penU(PENS[id]?id:"kambing",P0),W=penW(PENS[id]?id:"kambing",P0),midz=(P.z0+P.z1)/2,T=(x,z,h)=>{if(!W)return[x,z,h];const v=new THREE.Vector3(x,0,z).applyMatrix4(W);return[v.x,v.z,h]};
+  if(id==="manok")return T(P.x0+1.55,midz+(Math.random()-.5)*.3,true);
   let k=0;for(let j=0;j<i;j++){const q=animalObjs[j];if(q&&q.id===id)k++}
   const dep=P.z1-P.z0-1.1,rows=Math.max(2,Math.floor(dep/1.0)+1),col=k%2,row=Math.floor(k/2)%rows;
-  return[P.x0+.6+col*.75,P.z0+.55+row*(dep/(rows-1)),false]}
+  return T(P.x0+.6+col*.75,P.z0+.55+row*(dep/(rows-1)),false)}
 
 /* -------- ground & landscape -------- */
 const world=new THREE.Group();scene.add(world);
@@ -1337,10 +1346,10 @@ function buildFences(){
   const b=new Builder(),n=SIZES[S.size];
   fence(b,FX0-.2,FZ0-.2,FX0+n+.2,FZ0+n+.2,(mx,mz,ei)=>(ei===3&&mz>.0&&mz<1.1)||(ei===0&&mx>.0&&mx<1.1)||(ei===1&&Math.abs(mz)<.6)||(ei===2&&mx>0&&mx<1.1));
   plotDecor(b);
-  applyPenLayout();const pk=JSON.stringify([S.penSz||{},S.penPos||{},S.penLv||{}]);
+  applyPenLayout();const pk=JSON.stringify([S.penSz||{},S.penPos||{},S.penLv||{},S.penRot||{}]);
   if(penFence&&penFence._k!==pk){scene.remove(penFence);PENLABS.forEach(l=>scene.remove(l));PENLABS=[];if(PENSNOW)scene.remove(PENSNOW);penFence=null}
-  if(!penFence){const pb=new Builder(),r=rnd(3),snb=new Builder();
-    Object.entries(PENS).forEach(([id,P])=>{
+  if(!penFence){const PB0=new Builder(),r=rnd(3),SNB0=new Builder();
+    Object.entries(PENS).forEach(([id,P0])=>{const W=penW(id,P0),P=penU(id,P0),pb=rotB(PB0,W),snb=rotB(SNB0,W);
       const midz=(P.z0+P.z1)/2,midx=(P.x0+P.x1)/2;
       fence(pb,P.x0,P.z0,P.x1,P.z1,(mx,mz,ei)=>(P.gate==="e"&&ei===1&&Math.abs(mz+.15)<.55)||(P.gate==="s"&&ei===2&&Math.abs(mx-midx-.6)<.55)||(P.gate==="n"&&ei===0&&Math.abs(mx-midx-.6)<.55));
       pb.add("box",0xd9be7a,midx,.015,midz,P.x1-P.x0-.1,.03,P.z1-P.z0-.1);
@@ -1361,9 +1370,9 @@ function buildFences(){
         pb.add("box",0xdcb851,P.x0+.45,.3,P.z0+.7,.5,.5,.8);pb.add("box",0xdcb851,P.x0+.45,.3,P.z1-.7,.5,.5,.8);
         lab=labelSprite(P.n);lab.position.set(sx,tall+.85,midz);
       }
-      scene.add(lab);PENLABS.push(lab);
+      rotP(lab.position,W);scene.add(lab);PENLABS.push(lab);
     });
-    penFence=pb.mesh();penFence._k=pk;scene.add(penFence);PENSNOW=new THREE.Mesh(snb.geo(),SNOWMAT);PENSNOW.visible=!!(SNOWMESH&&SNOWMESH.visible);scene.add(PENSNOW)}
+    penFence=PB0.mesh();penFence._k=pk;scene.add(penFence);PENSNOW=new THREE.Mesh(SNB0.geo(),SNOWMAT);PENSNOW.visible=!!(SNOWMESH&&SNOWMESH.visible);scene.add(PENSNOW)}
   fenceMesh=b.mesh();scene.add(fenceMesh);
 }
 
@@ -2700,17 +2709,17 @@ function expand(){
   S.tiles=tiles.concat(old.slice(oc*oc));Object.values(CREW).forEach(W=>{if(W&&W.o){if(W.o.queue)W.o.queue.length=0;W.o.tile=-1}});S.size=nx;hovered=null;toast("The farm got bigger! "+nc+"×"+nc);save();buildField();ui();
 }
 const PENX=new THREE.Group();scene.add(PENX);let _penxK="";
-function syncPenLayout(){const k=JSON.stringify([S.penSz||{},S.penPos||{},S.penLv||{}]);if(k===_plk)return;const first=_plk===null;_plk=k;if(first)return;
+function syncPenLayout(){const k=JSON.stringify([S.penSz||{},S.penPos||{},S.penLv||{},S.penRot||{}]);if(k===_plk)return;const first=_plk===null;_plk=k;if(first)return;
   buildFences();_penxK=null;try{landDeco()}catch(e){}
   animalObjs.forEach(o=>{if(o.g.userData.zone&&o.g.userData.zone!=="pen")return;const [x,z]=randPen(o.r,o.id);o.g.position.set(x,0,z);o.tx=x;o.tz=z})}
-function buildPenX(){syncPenLayout();const key=JSON.stringify([S.penLv||{},S.penSz||{},S.penPos||{}]);if(key===_penxK)return;_penxK=key;while(PENX.children.length)PENX.remove(PENX.children[0]);
-  const b=new Builder(),sn=new Builder(),L=S.penLv||{};
+function buildPenX(){syncPenLayout();const key=JSON.stringify([S.penLv||{},S.penSz||{},S.penPos||{},S.penRot||{}]);if(key===_penxK)return;_penxK=key;while(PENX.children.length)PENX.remove(PENX.children[0]);
+  const B0=new Builder(),SN0=new Builder(),L=S.penLv||{};let b=B0,sn=SN0,CW=null;
   const shed=(x,z,wall,roof,ry=0)=>{b.add("box",wall,x,.42,z,.9,.84,.8,0,ry,0);b.add("prism",roof,x,.98,z,.6,1.0,.32,-Math.PI/2,ry,0);b.add("box",0x3a2615,x+.46*Math.cos(ry),.32,z-.46*Math.sin(ry),.02,.4,.28,0,ry,0);sn.add("box",0xffffff,x,1.12,z,.7,.05,1.0,0,ry,0)};
   const ROOFS=[0xb5452f,0xe07a2a,0x2f8f9b,0x3a5fc8],TRIM=[0x8f3a2a,0xc95a1a,0x1f6a73,0xf2b632];
   const flowers=(x0,x1,z)=>{b.add("box",0x8a5a2a,(x0+x1)/2,.12,z,x1-x0,.22,.28);for(let x=x0+.15;x<x1;x+=.28){const c=[0xff7bb0,0xffd84a,0xffffff,0xe2402f][Math.floor(x*7)&3];b.add("sph",0x3f8f2c,x,.3,z,.1,.08,.1);b.add("sph",c,x,.36,z,.07,.06,.07)}};
-  const lantern=(x,z)=>{b.add("cyl",0x2b3640,x,.75,z,.04,1.5,.04);b.add("box",0x2b3640,x,1.55,z,.2,.04,.2);const lm=new THREE.Mesh(new THREE.BoxGeometry(.14,.18,.14),new THREE.MeshBasicMaterial({color:0xffd27a}));lm.position.set(x,1.44,z);PENX.add(lm)};
+  const lantern=(x,z)=>{b.add("cyl",0x2b3640,x,.75,z,.04,1.5,.04);b.add("box",0x2b3640,x,1.55,z,.2,.04,.2);const lm=new THREE.Mesh(new THREE.BoxGeometry(.14,.18,.14),new THREE.MeshBasicMaterial({color:0xffd27a}));lm.position.set(x,1.44,z);rotP(lm.position,CW);PENX.add(lm)};
   const flag=(x,y,z,c)=>{b.add("cyl",0xdfe3e5,x,y+.45,z,.025,.9,.025);b.add("box",c,x+.18,y+.78,z,.34,.2,.02)};
-  Object.entries(PENS).forEach(([id,P])=>{const lv0=L[id]|0;if(!lv0)return;const lv=Math.min(3,lv0);const midz=(P.z0+P.z1)/2,midx=(P.x0+P.x1)/2,rc=ROOFS[lv],tc=TRIM[lv];
+  Object.entries(PENS).forEach(([id,P0])=>{b=B0;sn=SN0;CW=null;const lv0=L[id]|0;if(!lv0)return;const lv=Math.min(3,lv0);CW=penW(id,P0);const P=penU(id,P0);b=rotB(B0,CW);sn=rotB(SN0,CW);const midz=(P.z0+P.z1)/2,midx=(P.x0+P.x1)/2,rc=ROOFS[lv],tc=TRIM[lv];
     if(id==="manok"){const cx=P.x0+.9;b.add("prism",rc,cx,1.2,midz,.8,1.3,.5,-Math.PI/2,0,0);b.add("box",tc,cx,1.46,midz,.08,.06,1.32);b.add("box",0xfff6df,cx+.62,.78,midz,.02,.22,.22);if(lv>=2)b.add("box",0xfff6df,cx,.55,midz,1.24,.06,1.14)}
     else{const tall=id==="kabayo"?2.3:1.9,sx=P.x0+.95,dep=P.z1-P.z0-.3;b.add("box",rc,sx,tall+.13,midz,2.4,.1,dep+.55,0,0,-.13);b.add("box",tc,sx,tall+.2,midz,2.4,.05,.16,0,0,-.13);
       if(lv>=2){b.add("box",0xfff6df,P.x0+.12,tall*.5,midz,.14,.08,dep);b.add("box",0xfff6df,P.x0+.12,tall*.85,midz,.14,.08,dep)}
@@ -2719,7 +2728,7 @@ function buildPenX(){syncPenLayout();const key=JSON.stringify([S.penLv||{},S.pen
     if(lv>=2)flag(P.x1-.2,0,P.gate==="n"?P.z1-.2:P.z0+.2,tc);
     if(lv>=3){lantern(midx+1.2,fz);lantern(midx-1.6,fz);for(let k=0;k<4;k++)b.add("ico",0xc4b8a4,midx+.6,.03,(P.gate==="n"?P.z1+.5:P.z0-.5)+(P.gate==="n"?1:-1)*k*.45,.22,.04,.2,0,k,0)}
     for(let k=0;k<lv;k++){const z=P.z0+.6+k*((P.z1-P.z0-1.2)/2);shed(P.x0-.62,z,id==="manok"?0xd8a25a:0x9b6a3a,0xb5452f,Math.PI)}
-    if(lv){const t=labelSprite("Lv "+(lv0+1));t.scale.set(.9,.24,1);t.position.set(P.x0-.62,1.7,(P.z0+P.z1)/2);PENX.add(t)}});
+    if(lv){const t=labelSprite("Lv "+(lv0+1));t.scale.set(.9,.24,1);t.position.set(P.x0-.62,1.7,(P.z0+P.z1)/2);rotP(t.position,CW);PENX.add(t)}});b=B0;sn=SN0;CW=null;
   setPondSize((L.pond|0)+(S.lakeLv|0));if(L.pond){flowers(POND.x-POND.rx-.4,POND.x-POND.rx+.9,POND.z-POND.rz-.5);if(L.pond>=3){lantern(POND.x-POND.rx-.2,POND.z+POND.rz+.4);lantern(POND.x+POND.rx-.6,POND.z+POND.rz+.6)}}
   for(let k=0;k<(L.pond|0);k++){const a=1.2+k*.8;shed(POND.x+Math.cos(a)*(POND.rx+.9),POND.z+Math.sin(a)*(POND.rz+.9),0xe8e0c8,0x2f7fb8,Math.PI-a)}
   if(L.farm>=2)flag(-2.4,0,-11.6,0xf2b632);for(let k=0;k<(L.farm|0);k++)shed(-1.6+k*1.3,-11.6,0xc98a4b,0x8f3a2a,Math.PI/2);
@@ -2809,7 +2818,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="170";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
+const GAMEVER="173";let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 /* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
 (function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
   document.addEventListener("touchstart",e=>{el=null;if(!ROT||e.touches.length!==1)return;el=scroller(e.target);if(el){const q=exy(e.touches[0]);lx=q.x;ly=q.y;mv=0}},{passive:true});
@@ -2837,7 +2846,7 @@ $("spSend").onclick=async()=>{const email=$("spEmail").value.trim(),msg=$("spMsg
     m.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>{q=b.dataset.q==="a"?null:+b.dataset.q;draw()});m.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{r=b.dataset.r==="a"?null:+b.dataset.r;draw()});
     $("gfxApply").onclick=()=>{m.hidden=true;toast("Saving graphics · reloading…",1400);setTimeout(()=>setQuality(q,r),500)};$("gfxClose").onclick=()=>{m.hidden=true};draw()}}}
 $("sellAll").onclick=sellAll;$("shopOpen").onclick=()=>{S.shopOpen=S.shopOpen===false;save();invUI(true);toast(S.shopOpen?"The stall is open. Buyers will come.":"The stall is closed. No buyers will come.",2600)};$("goMkt").onclick=()=>{goView("market")};
-$("placeRot").onclick=()=>{if(PLACE){PLACE.r=(PLACE.r+Math.PI/2)%(Math.PI*2);PLACE.g.rotation.y=PLACE.r}};$("placeOk").onclick=confirmPlace;$("placeX").onclick=cancelPlace;
+$("placeRot").onclick=()=>{if(PLACE&&PLACE.pen){const P=PLACE;P.rot=(P.rot+1)%4;[P.w,P.dd]=P.rot&1?[P.ud,P.uw]:[P.uw,P.ud];P.g.rotation.y=-P.rot*Math.PI/2;updateGhost(P.lx!=null?P.lx:P.x0+P.dd/2,P.lz!=null?P.lz:P.z0+P.w/2);return}if(PLACE){PLACE.r=(PLACE.r+Math.PI/2)%(Math.PI*2);PLACE.g.rotation.y=PLACE.r}};$("placeOk").onclick=confirmPlace;$("placeX").onclick=cancelPlace;
 const CD_HARV=120,CD_TREAT=120;const cdLeft=k=>Math.max(0,(k==="harv"?CD_HARV:CD_TREAT)-(now()-((S.cd||{})[k]||0)));
 const OWNER_KEY="ronfarm";const isOwner=()=>{const n=v=>String(v||"").toLowerCase().replace(/[^a-z0-9]/g,"");const p=(typeof CLOUD!=="undefined"&&(CLOUD.local||CLOUD.profile))||{};return[typeof LOCAL!=="undefined"&&LOCAL.user,p.farm,p.farmer].some(v=>n(v)===OWNER_KEY)};
 function cdUI(){const h=cdLeft("harv"),c=cdLeft("treat"),a=$("tAll"),b=$("tCure");if(!a||!b)return;a.hidden=false;b.hidden=true;
@@ -3388,8 +3397,9 @@ function validPen(id,x0,x1,z0,z1){if(x0<-68||x1>16.5||z0<-23||z1>50)return"Too c
   for(const o of S.builds||[]){const d=BUILDS.find(q=>q.id===o.id),r=(d?d.r:1.5)*.75;if(o.x>x0-r&&o.x<x1+r&&o.z>z0-r&&o.z<z1+r)return(d?d.n:"A building")+" is in the way."}
   for(const T of FTREES)if(T.x>x0-.4&&T.x<x1+.4&&T.z>z0-.4&&T.z<z1+.4)return"A tree is in the way. Move the tree or chop it first.";
   return""}
-function startPenMove(id){const P=PENS[id];if(!P)return;cancelPlace();const w=P.x1-P.x0,d=P.z1-P.z0,g=new THREE.Group(),m=new THREE.Mesh(new THREE.BoxGeometry(w,.5,d),GHOSTMAT);m.position.set(w/2,.25,d/2);g.add(m);scene.add(g);
-  PLACE={pen:id,g,w,dd:d,d:{n:P.n,r:0},r:0,ok:false,x0:P.x0,z0:P.z0};updateGhost(P.x0+w/2,P.z0+d/2);$("placeRot").hidden=true;$("placeBar").hidden=false;$("placeTxt").textContent="Move "+P.n+" · drag it and let go to drop it";setTool("move")}
+function startPenMove(id){const P=PENS[id];if(!P)return;cancelPlace();const rot=penRot(id),U=penU(id,P),uw=U.x1-U.x0,ud=U.z1-U.z0,w=P.x1-P.x0,d=P.z1-P.z0,g=new THREE.Group(),m=new THREE.Mesh(new THREE.BoxGeometry(uw,.5,ud),GHOSTMAT);m.position.set(0,.25,0);g.add(m);
+  const hm=new THREE.Mesh(new THREE.BoxGeometry(1.3,1.4,Math.max(1,ud*.6)),GHOSTMAT);hm.position.set(-uw/2+.75,.7,0);g.add(hm);g.rotation.y=-rot*Math.PI/2;scene.add(g);
+  PLACE={pen:id,g,w,dd:d,uw,ud,rot,d:{n:P.n,r:0},r:0,ok:false,x0:P.x0,z0:P.z0};updateGhost(P.x0+w/2,P.z0+d/2);$("placeRot").hidden=false;$("placeBar").hidden=false;$("placeTxt").textContent="Move "+P.n+" · drag it, tap Rotate to turn it, then Place here";setTool("move")}
 function applyBarnPos(){const [dx,dz]=barnOff();BARNG.position.set(dx,0,dz)}
 function validBarn(dx,dz){const x0=-2+dx,x1=6.4+dx,z0=-11+dz,z1=-6.2+dz;if(x0<-68||x1>16.5||z0<-23||z1>50)return"Too close to the edge of the farm.";
   for(const a of layout())if(!(a.p&&a.p.island)&&x0<a.x0+a.n+.3&&x1>a.x0-.3&&z0<a.z0+a.n+.3&&z1>a.z0-.3)return a.p?"That covers "+a.p.n+".":"That covers the main field.";
@@ -3418,17 +3428,19 @@ function startFieldMove(){const N=SIZES[S.size];cancelPlace();const g=new THREE.
 function startPlotMove(id,noCam){const p=PLOTS.find(q=>q.id===id);if(!p)return;cancelPlace();const g=new THREE.Group(),m=new THREE.Mesh(new THREE.BoxGeometry(PN,.12,PN),GHOSTMAT);m.position.set(PN/2,.08,PN/2);g.add(m);scene.add(g);
   PLACE={plot:p,g,d:{n:p.n,r:0},r:0,ok:false,x0:p.x0,z0:p.z0};updateGhost(p.x0+PN/2,p.z0+PN/2);if(!noCam){cam.follow=false;Object.assign(camT,{tx:p.x0+PN/2,tz:p.z0+PN/2,dist:Math.max(camT.dist,30)})}
   $("placeRot").hidden=true;$("placeBar").hidden=false;$("placeTxt").textContent="Move "+p.n+" · tap where it should go (it snaps next to other land) · or press and hold the land to drag it";setTool("move")}
-function updateGhost(x,z){if(!PLACE)return;
+function updateGhost(x,z){updateGhost0(x,z);let w=$("placeWhy");if(!w){w=document.createElement("div");w.id="placeWhy";w.style.cssText="font-size:.82rem;font-weight:900;color:#b3261e;margin:2px 0";$("placeTxt").after(w)}
+  w.textContent=!PLACE||PLACE.ok?"":"⛔ "+(PLACE.why||"Something is in the way here. Try another spot.")}
+function updateGhost0(x,z){if(!PLACE)return;
   if(PLACE.barn){const dx=Math.round((x-2.2)*2)/2,dz=Math.round((z+8.6)*2)/2;PLACE.dx=dx;PLACE.dz=dz;PLACE.g.position.set(dx,0,dz);const [ox,oz]=barnOff();PLACE.why=(dx===ox&&dz===oz)?"":validBarn(dx,dz);PLACE.ok=!PLACE.why;GHOSTMAT.color.setHex(PLACE.ok?0x7fe08a:0xff6a5a);$("placeOk").disabled=!PLACE.ok;return}
   if(PLACE.field){const x0=Math.round(x-PLACE.N/2),z0=Math.round(z-PLACE.N/2);PLACE.x0=x0;PLACE.z0=z0;PLACE.g.position.set(x0,0,z0);PLACE.why=(x0===FX0&&z0===FZ0)?"":validField(x0,z0);PLACE.ok=!PLACE.why;GHOSTMAT.color.setHex(PLACE.ok?0x7fe08a:0xff6a5a);$("placeOk").disabled=!PLACE.ok;return}
   if(PLACE.hill){PLACE.x=x;PLACE.z=z;PLACE.g.position.set(x,0,z);PLACE.why=validHill(PLACE.hill,x,z);PLACE.ok=!PLACE.why;GHOSTMAT.color.setHex(PLACE.ok?0x7fe08a:0xff6a5a);$("placeOk").disabled=!PLACE.ok;return}
-  if(PLACE.pen){const x0=Math.round((x-PLACE.w/2)*2)/2,z0=Math.round((z-PLACE.dd/2)*2)/2;PLACE.x0=x0;PLACE.z0=z0;PLACE.g.position.set(x0,0,z0);PLACE.why=validPen(PLACE.pen,x0,x0+PLACE.w,z0,z0+PLACE.dd);PLACE.ok=!PLACE.why;GHOSTMAT.color.setHex(PLACE.ok?0x7fe08a:0xff6a5a);$("placeOk").disabled=!PLACE.ok;return}
+  if(PLACE.pen){PLACE.lx=x;PLACE.lz=z;const x0=Math.round((x-PLACE.w/2)*2)/2,z0=Math.round((z-PLACE.dd/2)*2)/2;PLACE.x0=x0;PLACE.z0=z0;PLACE.g.position.set(x0+PLACE.w/2,0,z0+PLACE.dd/2);PLACE.why=validPen(PLACE.pen,x0,x0+PLACE.w,z0,z0+PLACE.dd);PLACE.ok=!PLACE.why;GHOSTMAT.color.setHex(PLACE.ok?0x7fe08a:0xff6a5a);$("placeOk").disabled=!PLACE.ok;return}
   if(PLACE.tree){PLACE.x=x;PLACE.z=z;PLACE.g.position.set(x,0,z);PLACE.ok=validPlace(x,z,.9,PLACE.tree)&&!inAnyPen(x,z,.6);PLACE.why=PLACE.ok?"":"Can't put the tree there. Pick an empty grassy spot.";GHOSTMAT.color.setHex(PLACE.ok?0x7fe08a:0xff6a5a);$("placeOk").disabled=!PLACE.ok;return}
   if(PLACE.plot){let x0=Math.round(x-PN/2),z0=Math.round(z-PN/2);
     const a=layout()[0],edges=[a.x0+a.n,a.x0-PN],ez=[a.z0+a.n,a.z0-PN];PLOTS.forEach(q=>{if(q.island||q.id===PLACE.plot.id||!(S.plots||[]).includes(q.id))return;edges.push(q.x0+PN,q.x0-PN);ez.push(q.z0+PN,q.z0-PN)});
     edges.forEach(e=>{if(Math.abs(x0-e)<=1)x0=e});ez.forEach(e=>{if(Math.abs(z0-e)<=1)z0=e});
     PLACE.x0=x0;PLACE.z0=z0;PLACE.g.position.set(x0,0,z0);PLACE.why=validPlot(PLACE.plot,x0,z0);PLACE.ok=!PLACE.why;GHOSTMAT.color.setHex(PLACE.ok?0x7fe08a:0xff6a5a);$("placeOk").disabled=!PLACE.ok;return}PLACE.x=x;PLACE.z=z;PLACE.g.position.set(x,0,z);PLACE.ok=validPlace(x,z,PLACE.d.r);GHOSTMAT.color.setHex(PLACE.ok?0x7fe08a:0xff6a5a);$("placeOk").disabled=!PLACE.ok}
-function cancelPlace(){$("placeRot").hidden=false;if(PLACE){scene.remove(PLACE.g);if(PLACE.moving){S.builds=(S.builds||[]).concat(PLACE.moving);renderBuilds()}PLACE=null}$("placeBar").hidden=true}
+function cancelPlace(){{const w=$("placeWhy");if(w)w.textContent=""}$("placeRot").hidden=false;if(PLACE){scene.remove(PLACE.g);if(PLACE.moving){S.builds=(S.builds||[]).concat(PLACE.moving);renderBuilds()}PLACE=null}$("placeBar").hidden=true}
 function confirmPlace(){
   if(PLACE&&PLACE.barn){if(!PLACE.ok)return toast(PLACE.why||"Can't put the barn there.");S.barnPos=[PLACE.dx,PLACE.dz];scene.remove(PLACE.g);PLACE=null;$("placeBar").hidden=true;$("placeRot").hidden=false;hovered=null;applyBarnPos();
     if(typeof paintGround==="function")paintGround();if(typeof landDeco==="function")landDeco();buildMansionRoads();burst(2.2+S.barnPos[0],1,-8.6+S.barnPos[1],0xc98a4b,24,.6);after();return toast("📐 Moved the barn.",2400)}
@@ -3437,7 +3449,7 @@ function confirmPlace(){
   if(PLACE&&PLACE.hill){if(!PLACE.ok)return toast(PLACE.why||"Can't put the hill there.");const id=PLACE.hill,x=+PLACE.x.toFixed(2),z=+PLACE.z.toFixed(2);S.hillPos=Object.assign({},S.hillPos||{},{[id]:[x,z]});
     scene.remove(PLACE.g);PLACE=null;$("placeBar").hidden=true;$("placeRot").hidden=false;hovered=null;buildHills();try{landDeco()}catch(e){}burst(x,1,z,0x9aa1a4,22,.7);after();return toast("⛰️ Moved the hill.",2200)}
   if(PLACE&&PLACE.pen){if(!PLACE.ok)return toast(PLACE.why||"Can't put the pen there.");const id=PLACE.pen,P=PENS[id],ex=penSz(id)*PENGROW+houseGrow(id),B=PENS0[id];
-    S.penPos=Object.assign({},S.penPos||{},{[id]:[+(PLACE.x0+PLACE.w).toFixed(2),+PLACE.z0.toFixed(2)]});scene.remove(PLACE.g);PLACE=null;$("placeBar").hidden=true;$("placeRot").hidden=false;hovered=null;syncPenLayout();
+    const cx=PLACE.x0+PLACE.w/2,cz=PLACE.z0+PLACE.dd/2;S.penRot=Object.assign({},S.penRot||{},{[id]:PLACE.rot});S.penPos=Object.assign({},S.penPos||{},{[id]:[+(cx+PLACE.uw/2).toFixed(2),+(cz-PLACE.ud/2).toFixed(2)]});scene.remove(PLACE.g);PLACE=null;$("placeBar").hidden=true;$("placeRot").hidden=false;hovered=null;syncPenLayout();
     const Q=PENS[id];burst((Q.x0+Q.x1)/2,.5,(Q.z0+Q.z1)/2,0xc98a4b,22,.5);after();return toast("📐 Moved the "+P.n+".",2400)}
   if(PLACE&&PLACE.tree){if(!PLACE.ok)return toast(PLACE.why);const T=PLACE.tree,x=+PLACE.x.toFixed(2),z=+PLACE.z.toFixed(2);
     if(T.base)S.treePos=Object.assign({},S.treePos||{},{[T.id]:[x,z]});else{const q=(S.ptrees||[]).find(p=>"p"+p.u===T.id);if(q){q.x=x;q.z=z}}
@@ -6977,7 +6989,7 @@ function npcBubblePos(N){if(!N.el)return;const g=N.f.g,sc=toScreen(g.position.x,
 function npcRemove(N){if(!N)return;scene.remove(N.f.g);if(N.el)N.el.remove();if(N.carry)scene.remove(N.carry)}
 function npcAway(){return !visOk()&&(onIsle||onCity||S.inTown||JTRIP.on||TRIP.on||VISIT)}
 function visSpawnBuyer(){const L=visTargets();if(!L.length)return;const p=L[Math.floor(Math.random()*L.length)],a=animal(p.id);
-  const offer=Math.max(sellPrice(p)+5,Math.round(a.cost*(.95+Math.random()*.35)/5)*5);VIS.buyer={kind:"buyer",f:npcMake("buyer"),p,offer,st:"in",t:0,wp:0};
+  const mood=Math.random(),mult=mood<.2?.7+Math.random()*.25:mood<.85?.95+Math.random()*.45:1.45+Math.random()*.45,offer=Math.max(5,Math.round(a.cost*mult/5)*5);VIS.buyer={kind:"buyer",f:npcMake("buyer"),p,offer,st:"in",t:0,wp:0};
   toast("🧑‍💼 A buyer is coming to your farm to look at your animals.",3200)}
 function visSpawnThief(){const L=visTargets();if(!L.length)return;const p=L[Math.floor(Math.random()*L.length)];VIS.thief={kind:"thief",f:npcMake("thief"),p,st:"in",t:0,wp:0};
   toast("🚨 A thief is sneaking into your farm! Tap 🚨 Catch above the thief so your helper can stop them.",4500);if(typeof sfx==="function")try{sfx("alarm")}catch(e){}}
@@ -7004,11 +7016,11 @@ function stepVisitors(dt,t){
     if(B.st==="in"){if(npcWalk(f,VIS_IN[1][0],VIS_IN[1][1],1.7,dt))B.st="go"}
     else if(B.st==="go"){const o=visObj(B.p);if(!o||!o.g.visible){B.st="out";B.wp=1}else{const ap=o.g.position,dx=g.position.x-ap.x,dz=g.position.z-ap.z,d=Math.hypot(dx,dz)||1;if(d<1.4){B.st="offer";B.t=0}else npcWalk(f,ap.x+dx/d*1.2,ap.z+dz/d*1.2,1.7,dt)}}
     else if(B.st==="offer"){const o=visObj(B.p);if(!o){B.st="out";B.wp=1}else{g.rotation.y=Math.atan2(-(o.g.position.z-g.position.z),o.g.position.x-g.position.x);aL=1.2+Math.sin(t*3)*.15}
-      if(B.t>45){B.st="out";B.wp=1;toast("The buyer waited too long and left.",2200)}}
+      if(B.t>60){B.st="out";B.wp=1;toast("⏳ The buyer waited a minute and left.",2200)}}
     else if(B.st==="out"){const w=VIS_IN[B.wp];if(npcWalk(f,w[0],w[1],1.9,dt)){if(B.wp===0){npcRemove(B);VIS.buyer=null}else B.wp=0}}
     if(VIS.buyer){if(B.carry){const fx=Math.cos(g.rotation.y),fz=-Math.sin(g.rotation.y);B.carry.position.set(g.position.x-fz*.7,0,g.position.z+fx*.7);B.carry.rotation.y=g.rotation.y;aL=.6}
       npcAnim(f,t,dt,aL,null);
-      if(B.st==="offer"){const a=animal(B.p.id);npcBubble(B,'<b>🧑‍💼 I\'ll buy your '+a.n+' '+(B.p.g==="F"?"♀":"♂")+'</b><br>for <b>🪙 '+B.offer.toLocaleString()+'</b> <small>(market '+sellPrice(B.p).toLocaleString()+')</small><div class="npcR"><button class="btn sm" type="button" data-v="y">Sell</button><button class="btn sm alt" type="button" data-v="n">No</button></div>');
+      if(B.st==="offer"){const a=animal(B.p.id);const mk=sellPrice(B.p),left=Math.max(0,Math.ceil(60-B.t)),tag=B.offer>=mk*1.8?' <small style="color:#2f8f2c">🔥 great deal</small>':B.offer<mk?' <small style="color:#b3261e">⬇ low offer</small>':'';npcBubble(B,'<b>🧑‍💼 I\'ll buy your '+a.n+' '+(B.p.g==="F"?"♀":"♂")+'</b><br>for <b>🪙 '+B.offer.toLocaleString()+'</b> <small>(market '+mk.toLocaleString()+')</small>'+tag+'<br><small>⏳ Leaving in '+left+'s</small><div class="npcR"><button class="btn sm" type="button" data-v="y">Sell</button><button class="btn sm alt" type="button" data-v="n">No</button></div>');
         if(!B.el._on){B.el._on=1;B.el.onclick=e=>{const v=e.target.dataset&&e.target.dataset.v;if(v==="y")buyerAccept();else if(v==="n")buyerNo()}}}
       else if(B.el){B.el.remove();B.el=null;B.html=null}
       npcBubblePos(B)}}
