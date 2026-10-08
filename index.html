@@ -2620,7 +2620,7 @@ cv.addEventListener("pointermove",e=>{
   if(PLACE&&PLACE.drag){pointers.set(e.pointerId,{x:exy(e).x,y:exy(e).y});const gp=groundPoint(e);if(gp)updateGhost(gp.x-PLACE.ox,gp.z-PLACE.oz);return}
   const dx=exy(e).x-prev.x,dy=exy(e).y-prev.y;pointers.set(e.pointerId,{x:exy(e).x,y:exy(e).y});
   if(pointers.size===1){dragMoved+=Math.abs(dx)+Math.abs(dy);if(downAt&&Math.hypot(exy(e).x-downAt.x,exy(e).y-downAt.y)>(e.pointerType==="mouse"?6:16)){cv.classList.add("drag");if(e.shiftKey||(e.buttons&2)){camT.az-=dx*.008;camT.pol=Math.min(1.35,Math.max(.35,camT.pol-dy*.006));cam.auto=false;setAuto();return}pan(dx,dy)}}
-  else if(pointers.size===2){const [a,b]=[...pointers.values()],d=Math.hypot(a.x-b.x,a.y-b.y),an=Math.atan2(b.y-a.y,b.x-a.x);if(pinch0){camT.dist=Math.min(90,Math.max(5,camT.dist*pinch0/d));let da=an-ang0;da=Math.atan2(Math.sin(da),Math.cos(da));camT.az+=da;camT.pol=Math.min(1.35,Math.max(.35,camT.pol-dy*.004))}pinch0=d;ang0=an;dragMoved=99;cam.follow=false;cam.auto=false;setAuto()}
+  else if(pointers.size===2){const [a,b]=[...pointers.values()],d=Math.hypot(a.x-b.x,a.y-b.y),an=Math.atan2(b.y-a.y,b.x-a.x);if(pinch0){camT.dist=Math.min(ZMAX,Math.max(5,camT.dist*pinch0/d));let da=an-ang0;da=Math.atan2(Math.sin(da),Math.cos(da));camT.az+=da;camT.pol=Math.min(1.35,Math.max(.35,camT.pol-dy*.004))}pinch0=d;ang0=an;dragMoved=99;cam.follow=false;cam.auto=false;setAuto()}
 });
 function pan(dx,dy){const k=camT.dist*.0022,sa=Math.sin(cam.az),ca=Math.cos(cam.az);
   cam.follow=false;camT.tx=Math.max(-200,Math.min(FEAT?540:235,camT.tx-dx*k*ca-dy*k*sa));camT.tz=Math.max(FEAT?-140:-95,Math.min(FEAT?262:68,camT.tz+dx*k*sa-dy*k*ca));cam.auto=false;setAuto()}
@@ -2640,8 +2640,8 @@ function endPtr(e){clearTimeout(HOLD.t);
 }
 cv.addEventListener("pointerup",endPtr);cv.addEventListener("pointercancel",endPtr);
 cv.addEventListener("pointerleave",e=>{if(e.pointerType==="mouse")hovered=null});
-cv.addEventListener("wheel",e=>{e.preventDefault();camT.dist=Math.min(90,Math.max(5,camT.dist*(1+Math.sign(e.deltaY)*.1)));hideTip()},{passive:false});
-{const mv=(dx,dz)=>{cam.follow=false;const k=camT.dist*.12;camT.tx=Math.max(-200,Math.min(FEAT?540:235,camT.tx+dx*k));camT.tz=Math.max(FEAT?-140:-95,Math.min(FEAT?262:68,camT.tz+dz*k))},zm=f=>{camT.dist=Math.min(90,Math.max(5,camT.dist*f))};
+cv.addEventListener("wheel",e=>{e.preventDefault();camT.dist=Math.min(ZMAX,Math.max(5,camT.dist*(1+Math.sign(e.deltaY)*.1)));hideTip()},{passive:false});
+{const mv=(dx,dz)=>{cam.follow=false;const k=camT.dist*.12;camT.tx=Math.max(-200,Math.min(FEAT?540:235,camT.tx+dx*k));camT.tz=Math.max(FEAT?-140:-95,Math.min(FEAT?262:68,camT.tz+dz*k))},zm=f=>{camT.dist=Math.min(ZMAX,Math.max(5,camT.dist*f))};
   const hold=(id,fn)=>{const b=$(id);let iv=null;const go=()=>{fn();clearInterval(iv);iv=setInterval(fn,120)},stop=()=>{clearInterval(iv);iv=null};b.addEventListener("pointerdown",e=>{e.preventDefault();go()});["pointerup","pointerleave","pointercancel"].forEach(ev=>b.addEventListener(ev,stop))};
   hold("cU",()=>mv(0,-1));hold("cD",()=>mv(0,1));hold("cLf",()=>mv(-1,0));hold("cRt",()=>mv(1,0));hold("cZi",()=>zm(.88));hold("cZo",()=>zm(1.14));
   window.addEventListener("keydown",e=>{if(e.target&&(e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA"))return;const m={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0]}[e.key];if(m){e.preventDefault();mv(...m)}else if(e.key==="+"||e.key==="=")zm(.88);else if(e.key==="-")zm(1.14)})}
@@ -2904,7 +2904,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="197";const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
+const GAMEVER="198";const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
 if(TESTSRV){document.title="🧪 TEST · "+document.title;const tb=document.createElement("div");tb.id="testBar";tb.textContent=MIRROR_TEST?"🧪 TEST SERVER · a copy of your farm · changes here don't touch your real farm":"🧪 TEST SERVER · changes here don't touch your real farm";tb.style.cssText="position:fixed;left:50%;top:0;transform:translateX(-50%);z-index:9999;background:#7a3fc0;color:#fff;font:900 11px/1.2 sans-serif;padding:3px 10px;border-radius:0 0 10px 10px;pointer-events:none;letter-spacing:.3px";document.addEventListener("DOMContentLoaded",()=>document.body.appendChild(tb));if(document.body)document.body.appendChild(tb)}let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 /* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
 (function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
@@ -5073,7 +5073,7 @@ function buildCloudBanks(){if(!FEAT)return;const list=[[IX+14,IZ-22,50,"gp"]].co
     const btns=BTN3D.filter(s2=>s2.userData.btn3d!=="boat"&&Math.hypot(s2.position.x-cx,s2.position.z-cz)<R*1.05);
     CLOUDS.banks.push({cx,cz,R,key,halves,btns,open:0,want:0})})}
 function cloudOpen(x,z){CLOUDS.banks.forEach(B=>{if(Math.hypot(B.cx-x,B.cz-z)<B.R)B.want=1})}
-function stepClouds2(dt,t){CLOUDS.banks.forEach(B=>{const _d=Math.hypot(camT.tx-B.cx,camT.tz-B.cz);if(_d<(B.key==="gp"?B.R:B.R*.55))B.want=1;if(B.want&&Math.hypot(camT.tx-B.cx,camT.tz-B.cz)>B.R*1.3)B.want=0;{const now2=performance.now()/1000,rd=Math.min(.1,Math.max(0,now2-(B._t||now2)));B._t=now2;B.open=B.want?Math.min(1,B.open+rd/2.2):Math.max(0,B.open-rd/2.5)}const u=B.open;if(B.key==="gp")window.__GPOPEN=u>.5;
+function stepClouds2(dt,t){CLOUDS.banks.forEach(B=>{const _d=Math.hypot(camT.tx-B.cx,camT.tz-B.cz);const _sq=sqNearBank(B);if(_d<(B.key==="gp"?B.R:B.R*.55)||_sq)B.want=1;if(B.want&&!_sq&&Math.hypot(camT.tx-B.cx,camT.tz-B.cz)>B.R*1.3)B.want=0;{const now2=performance.now()/1000,rd=Math.min(.1,Math.max(0,now2-(B._t||now2)));B._t=now2;B.open=B.want?Math.min(1,B.open+rd/2.2):Math.max(0,B.open-rd/2.5)}const u=B.open;if(B.key==="gp")window.__GPOPEN=u>.5;
   B.halves.forEach(h=>{h.g.position.x=B.cx+h.side*u*B.R*2.1;h.g.position.y=Math.sin(t*.25+h.side)*.3+u*2;h.g.position.z=B.cz+Math.sin(t*.07)*1.2;const op=Math.max(0,1-u*1.15)*.72,tr=true;h.mats.forEach(m=>{if(m.transparent!==tr){m.transparent=tr;m.depthWrite=!tr;m.needsUpdate=true}m.opacity=op});h.g.visible=op>.02});
   B.btns.forEach(s2=>{s2.visible=u>.6})})}
 
@@ -5081,19 +5081,33 @@ function stepClouds2(dt,t){CLOUDS.banks.forEach(B=>{const _d=Math.hypot(camT.tx-
 /* ===== Side-quest farms: a themed farm at every island and city for extra coins, plus a Community button ===== */
 const TG_LINK="https://t.me/+9agzaT5X2GI3NzU1";const TG_LINKS={main:"https://t.me/+9agzaT5X2GI3NzU1",gp:"https://t.me/+9agzaT5X2GI3NzU1",cow:"https://t.me/cow88live",t2b:"https://t.me/+6K95KHxCTJY3NzE1",roll:"https://t.me/ROLLEMPH/1",wfl:"https://t.me/kawin4life88",gs:"https://t.me/+sN5YAx6s7YhiNDJl",pots:"https://t.me/tropangpearly"};
 const SQ={sites:[],on:false,tex:null};
+// every island and city has its own themed side quest with its own mini-game
 const SQDEF=[
- {id:"gp",n:"GoPyesta Island",ore:"Party Crystal",col:0xff8ad8,cost:60,t:300,pay:260,lv:1},
- {id:"wfl",n:"WIN FOR LIFE",ore:"Lucky Emerald",col:0x3fbf4a,cost:80,t:360,pay:340,lv:2},
- {id:"cow",n:"COW88",ore:"Gold Nugget",col:0xf5c732,cost:100,t:420,pay:430,lv:3},
- {id:"roll",n:"ROLL'EM",ore:"Amethyst",col:0x8a4ac0,cost:120,t:480,pay:520,lv:4},
- {id:"t2b",n:"Time2Bet",ore:"Royal Ruby",col:0xd8263a,cost:140,t:540,pay:610,lv:5},
- {id:"pots",n:"Pearl of the Seas",ore:"Aquamarine",col:0x5fd4f0,cost:160,t:600,pay:700,lv:6},
- {id:"gs",n:"GameSpot",ore:"Fire Opal",col:0xff6a2a,cost:180,t:660,pay:800,lv:7},
- {id:"bigi",n:"Isla Grande",ore:"Golden Topaz",col:0xf0b62a,cost:200,t:720,pay:900,lv:8}];
+ {id:"gp",n:"GoPyesta Island",type:"stall",icon:"🍢",title:"Fiesta Food Stall",btn:"🍢 Fiesta Stall",col:0xff8ad8,lv:1,lead:"Cook fiesta food at the stall and sell it to the party crowd.",
+  opts:[{k:"Halo-halo",cost:40,t:180,pay:170},{k:"Inihaw na Liempo",cost:60,t:300,pay:260},{k:"Lechon",cost:130,t:600,pay:560}],go:"🔥 Cook",done:"💰 Sell it all"},
+ {id:"wfl",n:"WIN FOR LIFE",type:"fish",icon:"🎣",title:"Lucky Fishing Pier",btn:"🎣 Lucky Fishing",col:0x3fbf4a,lv:2,lead:"Cast a line off the lucky pier. Every catch is different, and the Golden Clover Fish pays 4×.",
+  opts:[{k:"Worm bait",cost:80,t:360,pay:300},{k:"Lucky lure",cost:150,t:600,pay:560}],go:"🎣 Cast",done:"🎣 Reel it in"},
+ {id:"cow",n:"COW88",type:"dairy",icon:"🐄",title:"COW88 Dairy Ranch",btn:"🐄 Dairy Ranch",col:0xf5c732,lv:3,lead:"Feed the ranch cows, then sell what the dairy makes.",
+  opts:[{k:"Fresh Milk",cost:100,t:420,pay:430},{k:"Kesong Puti",cost:170,t:720,pay:760}],go:"🌾 Feed the cows",done:"🥛 Sell the dairy"},
+ {id:"roll",n:"ROLL'EM",type:"dice",icon:"🎲",title:"Treasure Dice Dig",btn:"🎲 Treasure Dice",col:0x8a4ac0,lv:4,lead:"Dig up the buried chest, then roll the giant dice. The number you roll multiplies the treasure, from ½× up to 2×.",
+  opts:[{k:"Dig for treasure",cost:120,t:480,pay:460}],go:"⛏️ Start digging",done:"🎲 Roll the dice"},
+ {id:"t2b",n:"Time2Bet",type:"race",icon:"🏇",title:"Time2Race Practice Track",btn:"🏇 Practice Race",col:0xd8263a,lv:5,lead:"Pick a horse and train it on the practice track, then race it. Favourites win more often, and longshots pay more.",
+  opts:[{k:"Thunder",odds:"Favourite",win:.7,pay:620,lose:200,c:"#e8a530"},{k:"Midnight",odds:"Contender",win:.45,pay:1000,lose:180,c:"#4a5ad8"},{k:"Longshot Lucky",odds:"Longshot",win:.2,pay:2200,lose:160,c:"#2f9a4a"}],cost:140,t:540,go:"🏇 Train",done:"🏁 Start the race"},
+ {id:"pots",n:"Pearl of the Seas",type:"pearl",icon:"🦪",title:"Poseidon's Pearl Lagoon",btn:"🦪 Pearl Diving",col:0x5fd4f0,lv:6,lead:"Dive the lagoon and bring up oysters, then pick 3 of the 9 to open. Some hide a golden pearl.",
+  opts:[{k:"Dive the lagoon",cost:160,t:600,pay:700}],go:"🤿 Dive",done:"🦪 Open oysters"},
+ {id:"gs",n:"GameSpot",type:"mine",icon:"⛏️",title:"Fire Opal Mine",ore:"Fire Opal",btn:"⛏️ Opal Mine",col:0xff6a2a,lv:7,lead:"Hire the miner to dig Fire Opal out of the volcano rock. Each haul has a 15% chance of a rare gem that doubles the reward.",
+  opts:[{k:"Fire Opal",cost:180,t:660,pay:800}],go:"⛏️ Start mining",done:"💎 Collect the opal"},
+ {id:"bigi",n:"Isla Grande",type:"pine",icon:"🍍",title:"Isla Grande Plantation",btn:"🍍 Plantation",col:0xf0b62a,lv:8,lead:"Plant the island's pineapple plantation and harvest it for extra coins.",
+  opts:[{k:"Baby Pineapple",cost:90,t:300,pay:380},{k:"Golden Pineapple",cost:200,t:720,pay:900}],go:"🌱 Plant",done:"🧺 Harvest"}];
 const SQ_DAILY=3,SQ_BONUS=500,SQ_RARE=.15;
+const SQ_FISH=[{n:"Galunggong",e:"🐟",m:.6,w:30},{n:"Tilapia",e:"🐟",m:1,w:35},{n:"Bangus",e:"🐠",m:1.3,w:20},{n:"Lapu-lapu",e:"🐡",m:2,w:12},{n:"Golden Clover Fish",e:"✨🐠",m:4,w:3}];
+const SQ_PEARL=[{n:"Empty",e:"🫧",m:0,w:30},{n:"White pearl",e:"⚪",m:.25,w:35},{n:"Pink pearl",e:"🩷",m:.45,w:20},{n:"Black pearl",e:"⚫",m:.8,w:12},{n:"Golden pearl",e:"🟡",m:3,w:3}];
+const SQ_DICE=[.5,.75,1,1.25,1.5,2];
+const sqPickW=a=>{let r=Math.random()*a.reduce((s,x)=>s+x.w,0);for(const x of a){r-=x.w;if(r<=0)return x}return a[0]};
 function sqState(){if(!S.sq)S.sq={};return S.sq}
 function sqSite(id){const st=sqState();if(!st[id])st[id]={at:0,day:0,n:0,bonus:0};const v=st[id];const d=typeof phDay==="function"?phDay():Math.floor(Date.now()/864e5);if(v.day!==d){v.day=d;v.n=0;v.bonus=0}return v}
-function sqGlow(){const k=document.createElement("canvas");k.width=k.height=64;const x=k.getContext("2d"),g=x.createRadialGradient(32,32,1,32,32,32);g.addColorStop(0,"rgba(255,255,255,1)");g.addColorStop(1,"rgba(255,255,255,0)");x.fillStyle=g;x.fillRect(0,0,64,64);const t=new THREE.CanvasTexture(k);return t}
+function sqOpt(d,v){const o=d.opts[Math.min(d.opts.length-1,v.o|0)];return d.type==="race"?{k:o.k,cost:d.cost,t:d.t,pay:o.pay}:o}
+function sqGlow(){const k=document.createElement("canvas");k.width=k.height=64;const x=k.getContext("2d"),g=x.createRadialGradient(32,32,1,32,32,32);g.addColorStop(0,"rgba(255,255,255,1)");g.addColorStop(1,"rgba(255,255,255,0)");x.fillStyle=g;x.fillRect(0,0,64,64);return new THREE.CanvasTexture(k)}
 // a little rocky mining islet: hill with a mine shaft, rails, a minecart, themed ore crystals and a miner
 function buildMine(d,cx,cz,face){const G=new THREE.Group();G.position.set(cx,0,cz);G.rotation.y=face;scene.add(G);const b=new Builder(),Y=.9;
   b.add("cyl",0x6e6a60,0,.3,0,4.8,.9,4.8);b.add("cyl",0x8a8476,0,.78,0,4.5,.12,4.5);
@@ -5130,34 +5144,147 @@ function buildHall(d,hx,hz,face){const G=new THREE.Group();G.position.set(hx,0,h
   b.add("box",0x6b4422,2.6,Y+1,2.8,.12,2,.12);b.add("cyl",0x229ed9,2.6,Y+2.3,2.82,.75,.1,.75,Math.PI/2,0,0);b.add("prism",0xffffff,2.6,Y+2.3,2.9,.45,.3,.05,0,0,-.5);
   b.add("box",0xe8a530,-2.2,Y+.3,2.4,.8,.5,.5);b.add("box",0xe8a530,-1,Y+.3,2.6,.8,.5,.5);
   G.add(b.mesh());const lab=labelSprite(d.n+" Community");lab.position.set(0,Y+5,-.6);lab.scale.set(4.8,1,1);G.add(lab);return G}
+// shared islet base for the themed side quests
+function sqBase(d,cx,cz,face,top,rim){const G=new THREE.Group();G.position.set(cx,0,cz);G.rotation.y=face;scene.add(G);const b=new Builder(),Y=.9;
+  b.add("cyl",rim||0x6e6a60,0,.3,0,4.8,.9,4.8);b.add("cyl",top,0,.78,0,4.5,.12,4.5);
+  const glow=new THREE.Sprite(new THREE.SpriteMaterial({color:d.col,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending,map:SQ.tex||(SQ.tex=sqGlow())}));glow.position.set(0,Y+2,0);glow.scale.set(9,9,1);G.add(glow);
+  const lab=labelSprite(d.icon+" "+d.title);lab.position.set(0,Y+4.4,-1);lab.scale.set(4.8,1,1);G.add(lab);return {G,b,Y,glow}}
+const sqNpc=(G,x,y,z,o)=>{const f=makeFarmer(o);f.g.scale.setScalar(.85);f.g.position.set(x,y,z);G.add(f.g);return f};
+const sqPop=(G,n,fn)=>{const a=[];for(let i=0;i<n;i++){const g=new THREE.Group(),pb=new Builder();fn(pb,i,g);g.add(pb.mesh({outline:false}));g.visible=false;G.add(g);a.push(g)}return a};
+const sqFill=(arr,pr)=>arr.forEach((m,i)=>{m.visible=pr>=0&&i<Math.ceil(Math.max(0,pr)*arr.length)});
+const sqAnimal=(G,id,x,y,z,s)=>{const a=makeAnimal(id);const U=a.userData;if(U.bubble)U.bubble.visible=false;if(U.moo)U.moo.visible=false;a.scale.setScalar(s||1);a.position.set(x,y,z);G.add(a);return a};
+const sqLegs=(a,t,sp)=>{(a.userData.legs||[]).forEach((l,k)=>{const ph=(k===0||k===3)?1:-1;l.rotation.z=sp?Math.sin(t*sp)*ph*.6:0})};
+// GoPyesta: fiesta food stall with banderitas and a grill
+function buildStall(d,cx,cz,face){const o=sqBase(d,cx,cz,face,0xf0dca0,0xc8a46a),{G,b,Y}=o;
+  [[-1.8,-.6],[1.8,-.6],[-1.8,1],[1.8,1]].forEach(([x,z])=>b.add("box",0x8a5a2e,x,Y+1.1,z,.14,2.2,.14));
+  b.add("box",0xb07a42,0,Y+.5,1,3.8,1,.9);b.add("box",0xf5e6c8,0,Y+1.02,1,3.9,.06,1);
+  for(let i=0;i<8;i++)b.add("box",i%2?0xffffff:0xff5aa8,-1.75+i*.5,Y+2.3,.2,.5,.08,2.2,.35,0,0);
+  b.add("box",0x3a3a40,-2.9,Y+.55,-.2,.9,.5,.7);b.add("box",0x222226,-2.9,Y+.82,-.2,.95,.04,.75);[[-3.1,-.3],[-2.75,-.05]].forEach(([x,z])=>b.add("sph",0xff5a1a,x,Y+.88,z,.12,.05,.12));
+  // banderitas strung between two poles
+  b.add("box",0x8a5a2e,-3.6,Y+1.6,2.6,.1,3.2,.1);b.add("box",0x8a5a2e,3.6,Y+1.6,2.6,.1,3.2,.1);b.add("box",0xe8d8b8,0,Y+3.05,2.6,7.2,.03,.03);
+  const BC=[0xff3a3a,0xffd23a,0x3a8aff,0x3fbf4a,0xff8ad8,0xffffff];for(let i=0;i<14;i++)b.add("cone4",BC[i%6],-3.25+i*.5,Y+2.82,2.6,.16,.4,.04,Math.PI,0,0);
+  [[-3.4,3.4],[3.3,3.3],[3.5,-2.5]].forEach(([x,z])=>{b.add("box",0x6b4422,x,Y+.3,z,.7,.6,.7)});G.add(b.mesh());
+  const food=sqPop(G,8,(pb,i,g)=>{g.position.set(-1.5+(i%4)*1,Y+1.12,.8+Math.floor(i/4)*.4);pb.add("cyl",0xffffff,0,0,0,.2,.03,.2);pb.add("sph",i%2?0xc8642a:d.col,0,.08,0,.14,.1,.14)});
+  const smoke=new THREE.Sprite(new THREE.SpriteMaterial({color:0xdddddd,transparent:true,opacity:0,depthWrite:false,map:SQ.tex||(SQ.tex=sqGlow())}));smoke.scale.set(1.4,1.4,1);smoke.position.set(-2.9,Y+1.6,-.2);G.add(smoke);
+  const f=sqNpc(G,0,Y,-.1,{shirt:0xff5aa8,pants:0x3a3a4a,hat:0xffffff,skin:0xc68a5a});f.g.rotation.y=-Math.PI/2;
+  const g1=sqNpc(G,-1,Y,2.2,{shirt:0x3a8aff,pants:0x3a3a4a,hat:0xe8c66a}),g2=sqNpc(G,1.1,Y,2.4,{shirt:0xffd23a,pants:0x5a3a2a,hat:0x8a5a2e});[g1,g2].forEach(q=>{q.g.rotation.y=Math.PI/2});
+  return Object.assign(o,{anim(t,dt,pr,run,slow){if(slow)sqFill(food,pr);smoke.material.opacity=run?.35+.15*Math.sin(t*3):0;smoke.position.y=Y+1.6+(t*.8%1);npcAnim(f,t,dt,null,run?2+Math.sin(t*8)*.6:null);
+    [g1,g2].forEach((q,i)=>{q.g.visible=pr>=1;if(pr>=1)npcAnim(q,t+i,dt,null,1.6+Math.sin(t*3+i)*.4)})}})}
+// WIN FOR LIFE: lucky fishing pier
+function buildFish(d,cx,cz,face){const o=sqBase(d,cx,cz,face,0xf0dca0,0xc8a46a),{G,b,Y}=o;
+  for(let z=1.5;z<=8;z+=.5)b.add("box",0x9b6a3a,0,Y+.05,z,1.8,.1,.42);[[-.85,3],[.85,3],[-.85,5.5],[.85,5.5],[-.85,8],[.85,8]].forEach(([x,z])=>b.add("cyl",0x6b4422,x,Y-.4,z,.12,1.8,.12));
+  b.add("cyl",0x8a8a90,-.5,Y+.35,7.2,.3,.5,.3);b.add("cyl",0x2a6aa8,-.5,Y+.52,7.2,.26,.08,.26);
+  b.add("box",0x7a4a22,-2.6,Y+.9,-1.6,.12,1.8,.12);b.add("box",0xf5e6c8,-2.6,Y+1.7,-1.6,1.6,.7,.08);[[0,0],[.18,.18],[-.18,.18],[0,.36]].forEach(([x,y])=>b.add("sph",0x3fbf4a,-2.6+x,Y+2.2+y,-1.6,.14,.14,.06));
+  b.add("box",0xc8a46a,2.3,Y+.6,-2,1.6,1.2,1.4);b.add("prism",0x3fbf4a,2.3,Y+1.5,-2,1.05,1.6,.6,-Math.PI/2,0,0);G.add(b.mesh());
+  const f=sqNpc(G,.3,Y,7.6,{shirt:0x3fbf4a,pants:0x3a3a4a,hat:0xd8b860,skin:0xc68a5a});f.g.rotation.y=-Math.PI/2;
+  const rod=new THREE.Group(),rb=new Builder();rb.add("box",0x4a3a2a,0,1.4,0,.05,2.8,.05);rod.add(rb.mesh());rod.position.set(.4,Y+.7,7.9);rod.rotation.x=.9;G.add(rod);
+  const bob=new THREE.Group(),bb=new Builder();bb.add("sph",0xff3a3a,0,0,0,.14,.14,.14);bb.add("sph",0xffffff,0,.1,0,.08,.06,.08);bob.add(bb.mesh({outline:false}));bob.position.set(.4,.15,10.2);G.add(bob);
+  const fish=sqPop(G,6,(pb,i,g)=>{g.position.set(-.5+(i%3-1)*.12,Y+.62+Math.floor(i/3)*.12,7.2+(i%2)*.1);pb.add("sph",i===5?0xffd23a:0x8ab0c8,0,0,0,.12,.06,.06)});
+  return Object.assign(o,{anim(t,dt,pr,run,slow){if(slow)sqFill(fish,pr);bob.visible=rod.visible=run||pr>=1;bob.position.y=.15+Math.sin(t*2)*.05-(pr>=1?Math.abs(Math.sin(t*6))*.12:0);rod.rotation.x=.9+(pr>=1?Math.sin(t*6)*.08:Math.sin(t)*.03);npcAnim(f,t,dt,null,run||pr>=1?1.2:null)}})}
+// COW88: dairy ranch with a red barn and grazing cows
+function buildDairy(d,cx,cz,face){const o=sqBase(d,cx,cz,face,0x7cc04a,0x8a6a3a),{G,b,Y}=o;
+  b.add("box",0xc8382b,0,Y+1.1,-2.4,3.4,2.2,2.2);b.add("prism",0x6b2a1e,0,Y+2.6,-2.4,2.1,2.4,1,-Math.PI/2,0,0);b.add("box",0xffffff,0,Y+.8,-1.28,1.4,1.6,.05);b.add("box",0xc8382b,0,Y+.8,-1.26,1.2,1.4,.05);b.add("box",0xffffff,0,Y+.8,-1.24,1.5,.08,.05);
+  b.add("box",0xf5c732,0,Y+2.45,-1.25,.9,.5,.05);
+  for(let a=0;a<Math.PI*2;a+=Math.PI/14){const x=Math.cos(a)*4.1,z=Math.sin(a)*4.1;if(z<-1.4&&Math.abs(x)<2.4)continue;b.add("box",0xf4f0e6,x,Y+.35,z,.1,.7,.1)}
+  b.add("cyl",0xd8b45a,2.9,Y+.4,-2.2,.55,.8,.55);b.add("cyl",0xe8c870,2.9,Y+.85,-2.2,.45,.12,.45);G.add(b.mesh());
+  const cans=sqPop(G,6,(pb,i,g)=>{g.position.set(-3+(i%3)*.45,Y,-1+Math.floor(i/3)*.45);pb.add("cyl",0xc8ccd4,0,.25,0,.17,.5,.17);pb.add("cyl",0x9aa0aa,0,.55,0,.1,.1,.1)});
+  const cows=[0,1,2].map(i=>sqAnimal(G,"baka",0,Y,0,.95));const f=sqNpc(G,1.6,Y,.4,{shirt:0xf5c732,pants:0x3b5f9a,hat:0xd8b860,skin:0xc68a5a});
+  return Object.assign(o,{anim(t,dt,pr,run,slow){if(slow)sqFill(cans,pr);cows.forEach((c,i)=>{const a=t*(run?.25:.08)+i*2.1,r=2.2+.4*i%1;c.position.set(Math.cos(a)*r,Y,Math.sin(a)*r+.6);c.rotation.y=-a-Math.PI/2;sqLegs(c,t,run?6:3)});
+    f.g.rotation.y=Math.sin(t*.5)*1.2;npcAnim(f,t,dt,null,run?1.5+Math.sin(t*5)*.5:null)}})}
+// ROLL'EM: buried treasure and giant dice
+function buildDice(d,cx,cz,face){const o=sqBase(d,cx,cz,face,0xf0dca0,0xc8a46a),{G,b,Y}=o;
+  b.add("box",0xd8263a,1.6,Y+.08,1.6,1.4,.04,.22,0,.78,0);b.add("box",0xd8263a,1.6,Y+.08,1.6,1.4,.04,.22,0,-.78,0);
+  [[-1.2,0,0],[1.4,-2.2,.5]].forEach(([x,z,r])=>{});G.add(b.mesh());
+  const die=(x,z,s)=>{const g=new THREE.Group(),db=new Builder();db.add("box",0xffffff,0,0,0,s,s,s);const p=s*.51,q=s*.25;
+    [[0,0]].forEach(([u,v])=>db.add("sph",0x8a4ac0,u,p,v,.09*s,.03,.09*s));[[-q,-q],[q,q]].forEach(([u,v])=>db.add("sph",0x8a4ac0,p,u,v,.03,.09*s,.09*s));[[-q,-q],[0,0],[q,q]].forEach(([u,v])=>db.add("sph",0x8a4ac0,u,v,p,.09*s,.09*s,.03));
+    g.add(db.mesh());g.position.set(x,Y+s/2,z);G.add(g);return g};
+  const d1=die(-1.6,-1.2,1.6),d2=die(.6,-2.4,1.1);d2.rotation.y=.6;
+  const chest=new THREE.Group(),cb=new Builder();cb.add("box",0x7a4a22,0,.3,0,1.2,.6,.8);cb.add("box",0xf2c21a,0,.3,.41,.2,.25,.04);cb.add("box",0xf2c21a,0,.3,0,1.24,.08,.84);chest.add(cb.mesh());
+  const lid=new THREE.Group(),lb=new Builder();lb.add("box",0x8a5a2e,0,.12,-.4,1.2,.24,.8);lb.add("box",0xf2c21a,0,.12,-.4,1.24,.06,.84);lid.add(lb.mesh());lid.position.set(0,.6,.4);chest.add(lid);
+  const gold=new THREE.Group(),gb=new Builder();[[0,0],[.25,.1],[-.25,-.05],[.1,-.2],[-.15,.18]].forEach(([x,z])=>gb.add("sph",0xf2c21a,x,.62,z,.16,.1,.16));gb.add("sph",0xb85af0,0,.75,0,.12,.12,.12);gold.add(gb.mesh({outline:false}));chest.add(gold);
+  chest.position.set(1.6,Y-.7,1.6);G.add(chest);
+  const dirt=sqPop(G,5,(pb,i,g)=>{g.position.set(2.6+(i%2)*.4,Y,.8+i*.35);pb.add("sph",0x9a7a4a,0,0,0,.4,.25,.35)});
+  const f=sqNpc(G,.4,Y,1.4,{shirt:0x8a4ac0,pants:0x3a3a4a,hat:0x2a2a2e,skin:0xc68a5a});f.g.rotation.y=0;
+  return Object.assign(o,{anim(t,dt,pr,run,slow){if(slow)sqFill(dirt,pr);chest.position.y=Y-.7+(pr<0?0:Math.min(1,pr))*.7;lid.rotation.x=pr>=1?-1.1-Math.sin(t*3)*.1:0;gold.visible=pr>=1;
+    d1.rotation.y=pr>=1?t*.8:0;d1.position.y=Y+.8+(pr>=1?Math.abs(Math.sin(t*2))*.3:0);npcAnim(f,t,dt,null,run?2.4+Math.sin(t*9)*.9:null)}})}
+// Time2Bet: a little Time2Race practice oval with two horses training
+function buildRaceTrack(d,cx,cz,face){const o=sqBase(d,cx,cz,face,0x5aa83a,0x6e6a60),{G,b,Y}=o;
+  b.add("cyl",0xb88a5a,0,Y-.02,0,4.3,.06,4.3);b.add("cyl",0x5aa83a,0,Y+.02,0,2.9,.08,2.9);
+  for(let a=0;a<Math.PI*2;a+=Math.PI/16){[4.35,2.85].forEach(r=>b.add("box",0xffffff,Math.cos(a)*r,Y+.3,Math.sin(a)*r,.08,.6,.08))}
+  b.add("box",0xffffff,3.6,Y+.04,0,1.4,.03,.12);b.add("box",0xd8263a,3.6,Y+1.1,-.9,.1,2.2,.1);b.add("box",0xd8263a,3.6,Y+1.1,.9,.1,2.2,.1);b.add("box",0xd8263a,3.6,Y+2.2,0,.12,.3,1.9);
+  b.add("box",0xf4f0e6,0,Y+.7,-.6,2.2,1.4,1.4);b.add("prism",0xd8263a,0,Y+1.65,-.6,1.4,1.6,.55,-Math.PI/2,0,0);b.add("box",0x6b4a2c,0,Y+.55,.12,.6,1.1,.04);
+  b.add("box",0x222226,-1.4,Y+1.2,.8,.06,1.2,.06);b.add("cyl",0xffffff,-1.4,Y+1.9,.82,.32,.05,.32,Math.PI/2,0,0);G.add(b.mesh());
+  const clock=new THREE.Group(),kb=new Builder();kb.add("box",0x222226,0,.12,0,.03,.24,.03);clock.add(kb.mesh({outline:false}));clock.position.set(-1.4,Y+1.9,.86);G.add(clock);
+  const hs=[0,1].map(i=>sqAnimal(G,"kabayo",3.6,Y,i?.5:-.5,.85));const f=sqNpc(G,1.6,Y,.9,{shirt:0xd8263a,pants:0xf4f0e6,hat:0x222226,skin:0xc68a5a});
+  return Object.assign(o,{anim(t,dt,pr,run){hs.forEach((h,i)=>{if(run){const a=t*(.9-i*.12)+i*.8,r=3.55+(i?.35:-.15);h.position.set(Math.cos(a)*r,Y,Math.sin(a)*r);h.rotation.y=-a-Math.PI/2;sqLegs(h,t,12)}else{h.position.set(3.3,Y,i?.5:-.5);h.rotation.y=-Math.PI/2;sqLegs(h,t,0)}});
+    clock.rotation.z=-t*(run?3:.3);f.g.rotation.y=run?Math.atan2(-hs[0].position.z+.9,hs[0].position.x-1.6)+0:Math.sin(t*.5);npcAnim(f,t,dt,null,run?2.6:null)}})}
+// Pearl of the Seas: lagoon with giant clams and a diver
+function buildPearl(d,cx,cz,face){const o=sqBase(d,cx,cz,face,0xf4e8c8,0xd8c8a0),{G,b,Y}=o;
+  b.add("cyl",0x2fb8d8,0,Y-.02,.4,2.9,.1,2.9);b.add("cyl",0x8ae0f0,0,Y+.02,.4,2,.04,2);
+  [[-3.4,-2.2],[3.2,-2.6],[3.6,2.4]].forEach(([x,z])=>{b.add("cone4",0xff8a7a,x,Y+.4,z,.12,.8,.12);b.add("cone4",0xff8a7a,x+.2,Y+.3,z+.1,.1,.6,.1,0,0,.4)});
+  b.add("box",0x7a4a22,-3.2,Y+.9,1.8,.1,1.8,.1);b.add("box",0xf5e6c8,-3.2,Y+1.7,1.8,1.4,.6,.08);b.add("cone",0x5fd4f0,-3.2,Y+2.2,1.8,.18,.4,.18);G.add(b.mesh());
+  const clams=[[-1.2,-.4],[1.2,-.5],[-.9,1.5],[1.1,1.4]].map(([x,z],i)=>{const g=new THREE.Group(),cb=new Builder();cb.add("sph",0xf0d8e8,0,0,0,.55,.18,.45);cb.add("sph",0xffffff,0,.12,0,.14,.14,.14);g.add(cb.mesh());
+    const top=new THREE.Group(),tb=new Builder();tb.add("sph",0xe8c0d8,0,0,.45,.55,.16,.45);top.add(tb.mesh());top.position.set(0,.05,-.45);g.add(top);g.position.set(x,Y+.05,z+.4);g.rotation.y=i*1.3;G.add(g);return top});
+  const f=sqNpc(G,0,Y-.5,.4,{shirt:0x2a6aa8,pants:0x1a3a6a,hat:0x5fd4f0,skin:0xc68a5a});
+  const buoy=new THREE.Group(),bb=new Builder();bb.add("sph",0xff5a1a,0,0,0,.25,.25,.25);bb.add("cyl",0xffffff,0,.3,0,.04,.4,.04);buoy.add(bb.mesh());buoy.position.set(2.6,.2,4.8);G.add(buoy);
+  return Object.assign(o,{anim(t,dt,pr,run){clams.forEach((c,i)=>{c.rotation.x=pr>=1?-.9-Math.sin(t*2+i)*.15:run?-.2-.2*Math.max(0,Math.sin(t*1.5+i)):0});
+    f.g.position.y=run?Y-.7+Math.sin(t*1.4)*.25:Y-.3;f.g.rotation.y=t*.4;buoy.position.y=.2+Math.sin(t*1.7)*.08;npcAnim(f,t,dt,null,run?2.8+Math.sin(t*4)*.4:null)}})}
+// Isla Grande: pineapple plantation with a nipa hut
+function buildPine(d,cx,cz,face){const o=sqBase(d,cx,cz,face,0x6b3e1e,0x8a6a3a),{G,b,Y}=o;
+  for(let r=0;r<4;r++)b.add("box",0x5a3418,-.4,Y+.1,-2.1+r*1.4,5.6,.12,.5);
+  b.add("box",0xc8a46a,3.2,Y+.7,2.6,1.5,1.4,1.3);b.add("prism",0xd8b45a,3.2,Y+1.75,2.6,1.05,1.7,.75,-Math.PI/2,0,0);b.add("box",0x6b4a2c,3.2,Y+.5,3.26,.45,1,.04);
+  [[-3.5,3.1],[3.6,-3],[-3.4,-3.2]].forEach(([x,z])=>{b.add("cyl",0x8a6a3a,x,Y+1.4,z,.12,2.8,.12);for(let k=0;k<6;k++)b.add("cone4",0x3f9a3a,x+Math.cos(k)*.6,Y+2.8,z+Math.sin(k)*.6,.12,1.4,.4,Math.PI/2,k,0)});G.add(b.mesh());
+  const plants=[];for(let r=0;r<4;r++)for(let q=0;q<4;q++){const pg=new THREE.Group();pg.position.set(-2.5+q*1.4,Y+.15,-2.1+r*1.4);const pb=new Builder();pb.add("cone4",0x3f8f34,0,.35,0,.35,.6,.35);pb.add("sph",d.col,0,.75,0,.22,.3,.22);pb.add("cone4",0x3f8f34,0,1.1,0,.12,.35,.12);pg.add(pb.mesh({outline:false}));pg.visible=false;G.add(pg);plants.push(pg)}
+  const f=sqNpc(G,1.9,Y,-2.9,{shirt:d.col,pants:0x3a3a4a,hat:0xd8b860,skin:0xc68a5a});
+  return Object.assign(o,{anim(t,dt,pr,run,slow){if(slow)plants.forEach((m,i)=>{m.visible=pr>=0;m.scale.setScalar(pr<0?0:.25+.75*Math.min(1,pr*1.05+(i%3)*.02))});f.g.rotation.y=Math.sin(t*.5)*1.2;npcAnim(f,t,dt,null,run?2.4+Math.sin(t*6)*.3:null)}})}
+function buildMineQ(d,cx,cz,face){const m=buildMine(d,cx,cz,face);m.G.children.forEach(c=>{if(c.isSprite&&c!==m.glow)c.visible=true});
+  return Object.assign(m,{anim(t,dt,pr,run,slow){if(slow)sqFill(m.ores,pr);m.cart.position.z=run?2.5+1.1*Math.sin(t*.9):3.6;m.load.visible=pr>=1||(run&&Math.cos(t*.9)<0);m.f.g.rotation.y=run?Math.PI*.5:Math.sin(t*.5)*1.2;npcAnim(m.f,t,dt,null,run?2.2+Math.sin(t*9)*.9:null)}})}
+const SQ_BUILD={stall:buildStall,fish:buildFish,dairy:buildDairy,dice:buildDice,race:buildRaceTrack,pearl:buildPearl,mine:buildMineQ,pine:buildPine};
 function buildSideQuests(){const centers={gp:[IX,IZ],t2b:[T2X,T2Z],pots:[POTS.x,POTS.z],gs:[GS.x,GS.z],bigi:[BIGI.x,BIGI.z]};THEMES.forEach((T,i)=>{centers[["wfl","cow","roll"][i]]=[T.o.x,T.o.z]});
   const boats=BTN3D.filter(b=>b.userData.btn3d==="boat");
   SQDEF.forEach(d=>{const c=centers[d.id];if(!c||c[0]==null)return;let best=null,bd=1e9;boats.forEach(b=>{const q=Math.hypot(b.position.x-c[0],b.position.z-c[1]);if(q<bd&&q<90){bd=q;best=b}});if(!best)return;
     const bx=best.position.x,bz=best.position.z,dx=bx-c[0],dz=bz-c[1],L=Math.hypot(dx,dz)||1,ox=dx/L,oz=dz/L,px=-oz,pz=ox;
-    let cx=bx+ox*5+px*11,cz=bz+oz*5+pz*11,hx=bx+ox*5-px*11,hz=bz+oz*5-pz*11;if(d.id==="gp"){cx=bx+3;cz=bz+21;hx=bx+15;hz=bz+21}
-    const face=Math.atan2(ox,oz);
-    const mn=buildMine(d,cx,cz,face),hG=buildHall(d,hx,hz,face);
-    const qb=btnSprite("⛏️ Mine "+d.ore,"#b8742a","sq:"+d.id);qb.position.set(cx,6.4,cz);qb.scale.set(6.8,1.6,1);scene.add(qb);
+    let cx=bx+ox*5+px*11,cz=bz+oz*5+pz*11,hx=bx+ox*5-px*11,hz=bz+oz*5-pz*11;if(d.id==="gp"){cx=bx+3;cz=bz+21;hx=bx+15;hz=bz+21}if(d.id==="gs"){cx+=ox*9;cz+=oz*9}
+    const face=Math.atan2(ox,oz);let mn;try{mn=(SQ_BUILD[d.type]||buildMineQ)(d,cx,cz,face)}catch(e){console.warn("sq",d.id,e);return}const hG=buildHall(d,hx,hz,face);
+    const qb=btnSprite(d.btn,"#b8742a","sq:"+d.id);qb.position.set(cx,6.4,cz);qb.scale.set(6.8,1.6,1);scene.add(qb);
     const cb=btnSprite("💬 Community","#229ed9","tg:"+d.id);cb.position.set(hx,7.2,hz);cb.scale.set(5.8,1.45,1);scene.add(cb);
     SQ.sites.push(Object.assign(mn,{d,hG,cx,cz,qb,cb,bank:null}))});
   SQ.on=true}
-function sqProg(d){const v=sqSite(d.id);if(!v.at)return -1;return Math.min(1,(Date.now()-v.at)/(d.t*1000))}
+function sqNearBank(B){return SQ.on&&SQ.sites.some(q=>q.bank===B&&(Math.hypot(camT.tx-q.cx,camT.tz-q.cz)<24||Math.hypot(camT.tx-q.hG.position.x,camT.tz-q.hG.position.z)<24))}
+function sqProg(d){const v=sqSite(d.id);if(!v.at)return -1;return Math.min(1,(Date.now()-v.at)/(sqOpt(d,v).t*1000))}
 function stepSideQuests(dt,t){if(!SQ.on||!S)return;SQ._t=(SQ._t||0)-dt;const slow=SQ._t<=0;if(slow)SQ._t=.5;
   SQ.sites.forEach(q=>{{const vis=!q.bank||q.bank.open>.6;q.qb.visible=q.cb.visible=vis;q.G.visible=q.hG.visible=vis||!q.bank}if(Math.hypot(cam.tx-q.cx,cam.tz-q.cz)>80)return;const pr=sqProg(q.d),run=pr>=0&&pr<1;
-    if(slow)q.ores.forEach((m,i)=>{m.visible=pr>=0&&i<Math.ceil(pr*q.ores.length)});
-    q.cart.position.z=run?2.5+1.1*Math.sin(t*.9):3.6;q.load.visible=pr>=1||(run&&Math.cos(t*.9)<0);
-    q.glow.material.opacity=pr>=1?.35+.2*Math.sin(t*4):0;q.f.g.rotation.y=run?Math.PI*.5:Math.sin(t*.5)*1.2;npcAnim(q.f,t,dt,null,run?2.2+Math.sin(t*9)*.9:null)})}
-function openSQ(id){const d=SQDEF.find(q=>q.id===id);if(!d)return;const v=sqSite(id),pr=sqProg(d);let m=document.getElementById("sqM");if(!m){m=document.createElement("div");m.className="modal";m.id="sqM";document.body.appendChild(m)}
-  const left=pr>=0&&pr<1?Math.ceil(d.t*(1-pr)):0,st=pr<0?"The mine is quiet":pr<1?"⛏️ Mining · done in "+fmt(left):"✅ Ore cart is full!";
-  const btn=S.lv<d.lv?`<button class="btn" disabled style="width:100%;opacity:.6">Unlocks at Level ${d.lv}</button>`:pr<0?`<button class="btn" id="sqGo" style="width:100%;background:#b8742a;box-shadow:0 4px 0 #7a4a18">⛏️ Start mining · ${d.cost} coins</button>`:pr<1?`<button class="btn alt" disabled style="width:100%">⏳ Mining…</button>`:`<button class="btn" id="sqGo" style="width:100%;background:#e8a530;box-shadow:0 4px 0 #a8741a">💎 Collect ${d.ore} · +${d.pay}</button>`;
-  m.innerHTML=`<div class="suBox" style="max-width:360px"><h3 style="margin:0 0 4px">⛏️ Side Quest · ${d.n} Mine</h3><p class="suLead" style="margin:0 0 8px">Hire the miner to dig <b>${d.ore}</b>, then cash in the ore for extra coins. Each haul has a ${Math.round(SQ_RARE*100)}% chance of a rare gem that doubles the reward.</p>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;text-align:center;margin-bottom:8px"><div class="stat" style="display:block"><small>Cost</small><div><b>${d.cost}</b></div></div><div class="stat" style="display:block"><small>Dig time</small><div><b>${fmt(d.t)}</b></div></div><div class="stat" style="display:block"><small>Reward</small><div><b style="color:#2f8f3a">+${d.pay}</b></div></div></div>
-    <p style="margin:0 0 6px;font-weight:800">${st}</p><p style="margin:0 0 10px;font-size:.82rem">Daily quest: collect here ${SQ_DAILY} times today for a <b>+${SQ_BONUS}</b> coin bonus · ${Math.min(v.n,SQ_DAILY)}/${SQ_DAILY}${v.bonus?" ✅ claimed":""}</p>${btn}
-    <button class="btn alt" type="button" id="sqX" style="width:100%;margin-top:8px">Close</button></div>`;
-  m.hidden=false;$("sqX").onclick=()=>{m.hidden=true};const g=$("sqGo");if(g)g.onclick=()=>{if(VISIT)return toast("Visiting: this isn't your farm.");const p2=sqProg(d);
-    if(p2<0){if(S.coins<d.cost)return toast("Not enough coins.");S.coins-=d.cost;v.at=Date.now();toast("⛏️ The miner is digging for "+d.ore+"! Come back in "+fmt(d.t)+".",2800)}
-    else if(p2>=1){v.at=0;v.n++;const rare=Math.random()<SQ_RARE;let pay=rare?d.pay*2:d.pay,gainC=pay;if(v.n>=SQ_DAILY&&!v.bonus){v.bonus=1;gainC+=SQ_BONUS;setTimeout(()=>toast("🏆 Daily side quest done! +"+SQ_BONUS+" bonus coins",3200),2800)}gain(gainC,Math.round(d.pay/20),null);toast((rare?"💎 Rare gem! ":"💰 Sold ")+d.ore+" · +"+pay+" coins",2600)}
-    after();openSQ(id)}}
+    try{q.anim(t,dt,pr,run,slow)}catch(e){}q.glow.material.opacity=pr>=1?.35+.2*Math.sin(t*4):0})}
+function sqFinish(d,v,pay,msg){v.at=0;v.n++;let g=pay;if(v.n>=SQ_DAILY&&!v.bonus){v.bonus=1;g+=SQ_BONUS;setTimeout(()=>toast("🏆 Daily side quest done! +"+SQ_BONUS+" bonus coins",3200),2900)}if(g>0)gain(g,Math.round(sqOpt(d,v).pay/20),null);toast(msg,2800);after()}
+function openSQ(id,flash){const d=SQDEF.find(q=>q.id===id);if(!d)return;const v=sqSite(id),pr=sqProg(d),o=sqOpt(d,v);let m=document.getElementById("sqM");if(!m){m=document.createElement("div");m.className="modal";m.id="sqM";document.body.appendChild(m)}
+  const left=pr>=0&&pr<1?Math.ceil(o.t*(1-pr)):0,B="width:100%;margin-top:6px;";let body="";
+  if(S.lv<d.lv)body=`<button class="btn" disabled style="${B}opacity:.6">Unlocks at Level ${d.lv}</button>`;
+  else if(pr<0){body=d.type==="race"?`<p style="margin:0 0 4px;font-weight:800">Pick your horse · training costs ${d.cost} coins · ${fmt(d.t)}</p>`+d.opts.map((x,i)=>`<button class="btn sqO" data-i="${i}" style="${B}background:${x.c};box-shadow:0 4px 0 rgba(0,0,0,.25);text-align:left">🏇 ${x.k} <small style="opacity:.9">· ${x.odds} · ${Math.round(x.win*100)}% win</small><br><small>Win +${x.pay} · Lose +${x.lose}</small></button>`).join("")
+      :d.opts.map((x,i)=>`<button class="btn sqO" data-i="${i}" style="${B}background:#b8742a;box-shadow:0 4px 0 #7a4a18;text-align:left">${d.go} ${x.k}<br><small>${x.cost} coins · ${fmt(x.t)} · ${d.type==="fish"||d.type==="dice"||d.type==="pearl"?"about ":""}+${x.pay}</small></button>`).join("")}
+  else if(pr<1)body=`<p style="margin:0 0 6px;font-weight:800">${d.icon} ${o.k} · ready in ${fmt(left)}</p><div style="height:12px;border-radius:8px;background:#e8dcc0;overflow:hidden"><div style="height:100%;width:${Math.round(pr*100)}%;background:#3f9a3a"></div></div>`;
+  else if(d.type==="pearl"){if(!v.oy){v.oy=Array.from({length:9},()=>SQ_PEARL.indexOf(sqPickW(SQ_PEARL)));v.pk=[];after()}
+    body=`<p style="margin:0 0 6px;font-weight:800">Pick ${3-v.pk.length} more oyster${3-v.pk.length===1?"":"s"} to open</p><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">`+v.oy.map((k,i)=>{const op=v.pk.includes(i),P=SQ_PEARL[k];return `<button class="btn ${op?"alt":""} sqP" data-i="${i}" ${op?"disabled":""} style="font-size:1.4rem;padding:10px 0">${op?P.e+`<br><small style="font-size:.7rem">${P.n} +${Math.round(o.pay*P.m)}</small>`:"🦪"}</button>`}).join("")+`</div>`}
+  else body=`<p style="margin:0 0 6px;font-weight:800">✅ ${o.k} is ready!</p><button class="btn" id="sqGo" style="${B}background:#e8a530;box-shadow:0 4px 0 #a8741a">${d.done}</button>`;
+  m.innerHTML=`<div class="suBox" style="max-width:380px"><h3 style="margin:0 0 4px">${d.icon} ${d.title}</h3><p class="suLead" style="margin:0 0 8px">${d.lead}</p><div id="sqStage">${flash||""}</div>${body}
+    <p style="margin:10px 0 0;font-size:.82rem">Daily quest: finish this side quest ${SQ_DAILY} times today for a <b>+${SQ_BONUS}</b> coin bonus · ${Math.min(v.n,SQ_DAILY)}/${SQ_DAILY}${v.bonus?" ✅ claimed":""}</p>
+    <button class="btn alt" type="button" id="sqX" style="${B}margin-top:8px">Close</button></div>`;
+  m.hidden=false;m.style.display="";m.dataset.id=id;$("sqX").onclick=()=>{m.hidden=true};const re=fl=>{if(!m.hidden&&m.dataset.id===id)openSQ(id,fl)};
+  const stage=$("sqStage"),busy=()=>{m.querySelectorAll("button").forEach(x=>{if(x.id!=="sqX")x.disabled=true})};
+  m.querySelectorAll(".sqO").forEach(x=>x.onclick=()=>{if(VISIT)return toast("Visiting: this isn't your farm.");const i=+x.dataset.i,cost=d.type==="race"?d.cost:d.opts[i].cost;if(S.coins<cost)return toast("Not enough coins.");
+    S.coins-=cost;v.o=i;v.at=Date.now();delete v.oy;const o2=sqOpt(d,v);toast(d.icon+" "+o2.k+" started! Come back in "+fmt(o2.t)+".",2800);after();openSQ(id)});
+  m.querySelectorAll(".sqP").forEach(x=>x.onclick=()=>{if(VISIT)return;const i=+x.dataset.i;if(v.pk.includes(i)||v.pk.length>=3)return;v.pk.push(i);after();
+    if(v.pk.length>=3){const tot=v.pk.reduce((s,k)=>s+Math.round(o.pay*SQ_PEARL[v.oy[k]].m),0),best=v.pk.map(k=>SQ_PEARL[v.oy[k]]).sort((a,b)=>b.m-a.m)[0];const fl=`<p style="margin:0 0 8px;font-size:1.1rem;font-weight:900;color:#2f8f3a">${v.pk.map(k=>SQ_PEARL[v.oy[k]].e).join(" ")} · +${tot} coins</p>`;
+      delete v.oy;delete v.pk;sqFinish(d,v,tot,(best.m>=3?"🟡 Golden pearl! ":"🦪 Pearls sold · ")+"+"+tot+" coins");openSQ(id,fl)}else openSQ(id)});
+  const g=$("sqGo");if(g)g.onclick=()=>{if(VISIT)return toast("Visiting: this isn't your farm.");if(sqProg(d)<1)return;busy();
+    if(d.type==="dice"){const r=1+Math.floor(Math.random()*6),pay=Math.round(o.pay*SQ_DICE[r-1]);const F="⚀⚁⚂⚃⚄⚅";let k=0;const iv=setInterval(()=>{stage.innerHTML=`<div style="font-size:4rem;text-align:center;line-height:1">${F[Math.floor(Math.random()*6)]}</div>`;if(++k>14){clearInterval(iv);
+        sqFinish(d,v,pay,"🎲 Rolled "+r+" · ×"+SQ_DICE[r-1]+" · +"+pay+" coins");re(`<div style="font-size:4rem;text-align:center;line-height:1">${F[r-1]}</div><p style="text-align:center;margin:4px 0 8px;font-weight:900;color:#2f8f3a">Rolled ${r} · ×${SQ_DICE[r-1]} · +${pay} coins</p>`)}},90);return}
+    if(d.type==="race"){const H=d.opts[v.o|0],win=Math.random()<H.win,pay=win?H.pay:H.lose,lanes=d.opts.map((x,i)=>({x,me:i===(v.o|0)}));const order=lanes.slice().sort(()=>Math.random()-.5);const meI=order.findIndex(q=>q.me);order.splice(meI,1);const place=win?0:1+Math.floor(Math.random()*2);order.splice(place,0,lanes.find(q=>q.me));
+      const T=[3.2,3.7,4.1];stage.innerHTML=`<div style="background:#5aa83a;border-radius:10px;padding:6px;margin-bottom:8px">`+lanes.map((q,i)=>`<div style="position:relative;height:30px;margin:3px 0;background:#b88a5a;border-radius:6px;border-right:4px solid #fff"><div class="sqH" data-i="${i}" style="position:absolute;left:2px;top:2px;font-size:1.3rem;transition:left ${T[order.indexOf(q)]}s cubic-bezier(.3,.1,.4,1)">🏇<small style="font-size:.6rem;font-weight:900;color:${q.me?"#fff":"#333"};background:${q.x.c};border-radius:4px;padding:0 3px">${q.x.k}</small></div></div>`).join("")+`</div>`;
+      requestAnimationFrame(()=>requestAnimationFrame(()=>stage.querySelectorAll(".sqH").forEach(h=>{h.style.left="calc(100% - 110px)"})));
+      setTimeout(()=>{sqFinish(d,v,pay,win?"🏆 "+H.k+" won the race! +"+pay+" coins":"🏁 "+H.k+" finished #"+(place+1)+" · +"+pay+" coins");re(`<p style="margin:0 0 8px;font-size:1.1rem;font-weight:900;color:${win?"#2f8f3a":"#a8741a"}">${win?"🏆 "+H.k+" WON! +"+pay:"🏁 "+H.k+" finished #"+(place+1)+" · +"+pay} coins</p>`)},4400);return}
+    if(d.type==="fish"){const F=sqPickW(SQ_FISH),pay=Math.round(o.pay*F.m);sqFinish(d,v,pay,"🎣 Caught a "+F.n+"! +"+pay+" coins");openSQ(id,`<p style="margin:0 0 8px;font-size:1.1rem;font-weight:900;color:#2f8f3a">${F.e} You caught a ${F.n}! · +${pay} coins</p>`);return}
+    if(d.type==="mine"){const rare=Math.random()<SQ_RARE,pay=rare?o.pay*2:o.pay;sqFinish(d,v,pay,(rare?"💎 Rare gem! ":"💰 Sold ")+d.ore+" · +"+pay+" coins");openSQ(id,`<p style="margin:0 0 8px;font-weight:900;color:#2f8f3a">${rare?"💎 Rare gem! ":"💰 "}+${pay} coins</p>`);return}
+    const tip=d.type==="stall"?Math.round(o.pay*Math.random()*.2):0,pay=o.pay+tip;sqFinish(d,v,pay,d.icon+" "+o.k+" · +"+pay+" coins"+(tip?" (incl. +"+tip+" tips)":""));openSQ(id,`<p style="margin:0 0 8px;font-weight:900;color:#2f8f3a">${d.icon} +${pay} coins${tip?" · includes +"+tip+" in tips":""}</p>`)}}
 function openCommunity(id){const u=(TG_LINKS[id]||TG_LINK||"").trim();if(!u)return toast("💬 The community Telegram is opening soon.",2600);toast("Opening the community on Telegram…",2000);
   const emb=window.top!==window||!!(window.claude&&window.claude.use);if(emb)return openLink(u);let w=null;try{w=window.open(u,"_blank","noopener")}catch(e){}if(!w)setTimeout(()=>{location.href=u},300)}
 
@@ -8032,7 +8159,7 @@ const PULLT0=Date.now();document.addEventListener("visibilitychange",()=>{if(!do
 async function linkPw(u,pw){if(!API||!u||!pw)return;try{SYNC.pulled=true;await netSend(true);
   if(NET.taken){try{await postJ("login",{u,pw,tok:myTok()});NET.taken=false;SYNC.base=0;toast("☁️ This device is linked again. Getting your latest farm…",2600);await pullSync(true);return}catch(e){return}}
   await postJ("setpw",{u,tok:myTok(),pw})}catch(e){}}
-const IS_APP=!!((window.matchMedia&&(matchMedia("(display-mode: standalone)").matches||matchMedia("(display-mode: fullscreen)").matches))||navigator.standalone||/android-app:/.test(document.referrer||""));
+const IS_APP=!!((window.matchMedia&&(matchMedia("(display-mode: standalone)").matches||matchMedia("(display-mode: fullscreen)").matches))||navigator.standalone||/android-app:/.test(document.referrer||""));const ZMAX=!IS_APP&&!(window.matchMedia&&matchMedia("(pointer:coarse)").matches)?108:90;
 let netT=2;function stepNet(dt){if(!API||VISIT||!myUser())return;netT-=dt;if(netT>0)return;netT=60;const full=Date.now()-NET.lastFull>55000;if(full)NET.lastFull=Date.now();netSend(full)}
 window.addEventListener("pagehide",()=>{if(API&&!VISIT&&myUser()&&navigator.sendBeacon){const u=myUser(),tok=myTok(),p=CLOUD.local||{};try{navigator.sendBeacon(API+"publish",new Blob([JSON.stringify({u,tok,farm:p.farm||"",farmer:p.farmer||"",shirt:p.shirt|0,lv:S.lv,size:S.size,state:snapState()})],{type:"application/json"}))}catch(e){}}});
 const isOn=f=>NET.now-f.seen<ONLINE_MS;
