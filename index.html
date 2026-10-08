@@ -294,7 +294,7 @@ body:not(.land) #menuBtn{display:inline-block!important}
 body:not(.land):not(.rot) .stage{height:calc(100vh - 96px);height:calc(100dvh - 96px);min-height:380px}
 
 /* workers list lives in the Menu, not on the farm screen */
-#crewHome .crew,#below .crew{position:static!important;top:auto!important;bottom:auto!important;left:auto!important;right:auto!important;max-width:none!important;max-height:none!important;overflow:visible!important;display:grid!important;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+#crewM .crew,#crewHome .crew,#below .crew{position:static!important;top:auto!important;bottom:auto!important;left:auto!important;right:auto!important;max-width:none!important;max-height:none!important;overflow:visible!important;display:grid!important;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}.toolbar{display:none!important}#crewM .suBox{max-width:560px;width:min(560px,100%)}
 #below .crew .crewc{background:#fff6df}
 #below .crew>*{display:flex!important}#below .crew>.cw-toggle{display:none!important}
 /* fixed-angle camera pad: move and zoom only */
@@ -466,7 +466,7 @@ body.land .sbtns .sb{font-size:.6rem!important;padding:3px 6px!important}
     <button class="btn" id="tBuyCoins" style="display:none!important;background:#e8a530;box-shadow:0 4px 0 #a8741a">💰 Buy Coins</button>
     <button class="btn alt" id="tPlot"></button>
     <button class="btn alt" id="tMoveLand" hidden style="display:none!important">📐 Move Land</button><button class="btn alt" id="tHills" hidden>⛰️ Bring back hills</button>
-    <button class="btn" id="tHelper"></button>
+    <button class="btn" id="tHelper"></button><button class="btn" id="crewBtn" type="button" style="background:#2f8f5a;box-shadow:0 4px 0 #1d6a3e">👷 Helpers Menu</button>
     <button class="btn" id="tHire" style="background:#2f7fb8;box-shadow:0 4px 0 #1d5a85"></button>
     <button class="btn" id="tHspd" style="background:#e07a2a;box-shadow:0 4px 0 #a5521a"></button>
     <button class="btn" id="tCure" style="background:#c0392b;box-shadow:0 4px 0 #8a2a1f">Treat All</button>
@@ -2730,7 +2730,7 @@ function setTool(k){if(!TOOLS[k])return;TOOL=k;document.querySelectorAll(".tb").
   const m=$("modeTag");m.textContent=k==="plant"?"Plant: "+crop(S.sel).n+" · tap the soil":TOOLS[k];m.style.opacity=1;clearTimeout(modeT);modeT=setTimeout(()=>m.style.opacity=k==="move"?0:.85,2600)}
 document.querySelectorAll(".tb").forEach(b=>b.onclick=()=>{if(SEL)selectWorker(null);setTool(b.dataset.t)});
 window.addEventListener("keydown",e=>{if(e.key==="Escape"&&SEL){selectWorker(null);setTool("move")}});
-window.addEventListener("keydown",e=>{if(e.target&&(e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA"))return;const k={"1":"move","2":"harvest","3":"care"}[e.key];if(k)setTool(k)});
+window.addEventListener("keydown",e=>{if(e.target&&(e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA"))return;const k={"1":"move"}[e.key];if(k)setTool(k)});
 function toolOk(i){const t=S.tiles[i];if(!t)return null;
   if(TOOL==="move"){if(t.k==="grass"||t.k==="soil")return true;const st=tileState(t);return!!(st&&(st.p>=1||st.dead))}
   if(TOOL==="plow")return t.k==="grass";
@@ -2904,7 +2904,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="201";const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
+const GAMEVER="202";const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
 if(TESTSRV){document.title="🧪 TEST · "+document.title;const tb=document.createElement("div");tb.id="testBar";tb.textContent=MIRROR_TEST?"🧪 TEST SERVER · a copy of your farm · changes here don't touch your real farm":"🧪 TEST SERVER · changes here don't touch your real farm";tb.style.cssText="position:fixed;left:50%;top:0;transform:translateX(-50%);z-index:9999;background:#7a3fc0;color:#fff;font:900 11px/1.2 sans-serif;padding:3px 10px;border-radius:0 0 10px 10px;pointer-events:none;letter-spacing:.3px";document.addEventListener("DOMContentLoaded",()=>document.body.appendChild(tb));if(document.body)document.body.appendChild(tb)}let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 /* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
 (function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
@@ -5083,8 +5083,8 @@ const TG_LINK="https://t.me/+9agzaT5X2GI3NzU1";const TG_LINKS={main:"https://t.m
 const SQ={sites:[],on:false,tex:null};
 // every island and city has its own themed side quest with its own mini-game
 const SQDEF=[
- {id:"gp",n:"GoPyesta Island",type:"stall",icon:"🍢",title:"Fiesta Food Stall",btn:"🍢 Fiesta Stall",col:0xff8ad8,lv:1,lead:"Cook fiesta food at the stall and sell it to the party crowd.",
-  opts:[{k:"Halo-halo",cost:40,t:180,pay:170},{k:"Inihaw na Liempo",cost:60,t:300,pay:260},{k:"Lechon",cost:130,t:600,pay:560}],go:"🔥 Cook",done:"💰 Sell it all"},
+ {id:"gp",n:"GoPyesta Island",type:"park",icon:"🎠",title:"Fountain Plaza Ride Operator",btn:"🎠 Ride Operator",col:0xff8ad8,lv:1,lead:"Work a shift as the amusement park's ride operator at the fountain plaza. Sell tickets, keep the rides running and the plaza clean, then collect the ride earnings.",
+  opts:[{k:"Morning shift",cost:40,t:600,pay:200},{k:"Afternoon shift",cost:70,t:600,pay:320},{k:"Night shift",cost:130,t:600,pay:580}],go:"🎟️ Start the",done:"💰 Collect ride earnings"},
  {id:"wfl",n:"WIN FOR LIFE",type:"fish",icon:"🎣",title:"Lucky Fishing Pier",btn:"🎣 Lucky Fishing",col:0x3fbf4a,lv:2,lead:"Cast a line off the lucky pier. Every catch is different, and the Golden Clover Fish pays 4×.",
   opts:[{k:"Worm bait",cost:80,t:360,pay:300},{k:"Lucky lure",cost:150,t:600,pay:560}],go:"🎣 Cast",done:"🎣 Reel it in"},
  {id:"cow",n:"COW88",type:"dairy",icon:"🐄",title:"COW88 Dairy Ranch",btn:"🐄 Dairy Ranch",col:0xf5c732,lv:3,lead:"Feed the ranch cows, then sell what the dairy makes.",
@@ -5107,6 +5107,7 @@ const SQ_DICE=[.5,.75,1,1.25,1.5,2];
 const SQ_T=600,SQ_TH=[0,.3,.65];
 SQDEF.forEach(d=>{d.opts.forEach(o=>{o.t=SQ_T});if(d.t)d.t=SQ_T});
 const SQ_TASKS={
+ park:[{n:"Sell ride tickets",k:"pick",tgt:"🙋",to:"🎟️",bad:["🐦","🎈","🐕"],c:7,h:"Sell a ticket to every guest raising a hand. Ignore the pigeons and balloons."},{n:"Oil the carousel",k:"tap",e:"🛢️",c:18,h:"Keep tapping to oil the carousel gears so the horses keep turning."},{n:"Fish wishing coins out of the fountain",k:"grid",from:["🪙","🪙","💧"],to:"✨",c:9,h:"Tap every coin in the fountain to scoop it out. The coins go to the ride earnings!"}],
  stall:[{n:"Chop the ingredients",k:"grid",from:["🧅","🍅","🥬","🧄"],to:"🔪",c:8,h:"Tap every ingredient to chop it."},{n:"Fan the grill",k:"tap",e:"🪭",c:15,h:"Tap fast to fan the charcoal until the fire is hot."},{n:"Serve the customers",k:"pick",tgt:"🙋",to:"😋",bad:["🚶","🐈","🐕"],c:6,h:"Serve only the customers raising a hand."}],
  fish:[{n:"Dig up bait worms",k:"pick",tgt:"🪱",to:"🪣",bad:["🪨","🐚","🌿"],c:6,h:"Pick up only the worms."},{n:"Cast the line",k:"timing",e:"🎣",btn:"Cast!",c:3,h:"Tap Cast when the marker is inside the green zone. Land 3 good casts."},{n:"Mend the fishing net",k:"grid",from:["🕳️"],to:"🧶",c:8,h:"Tap every hole to tie it shut."}],
  dairy:[{n:"Feed the cows",k:"grid",from:["🐄"],to:"🌾",c:6,h:"Give every hungry cow some hay."},{n:"Clean the barn",k:"pick",tgt:"💩",to:"✨",bad:["🐄","🪣","🐓"],c:7,h:"Scoop only the mess, not the animals."},{n:"Milk the cows",k:"tap",e:"🥛",c:18,h:"Keep tapping to milk until the pail is full."}],
@@ -5115,7 +5116,7 @@ const SQ_TASKS={
  pearl:[{n:"Put on the diving gear",k:"grid",from:["🤿","🩱","🧤"],to:"✅",c:6,h:"Tap each piece of gear to put it on."},{n:"Collect oysters",k:"pick",tgt:"🦪",to:"🧺",bad:["🪸","🐠","🪼"],c:6,h:"Pick up only the oysters. Don't touch the jellyfish!"},{n:"Shoo away the crabs",k:"grid",from:["🦀"],to:"💨",c:7,h:"Tap every crab before it steals a pearl."}],
  mine:[{n:"Light the lanterns",k:"grid",from:["🕯️"],to:"🔥",c:6,h:"Light every lantern in the mine shaft."},{n:"Swing the pickaxe",k:"tap",e:"⛏️",c:20,h:"Keep tapping to break the opal out of the rock."},{n:"Load the minecart",k:"pick",tgt:"💎",to:"🛒",bad:["🪨"],c:7,h:"Load only the opal chunks, not the plain rocks."}],
  pine:[{n:"Plant the seedlings",k:"grid",from:["🟫"],to:"🌱",c:9,h:"Tap every patch of soil to plant a seedling."},{n:"Water the field",k:"grid",from:["🌱"],to:"💧",c:9,h:"Tap every seedling to water it."},{n:"Pull the weeds",k:"pick",tgt:"🌿",to:"✨",bad:["🍍"],c:6,h:"Pull only the weeds and leave the pineapples."}]};
-const SQ_TIP={stall:"Customers leave a random tip of up to 20%.",fish:"The fish you reel in is random. The ✨ Golden Clover Fish pays 4×.",dairy:"The reward is fixed, so this is the safest side quest for steady coins.",dice:"The number you roll multiplies the treasure, from ½× on a 1 up to 2× on a 6.",race:"If your horse wins you get its full prize; otherwise a consolation prize. The longshot pays the most.",pearl:"Your 3 pearls are added together. A 🟡 Golden pearl alone is worth 3×.",mine:"Each haul has a 15% chance of a 💎 rare gem that doubles the reward.",pine:"The reward is fixed. Start again right away to keep the field busy."};
+const SQ_TIP={park:"Guests also leave a random tip of up to 20% at the ticket booth.",stall:"Customers leave a random tip of up to 20%.",fish:"The fish you reel in is random. The ✨ Golden Clover Fish pays 4×.",dairy:"The reward is fixed, so this is the safest side quest for steady coins.",dice:"The number you roll multiplies the treasure, from ½× on a 1 up to 2× on a 6.",race:"If your horse wins you get its full prize; otherwise a consolation prize. The longshot pays the most.",pearl:"Your 3 pearls are added together. A 🟡 Golden pearl alone is worth 3×.",mine:"Each haul has a 15% chance of a 💎 rare gem that doubles the reward.",pine:"The reward is fixed. Start again right away to keep the field busy."};
 function sqEl(v){if(v.tk==null){v.tk=3;v.el=0}const T=SQ_T*1000,cap=v.tk>=3?T:SQ_TH[v.tk]*T;return Math.min((v.el||0)+(Date.now()-v.at),cap)}
 function sqProg(d){const v=sqSite(d.id);if(!v.at)return -1;return Math.min(1,sqEl(v)/(SQ_T*1000))}
 function sqDue(d){const v=sqSite(d.id);if(!v.at||v.tk==null||v.tk>=3)return false;return sqEl(v)>=SQ_TH[v.tk]*SQ_T*1000}
@@ -5134,7 +5135,7 @@ function sqGame(box,t,done){const shuf=a=>{for(let i=a.length-1;i>0;i--){const j
   else if(t.k==="search"){const x=Math.floor(Math.random()*t.c);const it=Array(t.c).fill("❓");grid(it,(b,i)=>{if(b.disabled)return;b.disabled=true;if(i===x){b.textContent=t.e;b.style.background="#ffe9a8";toast("📍 Found it!",1200);setTimeout(done,500)}else{b.textContent="🏝️";b.style.opacity=".6"}})}}
 const sqPickW=a=>{let r=Math.random()*a.reduce((s,x)=>s+x.w,0);for(const x of a){r-=x.w;if(r<=0)return x}return a[0]};
 // step-by-step guides so players know exactly what to do for extra coins
-const SQ_WHERE={gp:"GoPyesta Island, beside the boat dock",wfl:"WIN FOR LIFE city, beside its Ride Boat dock",cow:"COW88 city, beside its Ride Boat dock",roll:"ROLL'EM city, beside its Ride Boat dock",t2b:"Time2Bet, beside its Ride Boat dock",pots:"Pearl of the Seas, beside its Ride Boat dock",gs:"GameSpot island, out on the water past its boat dock",bigi:"Isla Grande, beside its Ride Boat dock"};
+const SQ_WHERE={gp:"the amusement park, at the fountain in the middle of the plaza",wfl:"WIN FOR LIFE city, beside its Ride Boat dock",cow:"COW88 city, beside its Ride Boat dock",roll:"ROLL'EM city, beside its Ride Boat dock",t2b:"Time2Bet, beside its Ride Boat dock",pots:"Pearl of the Seas, beside its Ride Boat dock",gs:"GameSpot island, out on the water past its boat dock",bigi:"Isla Grande, beside its Ride Boat dock"};
 const SQ_STEPS={
  stall:["Sail to GoPyesta Island and find the striped Fiesta Food Stall beside the boat dock.","Tap <b>🍢 Fiesta Stall</b> and choose a dish. You pay for the ingredients up front.","The cook starts grilling and the dishes fill the counter. You can leave and keep farming, because the timer keeps running even while you are offline.","When the stall glows and customers line up, come back and tap <b>💰 Sell it all</b>.","You earn the dish price plus a random tip of up to 20%. Quick dishes are fast coins; Lechon takes longer but pays the most."],
  fish:["Go to the WIN FOR LIFE city and walk out to the Lucky Fishing Pier beside the boat dock.","Tap <b>🎣 Lucky Fishing</b> and pick your bait. The Lucky lure costs more but every fish is worth more.","The fisherman casts and waits. Come back when the bobber starts jumping and the pier glows.","Tap <b>🎣 Reel it in</b>. The fish you catch is random: see the catch table below.","Hope for the ✨ Golden Clover Fish: it pays 4× the bait's base value."],
@@ -5151,7 +5152,7 @@ function sqTable(d){const o=d.opts,th=(a)=>`<tr>${a.map(x=>`<th style="text-alig
   if(d.type==="dice")h+=`<p style="margin:6px 0 0;font-weight:800">Dice table</p>`+T(th(["Roll","×","Coins"])+SQ_DICE.map((m,i)=>tr(["⚀⚁⚂⚃⚄⚅"[i]+" "+(i+1),m+"×","+"+Math.round(o[0].pay*m)])).join(""));
   if(d.type==="pearl")h+=`<p style="margin:6px 0 0;font-weight:800">What an oyster can hold (pick 3)</p>`+T(th(["Inside","Chance","Coins each"])+SQ_PEARL.map(p=>tr([p.e+" "+p.n,pct(SQ_PEARL,p),"+"+Math.round(o[0].pay*p.m)])).join(""));
   if(d.type==="mine")h+=T(th(["Haul","Chance","Coins"])+tr(["💰 Fire Opal","85%","+"+o[0].pay])+tr(["💎 Rare gem","15%","+"+o[0].pay*2]));
-  if(d.type==="stall")h+=`<p style="margin:4px 0 0;font-size:.78rem">Customers leave a random tip of 0–20% on top of the price.</p>`;
+  if(d.type==="stall"||d.type==="park")h+=`<p style="margin:4px 0 0;font-size:.78rem">Customers leave a random tip of 0–20% on top of the price.</p>`;
   return h}
 function sqSteps(d){const tk=SQ_TASKS[d.type]||[],at=["right away","after about "+fmt(Math.round(SQ_TH[1]*SQ_T)),"after about "+fmt(Math.round(SQ_TH[2]*SQ_T))];
   return [`Go to ${SQ_WHERE[d.id]||d.n} and tap the <b>${d.btn}</b> button above the site.`,`Choose ${d.type==="race"?"your horse":"what to do"} and pay the cost. The side quest takes <b>${fmt(SQ_T)}</b> in total.`,
@@ -5214,10 +5215,11 @@ function buildHall(d,hx,hz,face,gy){const G=new THREE.Group();G.position.set(hx,
   b.add("box",0xe8e8e8,2.2,Y+1.4,-1.9,.06,2.8,.06);b.add("box",0x229ed9,2.6,Y+2.5,-1.9,.8,.5,.03);
   G.add(b.mesh());return G}
 // look down at the city from above and find a clear spot (ground level, nothing built on it) for a Community Hall
-function sqFindSpot(cx0,cz0,bx,bz,ox,oz,px,pz){const rc=new THREE.Raycaster();rc.camera=camera;scene.updateMatrixWorld(true);const near=[],v=new THREE.Vector3();
-  scene.traverse(o=>{if(!o.isMesh||!o.geometry)return;const g=o.geometry;if(!g.boundingSphere)g.computeBoundingSphere();if(!g.boundingSphere)return;v.copy(g.boundingSphere.center).applyMatrix4(o.matrixWorld);const r=g.boundingSphere.radius*o.matrixWorld.getMaxScaleOnAxis();if(Math.hypot(v.x-bx,v.z-bz)<70+r)near.push(o)});
+function sqFindSpot(cx0,cz0,bx,bz,ox,oz,px,pz,nr){const rc=new THREE.Raycaster();rc.camera=camera;scene.updateMatrixWorld(true);const near=[],v=new THREE.Vector3();
+  scene.traverse(o=>{if(!o.isMesh||!o.geometry)return;const g=o.geometry;if(!g.boundingSphere)g.computeBoundingSphere();if(!g.boundingSphere)return;v.copy(g.boundingSphere.center).applyMatrix4(o.matrixWorld);const r=g.boundingSphere.radius*o.matrixWorld.getMaxScaleOnAxis();if(Math.hypot(v.x-bx,v.z-bz)<70+r||(nr&&Math.hypot(v.x-nr[0],v.z-nr[1])<45+r))near.push(o)});
   const top=(x,z)=>{rc.set(new THREE.Vector3(x,80,z),new THREE.Vector3(0,-1,0));const h=rc.intersectObjects(near,false).find(q=>q.object.visible&&q.object.material&&!q.object.material.transparent);return h?h.point.y:-9};
   const ok=(x,z)=>{let lo=99,hi=-99;for(let a=-2.6;a<=2.6;a+=1.3)for(let c=-2.6;c<=2.6;c+=1.3){const y=top(x+a,z+c);if(y<.8||y>3.2)return null;lo=Math.min(lo,y);hi=Math.max(hi,y)}return hi-lo<.4?hi:null};
+  if(nr)for(let r=7;r<=30;r+=2.5)for(let q=0;q<24;q++){const an=q/24*Math.PI*2+r*.37,x=nr[0]+Math.cos(an)*r,z=nr[1]+Math.sin(an)*r,y=ok(x,z);if(y!=null)return[x,z,y]}
   const L=Math.hypot(bx-cx0,bz-cz0);for(let k=6;k<Math.min(L,40);k+=2.5)for(const s of[0,3,-3,6,-6,9,-9,12,-12,15,-15]){const x=bx-ox*k+px*s,z=bz-oz*k+pz*s,y=ok(x,z);if(y!=null)return[x,z,y]}
   for(let r=8;r<Math.max(L,30)*1.1;r+=3)for(let q=0;q<28;q++){const an=q/28*Math.PI*2,x=cx0+Math.cos(an)*r,z=cz0+Math.sin(an)*r,y=ok(x,z);if(y!=null)return[x,z,y]}
   return null}
@@ -5316,25 +5318,36 @@ function buildPine(d,cx,cz,face){const o=sqBase(d,cx,cz,face,0x6b3e1e,0x8a6a3a),
   return Object.assign(o,{anim(t,dt,pr,run,slow){if(slow)plants.forEach((m,i)=>{m.visible=pr>=0;m.scale.setScalar(pr<0?0:.25+.75*Math.min(1,pr*1.05+(i%3)*.02))});f.g.rotation.y=Math.sin(t*.5)*1.2;npcAnim(f,t,dt,null,run?2.4+Math.sin(t*6)*.3:null)}})}
 function buildMineQ(d,cx,cz,face){const m=buildMine(d,cx,cz,face);m.G.children.forEach(c=>{if(c.isSprite&&c!==m.glow)c.visible=true});
   return Object.assign(m,{anim(t,dt,pr,run,slow){if(slow)sqFill(m.ores,pr);m.cart.position.z=run?2.5+1.1*Math.sin(t*.9):3.6;m.load.visible=pr>=1||(run&&Math.cos(t*.9)<0);m.f.g.rotation.y=run?Math.PI*.5:Math.sin(t*.5)*1.2;npcAnim(m.f,t,dt,null,run?2.2+Math.sin(t*9)*.9:null)}})}
-const SQ_BUILD={stall:buildStall,fish:buildFish,dairy:buildDairy,dice:buildDice,race:buildRaceTrack,pearl:buildPearl,mine:buildMineQ,pine:buildPine};
+// amusement park: a small ticket booth beside the central fountain, with the ride operator
+function buildParkQ(d,cx,cz,face){const G=new THREE.Group();G.position.set(cx,0,cz);scene.add(G);const b=new Builder(),Y=1.2;
+  b.add("box",0xff8ad8,0,Y+.7,0,1.3,1.4,1);b.add("box",0xffffff,0,Y+1.5,0,1.6,.14,1.3);for(let k=0;k<4;k++)b.add("box",k%2?0xffffff:0xff5aa8,-.6+k*.4,Y+1.65,0,.4,.12,1.3);b.add("box",0x9fd8f5,0,Y+1,.52,.9,.5,.04);b.add("box",0xf5c732,0,Y+1.85,.4,1.1,.3,.06);
+  G.add(b.mesh());const glow=new THREE.Sprite(new THREE.SpriteMaterial({color:d.col,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending,map:SQ.tex||(SQ.tex=sqGlow())}));glow.position.set(-3.2,Y+1.5,0);glow.scale.set(9,9,1);G.add(glow);
+  const f=sqNpc(G,.9,Y,.9,{shirt:0xff5aa8,pants:0x1f3a7a,hat:0xf5c732,skin:0xc68a5a});
+  return {G,glow,f,anim(t,dt,pr,run){f.g.rotation.y=Math.sin(t*.6)*1.2;npcAnim(f,t,dt,null,run?1.8+Math.sin(t*5)*.5:null)}}}
+const SQ_BUILD={park:buildParkQ,stall:buildStall,fish:buildFish,dairy:buildDairy,dice:buildDice,race:buildRaceTrack,pearl:buildPearl,mine:buildMineQ,pine:buildPine};
 // a white "thinking" cloud bubble that floats over each Community Hall
-function cloudBtnSprite(text,act){const c=document.createElement("canvas");c.width=512;c.height=300;const x=c.getContext("2d");
-  const draw=()=>{x.clearRect(0,0,512,300);const puffs=[[256,112,92],[160,124,70],[352,124,72],[96,150,50],[420,150,52],[200,170,64],[316,172,62],[256,182,60]];
-    const cloud=(dx,dy,col)=>{x.fillStyle=col;x.beginPath();puffs.forEach(([px,py,r])=>{x.moveTo(px+dx+r,py+dy);x.arc(px+dx,py+dy,r,0,Math.PI*2)});x.fill()};
-    cloud(0,8,"rgba(0,0,0,.18)");x.save();x.lineWidth=14;x.strokeStyle="#229ed9";x.beginPath();puffs.forEach(([px,py,r])=>{x.moveTo(px+r,py);x.arc(px,py,r,0,Math.PI*2)});x.stroke();x.restore();cloud(0,0,"#ffffff");
-    [[150,248,20],[112,276,12],[86,294,7]].forEach(([px,py,r])=>{x.fillStyle="#229ed9";x.beginPath();x.arc(px,py,r+5,0,Math.PI*2);x.fill();x.fillStyle="#fff";x.beginPath();x.arc(px,py,r,0,Math.PI*2);x.fill()});
-    x.fillStyle="#229ed9";x.beginPath();x.moveTo(214,72);x.lineTo(298,46);x.lineTo(270,112);x.lineTo(252,92);x.lineTo(236,104);x.lineTo(240,86);x.closePath();x.fill();x.fillStyle="#fff";x.beginPath();x.moveTo(240,86);x.lineTo(290,52);x.lineTo(252,92);x.closePath();x.fill();
-    x.fillStyle="#1a6fa8";x.textAlign="center";x.textBaseline="middle";const w=text.split(" ");x.font="900 50px Nunito, Arial Rounded MT Bold, Arial, sans-serif";x.fillText(w[0]||"",256,142,330);x.fillText(w.slice(1).join(" "),256,192,350)};draw();
-  const tex=new THREE.CanvasTexture(c),sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,depthTest:false,transparent:true}));sp.renderOrder=20;sp.userData.btn3d=act;BTN3D.push(sp);
+function cloudBtnSprite(text,act){const c=document.createElement("canvas");c.width=512;c.height=340;const x=c.getContext("2d");
+  const draw=()=>{x.clearRect(0,0,512,340);const puffs=[[256,110,96],[150,128,74],[362,128,74],[84,158,52],[428,158,52],[186,184,66],[326,184,66],[256,192,64]];
+    const shape=(dx,dy)=>{x.beginPath();puffs.forEach(([px,py,r])=>{x.moveTo(px+dx+r,py+dy);x.arc(px+dx,py+dy,r,0,Math.PI*2)})};
+    x.fillStyle="rgba(0,0,0,.18)";shape(0,8);x.fill();x.lineWidth=14;x.strokeStyle="#229ed9";shape(0,0);x.stroke();x.fillStyle="#fff";shape(0,0);x.fill();
+    [[256,280,19],[256,312,11],[256,333,6]].forEach(([px,py,r])=>{x.fillStyle="#229ed9";x.beginPath();x.arc(px,py,r+5,0,Math.PI*2);x.fill();x.fillStyle="#fff";x.beginPath();x.arc(px,py,r,0,Math.PI*2);x.fill()});
+    x.save();x.translate(256,62);x.fillStyle="#229ed9";x.beginPath();x.moveTo(-34,4);x.lineTo(34,-22);x.lineTo(14,28);x.lineTo(2,14);x.lineTo(-10,22);x.lineTo(-8,8);x.closePath();x.fill();x.fillStyle="#fff";x.beginPath();x.moveTo(-8,8);x.lineTo(28,-17);x.lineTo(2,14);x.closePath();x.fill();x.restore();
+    const w=text.split(" "),l1=w[0]||"",l2=w.slice(1).join(" "),F="Nunito, Arial Rounded MT Bold, Arial, sans-serif";let fs=60;do{x.font="900 "+fs+"px "+F}while(Math.max(x.measureText(l1).width,x.measureText(l2).width)>292&&--fs>20);
+    x.fillStyle="#1a6fa8";x.textAlign="center";x.textBaseline="middle";x.fillText(l1,256,128);x.fillText(l2,256,128+fs*1.02)};draw();
+  const tex=new THREE.CanvasTexture(c),sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,depthTest:false,transparent:true}));sp.renderOrder=20;sp.userData.btn3d=act;BTN3D.push(sp);sp.center.set(.5,0);
   try{if(document.fonts)document.fonts.ready.then(()=>{draw();tex.needsUpdate=true})}catch(e){}return sp}
+window.__sqFind=id=>sqFindSpot(...SQ.args[id]);
+// Community Hall spots: clear ground next to each site's main Enter button (found once with sqFindSpot)
+const SQ_HALL={gp:[78.25,37.17,1.27],wfl:[246.45,-98.38,1.2],cow:[294.37,75.72,1.3],roll:[379.65,-23.46,1.32],t2b:[137.41,129.92,1.3],pots:[274,230.11,1.33],gs:[434,211.3,1.28],bigi:[457.92,47.01,1.59]};
+const SQ_ENTER={gp:"carnival",wfl:"theme0",cow:"theme1",roll:"theme2",t2b:"t2bEnter",pots:"potsEnter",gs:"gsEnter"};
 function buildSideQuests(){const centers={gp:[IX,IZ],t2b:[T2X,T2Z],pots:[POTS.x,POTS.z],gs:[GS.x,GS.z],bigi:[BIGI.x,BIGI.z]};THEMES.forEach((T,i)=>{centers[["wfl","cow","roll"][i]]=[T.o.x,T.o.z]});
   const boats=BTN3D.filter(b=>b.userData.btn3d==="boat");
   SQDEF.forEach(d=>{const c=centers[d.id];if(!c||c[0]==null)return;let best=null,bd=1e9;boats.forEach(b=>{const q=Math.hypot(b.position.x-c[0],b.position.z-c[1]);if(q<bd&&q<90){bd=q;best=b}});if(!best)return;
     const bx=best.position.x,bz=best.position.z,dx=bx-c[0],dz=bz-c[1],L=Math.hypot(dx,dz)||1,ox=dx/L,oz=dz/L,px=-oz,pz=ox;
-    let cx=bx+ox*5+px*11,cz=bz+oz*5+pz*11,hx=bx+ox*5-px*11,hz=bz+oz*5-pz*11,hy=null;if(d.id==="gp"){cx=bx+3;cz=bz+21;hx=bx+15;hz=bz+21}{let sp=null;try{sp=sqFindSpot(c[0],c[1],bx,bz,ox,oz,px,pz)}catch(e){console.warn("sq spot",e)}if(!sp&&d.id==="gs")sp=[c[0]-16,c[1]-40,1.2];if(sp){hx=sp[0];hz=sp[1];hy=sp[2]}}if(d.id==="gs"){cx+=ox*9;cz+=oz*9}
+    let cx=bx+ox*5+px*11,cz=bz+oz*5+pz*11,hx=bx+ox*5-px*11,hz=bz+oz*5-pz*11,hy=null;if(d.id==="gp"){cx=PARK.x+4.6;cz=PARK.z+6;hx=bx+15;hz=bz+21}{const eb=BTN3D.find(b=>b.userData.btn3d===SQ_ENTER[d.id]);let nr=null;if(eb){const w=new THREE.Vector3();eb.getWorldPosition(w);nr=[w.x,w.z]}(SQ.args=SQ.args||{})[d.id]=[c[0],c[1],bx,bz,ox,oz,px,pz,nr];const sp=SQ_HALL[d.id];if(sp){hx=sp[0];hz=sp[1];hy=sp[2]}}if(d.id==="gs"){cx+=ox*9;cz+=oz*9}
     const face=Math.atan2(ox,oz);let mn;try{mn=(SQ_BUILD[d.type]||buildMineQ)(d,cx,cz,face)}catch(e){console.warn("sq",d.id,e);return}const hG=buildHall(d,hx,hz,face,hy);
     const qb=btnSprite(d.btn,"#b8742a","sq:"+d.id);qb.position.set(cx,6.4,cz);qb.scale.set(6.8,1.6,1);scene.add(qb);
-    const cb=cloudBtnSprite("ENTER COMMUNITY","tg:"+d.id);cb.position.set(hx,(hy==null?1:hy)+7.4,hz);cb.scale.set(7,4.2,1);scene.add(cb);
+    const cb=cloudBtnSprite("ENTER COMMUNITY","tg:"+d.id);cb.position.set(hx,(hy==null?1:hy)+3.9,hz);cb.scale.set(6.2,4.1,1);scene.add(cb);
     const nd=labelSprite("❗ Your turn!");nd.position.set(cx,8.3,cz);nd.scale.set(4.4,1.1,1);nd.visible=false;scene.add(nd);
     SQ.sites.push(Object.assign(mn,{d,hG,cx,cz,qb,cb,nd,bank:null}))});
   SQ.on=true}
@@ -5374,7 +5387,7 @@ function openSQ(id,flash,guide){const d=SQDEF.find(q=>q.id===id);if(!d)return;co
       setTimeout(()=>{sqFinish(d,v,pay,win?"🏆 "+H.k+" won the race! +"+pay+" coins":"🏁 "+H.k+" finished #"+(place+1)+" · +"+pay+" coins");re(`<p style="margin:0 0 8px;font-size:1.1rem;font-weight:900;color:${win?"#2f8f3a":"#a8741a"}">${win?"🏆 "+H.k+" WON! +"+pay:"🏁 "+H.k+" finished #"+(place+1)+" · +"+pay} coins</p>`)},4400);return}
     if(d.type==="fish"){const F=sqPickW(SQ_FISH),pay=Math.round(o.pay*F.m);sqFinish(d,v,pay,"🎣 Caught a "+F.n+"! +"+pay+" coins");openSQ(id,`<p style="margin:0 0 8px;font-size:1.1rem;font-weight:900;color:#2f8f3a">${F.e} You caught a ${F.n}! · +${pay} coins</p>`);return}
     if(d.type==="mine"){const rare=Math.random()<SQ_RARE,pay=rare?o.pay*2:o.pay;sqFinish(d,v,pay,(rare?"💎 Rare gem! ":"💰 Sold ")+d.ore+" · +"+pay+" coins");openSQ(id,`<p style="margin:0 0 8px;font-weight:900;color:#2f8f3a">${rare?"💎 Rare gem! ":"💰 "}+${pay} coins</p>`);return}
-    const tip=d.type==="stall"?Math.round(o.pay*Math.random()*.2):0,pay=o.pay+tip;sqFinish(d,v,pay,d.icon+" "+o.k+" · +"+pay+" coins"+(tip?" (incl. +"+tip+" tips)":""));openSQ(id,`<p style="margin:0 0 8px;font-weight:900;color:#2f8f3a">${d.icon} +${pay} coins${tip?" · includes +"+tip+" in tips":""}</p>`)}}
+    const tip=d.type==="stall"||d.type==="park"?Math.round(o.pay*Math.random()*.2):0,pay=o.pay+tip;sqFinish(d,v,pay,d.icon+" "+o.k+" · +"+pay+" coins"+(tip?" (incl. +"+tip+" tips)":""));openSQ(id,`<p style="margin:0 0 8px;font-weight:900;color:#2f8f3a">${d.icon} +${pay} coins${tip?" · includes +"+tip+" in tips":""}</p>`)}}
 function openCommunity(id){const u=(TG_LINKS[id]||TG_LINK||"").trim();if(!u)return toast("💬 The community Telegram is opening soon.",2600);toast("Opening the community on Telegram…",2000);
   const emb=window.top!==window||!!(window.claude&&window.claude.use);if(emb)return openLink(u);let w=null;try{w=window.open(u,"_blank","noopener")}catch(e){}if(!w)setTimeout(()=>{location.href=u},300)}
 
@@ -7928,7 +7941,8 @@ $("tBuyCoins").onclick=openCoins;{let BIP=null;const ga=$("tGetApp");window.addE
   const doInstall=async e=>{if(e)e.preventDefault();if(BIP){BIP.prompt();try{const c=await BIP.userChoice;if(c&&c.outcome==="accepted"){toast("📲 Installing Farming… look for it on your home screen.",4200);ib.hidden=true;ga.hidden=true}}catch(err){}BIP=null;return}$("instM").hidden=false};
   ib.onclick=doInstall;$("instClose").onclick=()=>{$("instM").hidden=true};
   ga.addEventListener("click",doInstall);
-  window.addEventListener("appinstalled",()=>{ga.hidden=true;ib.hidden=true})}{const inApp=matchMedia("(display-mode: standalone)").matches||document.referrer.startsWith("android-app://");if(/^https?:$/.test(location.protocol)&&!(window.claude&&window.claude.use)&&/Android/i.test(navigator.userAgent)&&!inApp)$("tGetApp").hidden=false}$("coinStat").onclick=openCoins;try{$("tgBtn").onclick=()=>openCommunity("main");$("sqLogBtn").onclick=()=>{if(FEAT)openSQLog();else toast("Side quests are coming soon.")}}catch(e){}try{const c=$("crew"),h=$("crewHome");if(c&&h)h.appendChild(c)}catch(e){}(function hudFit(){const f=()=>{try{const h=document.querySelector(".hud");if(!h)return;const r=h.getBoundingClientRect();document.documentElement.style.setProperty("--hudB",Math.round(r.bottom)+"px");document.documentElement.style.setProperty("--hudR",Math.round(r.right)+"px")}catch(e){}};addEventListener("resize",f);addEventListener("orientationchange",()=>setTimeout(f,300));setInterval(f,2000);setTimeout(f,500)})();try{qsInit()}catch(e){console.warn(e)}{const pe=$("pesoStat");if(pe){pe.onclick=pesoOpen;pesoHUD()}}setInterval(()=>loadMyBuys(false),45000);setTimeout(()=>loadMyBuys(false),8000);
+  window.addEventListener("appinstalled",()=>{ga.hidden=true;ib.hidden=true})}{const inApp=matchMedia("(display-mode: standalone)").matches||document.referrer.startsWith("android-app://");if(/^https?:$/.test(location.protocol)&&!(window.claude&&window.claude.use)&&/Android/i.test(navigator.userAgent)&&!inApp)$("tGetApp").hidden=false}$("coinStat").onclick=openCoins;try{$("tgBtn").onclick=()=>openCommunity("main");$("sqLogBtn").onclick=()=>{if(FEAT)openSQLog();else toast("Side quests are coming soon.")}}catch(e){}try{const c=$("crew"),h=$("crewHome");if(c&&h)h.appendChild(c)}catch(e){}try{TOOL="move";$("crewBtn").onclick=()=>{let m=$("crewM");if(!m){m=document.createElement("div");m.className="modal";m.id="crewM";m.innerHTML='<div class="suBox"><h3 style="margin:0 0 4px">👷 Helpers</h3><p class="suLead" style="margin:0 0 8px">Hire helpers and tell them what to do on your farm.</p><div id="crewSlot"></div><button class="btn alt" type="button" id="crewX" style="width:100%;margin-top:8px">Close</button></div>';document.body.appendChild(m);m.addEventListener("click",e=>{if(e.target===m)$("crewX").click()})}
+  const c=$("crew");if(c)$("crewSlot").appendChild(c);m.hidden=false;m.style.display="";$("crewX").onclick=()=>{m.hidden=true;m.style.display="none";const c2=$("crew"),h2=$("crewHome");if(c2&&h2)h2.appendChild(c2)}}}catch(e){}(function hudFit(){const f=()=>{try{const h=document.querySelector(".hud");if(!h)return;const r=h.getBoundingClientRect();document.documentElement.style.setProperty("--hudB",Math.round(r.bottom)+"px");document.documentElement.style.setProperty("--hudR",Math.round(r.right)+"px")}catch(e){}};addEventListener("resize",f);addEventListener("orientationchange",()=>setTimeout(f,300));setInterval(f,2000);setTimeout(f,500)})();try{qsInit()}catch(e){console.warn(e)}{const pe=$("pesoStat");if(pe){pe.onclick=pesoOpen;pesoHUD()}}setInterval(()=>loadMyBuys(false),45000);setTimeout(()=>loadMyBuys(false),8000);
 function cutLogoBg(src,cb){const im=new Image();im.onload=()=>{try{const w=im.width,h=im.height,c=document.createElement("canvas");c.width=w;c.height=h;const x=c.getContext("2d");x.drawImage(im,0,0);const d=x.getImageData(0,0,w,h),a=d.data,seen=new Uint8Array(w*h),st=[];
     const corners=[[0,0],[w-1,0],[0,h-1],[w-1,h-1],[w>>1,0],[w>>1,h-1],[0,h>>1],[w-1,h>>1]];corners.forEach(([px,py])=>st.push(py*w+px));const ref=st.map(i=>[a[i*4],a[i*4+1],a[i*4+2]]);const near=i=>ref.some(([r,g,b])=>Math.abs(a[i*4]-r)+Math.abs(a[i*4+1]-g)+Math.abs(a[i*4+2]-b)<90);
     while(st.length){const i=st.pop();if(seen[i])continue;seen[i]=1;if(!near(i))continue;a[i*4+3]=0;const px=i%w,py=(i/w)|0;if(px>0)st.push(i-1);if(px<w-1)st.push(i+1);if(py>0)st.push(i-w);if(py<h-1)st.push(i+w)}
