@@ -2904,7 +2904,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="200";const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
+const GAMEVER="201";const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
 if(TESTSRV){document.title="🧪 TEST · "+document.title;const tb=document.createElement("div");tb.id="testBar";tb.textContent=MIRROR_TEST?"🧪 TEST SERVER · a copy of your farm · changes here don't touch your real farm":"🧪 TEST SERVER · changes here don't touch your real farm";tb.style.cssText="position:fixed;left:50%;top:0;transform:translateX(-50%);z-index:9999;background:#7a3fc0;color:#fff;font:900 11px/1.2 sans-serif;padding:3px 10px;border-radius:0 0 10px 10px;pointer-events:none;letter-spacing:.3px";document.addEventListener("DOMContentLoaded",()=>document.body.appendChild(tb));if(document.body)document.body.appendChild(tb)}let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 /* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
 (function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
@@ -5205,15 +5205,22 @@ function buildMine(d,cx,cz,face){const G=new THREE.Group();G.position.set(cx,0,c
   const f=makeFarmer({shirt:0x3a5a8a,pants:0x4a3a2a,hat:0xf2c21a,skin:0xc68a5a});f.g.scale.setScalar(.85);f.g.position.set(-1.2,Y,2);G.add(f.g);
   return {G,cart,load,ores,glow,f}}
 // a stilt clubhouse that opens the site's Telegram community
-function buildHall(d,hx,hz,face){const G=new THREE.Group();G.position.set(hx,0,hz);G.rotation.y=face;scene.add(G);const b=new Builder(),Y=1;
-  for(let x=-3;x<=3;x+=2)for(let z=-3;z<=3;z+=2)b.add("cyl",0x6b4422,x,.1,z,.22,2,.22);
-  b.add("box",0x9b6a3a,0,Y,0,7.2,.22,7.2);for(let k=-3.4;k<=3.4;k+=.7){b.add("box",0xe8d8b8,k,Y+.4,3.5,.07,.6,.07);b.add("box",0xe8d8b8,-3.5,Y+.4,k,.07,.6,.07);b.add("box",0xe8d8b8,3.5,Y+.4,k,.07,.6,.07)}
-  b.add("box",0xf4f0e6,0,Y+1.5,-.6,5.2,2.8,4);b.add("prism",0x229ed9,0,Y+3.65,-.6,3.25,4.5,1.5,-Math.PI/2,0,0);b.add("box",0x1b86bd,0,Y+2.95,-.6,5.6,.12,4.4);
-  b.add("box",0x6b4a2c,0,Y+.95,1.42,1,1.7,.06);[[-1.7,1.42],[1.7,1.42]].forEach(([x,z])=>{b.add("box",0x9fd8f5,x,Y+1.6,z,.9,.8,.05);b.add("box",0xffffff,x,Y+1.6,z+.02,.95,.06,.05)});
-  // round blue sign with a white paper plane
-  b.add("box",0x6b4422,2.6,Y+1,2.8,.12,2,.12);b.add("cyl",0x229ed9,2.6,Y+2.3,2.82,.75,.1,.75,Math.PI/2,0,0);b.add("prism",0xffffff,2.6,Y+2.3,2.9,.45,.3,.05,0,0,-.5);
-  b.add("box",0xe8a530,-2.2,Y+.3,2.4,.8,.5,.5);b.add("box",0xe8a530,-1,Y+.3,2.6,.8,.5,.5);
-  G.add(b.mesh());const lab=labelSprite(d.n+" Community");lab.position.set(0,Y+5,-.6);lab.scale.set(4.8,1,1);G.add(lab);return G}
+function buildHall(d,hx,hz,face,gy){const G=new THREE.Group();G.position.set(hx,gy==null?0:gy-1,hz);G.rotation.y=face;scene.add(G);const b=new Builder(),Y=1;
+  if(gy==null){for(let x=-2;x<=2;x+=2)for(let z=-2;z<=2;z+=2)b.add("cyl",0x6b4422,x,.1,z,.2,2,.2);b.add("box",0x9b6a3a,0,Y,0,5,.22,5)}else b.add("box",0xd8d2c4,0,Y+.05,0,5,.12,5);
+  b.add("box",0xf4f0e6,0,Y+1.3,-.5,3.8,2.4,2.8);b.add("box",0x1b86bd,0,Y+2.6,-.5,4.3,.2,3.3);b.add("box",0x229ed9,0,Y+2.85,-.5,3.5,.3,2.6);b.add("box",0x229ed9,0,Y+3.15,-.5,2.5,.3,1.8);b.add("box",0x1b86bd,0,Y+3.42,-.5,1.3,.26,.9);
+  b.add("box",0x6b4a2c,0,Y+.85,.92,.9,1.5,.06);[[-1.25,.92],[1.25,.92]].forEach(([x,z])=>{b.add("box",0x9fd8f5,x,Y+1.5,z,.8,.7,.05);b.add("box",0xffffff,x,Y+1.5,z+.02,.85,.05,.05)});
+  b.add("cyl",0x229ed9,0,Y+2.05,.96,.42,.06,.42,Math.PI/2,0,0);b.add("box",0xffffff,0,Y+2.05,1.0,.38,.08,.04,0,0,.4);
+  b.add("box",0x8a5a2e,-1.7,Y+.3,1.8,1,.12,.36);b.add("box",0x8a5a2e,1.7,Y+.3,1.8,1,.12,.36);[[-2.15,1.8],[-1.25,1.8],[1.25,1.8],[2.15,1.8]].forEach(([x,z])=>b.add("box",0x3a3a40,x,Y+.15,z,.08,.3,.3));
+  b.add("box",0xe8e8e8,2.2,Y+1.4,-1.9,.06,2.8,.06);b.add("box",0x229ed9,2.6,Y+2.5,-1.9,.8,.5,.03);
+  G.add(b.mesh());return G}
+// look down at the city from above and find a clear spot (ground level, nothing built on it) for a Community Hall
+function sqFindSpot(cx0,cz0,bx,bz,ox,oz,px,pz){const rc=new THREE.Raycaster();rc.camera=camera;scene.updateMatrixWorld(true);const near=[],v=new THREE.Vector3();
+  scene.traverse(o=>{if(!o.isMesh||!o.geometry)return;const g=o.geometry;if(!g.boundingSphere)g.computeBoundingSphere();if(!g.boundingSphere)return;v.copy(g.boundingSphere.center).applyMatrix4(o.matrixWorld);const r=g.boundingSphere.radius*o.matrixWorld.getMaxScaleOnAxis();if(Math.hypot(v.x-bx,v.z-bz)<70+r)near.push(o)});
+  const top=(x,z)=>{rc.set(new THREE.Vector3(x,80,z),new THREE.Vector3(0,-1,0));const h=rc.intersectObjects(near,false).find(q=>q.object.visible&&q.object.material&&!q.object.material.transparent);return h?h.point.y:-9};
+  const ok=(x,z)=>{let lo=99,hi=-99;for(let a=-2.6;a<=2.6;a+=1.3)for(let c=-2.6;c<=2.6;c+=1.3){const y=top(x+a,z+c);if(y<.8||y>3.2)return null;lo=Math.min(lo,y);hi=Math.max(hi,y)}return hi-lo<.4?hi:null};
+  const L=Math.hypot(bx-cx0,bz-cz0);for(let k=6;k<Math.min(L,40);k+=2.5)for(const s of[0,3,-3,6,-6,9,-9,12,-12,15,-15]){const x=bx-ox*k+px*s,z=bz-oz*k+pz*s,y=ok(x,z);if(y!=null)return[x,z,y]}
+  for(let r=8;r<Math.max(L,30)*1.1;r+=3)for(let q=0;q<28;q++){const an=q/28*Math.PI*2,x=cx0+Math.cos(an)*r,z=cz0+Math.sin(an)*r,y=ok(x,z);if(y!=null)return[x,z,y]}
+  return null}
 // shared islet base for the themed side quests
 function sqBase(d,cx,cz,face,top,rim){const G=new THREE.Group();G.position.set(cx,0,cz);G.rotation.y=face;scene.add(G);const b=new Builder(),Y=.9;
   b.add("cyl",rim||0x6e6a60,0,.3,0,4.8,.9,4.8);b.add("cyl",top,0,.78,0,4.5,.12,4.5);
@@ -5310,14 +5317,24 @@ function buildPine(d,cx,cz,face){const o=sqBase(d,cx,cz,face,0x6b3e1e,0x8a6a3a),
 function buildMineQ(d,cx,cz,face){const m=buildMine(d,cx,cz,face);m.G.children.forEach(c=>{if(c.isSprite&&c!==m.glow)c.visible=true});
   return Object.assign(m,{anim(t,dt,pr,run,slow){if(slow)sqFill(m.ores,pr);m.cart.position.z=run?2.5+1.1*Math.sin(t*.9):3.6;m.load.visible=pr>=1||(run&&Math.cos(t*.9)<0);m.f.g.rotation.y=run?Math.PI*.5:Math.sin(t*.5)*1.2;npcAnim(m.f,t,dt,null,run?2.2+Math.sin(t*9)*.9:null)}})}
 const SQ_BUILD={stall:buildStall,fish:buildFish,dairy:buildDairy,dice:buildDice,race:buildRaceTrack,pearl:buildPearl,mine:buildMineQ,pine:buildPine};
+// a white "thinking" cloud bubble that floats over each Community Hall
+function cloudBtnSprite(text,act){const c=document.createElement("canvas");c.width=512;c.height=300;const x=c.getContext("2d");
+  const draw=()=>{x.clearRect(0,0,512,300);const puffs=[[256,112,92],[160,124,70],[352,124,72],[96,150,50],[420,150,52],[200,170,64],[316,172,62],[256,182,60]];
+    const cloud=(dx,dy,col)=>{x.fillStyle=col;x.beginPath();puffs.forEach(([px,py,r])=>{x.moveTo(px+dx+r,py+dy);x.arc(px+dx,py+dy,r,0,Math.PI*2)});x.fill()};
+    cloud(0,8,"rgba(0,0,0,.18)");x.save();x.lineWidth=14;x.strokeStyle="#229ed9";x.beginPath();puffs.forEach(([px,py,r])=>{x.moveTo(px+r,py);x.arc(px,py,r,0,Math.PI*2)});x.stroke();x.restore();cloud(0,0,"#ffffff");
+    [[150,248,20],[112,276,12],[86,294,7]].forEach(([px,py,r])=>{x.fillStyle="#229ed9";x.beginPath();x.arc(px,py,r+5,0,Math.PI*2);x.fill();x.fillStyle="#fff";x.beginPath();x.arc(px,py,r,0,Math.PI*2);x.fill()});
+    x.fillStyle="#229ed9";x.beginPath();x.moveTo(214,72);x.lineTo(298,46);x.lineTo(270,112);x.lineTo(252,92);x.lineTo(236,104);x.lineTo(240,86);x.closePath();x.fill();x.fillStyle="#fff";x.beginPath();x.moveTo(240,86);x.lineTo(290,52);x.lineTo(252,92);x.closePath();x.fill();
+    x.fillStyle="#1a6fa8";x.textAlign="center";x.textBaseline="middle";const w=text.split(" ");x.font="900 50px Nunito, Arial Rounded MT Bold, Arial, sans-serif";x.fillText(w[0]||"",256,142,330);x.fillText(w.slice(1).join(" "),256,192,350)};draw();
+  const tex=new THREE.CanvasTexture(c),sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,depthTest:false,transparent:true}));sp.renderOrder=20;sp.userData.btn3d=act;BTN3D.push(sp);
+  try{if(document.fonts)document.fonts.ready.then(()=>{draw();tex.needsUpdate=true})}catch(e){}return sp}
 function buildSideQuests(){const centers={gp:[IX,IZ],t2b:[T2X,T2Z],pots:[POTS.x,POTS.z],gs:[GS.x,GS.z],bigi:[BIGI.x,BIGI.z]};THEMES.forEach((T,i)=>{centers[["wfl","cow","roll"][i]]=[T.o.x,T.o.z]});
   const boats=BTN3D.filter(b=>b.userData.btn3d==="boat");
   SQDEF.forEach(d=>{const c=centers[d.id];if(!c||c[0]==null)return;let best=null,bd=1e9;boats.forEach(b=>{const q=Math.hypot(b.position.x-c[0],b.position.z-c[1]);if(q<bd&&q<90){bd=q;best=b}});if(!best)return;
     const bx=best.position.x,bz=best.position.z,dx=bx-c[0],dz=bz-c[1],L=Math.hypot(dx,dz)||1,ox=dx/L,oz=dz/L,px=-oz,pz=ox;
-    let cx=bx+ox*5+px*11,cz=bz+oz*5+pz*11,hx=bx+ox*5-px*11,hz=bz+oz*5-pz*11;if(d.id==="gp"){cx=bx+3;cz=bz+21;hx=bx+15;hz=bz+21}if(d.id==="gs"){cx+=ox*9;cz+=oz*9}
-    const face=Math.atan2(ox,oz);let mn;try{mn=(SQ_BUILD[d.type]||buildMineQ)(d,cx,cz,face)}catch(e){console.warn("sq",d.id,e);return}const hG=buildHall(d,hx,hz,face);
+    let cx=bx+ox*5+px*11,cz=bz+oz*5+pz*11,hx=bx+ox*5-px*11,hz=bz+oz*5-pz*11,hy=null;if(d.id==="gp"){cx=bx+3;cz=bz+21;hx=bx+15;hz=bz+21}{let sp=null;try{sp=sqFindSpot(c[0],c[1],bx,bz,ox,oz,px,pz)}catch(e){console.warn("sq spot",e)}if(!sp&&d.id==="gs")sp=[c[0]-16,c[1]-40,1.2];if(sp){hx=sp[0];hz=sp[1];hy=sp[2]}}if(d.id==="gs"){cx+=ox*9;cz+=oz*9}
+    const face=Math.atan2(ox,oz);let mn;try{mn=(SQ_BUILD[d.type]||buildMineQ)(d,cx,cz,face)}catch(e){console.warn("sq",d.id,e);return}const hG=buildHall(d,hx,hz,face,hy);
     const qb=btnSprite(d.btn,"#b8742a","sq:"+d.id);qb.position.set(cx,6.4,cz);qb.scale.set(6.8,1.6,1);scene.add(qb);
-    const cb=btnSprite("💬 Community","#229ed9","tg:"+d.id);cb.position.set(hx,7.2,hz);cb.scale.set(5.8,1.45,1);scene.add(cb);
+    const cb=cloudBtnSprite("ENTER COMMUNITY","tg:"+d.id);cb.position.set(hx,(hy==null?1:hy)+7.4,hz);cb.scale.set(7,4.2,1);scene.add(cb);
     const nd=labelSprite("❗ Your turn!");nd.position.set(cx,8.3,cz);nd.scale.set(4.4,1.1,1);nd.visible=false;scene.add(nd);
     SQ.sites.push(Object.assign(mn,{d,hG,cx,cz,qb,cb,nd,bank:null}))});
   SQ.on=true}
