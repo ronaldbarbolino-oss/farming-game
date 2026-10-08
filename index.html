@@ -253,6 +253,24 @@ body.land{overflow:hidden;overscroll-behavior:none}
 body.land .stage{width:100vw;height:100vh;height:100dvh}
 @media (prefers-reduced-motion:reduce){#below{transition:none}}
 
+
+/* quick Store in the menu: tabbed grid of compact cards */
+#qStore{display:none}body.qs #qStore{display:block}
+#qStore{flex:none;background:#fff6df;border:3px solid var(--wood-d);border-radius:16px;overflow:hidden;margin-bottom:6px}
+.qsHead{background:linear-gradient(#e2504a,#c8382b);color:#fff;font-family:var(--display);font-size:1.05rem;text-align:center;padding:5px 8px;position:relative}
+.qsAwn{height:9px;background:repeating-linear-gradient(90deg,#e2504a 0 18px,#fff6df 18px 36px);border-bottom:2px solid #c8382b}
+.qsTabs{display:flex;gap:4px;padding:6px 6px 0;overflow-x:auto;scrollbar-width:none}
+.qsTabs button{flex:none;border:2px solid var(--wood-d);background:#fff;border-radius:999px;font:800 .72rem var(--body);padding:3px 9px;color:var(--ink);cursor:pointer}
+.qsTabs button.on{background:var(--leaf);border-color:var(--leaf);color:#fff}
+.qsGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:6px;max-height:min(52vh,360px);overflow-y:auto}
+.qc{position:relative;background:#fffdf6;border:2px solid #e2c99a;border-radius:11px;padding:4px 3px 5px;display:flex;flex-direction:column;align-items:center;gap:1px;text-align:center;min-width:0}
+.qc b{font-size:.68rem;line-height:1.1;background:#f6ead0;border-radius:6px;padding:1px 4px;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qc .ic{height:34px;display:grid;grid-template-columns:none;border:0;background:none;padding:0;place-items:center;font-size:1.55rem;line-height:1}.qc .ic img{max-height:34px;max-width:42px}
+.qc small{font-size:.6rem;font-weight:800;color:#7a5a3a;line-height:1.15}.qc small i{font-style:normal;color:#d23a2a}
+.qc .qp{font-size:.66rem;font-weight:900;font-variant-numeric:tabular-nums}
+.qc .qb{display:flex;gap:3px;width:100%}.qc .qb button{flex:1;min-width:0;border:0;border-radius:7px;background:#3f9a3a;color:#fff;font:900 .64rem var(--body);padding:4px 2px;box-shadow:0 2px 0 #2a6e27;cursor:pointer}
+.qc .qb button.f{background:#d9568a;box-shadow:0 2px 0 #9a2f5a}
+.qc.lock{opacity:.5}.qc.own{border-color:var(--leaf);background:#eaf7dc}.qc .qtag{font-size:.58rem;font-weight:900;color:var(--leaf)}
 /* fixed-angle camera pad: move and zoom only */
 .cam{display:grid!important;grid-template-columns:repeat(3,38px);grid-template-rows:repeat(3,38px);gap:4px!important;grid-template-areas:"zi u zo" "l h r" ". d ."}
 .cam .cbtn{min-width:0!important;width:38px;height:38px!important;padding:0!important;font-size:1rem!important;display:grid;place-items:center}
@@ -409,6 +427,7 @@ body.land .sbtns .sb{font-size:.6rem!important;padding:3px 6px!important}
 
   <div id="below">
   <div class="drawerTop"><b>Menu</b><button class="btn sm" id="drawerX" type="button">Close ✕</button></div>
+  <div id="qStore"><div class="qsHead">🛒 STORE</div><div class="qsAwn"></div><div class="qsTabs" id="qsTabs"></div><div class="qsGrid" id="qsGrid"></div></div>
   <div class="tools">
     <button class="btn alt" id="tPlow">Plow All</button>
     <button class="btn alt" id="tPlantAll">Plant All</button>
@@ -2846,7 +2865,7 @@ function hireUI(){const h=$("tHire"),u=$("tHspd");if(!h||!u)return;const n=Math.
 function hireHelper(){const n=Math.max(1,S.helpers|0);if(n>=HMAX)return;const c=HIRE_COSTS[n];if(S.coins<c)return toast("You need "+c.toLocaleString()+" coins to hire Helper "+(n+1)+".");S.coins-=c;S.helpers=n+1;hOnSet(HKEYS[n],true);ensureHelper2();hireUI();after();toast("Helper "+(n+1)+" joined your farm! They harvest, plant and pick fruit on their own.",3600)};
 function upgradeHelpers(){const lv=S.hspd|0;if(lv>=3)return;const c=HSPD[lv+1];if(S.coins<c)return toast("You need "+c.toLocaleString()+" coins for the speed upgrade.");S.coins-=c;S.hspd=lv+1;hireUI();after();toast("Helpers are now "+Math.round(30*(lv+1))+"% faster!",3000)};
 $("tHire").onclick=hireHelper;$("tHspd").onclick=upgradeHelpers;setInterval(hireUI,1000);
-$("menuBtn").onclick=()=>document.body.classList.toggle("drawer");
+$("menuBtn").onclick=()=>{document.body.classList.toggle("drawer");try{if(MIRROR_TEST)qsRender()}catch(e){}};
 document.body.classList.toggle("mob",!!MOBILE);document.querySelectorAll("#actPad [data-ap]").forEach(b=>b.onclick=e=>{e.stopPropagation();const k=b.dataset.ap;try{navigator.vibrate&&navigator.vibrate(15)}catch(x){}
   if(k==="menu"){if(document.body.classList.contains("land"))document.body.classList.toggle("drawer");else{const t=document.getElementById("below");if(t)t.scrollIntoView({behavior:"smooth",block:"start"})}return}
   const t=$(k);if(!t)return;if(t.disabled)return toast(t.textContent,1800);t.click()});
@@ -7542,7 +7561,7 @@ $("tBuyCoins").onclick=openCoins;{let BIP=null;const ga=$("tGetApp");window.addE
   const doInstall=async e=>{if(e)e.preventDefault();if(BIP){BIP.prompt();try{const c=await BIP.userChoice;if(c&&c.outcome==="accepted"){toast("📲 Installing FarmVerse PH… look for it on your home screen.",4200);ib.hidden=true;ga.hidden=true}}catch(err){}BIP=null;return}$("instM").hidden=false};
   ib.onclick=doInstall;$("instClose").onclick=()=>{$("instM").hidden=true};
   ga.addEventListener("click",doInstall);
-  window.addEventListener("appinstalled",()=>{ga.hidden=true;ib.hidden=true})}{const inApp=matchMedia("(display-mode: standalone)").matches||document.referrer.startsWith("android-app://");if(/^https?:$/.test(location.protocol)&&!(window.claude&&window.claude.use)&&/Android/i.test(navigator.userAgent)&&!inApp)$("tGetApp").hidden=false}$("coinStat").onclick=openCoins;{const pe=$("pesoStat");if(pe){pe.onclick=pesoOpen;pesoHUD()}}setInterval(()=>loadMyBuys(false),45000);setTimeout(()=>loadMyBuys(false),8000);
+  window.addEventListener("appinstalled",()=>{ga.hidden=true;ib.hidden=true})}{const inApp=matchMedia("(display-mode: standalone)").matches||document.referrer.startsWith("android-app://");if(/^https?:$/.test(location.protocol)&&!(window.claude&&window.claude.use)&&/Android/i.test(navigator.userAgent)&&!inApp)$("tGetApp").hidden=false}$("coinStat").onclick=openCoins;try{qsInit()}catch(e){console.warn(e)}{const pe=$("pesoStat");if(pe){pe.onclick=pesoOpen;pesoHUD()}}setInterval(()=>loadMyBuys(false),45000);setTimeout(()=>loadMyBuys(false),8000);
 function cutLogoBg(src,cb){const im=new Image();im.onload=()=>{try{const w=im.width,h=im.height,c=document.createElement("canvas");c.width=w;c.height=h;const x=c.getContext("2d");x.drawImage(im,0,0);const d=x.getImageData(0,0,w,h),a=d.data,seen=new Uint8Array(w*h),st=[];
     const corners=[[0,0],[w-1,0],[0,h-1],[w-1,h-1],[w>>1,0],[w>>1,h-1],[0,h>>1],[w-1,h>>1]];corners.forEach(([px,py])=>st.push(py*w+px));const ref=st.map(i=>[a[i*4],a[i*4+1],a[i*4+2]]);const near=i=>ref.some(([r,g,b])=>Math.abs(a[i*4]-r)+Math.abs(a[i*4+1]-g)+Math.abs(a[i*4+2]-b)<90);
     while(st.length){const i=st.pop();if(seen[i])continue;seen[i]=1;if(!near(i))continue;a[i*4+3]=0;const px=i%w,py=(i/w)|0;if(px>0)st.push(i-1);if(px<w-1)st.push(i+1);if(py>0)st.push(i-w);if(py<h-1)st.push(i+w)}
@@ -7604,6 +7623,30 @@ function townBuy(kind,id){if(!S.inTown)return toast("Go to Town first to shop he
     S.coins-=d.cost;if(id==="tricycle")buildJeep();toast("Bought: "+d.n,2400)}
   else if(kind==="decor"){const d=DECOR.find(q=>q.id===id);if(S.lv<d.lv)return toast("Level "+d.lv+" needed.");if(S.coins<d.cost)return toast("Not enough coins.");S.coins-=d.cost;S.decor=S.decor||{};S.decor[id]=(S.decor[id]||0)+1;toast(d.tree?"Bought: "+d.n+". Go home and plant it from 'My Items' (Town → Place on Farm).":"Bought: "+d.n+". Place it on the farm from 'My Items'.",3600)}
   after();townUI(true)}
+
+/* ===== quick Store (test server): buy seeds, tools, home goods, animals and buildings straight from the menu ===== */
+const QS={tab:"seed"};
+function qsEmoji(n){n=n.toLowerCase();const M=[["fert","🧪"],["axe","🪓"],["water","🚿"],["basket","🧺"],["wood","🪵"],["tricycle","🛺"],["table","🍽️"],["bench","🪑"],["chair","🪑"],["lamp","💡"],["light","💡"],["flower","🌸"],["fount","⛲"],["swing","🪀"],["well","🪣"],["mango","🥭"],["coconut","🥥"],["banana","🍌"],["tree","🌳"],["house","🏠"],["barn","🛖"],["kubo","🛖"],["nipa","🛖"],["silo","🏗️"],["coop","🐔"],["mill","🌀"],["boat","⛵"],["row","🚣"],["fish","🎣"],["stall","🏪"],["fence","🚧"],["statue","🗿"],["car","🚗"]];for(const[k,e] of M)if(n.includes(k))return e;return "📦"}
+const QSA={manok:"🐔",kambing:"🐐",bibe:"🦆",pato:"🦆",pusa:"🐱",aso:"🐶",baboy:"🐷",baka:"🐄",kabayo:"🐴",kalabaw:"🐃"};
+function qsCard(o){return `<div class="qc ${o.cls||""}"><b>${o.n}</b><div class="ic">${o.img?`<img src="${o.img}" alt="">`:o.e}</div>${o.l1?`<small>${o.l1}</small>`:""}${o.l2?`<small>${o.l2}</small>`:""}<span class="qp">🪙 ${o.cost.toLocaleString()}</span>${o.tag?`<span class="qtag">${o.tag}</span>`:`<div class="qb">${o.btn}</div>`}</div>`}
+function qsRender(){const g=$("qsGrid");if(!g)return;qsTabsUI();const T=QS.tab,lk=lv=>S.lv<lv;let h="";
+  if(T==="seed")h=TOWNSEEDS.map(d=>{const c=crop(d.id),own=seedOwned(d.id);return qsCard({n:c.n,img:ICONS[c.id],e:"🌱",l1:"⏱ "+fmt(c.t),l2:"Profit: <i>"+(c.s-c.c)+"</i>",cost:d.cost,cls:own?"own":lk(d.lv)?"lock":"",tag:own?"Owned":lk(d.lv)?"Level "+d.lv:"",btn:`<button data-q="seed" data-id="${d.id}">Buy</button>`})}).join("")+DECOR.filter(d=>d.tree).map(d=>qsCard({n:d.n,e:qsEmoji(d.n),l1:"Fruit tree",cost:d.cost,cls:lk(d.lv)?"lock":"",tag:lk(d.lv)?"Level "+d.lv:"",btn:`<button data-q="decor" data-id="${d.id}">Buy</button>`})).join("");
+  else if(T==="tool")h=TTOOLS.map(d=>qsCard({n:d.n,e:qsEmoji(d.id+" "+d.n),l1:(d.d||"").slice(0,34),cost:d.cost,cls:lk(d.lv)?"lock":"",tag:lk(d.lv)?"Level "+d.lv:"",btn:`<button data-q="tool" data-id="${d.id}">Buy</button>`})).join("");
+  else if(T==="home")h=DECOR.filter(d=>!d.tree).map(d=>qsCard({n:d.n,e:qsEmoji(d.n),l1:(S.decor||{})[d.id]?"You have "+S.decor[d.id]:"",cost:d.cost,cls:lk(d.lv)?"lock":"",tag:lk(d.lv)?"Level "+d.lv:"",btn:`<button data-q="decor" data-id="${d.id}">Buy</button>`})).join("");
+  else if(T==="animal")h=ANIMALS.map(a=>qsCard({n:a.n,e:QSA[a.id]||"🐾",l1:"⏱ "+fmt(a.t),l2:a.item,cost:a.cost,cls:lk(a.lv)?"lock":"",tag:lk(a.lv)?"Level "+a.lv:"",btn:`<button data-q="animal" data-id="${a.id}" data-g="M">♂</button><button class="f" data-q="animal" data-id="${a.id}" data-g="F">♀</button>`})).join("");
+  else if(T==="build")h=BUILDS.filter(d=>!d.decor).map(d=>qsCard({n:d.n,e:qsEmoji(d.id+" "+d.n),l1:d.wood?"🪵 "+d.wood:"",cost:d.cost||0,cls:lk(d.lv)?"lock":"",tag:lk(d.lv)?"Level "+d.lv:"",btn:`<button data-q="build" data-id="${d.id}">Build</button>`})).join("")+BOATS.map(d=>{const own=(S.boats||[]).includes(d.id);return qsCard({n:d.n,e:"⛵",l1:"Boat",cost:d.cost,cls:own?"own":lk(d.lv)?"lock":"",tag:own?"Owned":lk(d.lv)?"Level "+d.lv:"",btn:`<button data-q="boat" data-id="${d.id}">Buy</button>`})}).join("");
+  g.innerHTML=h;g.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>qsBuy(b.dataset.q,b.dataset.id,b.dataset.g))}
+function qsBuy(k,id,gd){if(k==="seed"||k==="tool"||k==="decor"){const was=S.inTown;S.inTown=true;try{townBuy(k,id)}finally{S.inTown=was}after()}
+  else if(k==="animal")buyAnimal(animal(id),gd);else if(k==="build"){document.body.classList.remove("drawer");startPlace(id)}
+  else if(k==="boat"){const b=document.querySelector('#shopV [data-v="'+id+'"]');if(b)b.click()}
+  qsRender()}
+function qsTabsUI(){const t=$("qsTabs");if(!t)return;const tabs=[["seed","🌱 Seeds"],["tool","🔧 Tools"],["home","🏠 Home"],["animal","🐔 Animals"],["build","🏗️ Build"]];
+  t.innerHTML=tabs.map(([k,l])=>`<button type="button" data-t="${k}" class="${k===QS.tab?"on":""}">${l}</button>`).join("");
+  t.querySelectorAll("button").forEach(b=>b.onclick=()=>{QS.tab=b.dataset.t;qsRender()})}
+function qsInit(){if(!MIRROR_TEST)return;document.body.classList.add("qs");
+  // tidy the menu: weather goes to the bottom
+  try{const wx=$("wx"),pn=wx.closest(".panel"),hd=pn.previousElementSibling,below=$("below");below.appendChild(hd);below.appendChild(pn)}catch(e){}
+  qsRender();let lv=S.lv,c=-1;setInterval(()=>{const k=S.lv+"|"+Math.floor(S.coins/10);if(k!==c&&document.body.classList.contains("drawer")){c=k;qsRender()}},1500)}
 let _townKey="";
 function townUI(force){const key=JSON.stringify([S.inTown,S.lv,S.seeds,S.tools,S.fert,S.basket,S.decor,Math.floor(S.coins/50)]);if(!force&&key===_townKey)return;_townKey=key;
   const here=!!S.inTown,dis=here?"":" disabled";$("townWhere").textContent=here?"You're in Town now. Go shopping!":"You're on the farm. Ride the jeep to go shopping.";
