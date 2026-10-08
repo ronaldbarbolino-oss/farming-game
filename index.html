@@ -292,6 +292,11 @@ body.drawer:not(.land) #below{transform:none}
 body:not(.land) .drawerTop{display:flex;justify-content:space-between;align-items:center;position:sticky;top:-10px;background:var(--grass-d);padding:6px 0;z-index:2;color:#fff;font-family:var(--display);font-size:1.3rem}
 body:not(.land) #menuBtn{display:inline-block!important}
 body:not(.land):not(.rot) .stage{height:calc(100vh - 96px);height:calc(100dvh - 96px);min-height:380px}
+
+/* workers list lives in the Menu, not on the farm screen */
+#crewHome .crew,#below .crew{position:static!important;top:auto!important;bottom:auto!important;left:auto!important;right:auto!important;max-width:none!important;max-height:none!important;overflow:visible!important;display:grid!important;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+#below .crew .crewc{background:#fff6df}
+#below .crew>*{display:flex!important}#below .crew>.cw-toggle{display:none!important}
 /* fixed-angle camera pad: move and zoom only */
 .cam{display:grid!important;grid-template-columns:repeat(3,38px);grid-template-rows:repeat(3,38px);gap:4px!important;grid-template-areas:"zi u zo" "l h r" ". d ."}
 .cam .cbtn{min-width:0!important;width:38px;height:38px!important;padding:0!important;font-size:1rem!important;display:grid;place-items:center}
@@ -448,6 +453,7 @@ body.land .sbtns .sb{font-size:.6rem!important;padding:3px 6px!important}
 
   <div id="below">
   <div class="drawerTop"><b>Menu</b><button class="btn sm" id="drawerX" type="button">Close ✕</button></div>
+  <div class="tray-head" id="crewHead"><h2>👷 Workers</h2><span class="hint">Give your workers jobs, rest them or train them.</span></div><div class="panel" id="crewHome"></div>
   <div id="qStore"><div class="qsHead">🛒 STORE</div><div class="qsAwn"></div><div class="qsTabs" id="qsTabs"></div><div class="qsGrid" id="qsGrid"></div></div>
   <div class="tools">
     <button class="btn alt" id="tPlow">Plow All</button>
@@ -2898,7 +2904,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="193";const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
+const GAMEVER="194";const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
 if(TESTSRV){document.title="🧪 TEST · "+document.title;const tb=document.createElement("div");tb.id="testBar";tb.textContent=MIRROR_TEST?"🧪 TEST SERVER · a copy of your farm · changes here don't touch your real farm":"🧪 TEST SERVER · changes here don't touch your real farm";tb.style.cssText="position:fixed;left:50%;top:0;transform:translateX(-50%);z-index:9999;background:#7a3fc0;color:#fff;font:900 11px/1.2 sans-serif;padding:3px 10px;border-radius:0 0 10px 10px;pointer-events:none;letter-spacing:.3px";document.addEventListener("DOMContentLoaded",()=>document.body.appendChild(tb));if(document.body)document.body.appendChild(tb)}let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 /* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
 (function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
@@ -7621,7 +7627,7 @@ $("tBuyCoins").onclick=openCoins;{let BIP=null;const ga=$("tGetApp");window.addE
   const doInstall=async e=>{if(e)e.preventDefault();if(BIP){BIP.prompt();try{const c=await BIP.userChoice;if(c&&c.outcome==="accepted"){toast("📲 Installing Farming… look for it on your home screen.",4200);ib.hidden=true;ga.hidden=true}}catch(err){}BIP=null;return}$("instM").hidden=false};
   ib.onclick=doInstall;$("instClose").onclick=()=>{$("instM").hidden=true};
   ga.addEventListener("click",doInstall);
-  window.addEventListener("appinstalled",()=>{ga.hidden=true;ib.hidden=true})}{const inApp=matchMedia("(display-mode: standalone)").matches||document.referrer.startsWith("android-app://");if(/^https?:$/.test(location.protocol)&&!(window.claude&&window.claude.use)&&/Android/i.test(navigator.userAgent)&&!inApp)$("tGetApp").hidden=false}$("coinStat").onclick=openCoins;(function hudFit(){const f=()=>{try{const h=document.querySelector(".hud");if(!h)return;const r=h.getBoundingClientRect();document.documentElement.style.setProperty("--hudB",Math.round(r.bottom)+"px");document.documentElement.style.setProperty("--hudR",Math.round(r.right)+"px")}catch(e){}};addEventListener("resize",f);addEventListener("orientationchange",()=>setTimeout(f,300));setInterval(f,2000);setTimeout(f,500)})();try{qsInit()}catch(e){console.warn(e)}{const pe=$("pesoStat");if(pe){pe.onclick=pesoOpen;pesoHUD()}}setInterval(()=>loadMyBuys(false),45000);setTimeout(()=>loadMyBuys(false),8000);
+  window.addEventListener("appinstalled",()=>{ga.hidden=true;ib.hidden=true})}{const inApp=matchMedia("(display-mode: standalone)").matches||document.referrer.startsWith("android-app://");if(/^https?:$/.test(location.protocol)&&!(window.claude&&window.claude.use)&&/Android/i.test(navigator.userAgent)&&!inApp)$("tGetApp").hidden=false}$("coinStat").onclick=openCoins;try{const c=$("crew"),h=$("crewHome");if(c&&h)h.appendChild(c)}catch(e){}(function hudFit(){const f=()=>{try{const h=document.querySelector(".hud");if(!h)return;const r=h.getBoundingClientRect();document.documentElement.style.setProperty("--hudB",Math.round(r.bottom)+"px");document.documentElement.style.setProperty("--hudR",Math.round(r.right)+"px")}catch(e){}};addEventListener("resize",f);addEventListener("orientationchange",()=>setTimeout(f,300));setInterval(f,2000);setTimeout(f,500)})();try{qsInit()}catch(e){console.warn(e)}{const pe=$("pesoStat");if(pe){pe.onclick=pesoOpen;pesoHUD()}}setInterval(()=>loadMyBuys(false),45000);setTimeout(()=>loadMyBuys(false),8000);
 function cutLogoBg(src,cb){const im=new Image();im.onload=()=>{try{const w=im.width,h=im.height,c=document.createElement("canvas");c.width=w;c.height=h;const x=c.getContext("2d");x.drawImage(im,0,0);const d=x.getImageData(0,0,w,h),a=d.data,seen=new Uint8Array(w*h),st=[];
     const corners=[[0,0],[w-1,0],[0,h-1],[w-1,h-1],[w>>1,0],[w>>1,h-1],[0,h>>1],[w-1,h>>1]];corners.forEach(([px,py])=>st.push(py*w+px));const ref=st.map(i=>[a[i*4],a[i*4+1],a[i*4+2]]);const near=i=>ref.some(([r,g,b])=>Math.abs(a[i*4]-r)+Math.abs(a[i*4+1]-g)+Math.abs(a[i*4+2]-b)<90);
     while(st.length){const i=st.pop();if(seen[i])continue;seen[i]=1;if(!near(i))continue;a[i*4+3]=0;const px=i%w,py=(i/w)|0;if(px>0)st.push(i-1);if(px<w-1)st.push(i+1);if(py>0)st.push(i-w);if(py<h-1)st.push(i+w)}
