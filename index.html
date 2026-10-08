@@ -2904,7 +2904,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="197";const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
+const GAMEVER="198";const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
 if(TESTSRV){document.title="🧪 TEST · "+document.title;const tb=document.createElement("div");tb.id="testBar";tb.textContent=MIRROR_TEST?"🧪 TEST SERVER · a copy of your farm · changes here don't touch your real farm":"🧪 TEST SERVER · changes here don't touch your real farm";tb.style.cssText="position:fixed;left:50%;top:0;transform:translateX(-50%);z-index:9999;background:#7a3fc0;color:#fff;font:900 11px/1.2 sans-serif;padding:3px 10px;border-radius:0 0 10px 10px;pointer-events:none;letter-spacing:.3px";document.addEventListener("DOMContentLoaded",()=>document.body.appendChild(tb));if(document.body)document.body.appendChild(tb)}let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 /* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
 (function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
@@ -5082,61 +5082,81 @@ function stepClouds2(dt,t){CLOUDS.banks.forEach(B=>{const _d=Math.hypot(camT.tx-
 const TG_LINK="https://t.me/+9agzaT5X2GI3NzU1";const TG_LINKS={main:"https://t.me/+9agzaT5X2GI3NzU1",gp:"https://t.me/+9agzaT5X2GI3NzU1",cow:"https://t.me/cow88live",t2b:"https://t.me/+6K95KHxCTJY3NzE1",roll:"https://t.me/ROLLEMPH/1",wfl:"https://t.me/kawin4life88",gs:"https://t.me/+sN5YAx6s7YhiNDJl",pots:"https://t.me/tropangpearly"};
 const SQ={sites:[],on:false,tex:null};
 const SQDEF=[
- {id:"gp",n:"GoPyesta Island",crop:"Cotton Candy Flower",col:0xff8ad8,cost:60,t:300,pay:260,lv:1,shape:"flower"},
- {id:"wfl",n:"WIN FOR LIFE",crop:"Lucky Clover",col:0x3fbf4a,cost:80,t:360,pay:340,lv:2,shape:"leaf"},
- {id:"cow",n:"COW88",crop:"Golden Corn",col:0xf5c732,cost:100,t:420,pay:430,lv:3,shape:"corn"},
- {id:"roll",n:"ROLL'EM",crop:"Purple Grapes",col:0x8a4ac0,cost:120,t:480,pay:520,lv:4,shape:"ball"},
- {id:"t2b",n:"Time2Bet",crop:"English Tea",col:0x2f6a3a,cost:140,t:540,pay:610,lv:5,shape:"leaf"},
- {id:"pots",n:"Pearl of the Seas",crop:"Pearl Lily",col:0x8ae0ff,cost:160,t:600,pay:700,lv:6,shape:"flower"},
- {id:"gs",n:"GameSpot",crop:"Lava Pepper",col:0xe2402f,cost:180,t:660,pay:800,lv:7,shape:"pepper"},
- {id:"bigi",n:"Isla Grande",crop:"Golden Pineapple",col:0xf0b62a,cost:200,t:720,pay:900,lv:8,shape:"pine"}];
-const SQ_DAILY=3,SQ_BONUS=500;
+ {id:"gp",n:"GoPyesta Island",ore:"Party Crystal",col:0xff8ad8,cost:60,t:300,pay:260,lv:1},
+ {id:"wfl",n:"WIN FOR LIFE",ore:"Lucky Emerald",col:0x3fbf4a,cost:80,t:360,pay:340,lv:2},
+ {id:"cow",n:"COW88",ore:"Gold Nugget",col:0xf5c732,cost:100,t:420,pay:430,lv:3},
+ {id:"roll",n:"ROLL'EM",ore:"Amethyst",col:0x8a4ac0,cost:120,t:480,pay:520,lv:4},
+ {id:"t2b",n:"Time2Bet",ore:"Royal Ruby",col:0xd8263a,cost:140,t:540,pay:610,lv:5},
+ {id:"pots",n:"Pearl of the Seas",ore:"Aquamarine",col:0x5fd4f0,cost:160,t:600,pay:700,lv:6},
+ {id:"gs",n:"GameSpot",ore:"Fire Opal",col:0xff6a2a,cost:180,t:660,pay:800,lv:7},
+ {id:"bigi",n:"Isla Grande",ore:"Golden Topaz",col:0xf0b62a,cost:200,t:720,pay:900,lv:8}];
+const SQ_DAILY=3,SQ_BONUS=500,SQ_RARE=.15;
 function sqState(){if(!S.sq)S.sq={};return S.sq}
 function sqSite(id){const st=sqState();if(!st[id])st[id]={at:0,day:0,n:0,bonus:0};const v=st[id];const d=typeof phDay==="function"?phDay():Math.floor(Date.now()/864e5);if(v.day!==d){v.day=d;v.n=0;v.bonus=0}return v}
+function sqGlow(){const k=document.createElement("canvas");k.width=k.height=64;const x=k.getContext("2d"),g=x.createRadialGradient(32,32,1,32,32,32);g.addColorStop(0,"rgba(255,255,255,1)");g.addColorStop(1,"rgba(255,255,255,0)");x.fillStyle=g;x.fillRect(0,0,64,64);const t=new THREE.CanvasTexture(k);return t}
+// a little rocky mining islet: hill with a mine shaft, rails, a minecart, themed ore crystals and a miner
+function buildMine(d,cx,cz,face){const G=new THREE.Group();G.position.set(cx,0,cz);G.rotation.y=face;scene.add(G);const b=new Builder(),Y=.9;
+  b.add("cyl",0x6e6a60,0,.3,0,4.8,.9,4.8);b.add("cyl",0x8a8476,0,.78,0,4.5,.12,4.5);
+  b.add("sph",0x8a8174,0,1.2,-1.8,3,2.6,2.2);b.add("sph",0x7a7266,-2.1,1,-1.3,1.7,1.6,1.5);b.add("sph",0x968c7c,2.1,1,-1.4,1.6,1.5,1.5);b.add("sph",0x6f675c,.6,2.9,-2.2,1.5,1.2,1.3);
+  [[-3.3,.4],[3.4,1.2],[-3.6,2.6],[2.9,-3.4]].forEach(([x,z])=>b.add("sph",0x7c7468,x,Y,z,.5,.35,.45));
+  // crystals of the site's ore sticking out of the rock
+  [[-2.2,2,-.6,.3],[-1.6,1.7,-.2,-.3],[2,2,-.6,.3],[1.2,3.3,-1.4,-.2],[-.6,3.7,-1.6,.15],[2.6,1.4,-.3,-.4]].forEach(([x,y,z,r])=>b.add("cone4",d.col,x,y,z,.28,.9,.28,r,0,r*.6));
+  // mine shaft with timber frame
+  b.add("box",0x15100c,0,Y+.95,.25,1.8,1.9,.3);b.add("box",0x7a4a22,-1,Y+1,.42,.22,2.1,.22);b.add("box",0x7a4a22,1,Y+1,.42,.22,2.1,.22);b.add("box",0x7a4a22,0,Y+2.1,.42,2.4,.26,.26);
+  b.add("box",0xf5e6c8,0,Y+2.55,.5,1.8,.45,.06);
+  // rails from the shaft to the edge
+  [-.42,.42].forEach(x=>b.add("box",0x55565c,x,Y+.06,2.4,.08,.08,4.4));for(let z=.6;z<=4.4;z+=.55)b.add("box",0x6b4422,0,Y+.02,z,1.2,.06,.18);
+  // lanterns, tool rack, sign
+  b.add("box",0x7a4a22,1.6,Y+.7,1.2,.1,1.4,.1);b.add("sph",0xffd27a,1.6,Y+1.5,1.2,.12,.14,.12);b.add("box",0x7a4a22,-1.6,Y+.7,1.2,.1,1.4,.1);b.add("sph",0xffd27a,-1.6,Y+1.5,1.2,.12,.14,.12);
+  b.add("box",0x6b4422,-3,Y+.5,2.2,.12,1,.12);b.add("box",0xf5e6c8,-3,Y+1.15,2.2,1.4,.6,.08);b.add("sph",d.col,-3,Y+1.65,2.2,.11,.11,.11);
+  b.add("box",0x6b4422,2.8,Y+.35,2.6,1.4,.12,.9);b.add("box",0x5a3418,2.8,Y+.25,2.6,1.2,.5,.7);
+  G.add(b.mesh());
+  const lab=labelSprite("⛏️ "+d.ore+" Mine");lab.position.set(0,Y+4.4,-1);lab.scale.set(4.6,1,1);G.add(lab);
+  // minecart that rolls while mining
+  const cart=new THREE.Group(),cb2=new Builder();cb2.add("box",0x5a5a62,0,.45,0,.9,.5,.75);cb2.add("box",0x3a3a40,0,.71,0,.96,.06,.8);[[-.32,-.38],[.32,-.38],[-.32,.38],[.32,.38]].forEach(([x,z])=>cb2.add("cyl",0x222226,x,.16,z,.15,.06,.15,Math.PI/2,0,0));
+  cart.add(cb2.mesh());const load=new THREE.Group(),lb=new Builder();[[0,0],[.2,.15],[-.2,-.1],[.15,-.18],[-.12,.18]].forEach(([x,z])=>lb.add("sph",d.col,x,.76,z,.14,.11,.14));load.add(lb.mesh({outline:false}));cart.add(load);cart.position.set(0,Y,3.6);G.add(cart);
+  // ore pile next to the rails that fills up while mining
+  const ores=[];for(let i=0;i<12;i++){const og=new THREE.Group(),ob=new Builder();const a=i*2.4,r=.25+.08*i;ob.add(i%3?"sph":"cone4",d.col,0,.12,0,.16,i%3?.15:.4,.16);og.add(ob.mesh({outline:false}));og.position.set(2.1+Math.cos(a)*r*.6,Y+.05+Math.floor(i/5)*.22,3.4+Math.sin(a)*r*.6);og.visible=false;G.add(og);ores.push(og)}
+  const glow=new THREE.Sprite(new THREE.SpriteMaterial({color:d.col,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending,map:SQ.tex||(SQ.tex=sqGlow())}));glow.position.set(0,Y+2,1);glow.scale.set(9,9,1);G.add(glow);
+  const f=makeFarmer({shirt:0x3a5a8a,pants:0x4a3a2a,hat:0xf2c21a,skin:0xc68a5a});f.g.scale.setScalar(.85);f.g.position.set(-1.2,Y,2);G.add(f.g);
+  return {G,cart,load,ores,glow,f}}
+// a stilt clubhouse that opens the site's Telegram community
+function buildHall(d,hx,hz,face){const G=new THREE.Group();G.position.set(hx,0,hz);G.rotation.y=face;scene.add(G);const b=new Builder(),Y=1;
+  for(let x=-3;x<=3;x+=2)for(let z=-3;z<=3;z+=2)b.add("cyl",0x6b4422,x,.1,z,.22,2,.22);
+  b.add("box",0x9b6a3a,0,Y,0,7.2,.22,7.2);for(let k=-3.4;k<=3.4;k+=.7){b.add("box",0xe8d8b8,k,Y+.4,3.5,.07,.6,.07);b.add("box",0xe8d8b8,-3.5,Y+.4,k,.07,.6,.07);b.add("box",0xe8d8b8,3.5,Y+.4,k,.07,.6,.07)}
+  b.add("box",0xf4f0e6,0,Y+1.5,-.6,5.2,2.8,4);b.add("prism",0x229ed9,0,Y+3.65,-.6,3.25,4.5,1.5,-Math.PI/2,0,0);b.add("box",0x1b86bd,0,Y+2.95,-.6,5.6,.12,4.4);
+  b.add("box",0x6b4a2c,0,Y+.95,1.42,1,1.7,.06);[[-1.7,1.42],[1.7,1.42]].forEach(([x,z])=>{b.add("box",0x9fd8f5,x,Y+1.6,z,.9,.8,.05);b.add("box",0xffffff,x,Y+1.6,z+.02,.95,.06,.05)});
+  // round blue sign with a white paper plane
+  b.add("box",0x6b4422,2.6,Y+1,2.8,.12,2,.12);b.add("cyl",0x229ed9,2.6,Y+2.3,2.82,.75,.1,.75,Math.PI/2,0,0);b.add("prism",0xffffff,2.6,Y+2.3,2.9,.45,.3,.05,0,0,-.5);
+  b.add("box",0xe8a530,-2.2,Y+.3,2.4,.8,.5,.5);b.add("box",0xe8a530,-1,Y+.3,2.6,.8,.5,.5);
+  G.add(b.mesh());const lab=labelSprite(d.n+" Community");lab.position.set(0,Y+5,-.6);lab.scale.set(4.8,1,1);G.add(lab);return G}
 function buildSideQuests(){const centers={gp:[IX,IZ],t2b:[T2X,T2Z],pots:[POTS.x,POTS.z],gs:[GS.x,GS.z],bigi:[BIGI.x,BIGI.z]};THEMES.forEach((T,i)=>{centers[["wfl","cow","roll"][i]]=[T.o.x,T.o.z]});
   const boats=BTN3D.filter(b=>b.userData.btn3d==="boat");
   SQDEF.forEach(d=>{const c=centers[d.id];if(!c||c[0]==null)return;let best=null,bd=1e9;boats.forEach(b=>{const q=Math.hypot(b.position.x-c[0],b.position.z-c[1]);if(q<bd&&q<90){bd=q;best=b}});if(!best)return;
     const bx=best.position.x,bz=best.position.z,dx=bx-c[0],dz=bz-c[1],L=Math.hypot(dx,dz)||1,ox=dx/L,oz=dz/L,px=-oz,pz=ox;
-    let cx=bx+ox*4+px*9,cz=bz+oz*4+pz*9;if(d.id==="gp"){cx=bx+3;cz=bz+20}const G=new THREE.Group();G.position.set(cx,0,cz);scene.add(G);const b=new Builder(),Y=.75;
-    // floating farm barge with fence, soil rows, a little hut and a sign
-    b.add("box",0x8a5a2e,0,.35,0,8.6,.5,8.6);b.add("box",0x9b6a3a,0,.62,0,8.4,.08,8.4);for(let k=-4;k<=4;k+=2)[-4.2,4.2].forEach(e=>{b.add("cyl",0x6b4422,k,.2,e,.14,1.2,.14);b.add("cyl",0x6b4422,e,.2,k,.14,1.2,.14)});
-    b.add("box",0x6b3e1e,-.6,Y,-.2,5.6,.16,5.6);for(let r=0;r<4;r++)b.add("box",0x5a3418,-.6,Y+.1,-2.3+r*1.4,5.4,.05,.12);
-    for(let k=-4;k<=4;k+=.6){[[k,-4.1],[k,4.1]].forEach(([x,z])=>b.add("box",0xe8d8b8,x,Y+.3,z,.07,.6,.07));[[-4.1,k],[4.1,k]].forEach(([x,z])=>b.add("box",0xe8d8b8,x,Y+.3,z,.07,.6,.07))}
-    [[-4.1,0,8.3,.06],[4.1,0,8.3,.06]].forEach(([x,z,l])=>{b.add("box",0xe8d8b8,x,Y+.5,z,.05,.05,l);b.add("box",0xe8d8b8,z,Y+.5,x,l,.05,.05)});
-    b.add("box",0xc8a46a,3,Y+.6,2.8,1.4,1.2,1.2);b.add("prism",0xd8b45a,3,Y+1.5,2.8,.95,1.6,.7,-Math.PI/2,0,0,"YXZ");b.add("box",0x6b4a2c,3,Y+.45,3.41,.4,.9,.04);
-    b.add("box",0x7a4a22,3.1,Y+.9,-3.2,.1,1.8,.1);b.add("box",0xf5e6c8,3.1,Y+1.7,-3.2,1.6,.7,.08);b.add("sph",d.col,3.1,Y+2.25,-3.2,.22,.22,.22);
-    G.add(b.mesh());
-    const lab=labelSprite(d.crop);lab.position.set(0,Y+3.4,0);lab.scale.set(3.4,.85,1);G.add(lab);
-    const qb=btnSprite("🌱 Side Quest","#3f9a3a","sq:"+d.id);qb.position.set(cx-.6,Y+5.1,cz-.2);qb.scale.set(6.4,1.6,1);scene.add(qb);
-    const cb=btnSprite("💬 Community","#229ed9","tg:"+d.id);cb.position.set(cx-.6,Y+3.1,cz-.2+(oz>0?-5.8:5.8));cb.scale.set(5.6,1.4,1);scene.add(cb);
-    // 16 plants that grow while the quest runs
-    const plants=[];for(let r=0;r<4;r++)for(let q=0;q<4;q++){const pg=new THREE.Group();pg.position.set(-2.7+q*1.4,Y+.1,-2.3+r*1.4);const pb=new Builder();
-      if(d.shape==="corn"){pb.add("cyl",0x3f8f34,0,.5,0,.05,1,.05);pb.add("cone4",0x58b83a,.12,.55,0,.06,.6,.2,0,0,-.6);pb.add("cyl",d.col,.06,.85,0,.1,.4,.1)}
-      else if(d.shape==="pine"){pb.add("cone4",0x3f8f34,0,.35,0,.35,.6,.35);pb.add("sph",d.col,0,.75,0,.22,.3,.22);pb.add("cone4",0x3f8f34,0,1.1,0,.12,.35,.12)}
-      else if(d.shape==="flower"){pb.add("cyl",0x3f8f34,0,.3,0,.03,.6,.03);for(let k=0;k<5;k++)pb.add("sph",d.col,Math.cos(k*1.26)*.13,.65,Math.sin(k*1.26)*.13,.11,.06,.11);pb.add("sph",0xfff2a0,0,.67,0,.07,.07,.07)}
-      else if(d.shape==="ball"){pb.add("cyl",0x3f8f34,0,.4,0,.03,.8,.03);for(let k=0;k<6;k++)pb.add("sph",d.col,(k%2-.5)*.14,.75-Math.floor(k/2)*.12,(k%3-1)*.08,.08,.08,.08)}
-      else if(d.shape==="pepper"){pb.add("sph",0x3f8f34,0,.3,0,.25,.25,.25);[[.15,.2],[-.15,-.1],[0,.25]].forEach(([x,z])=>pb.add("cone",d.col,x,.42,z,.06,.3,.06,Math.PI,0,0))}
-      else{pb.add("sph",d.col,0,.25,0,.3,.22,.3);pb.add("sph",d.col,.15,.35,.1,.18,.16,.18)}
-      pg.add(pb.mesh({outline:false}));pg.visible=false;G.add(pg);plants.push(pg)}
-    const glow=new THREE.Sprite(new THREE.SpriteMaterial({color:0xfff2a0,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending,map:(()=>{const k=document.createElement("canvas");k.width=k.height=64;const x=k.getContext("2d"),g=x.createRadialGradient(32,32,1,32,32,32);g.addColorStop(0,"rgba(255,255,255,1)");g.addColorStop(1,"rgba(255,255,255,0)");x.fillStyle=g;x.fillRect(0,0,64,64);return new THREE.CanvasTexture(k)})()}));glow.position.set(-.6,Y+1,-.2);glow.scale.set(7,7,1);G.add(glow);
-    // a farmer NPC tending the field
-    const f=makeFarmer({shirt:d.col,pants:0x3a3a4a,hat:0xd8b860,skin:0xc68a5a});f.g.scale.setScalar(.85);f.g.position.set(1.8,Y+.1,-3);G.add(f.g);
-    let bank=null,bb=1e9;(CLOUDS.banks||[]).forEach(B=>{const q=Math.hypot(B.cx-c[0],B.cz-c[1]);if(q<bb&&q<40){bb=q;bank=B}});SQ.sites.push({d,G,plants,glow,f,cx,cz,qb,cb,bank})});
+    let cx=bx+ox*5+px*11,cz=bz+oz*5+pz*11,hx=bx+ox*5-px*11,hz=bz+oz*5-pz*11;if(d.id==="gp"){cx=bx+3;cz=bz+21;hx=bx+15;hz=bz+21}
+    const face=Math.atan2(ox,oz);
+    const mn=buildMine(d,cx,cz,face),hG=buildHall(d,hx,hz,face);
+    const qb=btnSprite("⛏️ Mine "+d.ore,"#b8742a","sq:"+d.id);qb.position.set(cx,6.4,cz);qb.scale.set(6.8,1.6,1);scene.add(qb);
+    const cb=btnSprite("💬 Community","#229ed9","tg:"+d.id);cb.position.set(hx,7.2,hz);cb.scale.set(5.8,1.45,1);scene.add(cb);
+    SQ.sites.push(Object.assign(mn,{d,hG,cx,cz,qb,cb,bank:null}))});
   SQ.on=true}
 function sqProg(d){const v=sqSite(d.id);if(!v.at)return -1;return Math.min(1,(Date.now()-v.at)/(d.t*1000))}
 function stepSideQuests(dt,t){if(!SQ.on||!S)return;SQ._t=(SQ._t||0)-dt;const slow=SQ._t<=0;if(slow)SQ._t=.5;
-  SQ.sites.forEach(q=>{{const vis=!q.bank||q.bank.open>.6;q.qb.visible=q.cb.visible=vis;q.G.visible=vis||!q.bank}if(Math.hypot(cam.tx-q.cx,cam.tz-q.cz)>80)return;const pr=sqProg(q.d);if(slow){q.plants.forEach((m,i)=>{m.visible=pr>=0;const s2=pr<0?0:.25+.75*Math.min(1,pr*1.05+(i%3)*.02);m.scale.setScalar(s2)})}
-    q.glow.material.opacity=pr>=1?.45+.25*Math.sin(t*4):0;q.f.g.rotation.y=Math.sin(t*.5)*1.2;npcAnim(q.f,t,dt,null,pr>=0&&pr<1?2.4+Math.sin(t*6)*.3:null)})}
+  SQ.sites.forEach(q=>{{const vis=!q.bank||q.bank.open>.6;q.qb.visible=q.cb.visible=vis;q.G.visible=q.hG.visible=vis||!q.bank}if(Math.hypot(cam.tx-q.cx,cam.tz-q.cz)>80)return;const pr=sqProg(q.d),run=pr>=0&&pr<1;
+    if(slow)q.ores.forEach((m,i)=>{m.visible=pr>=0&&i<Math.ceil(pr*q.ores.length)});
+    q.cart.position.z=run?2.5+1.1*Math.sin(t*.9):3.6;q.load.visible=pr>=1||(run&&Math.cos(t*.9)<0);
+    q.glow.material.opacity=pr>=1?.35+.2*Math.sin(t*4):0;q.f.g.rotation.y=run?Math.PI*.5:Math.sin(t*.5)*1.2;npcAnim(q.f,t,dt,null,run?2.2+Math.sin(t*9)*.9:null)})}
 function openSQ(id){const d=SQDEF.find(q=>q.id===id);if(!d)return;const v=sqSite(id),pr=sqProg(d);let m=document.getElementById("sqM");if(!m){m=document.createElement("div");m.className="modal";m.id="sqM";document.body.appendChild(m)}
-  const left=pr>=0&&pr<1?Math.ceil(d.t*(1-pr)):0,st=pr<0?"Empty field":pr<1?"Growing · ready in "+fmt(left):"✅ Ready to harvest!";
-  const btn=S.lv<d.lv?`<button class="btn" disabled style="width:100%;opacity:.6">Unlocks at Level ${d.lv}</button>`:pr<0?`<button class="btn" id="sqGo" style="width:100%">🌱 Plant all 16 · ${d.cost} coins</button>`:pr<1?`<button class="btn alt" disabled style="width:100%">⏳ Growing…</button>`:`<button class="btn" id="sqGo" style="width:100%;background:#e8a530;box-shadow:0 4px 0 #a8741a">🧺 Harvest · +${d.pay} coins</button>`;
-  m.innerHTML=`<div class="suBox" style="max-width:360px"><h3 style="margin:0 0 4px">🌱 Side Quest · ${d.n}</h3><p class="suLead" style="margin:0 0 8px">Plant and harvest the <b>${d.crop}</b> farm here to earn extra coins.</p>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;text-align:center;margin-bottom:8px"><div class="stat" style="display:block"><small>Cost</small><div><b>${d.cost}</b></div></div><div class="stat" style="display:block"><small>Grows</small><div><b>${fmt(d.t)}</b></div></div><div class="stat" style="display:block"><small>Reward</small><div><b style="color:#2f8f3a">+${d.pay}</b></div></div></div>
-    <p style="margin:0 0 6px;font-weight:800">${st}</p><p style="margin:0 0 10px;font-size:.82rem">Daily quest: harvest here ${SQ_DAILY} times today for a <b>+${SQ_BONUS}</b> coin bonus · ${Math.min(v.n,SQ_DAILY)}/${SQ_DAILY}${v.bonus?" ✅ claimed":""}</p>${btn}
+  const left=pr>=0&&pr<1?Math.ceil(d.t*(1-pr)):0,st=pr<0?"The mine is quiet":pr<1?"⛏️ Mining · done in "+fmt(left):"✅ Ore cart is full!";
+  const btn=S.lv<d.lv?`<button class="btn" disabled style="width:100%;opacity:.6">Unlocks at Level ${d.lv}</button>`:pr<0?`<button class="btn" id="sqGo" style="width:100%;background:#b8742a;box-shadow:0 4px 0 #7a4a18">⛏️ Start mining · ${d.cost} coins</button>`:pr<1?`<button class="btn alt" disabled style="width:100%">⏳ Mining…</button>`:`<button class="btn" id="sqGo" style="width:100%;background:#e8a530;box-shadow:0 4px 0 #a8741a">💎 Collect ${d.ore} · +${d.pay}</button>`;
+  m.innerHTML=`<div class="suBox" style="max-width:360px"><h3 style="margin:0 0 4px">⛏️ Side Quest · ${d.n} Mine</h3><p class="suLead" style="margin:0 0 8px">Hire the miner to dig <b>${d.ore}</b>, then cash in the ore for extra coins. Each haul has a ${Math.round(SQ_RARE*100)}% chance of a rare gem that doubles the reward.</p>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;text-align:center;margin-bottom:8px"><div class="stat" style="display:block"><small>Cost</small><div><b>${d.cost}</b></div></div><div class="stat" style="display:block"><small>Dig time</small><div><b>${fmt(d.t)}</b></div></div><div class="stat" style="display:block"><small>Reward</small><div><b style="color:#2f8f3a">+${d.pay}</b></div></div></div>
+    <p style="margin:0 0 6px;font-weight:800">${st}</p><p style="margin:0 0 10px;font-size:.82rem">Daily quest: collect here ${SQ_DAILY} times today for a <b>+${SQ_BONUS}</b> coin bonus · ${Math.min(v.n,SQ_DAILY)}/${SQ_DAILY}${v.bonus?" ✅ claimed":""}</p>${btn}
     <button class="btn alt" type="button" id="sqX" style="width:100%;margin-top:8px">Close</button></div>`;
   m.hidden=false;$("sqX").onclick=()=>{m.hidden=true};const g=$("sqGo");if(g)g.onclick=()=>{if(VISIT)return toast("Visiting: this isn't your farm.");const p2=sqProg(d);
-    if(p2<0){if(S.coins<d.cost)return toast("Not enough coins.");S.coins-=d.cost;v.at=Date.now();toast("🌱 Planted "+d.crop+"! Come back in "+fmt(d.t)+".",2800)}
-    else if(p2>=1){v.at=0;v.n++;let gainC=d.pay;if(v.n>=SQ_DAILY&&!v.bonus){v.bonus=1;gainC+=SQ_BONUS;toast("🏆 Daily side quest done! +"+SQ_BONUS+" bonus coins",3200)}gain(gainC,Math.round(d.pay/20),null);toast("🧺 Harvested "+d.crop+" · +"+d.pay+" coins",2600)}
+    if(p2<0){if(S.coins<d.cost)return toast("Not enough coins.");S.coins-=d.cost;v.at=Date.now();toast("⛏️ The miner is digging for "+d.ore+"! Come back in "+fmt(d.t)+".",2800)}
+    else if(p2>=1){v.at=0;v.n++;const rare=Math.random()<SQ_RARE;let pay=rare?d.pay*2:d.pay,gainC=pay;if(v.n>=SQ_DAILY&&!v.bonus){v.bonus=1;gainC+=SQ_BONUS;setTimeout(()=>toast("🏆 Daily side quest done! +"+SQ_BONUS+" bonus coins",3200),2800)}gain(gainC,Math.round(d.pay/20),null);toast((rare?"💎 Rare gem! ":"💰 Sold ")+d.ore+" · +"+pay+" coins",2600)}
     after();openSQ(id)}}
 function openCommunity(id){const u=(TG_LINKS[id]||TG_LINK||"").trim();if(!u)return toast("💬 The community Telegram is opening soon.",2600);toast("Opening the community on Telegram…",2000);
   const emb=window.top!==window||!!(window.claude&&window.claude.use);if(emb)return openLink(u);let w=null;try{w=window.open(u,"_blank","noopener")}catch(e){}if(!w)setTimeout(()=>{location.href=u},300)}
