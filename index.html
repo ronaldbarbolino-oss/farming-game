@@ -294,7 +294,7 @@ body:not(.land) #menuBtn{display:inline-block!important}
 body:not(.land):not(.rot) .stage{height:calc(100vh - 96px);height:calc(100dvh - 96px);min-height:380px}
 
 /* workers list lives in the Menu, not on the farm screen */
-#crewM .crew,#crewHome .crew,#below .crew{position:static!important;top:auto!important;bottom:auto!important;left:auto!important;right:auto!important;max-width:none!important;max-height:none!important;overflow:visible!important;display:grid!important;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}.toolbar{display:none!important}@media (pointer:coarse){#redeemStat .rdTxt{display:none}#clockStat,#wxStat,.hud .saved,.hud #logo{display:none!important}#acct{font-size:0!important;width:42px;height:42px;min-width:42px;border-radius:50%!important;padding:0!important;display:inline-grid!important;place-items:center;background:#fff6df;border:3px solid var(--wood-d);box-shadow:0 3px 0 var(--wood-d);overflow:hidden}#acct::before{content:"";display:block;width:24px;height:24px;background:no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27%3E%3Ccircle cx=%2712%27 cy=%278%27 r=%274.2%27 fill=%27%235a3a1a%27/%3E%3Cpath d=%27M3.5 21.5c.8-4.6 4.2-7 8.5-7s7.7 2.4 8.5 7z%27 fill=%27%235a3a1a%27/%3E%3C/svg%3E")}}#qset{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 10px}#qset .btn{font-size:.8rem;padding:7px 11px}#crewHome .crew{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))!important;gap:5px!important;font-size:.72rem}#crewHome .crewc{padding:4px 6px!important;gap:3px!important;border-width:2px!important}#crewHome .crewc button,#crewHome .crewc .cbtn{font-size:.64rem!important;padding:2px 5px!important;min-height:0!important}#crewHome .cw-toggle{display:none!important}#crewHome[hidden]{display:none!important}#crewHead button{display:none!important}#crewM .suBox{max-width:560px;width:min(560px,100%)}
+#crewM .crew,#crewHome .crew,#below .crew{position:static!important;top:auto!important;bottom:auto!important;left:auto!important;right:auto!important;max-width:none!important;max-height:none!important;overflow:visible!important;display:grid!important;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}.toolbar{display:none!important}body.mob #tPlow,body.mob #tPlantAll,body.mob #tAll{display:none!important}#tRedeem{display:none!important}button,.stat,.ap,.sb,.btn,.qc{-webkit-tap-highlight-color:transparent}.btn:active,.sb:active,.stat:active,.cbtn:active,.qc button:active{filter:brightness(.88);transform:translateY(2px)}#actPad .ap:active{filter:brightness(.85)}@media (pointer:coarse){#redeemStat .rdTxt{display:none}#clockStat,#wxStat,.hud .saved,.hud #logo{display:none!important}#acct{font-size:0!important;width:42px;height:42px;min-width:42px;border-radius:50%!important;padding:0!important;display:inline-grid!important;place-items:center;background:#fff6df;border:3px solid var(--wood-d);box-shadow:0 3px 0 var(--wood-d);overflow:hidden}#acct::before{content:"";display:block;width:24px;height:24px;background:no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27%3E%3Ccircle cx=%2712%27 cy=%278%27 r=%274.2%27 fill=%27%235a3a1a%27/%3E%3Cpath d=%27M3.5 21.5c.8-4.6 4.2-7 8.5-7s7.7 2.4 8.5 7z%27 fill=%27%235a3a1a%27/%3E%3C/svg%3E")}}#qset{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 10px}#qset .btn{font-size:.8rem;padding:7px 11px}#crewHome .crew{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))!important;gap:5px!important;font-size:.72rem}#crewHome .crewc{padding:4px 6px!important;gap:3px!important;border-width:2px!important}#crewHome .crewc button,#crewHome .crewc .cbtn{font-size:.64rem!important;padding:2px 5px!important;min-height:0!important}#crewHome .cw-toggle{display:none!important}#crewHome[hidden]{display:none!important}#crewHead button{display:none!important}#crewM .suBox{max-width:560px;width:min(560px,100%)}
 #below .crew .crewc{background:#fff6df}
 #below .crew>*{display:flex!important}#below .crew>.cw-toggle{display:none!important}
 /* fixed-angle camera pad: move and zoom only */
@@ -505,25 +505,25 @@ body.land .sbtns .sb{font-size:.6rem!important;padding:3px 6px!important}
 
   <div class="tray-head" id="townHead"><h2>Town</h2><span class="hint" id="townWhere"></span></div>
   <div class="panel shopP" id="townP">
-    <p class="mktNote">Ride the jeep (20 coins) to Town to buy new seeds, farm tools and home goods. These are only sold in Town.</p>
+    <div style="display:none"><p class="mktNote">Ride the jeep (20 coins) to Town to buy new seeds, farm tools and home goods. These are only sold in Town.</p>
     <h4>Seed Shop</h4><div class="scs" id="townSeeds"></div>
     <h4>Hardware Store: farm tools</h4><div class="scs" id="townTools"></div>
-    <h4>Home Goods</h4><div class="scs" id="townDecor"></div>
+    <h4>Home Goods</h4><div class="scs" id="townDecor"></div></div>
     <h4>My Items</h4><div class="scs" id="myDecor"></div>
   </div>
 
-  <div class="tray-head"><h2>Shop</h2><span class="hint">Build buildings, buy boats and open a field on the island.</span></div>
+  <div class="tray-head"><h2>On the Island</h2><span class="hint">Open a field on the island. Buildings and boats are in the 🛒 Store.</span></div>
   <div class="panel shopP">
-    <h4>Buildings · need 🪵 wood (have a worker chop trees)</h4><div class="scs" id="shopB"></div>
-    <h4>Boats</h4><div class="scs" id="shopV"></div>
+    <div style="display:none"><h4>Buildings · need 🪵 wood (have a worker chop trees)</h4><div class="scs" id="shopB"></div>
+    <h4>Boats</h4><div class="scs" id="shopV"></div></div>
     <h4>On the Island</h4><div class="scs" id="shopI"></div>
   </div>
 
   <div class="tray-head" id="lbHead"><h2>Farmers</h2><span class="hint" id="lbHint"></span></div>
   <div class="panel" id="lbPanel"><ol class="lb" id="lb"><li class="lbEmpty">Loading the list…</li></ol></div>
 
-  <div class="tray-head"><h2>Animals</h2><span class="hint">Buy a male and a female to breed: the female gets pregnant on her own and gives birth after 30 minutes. Each species has its own pen. They shelter on their own when it rains or snows.</span></div>
-  <div class="panel"><div class="tools" id="shop"></div>
+  <div class="tray-head"><h2>Animals</h2><span class="hint">Buy animals in the 🛒 Store. Here you can rest, sell and level up their houses.</span></div>
+  <div class="panel"><div class="tools" id="shop" style="display:none"></div>
     <div class="tools" style="margin-top:8px"><button class="btn" id="tRest" hidden style="background:#6a5acd;box-shadow:0 4px 0 #463a9a">😴 Rest All Animals</button><span class="mktNote" id="restNote" style="margin:0" hidden>Resting animals go inside for 3 minutes. After that they can't get sick for 20 minutes.</span></div>
     <h4 class="penH">Sell Animals</h4><p class="mktNote">Sell an animal you don't need. Adults sell for 70% of their price, babies for 35%, sick animals for half of that. Pregnant animals are sold last.</p><div class="tools" id="sellA"></div>
     <h4 class="penH">Animal Houses</h4><p class="mktNote">Level up a house (up to Level 20) to keep more animals and give it a makeover. From Level 5 the yard also gets bigger. Each house has a most it can ever hold. Press 📐 Bigger pen to make the yard wider (+2 space).</p><div class="tools" id="penUp"></div></div>
@@ -2588,7 +2588,7 @@ const _fv=new THREE.Vector3(),SUNOFF=new THREE.Vector3(14,24,10).normalize().mul
 function applyCam(dt){
   cam.auto=false;camT.az=CAM_AZ;camT.pol=CAM_POL;
   if(cam.follow){(cam.followFn||ISLE.boatWorld)(_fv);camT.tx=_fv.x;camT.tz=_fv.z;camT.ty=1.5}
-  const k=Math.min(1,dt*(cam.follow?5:4.5));
+  const k=Math.min(1,dt*(cam.follow?6:(document.body.classList.contains("mob")?9:6)));
   ["az","pol","dist","tx","ty","tz"].forEach(p=>cam[p]+=(camT[p]-cam[p])*k);
   const sp=Math.sin(cam.pol);camera.position.set(cam.tx+cam.dist*sp*Math.sin(cam.az),cam.ty+cam.dist*Math.cos(cam.pol),cam.tz+cam.dist*sp*Math.cos(cam.az));
   if(camera.position.y<.5)camera.position.y=.5;
@@ -2620,10 +2620,10 @@ cv.addEventListener("pointermove",e=>{
   if(!prev){if(e.pointerType==="mouse")hoverAt(e);return}
   if(PLACE&&PLACE.drag){pointers.set(e.pointerId,{x:exy(e).x,y:exy(e).y});const gp=groundPoint(e);if(gp)updateGhost(gp.x-PLACE.ox,gp.z-PLACE.oz);return}
   const dx=exy(e).x-prev.x,dy=exy(e).y-prev.y;pointers.set(e.pointerId,{x:exy(e).x,y:exy(e).y});
-  if(pointers.size===1){dragMoved+=Math.abs(dx)+Math.abs(dy);if(downAt&&Math.hypot(exy(e).x-downAt.x,exy(e).y-downAt.y)>(e.pointerType==="mouse"?6:16)){cv.classList.add("drag");if(e.shiftKey||(e.buttons&2)){camT.az-=dx*.008;camT.pol=Math.min(1.35,Math.max(.35,camT.pol-dy*.006));cam.auto=false;setAuto();return}pan(dx,dy)}}
+  if(pointers.size===1){dragMoved+=Math.abs(dx)+Math.abs(dy);if(downAt&&Math.hypot(exy(e).x-downAt.x,exy(e).y-downAt.y)>(e.pointerType==="mouse"?6:9)){cv.classList.add("drag");if(e.shiftKey||(e.buttons&2)){camT.az-=dx*.008;camT.pol=Math.min(1.35,Math.max(.35,camT.pol-dy*.006));cam.auto=false;setAuto();return}pan(dx,dy)}}
   else if(pointers.size===2){const [a,b]=[...pointers.values()],d=Math.hypot(a.x-b.x,a.y-b.y),an=Math.atan2(b.y-a.y,b.x-a.x);if(pinch0){camT.dist=Math.min(ZMAX,Math.max(5,camT.dist*pinch0/d));let da=an-ang0;da=Math.atan2(Math.sin(da),Math.cos(da));camT.az+=da;camT.pol=Math.min(1.35,Math.max(.35,camT.pol-dy*.004))}pinch0=d;ang0=an;dragMoved=99;cam.follow=false;cam.auto=false;setAuto()}
 });
-function pan(dx,dy){const k=camT.dist*.0022,sa=Math.sin(cam.az),ca=Math.cos(cam.az);
+function pan(dx,dy){const k=camT.dist*(document.body.classList.contains("mob")?.0029:.0022),sa=Math.sin(cam.az),ca=Math.cos(cam.az);
   cam.follow=false;camT.tx=Math.max(-200,Math.min(FEAT?540:235,camT.tx-dx*k*ca-dy*k*sa));camT.tz=Math.max(FEAT?-140:-95,Math.min(FEAT?262:68,camT.tz+dx*k*sa-dy*k*ca));cam.auto=false;setAuto()}
 cv.addEventListener("contextmenu",e=>e.preventDefault());
 function goView(k){const v=VIEWS[k];if(!v)return;const {follow,roofOff,...rest}=v;Object.assign(camT,{ty:.6},rest);cam.follow=!!follow;cam.auto=false;setAuto();ISLE.setRoof(!roofOff);if(k==="tug")ISLE.sail();
@@ -2643,7 +2643,7 @@ cv.addEventListener("pointerup",endPtr);cv.addEventListener("pointercancel",endP
 cv.addEventListener("pointerleave",e=>{if(e.pointerType==="mouse")hovered=null});
 cv.addEventListener("wheel",e=>{e.preventDefault();camT.dist=Math.min(ZMAX,Math.max(5,camT.dist*(1+Math.sign(e.deltaY)*.1)));hideTip()},{passive:false});
 {const mv=(dx,dz)=>{cam.follow=false;const k=camT.dist*.12;camT.tx=Math.max(-200,Math.min(FEAT?540:235,camT.tx+dx*k));camT.tz=Math.max(FEAT?-140:-95,Math.min(FEAT?262:68,camT.tz+dz*k))},zm=f=>{camT.dist=Math.min(ZMAX,Math.max(5,camT.dist*f))};
-  const hold=(id,fn)=>{const b=$(id);let iv=null;const go=()=>{fn();clearInterval(iv);iv=setInterval(fn,120)},stop=()=>{clearInterval(iv);iv=null};b.addEventListener("pointerdown",e=>{e.preventDefault();go()});["pointerup","pointerleave","pointercancel"].forEach(ev=>b.addEventListener(ev,stop))};
+  const hold=(id,fn)=>{const b=$(id);let iv=null;const go=()=>{fn();clearInterval(iv);iv=setInterval(fn,70)},stop=()=>{clearInterval(iv);iv=null};b.addEventListener("pointerdown",e=>{e.preventDefault();go()});["pointerup","pointerleave","pointercancel"].forEach(ev=>b.addEventListener(ev,stop))};
   hold("cU",()=>mv(0,-1));hold("cD",()=>mv(0,1));hold("cLf",()=>mv(-1,0));hold("cRt",()=>mv(1,0));hold("cZi",()=>zm(.88));hold("cZo",()=>zm(1.14));
   window.addEventListener("keydown",e=>{if(e.target&&(e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA"))return;const m={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0]}[e.key];if(m){e.preventDefault();mv(...m)}else if(e.key==="+"||e.key==="=")zm(.88);else if(e.key==="-")zm(1.14)})}
 $("c0").onclick=()=>{const a=camT.az;Object.assign(camT,DEF);camT.az=Math.round((a-DEF.az)/(2*Math.PI))*2*Math.PI+DEF.az;cam.auto=false;setAuto()};
@@ -2905,7 +2905,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="206";const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
+const GAMEVER="207";const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
 if(TESTSRV){document.title="🧪 TEST · "+document.title;const tb=document.createElement("div");tb.id="testBar";tb.textContent=MIRROR_TEST?"🧪 TEST SERVER · a copy of your farm · changes here don't touch your real farm":"🧪 TEST SERVER · changes here don't touch your real farm";tb.style.cssText="position:fixed;left:50%;top:0;transform:translateX(-50%);z-index:9999;background:#7a3fc0;color:#fff;font:900 11px/1.2 sans-serif;padding:3px 10px;border-radius:0 0 10px 10px;pointer-events:none;letter-spacing:.3px";document.addEventListener("DOMContentLoaded",()=>document.body.appendChild(tb));if(document.body)document.body.appendChild(tb)}let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 /* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
 (function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
