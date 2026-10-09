@@ -294,7 +294,7 @@ body:not(.land) #menuBtn{display:inline-block!important}
 body:not(.land):not(.rot) .stage{height:calc(100vh - 96px);height:calc(100dvh - 96px);min-height:380px}
 
 /* workers list lives in the Menu, not on the farm screen */
-#crewM .crew,#crewHome .crew,#below .crew{position:static!important;top:auto!important;bottom:auto!important;left:auto!important;right:auto!important;max-width:none!important;max-height:none!important;overflow:visible!important;display:grid!important;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}.toolbar{display:none!important}#qset{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 10px}#qset .btn{font-size:.8rem;padding:7px 11px}#crewHome .crew{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))!important;gap:5px!important;font-size:.72rem}#crewHome .crewc{padding:4px 6px!important;gap:3px!important;border-width:2px!important}#crewHome .crewc button,#crewHome .crewc .cbtn{font-size:.64rem!important;padding:2px 5px!important;min-height:0!important}#crewHome .cw-toggle{display:none!important}#crewHome[hidden]{display:none!important}#crewHead button{display:none!important}#crewM .suBox{max-width:560px;width:min(560px,100%)}
+#crewM .crew,#crewHome .crew,#below .crew{position:static!important;top:auto!important;bottom:auto!important;left:auto!important;right:auto!important;max-width:none!important;max-height:none!important;overflow:visible!important;display:grid!important;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}.toolbar{display:none!important}@media (pointer:coarse){#redeemStat .rdTxt{display:none}#clockStat,#wxStat,.hud .saved,.hud #logo{display:none!important}#acct{font-size:0!important;width:42px;height:42px;min-width:42px;border-radius:50%!important;padding:0!important;display:inline-grid!important;place-items:center;background:#fff6df;border:3px solid var(--wood-d);box-shadow:0 3px 0 var(--wood-d);overflow:hidden}#acct::before{content:"";display:block;width:24px;height:24px;background:no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27%3E%3Ccircle cx=%2712%27 cy=%278%27 r=%274.2%27 fill=%27%235a3a1a%27/%3E%3Cpath d=%27M3.5 21.5c.8-4.6 4.2-7 8.5-7s7.7 2.4 8.5 7z%27 fill=%27%235a3a1a%27/%3E%3C/svg%3E")}}#qset{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 10px}#qset .btn{font-size:.8rem;padding:7px 11px}#crewHome .crew{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))!important;gap:5px!important;font-size:.72rem}#crewHome .crewc{padding:4px 6px!important;gap:3px!important;border-width:2px!important}#crewHome .crewc button,#crewHome .crewc .cbtn{font-size:.64rem!important;padding:2px 5px!important;min-height:0!important}#crewHome .cw-toggle{display:none!important}#crewHome[hidden]{display:none!important}#crewHead button{display:none!important}#crewM .suBox{max-width:560px;width:min(560px,100%)}
 #below .crew .crewc{background:#fff6df}
 #below .crew>*{display:flex!important}#below .crew>.cw-toggle{display:none!important}
 /* fixed-angle camera pad: move and zoom only */
@@ -399,12 +399,12 @@ body.land .sbtns .sb{font-size:.6rem!important;padding:3px 6px!important}
   <header class="hud">
     <div class="who"><h1 class="logo" id="logo">FarmVerse PH</h1><button class="acct" id="acct" type="button">Guest · Sign up</button><span class="saved" id="acctSave">Saved in this browser</span></div>
     <div class="stats">
-      <div class="stat" title="Farm time (1 game day = 48 minutes)"><span id="clock">6:00 AM</span></div>
+      <div class="stat" id="clockStat" title="Farm time (1 game day = 48 minutes)"><span id="clock">6:00 AM</span></div>
       <div class="stat" title="Weather · tap to change" id="wxStat" style="cursor:pointer"><span id="season">Spring</span> <small aria-hidden="true">▾</small></div>
       <div class="stat" id="coinStat" title="Coins · tap to buy more" style="cursor:pointer"><span class="coin"></span><span id="coins">0</span><span style="font-size:.75rem;background:#3f9a3a;color:#fff;border-radius:6px;padding:0 5px;margin-left:2px">＋</span></div>
       <div class="stat" id="pesoStat" hidden title="Real-money wallet · tap for details" style="cursor:pointer"><span style="display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#2f8f3a;color:#fff;font-weight:900;font-size:.85rem">₱</span><span id="pesoN">0.00</span></div>
       <div class="stat" title="Wood (storage + reserve)">🪵<span id="woodN">0</span></div>
-      <div class="stat" title="Level and XP"><span class="lvl" id="lvl">1</span><span class="xpbar"><i id="xp"></i></span></div>
+      <div class="stat" title="Level and XP"><span class="lvl" id="lvl">1</span><span class="xpbar"><i id="xp"></i></span></div><div class="stat" id="redeemStat" title="Redeem a code" style="cursor:pointer;background:#8a4ac0;color:#fff;border-color:#5e2f88">🎁<span class="rdTxt" style="margin-left:3px">Redeem</span></div>
     </div>
   </header>
 
@@ -479,11 +479,11 @@ body.land .sbtns .sb{font-size:.6rem!important;padding:3px 6px!important}
     <button class="btn" id="tLvl" hidden style="background:#2f7fb8;box-shadow:0 4px 0 #1d5a85">Test: Max farm</button>
   </div>
 
-  <div class="tray-head">
+  <div class="tray-head" style="display:none">
     <h2>Seeds</h2>
     <span class="hint">Tap the grass inside the fence to plow, then plant.</span>
   </div>
-  <div class="panel"><div class="seeds" id="seeds"></div></div>
+  <div class="panel" style="display:none"><div class="seeds" id="seeds"></div></div>
 
   <div class="tray-head"><h2>Weather</h2><span class="hint">The weather stays the way you pick it. Tap the weather at the top to change it anytime.</span></div>
   <div class="panel"><div class="tools" id="wx">
@@ -865,7 +865,8 @@ const BASE={
   cyl:new THREE.CylinderGeometry(1,1,1,QLV===0?6:8).toNonIndexed(),
   cone:new THREE.ConeGeometry(1,1,8).toNonIndexed(),
   cone4:new THREE.ConeGeometry(1,1,4).toNonIndexed(),
-  prism:new THREE.CylinderGeometry(1,1,1,3).toNonIndexed()
+  prism:new THREE.CylinderGeometry(1,1,1,3).toNonIndexed(),
+  torus:new THREE.TorusGeometry(1,.3,6,QLV===0?10:14).toNonIndexed()
 };
 BASE.ico.computeVertexNormals();
 const GRAD=(()=>{const d=new Uint8Array([120,120,120,195,195,195,255,255,255]);const t=new THREE.DataTexture(d,3,1,THREE.RGBFormat);t.minFilter=t.magFilter=THREE.NearestFilter;t.needsUpdate=true;return t})();
@@ -2904,7 +2905,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="205";const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
+const GAMEVER="206";const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
 if(TESTSRV){document.title="🧪 TEST · "+document.title;const tb=document.createElement("div");tb.id="testBar";tb.textContent=MIRROR_TEST?"🧪 TEST SERVER · a copy of your farm · changes here don't touch your real farm":"🧪 TEST SERVER · changes here don't touch your real farm";tb.style.cssText="position:fixed;left:50%;top:0;transform:translateX(-50%);z-index:9999;background:#7a3fc0;color:#fff;font:900 11px/1.2 sans-serif;padding:3px 10px;border-radius:0 0 10px 10px;pointer-events:none;letter-spacing:.3px";document.addEventListener("DOMContentLoaded",()=>document.body.appendChild(tb));if(document.body)document.body.appendChild(tb)}let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 /* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
 (function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
@@ -7941,7 +7942,7 @@ $("tBuyCoins").onclick=openCoins;{let BIP=null;const ga=$("tGetApp");window.addE
   const doInstall=async e=>{if(e)e.preventDefault();if(BIP){BIP.prompt();try{const c=await BIP.userChoice;if(c&&c.outcome==="accepted"){toast("📲 Installing FarmVerse PH… look for it on your home screen.",4200);ib.hidden=true;ga.hidden=true}}catch(err){}BIP=null;return}$("instM").hidden=false};
   ib.onclick=doInstall;$("instClose").onclick=()=>{$("instM").hidden=true};
   ga.addEventListener("click",doInstall);
-  window.addEventListener("appinstalled",()=>{ga.hidden=true;ib.hidden=true})}{const inApp=matchMedia("(display-mode: standalone)").matches||document.referrer.startsWith("android-app://");if(/^https?:$/.test(location.protocol)&&!(window.claude&&window.claude.use)&&/Android/i.test(navigator.userAgent)&&!inApp)$("tGetApp").hidden=false}$("coinStat").onclick=openCoins;try{$("tgBtn").onclick=()=>openCommunity("main");$("sqLogBtn").onclick=()=>{if(FEAT)openSQLog();else toast("Side quests are coming soon.")}}catch(e){}try{const c=$("crew"),h=$("crewHome");if(c&&h)h.appendChild(c)}catch(e){}try{$("crewHead").onclick=()=>{const h=$("crewHome");h.hidden=!h.hidden;$("crewTg").textContent=h.hidden?"Show ▾":"Hide ▴"}}catch(e){}
+  window.addEventListener("appinstalled",()=>{ga.hidden=true;ib.hidden=true})}{const inApp=matchMedia("(display-mode: standalone)").matches||document.referrer.startsWith("android-app://");if(/^https?:$/.test(location.protocol)&&!(window.claude&&window.claude.use)&&/Android/i.test(navigator.userAgent)&&!inApp)$("tGetApp").hidden=false}$("coinStat").onclick=openCoins;try{$("tgBtn").onclick=()=>openCommunity("main");$("sqLogBtn").onclick=()=>{if(FEAT)openSQLog();else toast("Side quests are coming soon.")}}catch(e){}try{const c=$("crew"),h=$("crewHome");if(c&&h)h.appendChild(c)}catch(e){}try{$("redeemStat").onclick=()=>{const r=$("tRedeem");if(r)r.click()}}catch(e){}try{$("crewHead").onclick=()=>{const h=$("crewHome");h.hidden=!h.hidden;$("crewTg").textContent=h.hidden?"Show ▾":"Hide ▴"}}catch(e){}
   try{const Q=$("qset"),L=[["dnBtn","#4a5ad8"],["hideBtn","#6b5a40"],["sqLogBtn","#b8742a"],["mapBtn","#3f8f5a"],["sndBtn","#7a6a5a"],["qBtn","#8a6a2a"],["supBtn","#5a7a9a"]];
     const sync=()=>L.forEach(([id],i)=>{const src=$(id),b=Q.children[i];if(!src||!b)return;let t=src.textContent.trim();if(id==="hideBtn")t=document.body.classList.contains("hideui")?"👁️ Show screen buttons":"🙈 Hide screen buttons";b.textContent=t;b.style.display=src.hidden&&id==="dnBtn"?"none":""});
     L.forEach(([id,c])=>{const b=document.createElement("button");b.type="button";b.className="btn";b.style.cssText="background:"+c+";box-shadow:0 4px 0 rgba(0,0,0,.25)";b.onclick=()=>{const src=$(id);if(!src)return;if(id!=="dnBtn"&&id!=="hideBtn"&&id!=="sndBtn"&&id!=="qBtn")try{$("drawerX").click()}catch(e){}src.click();setTimeout(sync,60)};Q.appendChild(b)});setTimeout(sync,500);setInterval(sync,3000)}catch(e){console.warn(e)}try{TOOL="move";$("crewBtn").onclick=()=>{let m=$("crewM");if(!m){m=document.createElement("div");m.className="modal";m.id="crewM";m.innerHTML='<div class="suBox"><h3 style="margin:0 0 4px">👷 Helpers</h3><p class="suLead" style="margin:0 0 8px">Hire helpers and tell them what to do on your farm.</p><div id="crewSlot"></div><button class="btn alt" type="button" id="crewX" style="width:100%;margin-top:8px">Close</button></div>';document.body.appendChild(m);m.addEventListener("click",e=>{if(e.target===m)$("crewX").click()})}
@@ -8014,13 +8015,13 @@ function qsEmoji(n){n=n.toLowerCase();const M=[["fert","🧪"],["axe","🪓"],["
 const QSA={manok:"🐔",kambing:"🐐",bibe:"🦆",pato:"🦆",pusa:"🐱",aso:"🐶",baboy:"🐷",baka:"🐄",kabayo:"🐴",kalabaw:"🐃"};
 function qsCard(o){return `<div class="qc ${o.cls||""}"><b>${o.n}</b><div class="ic">${o.img?`<img src="${o.img}" alt="">`:o.e}</div>${o.l1?`<small>${o.l1}</small>`:""}${o.l2?`<small>${o.l2}</small>`:""}<span class="qp">🪙 ${o.cost.toLocaleString()}</span>${o.tag?`<span class="qtag">${o.tag}</span>`:`<div class="qb">${o.btn}</div>`}</div>`}
 function qsRender(){const g=$("qsGrid");if(!g)return;qsTabsUI();const T=QS.tab,lk=lv=>S.lv<lv;let h="";
-  if(T==="seed")h=TOWNSEEDS.map(d=>{const c=crop(d.id),own=seedOwned(d.id);return qsCard({n:c.n,img:ICONS[c.id],e:"🌱",l1:"⏱ "+fmt(c.t),l2:"Profit: <i>"+(c.s-c.c)+"</i>",cost:d.cost,cls:own?"own":lk(d.lv)?"lock":"",tag:own?"Owned":lk(d.lv)?"Level "+d.lv:"",btn:`<button data-q="seed" data-id="${d.id}">Buy</button>`})}).join("")+DECOR.filter(d=>d.tree).map(d=>qsCard({n:d.n,e:qsEmoji(d.n),l1:"Fruit tree",cost:d.cost,cls:lk(d.lv)?"lock":"",tag:lk(d.lv)?"Level "+d.lv:"",btn:`<button data-q="decor" data-id="${d.id}">Buy</button>`})).join("");
+  if(T==="seed")h=CROPS.filter(c=>!c.town||seedOwned(c.id)).map(c=>{const on=S.sel===c.id,fr=seedFree(c.id);return qsCard({n:c.n,img:ICONS[c.id],e:"🌱",l1:"⏱ "+fmt(c.t)+(fr?" · 🎁 "+fr+" free":""),l2:"Profit: <i>"+(c.s-c.c)+"</i>",cost:c.c,cls:(on?"own ":"")+(lk(c.lv)?"lock":""),tag:lk(c.lv)?"Level "+c.lv:"",btn:on?`<button disabled>✅ Planting</button>`:`<button data-q="sel" data-id="${c.id}">🌱 Plant</button>`})}).join("")+TOWNSEEDS.filter(d=>!seedOwned(d.id)).map(d=>{const c=crop(d.id),own=seedOwned(d.id);return qsCard({n:c.n,img:ICONS[c.id],e:"🌱",l1:"⏱ "+fmt(c.t),l2:"Profit: <i>"+(c.s-c.c)+"</i>",cost:d.cost,cls:own?"own":lk(d.lv)?"lock":"",tag:own?"Owned":lk(d.lv)?"Level "+d.lv:"",btn:`<button data-q="seed" data-id="${d.id}">Buy</button>`})}).join("")+DECOR.filter(d=>d.tree).map(d=>qsCard({n:d.n,e:qsEmoji(d.n),l1:"Fruit tree",cost:d.cost,cls:lk(d.lv)?"lock":"",tag:lk(d.lv)?"Level "+d.lv:"",btn:`<button data-q="decor" data-id="${d.id}">Buy</button>`})).join("");
   else if(T==="tool")h=TTOOLS.map(d=>qsCard({n:d.n,e:qsEmoji(d.id+" "+d.n),l1:(d.d||"").slice(0,34),cost:d.cost,cls:lk(d.lv)?"lock":"",tag:lk(d.lv)?"Level "+d.lv:"",btn:`<button data-q="tool" data-id="${d.id}">Buy</button>`})).join("");
   else if(T==="home")h=DECOR.filter(d=>!d.tree).map(d=>qsCard({n:d.n,e:qsEmoji(d.n),l1:(S.decor||{})[d.id]?"You have "+S.decor[d.id]:"",cost:d.cost,cls:lk(d.lv)?"lock":"",tag:lk(d.lv)?"Level "+d.lv:"",btn:`<button data-q="decor" data-id="${d.id}">Buy</button>`})).join("");
   else if(T==="animal")h=ANIMALS.map(a=>qsCard({n:a.n,e:QSA[a.id]||"🐾",l1:"⏱ "+fmt(a.t),l2:a.item,cost:a.cost,cls:lk(a.lv)?"lock":"",tag:lk(a.lv)?"Level "+a.lv:"",btn:`<button data-q="animal" data-id="${a.id}" data-g="M">♂</button><button class="f" data-q="animal" data-id="${a.id}" data-g="F">♀</button>`})).join("");
   else if(T==="build")h=BUILDS.filter(d=>!d.decor).map(d=>qsCard({n:d.n,e:qsEmoji(d.id+" "+d.n),l1:d.wood?"🪵 "+d.wood:"",cost:d.cost||0,cls:lk(d.lv)?"lock":"",tag:lk(d.lv)?"Level "+d.lv:"",btn:`<button data-q="build" data-id="${d.id}">Build</button>`})).join("")+BOATS.map(d=>{const own=(S.boats||[]).includes(d.id);return qsCard({n:d.n,e:"⛵",l1:"Boat",cost:d.cost,cls:own?"own":lk(d.lv)?"lock":"",tag:own?"Owned":lk(d.lv)?"Level "+d.lv:"",btn:`<button data-q="boat" data-id="${d.id}">Buy</button>`})}).join("");
   g.innerHTML=h;g.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>qsBuy(b.dataset.q,b.dataset.id,b.dataset.g))}
-function qsBuy(k,id,gd){if(k==="seed"||k==="tool"||k==="decor"){const was=S.inTown;S.inTown=true;try{townBuy(k,id)}finally{S.inTown=was}after()}
+function qsBuy(k,id,gd){if(k==="sel"){const c=crop(id);if(!c)return;S.sel=id;try{save()}catch(e){}try{ui()}catch(e){}toast("🌱 "+c.n+" selected. Tap Plant All, or tap plowed soil to plant it.",2600);qsRender();return}if(k==="seed"||k==="tool"||k==="decor"){const was=S.inTown;S.inTown=true;try{townBuy(k,id)}finally{S.inTown=was}after()}
   else if(k==="animal")buyAnimal(animal(id),gd);else if(k==="build"){document.body.classList.remove("drawer");startPlace(id)}
   else if(k==="boat"){const b=document.querySelector('#shopV [data-v="'+id+'"]');if(b)b.click()}
   qsRender()}
