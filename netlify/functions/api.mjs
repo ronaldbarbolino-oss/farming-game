@@ -24,7 +24,9 @@ export default async (req) => {
   const path = url.pathname.replace(/^.*?\/api\/?/, "").replace(/^\.netlify\/functions\/api\/?/, "").replace(/\/$/, "");
   // test server (branch deploy "test"): its own data, never touching the live farms
   const TEST = /^test--/.test(url.hostname);
-  const gs = (o) => getStore({ ...o, name: (TEST ? "test-" : "") + o.name });
+  // Manila server (branch deploy "manila"): its own farms, separate from live and test
+  const MNL = /^manila--/.test(url.hostname);
+  const gs = (o) => getStore({ ...o, name: (MNL ? "mnl-" : "") + (TEST ? "test-" : "") + o.name });
   if (path === "health" || path === "") return J({ ok: true, service: "farming-api", path: url.pathname });
   if (path === "mailcheck") { let mod = false; try { await import("nodemailer"); mod = true } catch {} const gp = (process.env.GMAIL_APP_PASSWORD || "").replace(/\s+/g, ""); return J({ gmailUser: !!process.env.GMAIL_USER, gmailPassLength: gp.length, nodemailer: mod, resend: !!process.env.RESEND_API_KEY }) }
   const meta = gs({ name: "meta", consistency: "strong" });
