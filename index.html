@@ -2905,7 +2905,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="210";const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
+const GAMEVER="211";const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
 if(TESTSRV){document.title="🧪 TEST · "+document.title;const tb=document.createElement("div");tb.id="testBar";tb.textContent=MIRROR_TEST?"🧪 TEST SERVER · a copy of your farm · changes here don't touch your real farm":"🧪 TEST SERVER · changes here don't touch your real farm";tb.style.cssText="position:fixed;left:50%;top:0;transform:translateX(-50%);z-index:9999;background:#7a3fc0;color:#fff;font:900 11px/1.2 sans-serif;padding:3px 10px;border-radius:0 0 10px 10px;pointer-events:none;letter-spacing:.3px";document.addEventListener("DOMContentLoaded",()=>document.body.appendChild(tb));if(document.body)document.body.appendChild(tb)}let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 /* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
 (function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
@@ -5119,6 +5119,30 @@ const SQ_TASKS={
  pine:[{n:"Plant the seedlings",k:"grid",from:["🟫"],to:"🌱",c:9,h:"Tap every patch of soil to plant a seedling."},{n:"Water the field",k:"grid",from:["🌱"],to:"💧",c:9,h:"Tap every seedling to water it."},{n:"Pull the weeds",k:"pick",tgt:"🌿",to:"✨",bad:["🍍"],c:6,h:"Pull only the weeds and leave the pineapples."}]};
 const SQ_TIP={park:"Guests also leave a random tip of up to 20% at the ticket booth.",stall:"Customers leave a random tip of up to 20%.",fish:"The fish you reel in is random. The ✨ Golden Clover Fish pays 4×.",dairy:"The reward is fixed, so this is the safest side quest for steady coins.",dice:"The number you roll multiplies the treasure, from ½× on a 1 up to 2× on a 6.",race:"If your horse wins you get its full prize; otherwise a consolation prize. The longshot pays the most.",pearl:"Your 3 pearls are added together. A 🟡 Golden pearl alone is worth 3×.",mine:"Each haul has a 15% chance of a 💎 rare gem that doubles the reward.",pine:"The reward is fixed. Start again right away to keep the field busy."};
 function sqEl(v){if(v.tk==null){v.tk=3;v.el=0}const T=SQ_T*1000,cap=v.tk>=3?T:SQ_TH[v.tk]*T;return Math.min((v.el||0)+(Date.now()-v.at),cap)}
+
+/* secret helpers: up to 2 hooded workers who tend the Secret Island field (plow, plant the chosen secret crop, harvest) */
+const SH_MAX=2,SH_COST=[25000,40000],SHH={npcs:[],t:0};
+const shCrops=()=>CROPS.filter(c=>c.island);
+function shSel(){const L=shCrops().filter(c=>S.lv>=c.lv);if(!L.length)return null;let c=L.find(x=>x.id===S.shSel);if(!c){c=L[0];S.shSel=c.id}return c}
+function buyShelp(){const n=S.shelp|0;if(!ownIsle())return toast("🏝️ Buy the Secret Island first (Menu → On the Island).",2600);if(n>=SH_MAX)return toast("You already have "+SH_MAX+" secret helpers, the most the island can hold.",2600);
+  const cost=SH_COST[n];if(S.coins<cost)return toast("Not enough coins. A secret helper costs "+cost.toLocaleString()+".",2400);S.coins-=cost;S.shelp=n+1;shSel();after();toast("🕵️ Secret helper hired! They'll tend the Secret Island field for you.",3200)}
+function shNext(){const L=shCrops().filter(c=>S.lv>=c.lv);if(!L.length)return;const i=L.findIndex(c=>c.id===S.shSel);S.shSel=L[(i+1)%L.length].id;after();toast("🕵️ Secret helpers will plant "+crop(S.shSel).n+".",2200)}
+function stepSecretHelp(dt,t){if(typeof S==="undefined"||!S||VISIT)return;const n=ownIsle()?Math.min(SH_MAX,S.shelp|0):0;
+  while(SHH.npcs.length<n){const f=makeFarmer({shirt:0x2b2b33,pants:0x1a1a22,hat:0x3a2a4a,skin:0xc68a5a});f.g.scale.setScalar(.9);scene.add(f.g);const lab=labelSprite("🕵️ Secret Helper");lab.scale.set(2.6,.65,1);lab.position.y=2.2;f.g.add(lab);SHH.npcs.push({f,tx:IX_+2,tz:IZ_+33,job:-1,wait:1+SHH.npcs.length})}
+  SHH.npcs.forEach((h,k)=>{h.f.g.visible=k<n;if(k>=n)return;const g=h.f.g;if(g.position.lengthSq()<1){g.position.set(IX_+2+k,1.2,IZ_+32)}
+    const dx=h.tx-g.position.x,dz=h.tz-g.position.z,d=Math.hypot(dx,dz),moving=d>.15;if(moving){const sp=Math.min(d,dt*2.2);g.position.x+=dx/d*sp;g.position.z+=dz/d*sp;g.rotation.y=Math.atan2(dx,dz)-Math.PI/2}
+    h.f._w=moving?1:0;npcAnim(h.f,t,dt,null,!moving&&h.job>=0?2.2+Math.sin(t*8)*.6:null);
+    if(moving)return;h.wait-=dt;if(h.wait>0)return;h.wait=2.4;
+    if(h.job>=0){const i=h.job;h.job=-1;const tl=S.tiles[i];if(!tl||!isIsleTile(i))return;
+      if(typeof RAID!=="undefined"&&RAID.on)return;
+      const [x,z]=tileXZ(i),sc=toScreen(x,1.3,z);
+      if(tl.k==="crop"){const st=tileState(tl);if(st&&st.p>=1){if(harvestTile(i))after()}}
+      else if(tl.k==="soil"){const c=shSel();if(c&&plantAt(i,c.id,sc.x,sc.y,true))after()}
+      else if(tl.k==="grass"&&S.coins>=PLOW){S.coins-=PLOW;tl.k="soil";burstTile(i,0x8d5a32,8);after()}
+      return}
+    // pick the next job: ripe crops first, then empty soil, then grass; the two helpers split the field
+    let best=-1,score=-1;S.tiles.forEach((tl,i)=>{if(!isIsleTile(i)||i%n!==k%n)return;let sv=-1;if(tl.k==="crop"){const st=tileState(tl);if(st&&st.p>=1)sv=3}else if(tl.k==="soil")sv=shSel()?2:-1;else if(tl.k==="grass")sv=1;if(sv>score){score=sv;best=i}});
+    if(best<0||score<1){h.tx=IX_+1.5+k*1.5;h.tz=IZ_+30;return}const [x,z]=tileXZ(best);h.tx=x+.45;h.tz=z+.45;h.job=best})}
 function sqProg(d){const v=sqSite(d.id);if(!v.at)return -1;return Math.min(1,sqEl(v)/(SQ_T*1000))}
 function sqDue(d){const v=sqSite(d.id);if(!v.at||v.tk==null||v.tk>=3)return false;return sqEl(v)>=SQ_TH[v.tk]*SQ_T*1000}
 function sqLeft(d){const v=sqSite(d.id);if(!v.at)return 0;const T=SQ_T*1000,nx=v.tk>=3?T:SQ_TH[v.tk]*T;return Math.max(0,Math.ceil((nx-sqEl(v))/1000))}
@@ -5219,7 +5243,7 @@ function buildHall(d,hx,hz,face,gy){const G=new THREE.Group();G.position.set(hx,
 function sqFindSpot(cx0,cz0,bx,bz,ox,oz,px,pz,nr){const rc=new THREE.Raycaster();rc.camera=camera;scene.updateMatrixWorld(true);const near=[],v=new THREE.Vector3();
   scene.traverse(o=>{if(!o.isMesh||!o.geometry)return;const g=o.geometry;if(!g.boundingSphere)g.computeBoundingSphere();if(!g.boundingSphere)return;v.copy(g.boundingSphere.center).applyMatrix4(o.matrixWorld);const r=g.boundingSphere.radius*o.matrixWorld.getMaxScaleOnAxis();if(Math.hypot(v.x-bx,v.z-bz)<70+r||(nr&&Math.hypot(v.x-nr[0],v.z-nr[1])<45+r))near.push(o)});
   const top=(x,z)=>{rc.set(new THREE.Vector3(x,80,z),new THREE.Vector3(0,-1,0));const h=rc.intersectObjects(near,false).find(q=>q.object.visible&&q.object.material&&!q.object.material.transparent);return h?h.point.y:-9};
-  const ok=(x,z)=>{let lo=99,hi=-99;for(let a=-2.6;a<=2.6;a+=1.3)for(let c=-2.6;c<=2.6;c+=1.3){const y=top(x+a,z+c);if(y<.8||y>3.2)return null;lo=Math.min(lo,y);hi=Math.max(hi,y)}return hi-lo<.4?hi:null};
+  const ok=(x,z)=>{if(Math.abs(x-(IX_+2.5))<7.5&&Math.abs(z-(IZ_+34))<7.5)return null;let lo=99,hi=-99;for(let a=-2.6;a<=2.6;a+=1.3)for(let c=-2.6;c<=2.6;c+=1.3){const y=top(x+a,z+c);if(y<.8||y>3.2)return null;lo=Math.min(lo,y);hi=Math.max(hi,y)}return hi-lo<.4?hi:null};
   if(nr)for(let r=7;r<=30;r+=2.5)for(let q=0;q<24;q++){const an=q/24*Math.PI*2+r*.37,x=nr[0]+Math.cos(an)*r,z=nr[1]+Math.sin(an)*r,y=ok(x,z);if(y!=null)return[x,z,y]}
   const L=Math.hypot(bx-cx0,bz-cz0);for(let k=6;k<Math.min(L,40);k+=2.5)for(const s of[0,3,-3,6,-6,9,-9,12,-12,15,-15]){const x=bx-ox*k+px*s,z=bz-oz*k+pz*s,y=ok(x,z);if(y!=null)return[x,z,y]}
   for(let r=8;r<Math.max(L,30)*1.1;r+=3)for(let q=0;q<28;q++){const an=q/28*Math.PI*2,x=cx0+Math.cos(an)*r,z=cz0+Math.sin(an)*r,y=ok(x,z);if(y!=null)return[x,z,y]}
@@ -5339,7 +5363,7 @@ function cloudBtnSprite(text,act){const c=document.createElement("canvas");c.wid
   try{if(document.fonts)document.fonts.ready.then(()=>{draw();tex.needsUpdate=true})}catch(e){}return sp}
 window.__sqFind=id=>sqFindSpot(...SQ.args[id]);
 // Community Hall spots: clear ground next to each site's main Enter button (found once with sqFindSpot)
-const SQ_HALL={gp:[78.25,37.17,1.27],wfl:[246.45,-98.38,1.2],cow:[294.37,75.72,1.3],roll:[379.65,-23.46,1.32],t2b:[137.41,129.92,1.3],pots:[274,230.11,1.33],gs:[434,211.3,1.28],bigi:[457.92,47.01,1.59]};
+const SQ_HALL={gp:[76.35,-13.35,1.33],wfl:[246.45,-98.38,1.2],cow:[294.37,75.72,1.3],roll:[379.65,-23.46,1.32],t2b:[137.41,129.92,1.3],pots:[274,230.11,1.33],gs:[434,211.3,1.28],bigi:[457.92,47.01,1.59]};
 const SQ_ENTER={gp:"carnival",wfl:"theme0",cow:"theme1",roll:"theme2",t2b:"t2bEnter",pots:"potsEnter",gs:"gsEnter"};
 function buildSideQuests(){const centers={gp:[IX,IZ],t2b:[T2X,T2Z],pots:[POTS.x,POTS.z],gs:[GS.x,GS.z],bigi:[BIGI.x,BIGI.z]};THEMES.forEach((T,i)=>{centers[["wfl","cow","roll"][i]]=[T.o.x,T.o.z]});
   const boats=BTN3D.filter(b=>b.userData.btn3d==="boat");
@@ -5353,7 +5377,7 @@ function buildSideQuests(){const centers={gp:[IX,IZ],t2b:[T2X,T2Z],pots:[POTS.x,
     SQ.sites.push(Object.assign(mn,{d,hG,cx,cz,qb,cb,nd,bank:null}))});
   SQ.on=true}
 function sqNearBank(B){return SQ.on&&SQ.sites.some(q=>q.bank===B&&(Math.hypot(camT.tx-q.cx,camT.tz-q.cz)<24||Math.hypot(camT.tx-q.hG.position.x,camT.tz-q.hG.position.z)<24))}
-function stepSideQuests(dt,t){if(!SQ.on||!S)return;SQ._t=(SQ._t||0)-dt;const slow=SQ._t<=0;if(slow)SQ._t=.5;
+function stepSideQuests(dt,t){try{stepSecretHelp(dt,t)}catch(e){}if(!SQ.on||!S)return;SQ._t=(SQ._t||0)-dt;const slow=SQ._t<=0;if(slow)SQ._t=.5;
   SQ.sites.forEach(q=>{{const vis=!q.bank||q.bank.open>.6;q.qb.visible=q.cb.visible=vis;q.G.visible=q.hG.visible=vis||!q.bank}if(slow)q.nd.visible=q.qb.visible&&sqDue(q.d);if(Math.hypot(cam.tx-q.cx,cam.tz-q.cz)>80)return;const pr=sqProg(q.d),run=pr>=0&&pr<1;
     try{q.anim(t,dt,pr,run,slow)}catch(e){}if(q.nd.visible)q.nd.position.y=8.3+Math.sin(t*4)*.25;q.glow.material.opacity=pr>=1?.35+.2*Math.sin(t*4):0})}
 function sqFinish(d,v,pay,msg){v.at=0;v.tk=0;v.el=0;v.n++;let g=pay;if(v.n>=SQ_DAILY&&!v.bonus){v.bonus=1;g+=SQ_BONUS;setTimeout(()=>toast("🏆 Daily side quest done! +"+SQ_BONUS+" bonus coins",3200),2900)}if(g>0)gain(g,Math.round(sqOpt(d,v).pay/20),null);toast(msg,2800);after()}
@@ -8015,13 +8039,13 @@ function qsEmoji(n){n=n.toLowerCase();const M=[["fert","🧪"],["axe","🪓"],["
 const QSA={manok:"🐔",kambing:"🐐",bibe:"🦆",pato:"🦆",pusa:"🐱",aso:"🐶",baboy:"🐷",baka:"🐄",kabayo:"🐴",kalabaw:"🐃"};
 function qsCard(o){return `<div class="qc ${o.cls||""}"><b>${o.n}</b><div class="ic">${o.img?`<img src="${o.img}" alt="">`:o.e}</div>${o.l1?`<small>${o.l1}</small>`:""}${o.l2?`<small>${o.l2}</small>`:""}<span class="qp">🪙 ${o.cost.toLocaleString()}</span>${o.tag?`<span class="qtag">${o.tag}</span>`:`<div class="qb">${o.btn}</div>`}</div>`}
 function qsRender(){const g=$("qsGrid");if(!g)return;qsTabsUI();const T=QS.tab,lk=lv=>S.lv<lv;let h="";
-  if(T==="seed")h=CROPS.filter(c=>!c.town||seedOwned(c.id)).map(c=>{const on=S.sel===c.id,fr=seedFree(c.id);return qsCard({n:c.n,img:ICONS[c.id],e:"🌱",l1:"⏱ "+fmt(c.t)+(fr?" · 🎁 "+fr+" free":""),l2:"Profit: <i>"+(c.s-c.c)+"</i>",cost:c.c,cls:(on?"own ":"")+(lk(c.lv)?"lock":""),tag:lk(c.lv)?"Level "+c.lv:"",btn:on?`<button disabled>✅ Planting</button>`:`<button data-q="sel" data-id="${c.id}">🌱 Plant</button>`})}).join("")+TOWNSEEDS.filter(d=>!seedOwned(d.id)).map(d=>{const c=crop(d.id),own=seedOwned(d.id);return qsCard({n:c.n,img:ICONS[c.id],e:"🌱",l1:"⏱ "+fmt(c.t),l2:"Profit: <i>"+(c.s-c.c)+"</i>",cost:d.cost,cls:own?"own":lk(d.lv)?"lock":"",tag:own?"Owned":lk(d.lv)?"Level "+d.lv:"",btn:`<button data-q="seed" data-id="${d.id}">Buy</button>`})}).join("")+DECOR.filter(d=>d.tree).map(d=>qsCard({n:d.n,e:qsEmoji(d.n),l1:"Fruit tree",cost:d.cost,cls:lk(d.lv)?"lock":"",tag:lk(d.lv)?"Level "+d.lv:"",btn:`<button data-q="decor" data-id="${d.id}">Buy</button>`})).join("");
-  else if(T==="tool")h=TTOOLS.map(d=>qsCard({n:d.n,e:qsEmoji(d.id+" "+d.n),l1:(d.d||"").slice(0,34),cost:d.cost,cls:lk(d.lv)?"lock":"",tag:lk(d.lv)?"Level "+d.lv:"",btn:`<button data-q="tool" data-id="${d.id}">Buy</button>`})).join("");
+  if(T==="seed")h=CROPS.filter(c=>!c.town||seedOwned(c.id)).map(c=>{const on=S.sel===c.id,fr=seedFree(c.id);return qsCard({n:(c.island?"🚫 ":"")+c.n,img:ICONS[c.id],e:"🌱",l1:(c.island?"Secret Island only · ":"")+"⏱ "+fmt(c.t)+(fr?" · 🎁 "+fr+" free":""),l2:"Profit: <i>"+(c.s-c.c)+"</i>",cost:c.c,cls:(on?"own ":"")+(lk(c.lv)?"lock":""),tag:lk(c.lv)?"Level "+c.lv:"",btn:on?`<button disabled>✅ Planting</button>`:`<button data-q="sel" data-id="${c.id}">🌱 Plant</button>`})}).join("")+TOWNSEEDS.filter(d=>!seedOwned(d.id)).map(d=>{const c=crop(d.id),own=seedOwned(d.id);return qsCard({n:c.n,img:ICONS[c.id],e:"🌱",l1:"⏱ "+fmt(c.t),l2:"Profit: <i>"+(c.s-c.c)+"</i>",cost:d.cost,cls:own?"own":lk(d.lv)?"lock":"",tag:own?"Owned":lk(d.lv)?"Level "+d.lv:"",btn:`<button data-q="seed" data-id="${d.id}">Buy</button>`})}).join("")+DECOR.filter(d=>d.tree).map(d=>qsCard({n:d.n,e:qsEmoji(d.n),l1:"Fruit tree",cost:d.cost,cls:lk(d.lv)?"lock":"",tag:lk(d.lv)?"Level "+d.lv:"",btn:`<button data-q="decor" data-id="${d.id}">Buy</button>`})).join("");
+  else if(T==="tool")h=(()=>{const n=S.shelp|0,own=ownIsle(),c=shSel();return qsCard({n:"🕵️ Secret Helper",e:"🕵️",l1:"Tends the Secret Island · "+n+"/"+SH_MAX,l2:c?"Plants: "+c.n:"",cost:SH_COST[Math.min(n,SH_MAX-1)],cls:n>=SH_MAX?"own":!own?"lock":"",tag:n>=SH_MAX?"2/2 hired":!own?"Needs Secret Island":"",btn:`<button data-q="shelp">Hire</button>`})+(own&&n?qsCard({n:"Secret crop",e:"🌿",l1:"What secret helpers plant",l2:c?c.n:"",cost:0,btn:`<button data-q="shsel">Change</button>`}):"")})()+TTOOLS.map(d=>qsCard({n:d.n,e:qsEmoji(d.id+" "+d.n),l1:(d.d||"").slice(0,34),cost:d.cost,cls:lk(d.lv)?"lock":"",tag:lk(d.lv)?"Level "+d.lv:"",btn:`<button data-q="tool" data-id="${d.id}">Buy</button>`})).join("");
   else if(T==="home")h=DECOR.filter(d=>!d.tree).map(d=>qsCard({n:d.n,e:qsEmoji(d.n),l1:(S.decor||{})[d.id]?"You have "+S.decor[d.id]:"",cost:d.cost,cls:lk(d.lv)?"lock":"",tag:lk(d.lv)?"Level "+d.lv:"",btn:`<button data-q="decor" data-id="${d.id}">Buy</button>`})).join("");
   else if(T==="animal")h=ANIMALS.map(a=>qsCard({n:a.n,e:QSA[a.id]||"🐾",l1:"⏱ "+fmt(a.t),l2:a.item,cost:a.cost,cls:lk(a.lv)?"lock":"",tag:lk(a.lv)?"Level "+a.lv:"",btn:`<button data-q="animal" data-id="${a.id}" data-g="M">♂</button><button class="f" data-q="animal" data-id="${a.id}" data-g="F">♀</button>`})).join("");
   else if(T==="build")h=BUILDS.filter(d=>!d.decor).map(d=>qsCard({n:d.n,e:qsEmoji(d.id+" "+d.n),l1:d.wood?"🪵 "+d.wood:"",cost:d.cost||0,cls:lk(d.lv)?"lock":"",tag:lk(d.lv)?"Level "+d.lv:"",btn:`<button data-q="build" data-id="${d.id}">Build</button>`})).join("")+BOATS.map(d=>{const own=(S.boats||[]).includes(d.id);return qsCard({n:d.n,e:"⛵",l1:"Boat",cost:d.cost,cls:own?"own":lk(d.lv)?"lock":"",tag:own?"Owned":lk(d.lv)?"Level "+d.lv:"",btn:`<button data-q="boat" data-id="${d.id}">Buy</button>`})}).join("");
   g.innerHTML=h;g.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>qsBuy(b.dataset.q,b.dataset.id,b.dataset.g))}
-function qsBuy(k,id,gd){if(k==="sel"){const c=crop(id);if(!c)return;S.sel=id;try{save()}catch(e){}try{ui()}catch(e){}toast("🌱 "+c.n+" selected. Tap Plant All, or tap plowed soil to plant it.",2600);qsRender();return}if(k==="seed"||k==="tool"||k==="decor"){const was=S.inTown;S.inTown=true;try{townBuy(k,id)}finally{S.inTown=was}after()}
+function qsBuy(k,id,gd){if(k==="shelp"){buyShelp();qsRender();return}if(k==="shsel"){shNext();qsRender();return}if(k==="sel"){const c=crop(id);if(!c)return;S.sel=id;try{save()}catch(e){}try{ui()}catch(e){}toast("🌱 "+c.n+" selected. Tap Plant All, or tap plowed soil to plant it.",2600);qsRender();return}if(k==="seed"||k==="tool"||k==="decor"){const was=S.inTown;S.inTown=true;try{townBuy(k,id)}finally{S.inTown=was}after()}
   else if(k==="animal")buyAnimal(animal(id),gd);else if(k==="build"){document.body.classList.remove("drawer");startPlace(id)}
   else if(k==="boat"){const b=document.querySelector('#shopV [data-v="'+id+'"]');if(b)b.click()}
   qsRender()}
