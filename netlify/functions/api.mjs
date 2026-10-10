@@ -19,7 +19,7 @@ const FROZEN = m => J({ error: "This account is frozen by the game admin. Please
 const pub = m => ({ u: m.u, farm: m.farm, farmer: m.farmer, shirt: m.shirt, lv: m.lv, size: m.size, seen: m.seen, ...(m.app ? { app: 1 } : {}) });
 
 // a restart time shipped with a deploy: open games reload once after it
-const DEPLOY_RESTART = 1791603970283;
+const DEPLOY_RESTART = 1791604675576;
 export default async (req) => {
   const url = new URL(req.url);
   const path = url.pathname.replace(/^.*?\/api\/?/, "").replace(/^\.netlify\/functions\/api\/?/, "").replace(/\/$/, "");
@@ -36,7 +36,9 @@ export default async (req) => {
     if (req.method === "GET" && path === "restart") {
       const r = await ctl.get("restart", { type: "json" });
       const dep = DEPLOY_RESTART <= Date.now() ? DEPLOY_RESTART : 0;
-      return J({ at: Math.max(r ? r.at : 0, dep), now: Date.now() });
+      const qu = norm(url.searchParams.get("u")); let fz = {};
+      if (qu) { const fm = await meta.get(qu, { type: "json" }).catch(() => null); if (fm) fz = { fz: fm.frozen ? 1 : 0, fr: (fm.frozen && fm.frozen.reason) || "" } }
+      return J({ at: Math.max(r ? r.at : 0, dep), now: Date.now(), ...fz });
     }
     if (req.method === "POST" && path === "restart") {
       let b; try { b = await req.json() } catch { return J({ error: "bad json" }, 400) }

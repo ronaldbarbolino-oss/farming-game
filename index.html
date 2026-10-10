@@ -2905,7 +2905,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="209";const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
+const GAMEVER="210";const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
 if(TESTSRV){document.title="🧪 TEST · "+document.title;const tb=document.createElement("div");tb.id="testBar";tb.textContent=MIRROR_TEST?"🧪 TEST SERVER · a copy of your farm · changes here don't touch your real farm":"🧪 TEST SERVER · changes here don't touch your real farm";tb.style.cssText="position:fixed;left:50%;top:0;transform:translateX(-50%);z-index:9999;background:#7a3fc0;color:#fff;font:900 11px/1.2 sans-serif;padding:3px 10px;border-radius:0 0 10px 10px;pointer-events:none;letter-spacing:.3px";document.addEventListener("DOMContentLoaded",()=>document.body.appendChild(tb));if(document.body)document.body.appendChild(tb)}let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 /* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
 (function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
@@ -8269,7 +8269,7 @@ function showFrozen(reason,u){u=u||myUser();NET.frozen=true;try{if(u)localStorag
   clearInterval(NET.frzIv);NET.frzIv=setInterval(()=>frozenCheck(false),60000)}
 async function frozenCheck(say){const u=myUser(),tok=myTok();if(!API||!u||!tok)return;try{const r=await fetch(API+"ping",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({u,tok,farm:(CLOUD.local||{}).farm||"",farmer:(CLOUD.local||{}).farmer||"",lv:S.lv,size:S.size,coins:Math.floor(S.coins),seen:S.seen||0})});
   if(r.status===423){if(say)toast("🧊 Still frozen. Please contact Support.",2500);return}
-  if(r.ok){NET.frozen=false;clearInterval(NET.frzIv);try{localStorage.removeItem("farming-frozen-"+u)}catch(e){}const m=$("frozenM");if(m){m.hidden=true;m.style.display="none"}toast("✅ Your account has been unfrozen. Welcome back!",3500)}}catch(e){if(say)toast("Couldn't reach the server. Check your internet.",2500)}}
+  if(r.ok){NET.frozen=false;clearInterval(NET.frzIv);try{localStorage.removeItem("farming-frozen-"+u)}catch(e){}toast("✅ Your account has been unfrozen. Reloading…",2500);setTimeout(()=>location.reload(),1200)}}catch(e){if(say)toast("Couldn't reach the server. Check your internet.",2500)}}
 setTimeout(()=>{try{const u=myUser();if(!u||VISIT)return;const f=JSON.parse(localStorage.getItem("farming-frozen-"+u)||"null");if(f){showFrozen(f.reason||"",u);frozenCheck(false)}}catch(e){}},1500);
 /* cloud sync: the same farm on the web and in the app */
 function showSyncBar(){let b=$("syncBar");if(!b){b=document.createElement("button");b.id="syncBar";b.type="button";b.className="btn";b.style.cssText="position:fixed;left:50%;top:calc(58px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:60;background:#2f7fb8;box-shadow:0 4px 0 #1d5a85";
@@ -8366,7 +8366,9 @@ if(API){let base=null,rT=null,going=false;
   const hardReload=async at=>{try{if(window.caches){const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}}catch(e){}
     try{if(navigator.serviceWorker){const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.update().catch(()=>{})))}}catch(e){}
     const u=new URL(location.href);u.searchParams.set("r",String(at));location.replace(u.toString())};
-  const chk=async()=>{if(going)return;try{const r=await fetch(API+"restart?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;const v=await r.json();const at=v&&v.at||0;
+  const chk=async()=>{if(going)return;try{const mu=VISIT?"":(myUser()||"");const r=await fetch(API+"restart?t="+Date.now()+(mu?"&u="+encodeURIComponent(mu):""),{cache:"no-store"});if(!r.ok)return;const v=await r.json();const at=v&&v.at||0;
+    if(mu&&v&&v.fz!=null){if(v.fz&&!NET.frozen){going=true;try{localStorage.setItem("farming-frozen-"+mu,JSON.stringify({reason:v.fr||"",at:Date.now()}))}catch(e){}toast("🧊 Your account was frozen by the admin.",2500);setTimeout(()=>location.reload(),1200);return}
+      if(!v.fz&&NET.frozen){going=true;NET.frozen=false;try{localStorage.removeItem("farming-frozen-"+mu)}catch(e){}toast("✅ Your account has been unfrozen. Reloading…",2500);setTimeout(()=>location.reload(),1200);return}}
     if(base===null){base=at;return}
     if(at>base){going=true;clearInterval(rT);if(VISIT)goHome();save();try{if(myUser())await netSend(true)}catch(e){}toast("🔄 The game is restarting for an update…",3000);setTimeout(()=>hardReload(at),1500)}}catch(e){}};
   chk();rT=setInterval(chk,15000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)chk()});window.addEventListener("focus",chk);window.addEventListener("pageshow",chk);window.addEventListener("online",chk)}
