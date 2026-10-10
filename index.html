@@ -2905,7 +2905,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="208";const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
+const GAMEVER="209";const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
 if(TESTSRV){document.title="🧪 TEST · "+document.title;const tb=document.createElement("div");tb.id="testBar";tb.textContent=MIRROR_TEST?"🧪 TEST SERVER · a copy of your farm · changes here don't touch your real farm":"🧪 TEST SERVER · changes here don't touch your real farm";tb.style.cssText="position:fixed;left:50%;top:0;transform:translateX(-50%);z-index:9999;background:#7a3fc0;color:#fff;font:900 11px/1.2 sans-serif;padding:3px 10px;border-radius:0 0 10px 10px;pointer-events:none;letter-spacing:.3px";document.addEventListener("DOMContentLoaded",()=>document.body.appendChild(tb));if(document.body)document.body.appendChild(tb)}let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 /* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
 (function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
@@ -8171,7 +8171,7 @@ async function localAuthStart(){$("lbHead").hidden=true;$("lbPanel").hidden=true
 })();
 
 /* ---- email verification and account recovery ---- */
-const postJ=async(path,body)=>{const r=await fetch(API+path,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});let d={};try{d=await r.json()}catch(e){}if(!r.ok)throw new Error(d.error||"Something went wrong. Try again.");return d};
+const postJ=async(path,body)=>{const r=await fetch(API+path,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});let d={};try{d=await r.json()}catch(e){}if(r.status===423&&d.frozen)try{showFrozen(d.reason||"",body&&body.u)}catch(e){}if(!r.ok)throw new Error(d.error||"Something went wrong. Try again.");return d};
 function emailStateUI(){const a=myUser()&&accts()[myUser()],el=$("emailState");{const pu=$("pwUser");if(pu)pu.textContent=API&&myUser()?"Username: "+myUser():"";const pb=$("pwBtn");if(pb&&!API)pb.textContent="🔑 Set password for phone login"}if(el)el.textContent=a&&a.email?(a.emailOk?"✅ "+a.email:"⏳ "+a.email+" (not verified)"):"No email yet"}
 function openEmail(prefill,auto){if(!API)return toast("Email works in the FarmVerse PH app at farmverse-ph.netlify.app.",3200);if(!myUser())return;const a=accts()[myUser()]||{};
   $("emailM").hidden=false;$("emErr").textContent="";$("emStep1").hidden=false;$("emStep2").hidden=true;$("emAddr").value=prefill||a.email||"";if(auto&&prefill)$("emSend").click()}
@@ -8253,11 +8253,24 @@ const ONLINE_MS=150000;let NET={ok:null,last:0,lastFull:0,taken:false,list:[],no
 const myUser=()=>typeof LOCAL!=="undefined"&&LOCAL.user||null;
 function myTok(){const u=myUser();if(!u)return null;const A=accts();if(!A[u])return null;if(!A[u].tok){const r=crypto.getRandomValues(new Uint8Array(16));A[u].tok=[...r].map(b=>b.toString(16).padStart(2,"0")).join("");saveAccts(A)}return A[u].tok}
 function snapState(){const st=JSON.parse(JSON.stringify(S));delete st.free;delete st.inTown;return st}
-async function netSend(full){if(!API||VISIT||NET.taken)return;if(!SYNC.pulled&&Date.now()-(SYNC.pullT||0)<15000){if(!SYNC.pulling)pullSync(true);return}const u=myUser(),tok=myTok();if(!u||!tok)return;const p=CLOUD.local||{};
+async function netSend(full){if(!API||VISIT||NET.taken||NET.frozen)return;if(!SYNC.pulled&&Date.now()-(SYNC.pullT||0)<15000){if(!SYNC.pulling)pullSync(true);return}const u=myUser(),tok=myTok();if(!u||!tok)return;const p=CLOUD.local||{};
   const body={u,tok,farm:p.farm||"",farmer:p.farmer||"",shirt:p.shirt|0,lv:S.lv,size:S.size,coins:Math.floor(S.coins),animals:S.pens.length,plots:(S.plots||[]).length,app:IS_APP?1:0,seen:S.seen||0};if(!NET.sentFirst&&full){body.first=1;NET.sentFirst=1}if(full)body.state=snapState();
   try{const r=await fetch(API+(full?"publish":"ping"),{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});
+    if(r.status===423){let d={};try{d=await r.json()}catch(e){}showFrozen(d.reason||"",u);return}
     if(r.status===403){NET.taken=true;toast("☁️ This farm isn't linked on this device anymore. Log out, then log in with your username and password to sync it here.",6500)}
     else if(r.ok){try{const d=await r.json();if(d&&d.newer)showSyncBar();else if(full&&body.state)SYNC.base=Number(body.state.seen)||SYNC.base}catch(e){}if(full&&!NET.lhSent){NET.lhSent=1;const a=accts()[u];if(a&&a.salt&&/^[0-9a-f]{64}$/.test(a.hash||""))postJ("setlh",{u,tok,salt:a.salt,hash:a.hash}).catch(()=>{})}}NET.ok=r.ok||r.status===403}catch(e){NET.ok=false}}
+/* account frozen by the admin: the game is locked until the admin unfreezes it */
+function showFrozen(reason,u){u=u||myUser();NET.frozen=true;try{if(u)localStorage.setItem("farming-frozen-"+u,JSON.stringify({reason:reason||"",at:Date.now()}))}catch(e){}
+  let m=$("frozenM");if(!m){m=document.createElement("div");m.id="frozenM";m.style.cssText="position:fixed;inset:0;z-index:9000;background:rgba(20,40,70,.88);display:flex;align-items:center;justify-content:center;padding:16px";document.body.appendChild(m)}
+  m.innerHTML=`<div class="suBox" style="max-width:380px;text-align:center"><div style="font-size:3rem;line-height:1">🧊</div><h3 style="margin:6px 0 4px">Your account is frozen</h3><p class="suLead" style="margin:0 0 8px">The game admin has frozen <b>${(u||"this account").replace(/[<>&"]/g,"")}</b>. You can't play, save or sync until the admin unfreezes it.</p>${reason?`<p style="margin:0 0 8px;font-weight:800">Reason: ${String(reason).replace(/[<>&"]/g,"")}</p>`:""}<button class="btn" type="button" id="frzSup" style="width:100%">💬 Contact Support</button><button class="btn alt" type="button" id="frzChk" style="width:100%;margin-top:6px">🔄 Check again</button><button class="btn alt" type="button" id="frzOut" style="width:100%;margin-top:6px">Log out</button></div>`;
+  m.hidden=false;m.style.display="flex";
+  $("frzSup").onclick=()=>{m.style.display="none";try{$("supBtn").click()}catch(e){}const iv=setInterval(()=>{const sm=document.querySelector(".modal:not([hidden]):not(#frozenM)");if(!sm){clearInterval(iv);if(NET.frozen)m.style.display="flex"}},700)};
+  $("frzChk").onclick=()=>frozenCheck(true);$("frzOut").onclick=()=>{NET.frozen=false;m.style.display="none";try{logoutLocal()}catch(e){}};
+  clearInterval(NET.frzIv);NET.frzIv=setInterval(()=>frozenCheck(false),60000)}
+async function frozenCheck(say){const u=myUser(),tok=myTok();if(!API||!u||!tok)return;try{const r=await fetch(API+"ping",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({u,tok,farm:(CLOUD.local||{}).farm||"",farmer:(CLOUD.local||{}).farmer||"",lv:S.lv,size:S.size,coins:Math.floor(S.coins),seen:S.seen||0})});
+  if(r.status===423){if(say)toast("🧊 Still frozen. Please contact Support.",2500);return}
+  if(r.ok){NET.frozen=false;clearInterval(NET.frzIv);try{localStorage.removeItem("farming-frozen-"+u)}catch(e){}const m=$("frozenM");if(m){m.hidden=true;m.style.display="none"}toast("✅ Your account has been unfrozen. Welcome back!",3500)}}catch(e){if(say)toast("Couldn't reach the server. Check your internet.",2500)}}
+setTimeout(()=>{try{const u=myUser();if(!u||VISIT)return;const f=JSON.parse(localStorage.getItem("farming-frozen-"+u)||"null");if(f){showFrozen(f.reason||"",u);frozenCheck(false)}}catch(e){}},1500);
 /* cloud sync: the same farm on the web and in the app */
 function showSyncBar(){let b=$("syncBar");if(!b){b=document.createElement("button");b.id="syncBar";b.type="button";b.className="btn";b.style.cssText="position:fixed;left:50%;top:calc(58px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:60;background:#2f7fb8;box-shadow:0 4px 0 #1d5a85";
   b.textContent="☁️ Newer progress from your other device · Sync now";b.onclick=()=>pullSync(true);document.body.appendChild(b)}b.hidden=false}
