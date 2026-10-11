@@ -485,8 +485,8 @@ body.land .sbtns .sb{font-size:.6rem!important;padding:3px 6px!important}
   </div>
   <div class="panel" style="display:none"><div class="seeds" id="seeds"></div></div>
 
-  <div class="tray-head"><h2>Weather</h2><span class="hint">The weather stays the way you pick it. Tap the weather at the top to change it anytime.</span></div>
-  <div class="panel"><div class="tools" id="wx">
+  <div class="tray-head" id="wxHead"><h2>Weather</h2><span class="hint">The weather stays the way you pick it. Tap the weather at the top to change it anytime.</span></div>
+  <div class="panel" id="wxPanel"><div class="tools" id="wx">
     <button class="btn alt" data-s="spring">🌼 Spring</button>
     <button class="btn alt" data-s="summer">☀️ Summer</button>
     <button class="btn alt" data-s="rainy">🌧️ Rainy</button>
@@ -896,7 +896,7 @@ const _ca=new THREE.Color(),_cb=new THREE.Color();
 const mix=(a,b,t)=>_ca.set(a).lerp(_cb.set(b),Math.max(0,Math.min(1,t))).getHex();
 /* -------- extra farmland parcels -------- */
 const PN=8;
-const FARMVERSE=false;const GPLIVE=true;const MIRROR_TEST=false,MAIN_ART="https://claude.ai/artifact/UyPMu4gvJm8nFYiZ8snZbo",TEST_ART="https://claude.ai/artifact/FXF22kREKnNuiM4FxwxmGY";const FEAT=true;const NOBRAND=true;const ONEISLE=true;function nbSnap(){return new Set(scene.children)}function nbDrop(s0){if(!ONEISLE)return;try{const rm=scene.children.filter(c=>!s0.has(c)&&!(window.__SEAMAT&&c.material===window.__SEAMAT));rm.forEach(c=>scene.remove(c));const gone=new Set(rm);const on=o=>{for(let n=0;o&&n<40;n++){if(gone.has(o))return false;if(o===scene)return true;o=o.parent}return true};for(let i=BTN3D.length-1;i>=0;i--)if(!on(BTN3D[i]))BTN3D.splice(i,1)}catch(e){console.warn(e)}}function nbCut(fn){const s0=nbSnap();try{fn()}catch(e){console.warn(e)}nbDrop(s0)}const NB_SQ=["gp","pots","roll","wfl","gs","t2b","cow"],NB_BTN=["carnival","parkEnter","potsEnter","gsEnter","t2bEnter","theme0","theme1","theme2"];
+const FARMVERSE=false;const GPLIVE=true;const MIRROR_TEST=false,MAIN_ART="https://claude.ai/artifact/UyPMu4gvJm8nFYiZ8snZbo",TEST_ART="https://claude.ai/artifact/FXF22kREKnNuiM4FxwxmGY";const FEAT=true;const NOBRAND=true;const ONEISLE=true;function nbSnap(){return new Set(scene.children)}function nbDrop(s0){if(!ONEISLE)return;try{const rm=scene.children.filter(c=>!s0.has(c)&&!(window.__SEAMAT&&c.material===window.__SEAMAT));rm.forEach(c=>scene.remove(c));const gone=new Set(rm);const on=o=>{for(let n=0;o&&n<40;n++){if(gone.has(o))return false;if(o===scene)return true;o=o.parent}return true};for(let i=BTN3D.length-1;i>=0;i--)if(!on(BTN3D[i]))BTN3D.splice(i,1)}catch(e){console.warn(e)}}if(ONEISLE)document.head.insertAdjacentHTML("beforeend","<style>#wxHead,#wxPanel{display:none!important}</style>");function nbCut(fn){const s0=nbSnap();try{fn()}catch(e){console.warn(e)}nbDrop(s0)}const NB_SQ=["gp","pots","roll","wfl","gs","t2b","cow"],NB_BTN=["carnival","parkEnter","potsEnter","gsEnter","t2bEnter","theme0","theme1","theme2"];
 const IX_=80,IZ_=4;const CX=180,CZ=4,CHX=32,CHZ=26;
 const CITY_POS=FEAT?[]:[[180,4]];
 const PLOTS=[{id:"isla",n:"Secret Island",x0:IX_-.5,z0:IZ_+31,sz:6,y:1.2,island:true,cost:100000,lv:3},{id:"timog",n:"South Land",x0:-4,z0:12,cost:1500,lv:4},{id:"kanluran",n:"West Land",x0:-17,z0:10,cost:4000,lv:6},{id:"malayo",n:"Far Land",x0:-26.5,z0:10,cost:8000,lv:8},{id:"lambak",n:"Valley Land",x0:-4,z0:21,cost:15000,lv:9},{id:"burol",n:"Hill Land",x0:-17,z0:21,cost:25000,lv:10},{id:"parang",n:"Meadow Land",x0:-26.5,z0:21,cost:40000,lv:11},{id:"ilog",n:"Riverside Land",x0:-4,z0:30,cost:60000,lv:12},{id:"gubat",n:"Forest Land",x0:-17,z0:30,cost:85000,lv:13},{id:"bukal",n:"Spring Land",x0:-26.5,z0:30,cost:120000,lv:14},{id:"talampas",n:"Plateau Land",x0:-36,z0:10,cost:160000,lv:15},{id:"dulo",n:"Edge Land",x0:-36,z0:21,cost:220000,lv:16}];
@@ -2905,7 +2905,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="215";const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
+const GAMEVER="216";const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
 if(TESTSRV){document.title="🧪 TEST · "+document.title;const tb=document.createElement("div");tb.id="testBar";tb.textContent=MIRROR_TEST?"🧪 TEST SERVER · a copy of your farm · changes here don't touch your real farm":"🧪 TEST SERVER · changes here don't touch your real farm";tb.style.cssText="position:fixed;left:50%;top:0;transform:translateX(-50%);z-index:9999;background:#7a3fc0;color:#fff;font:900 11px/1.2 sans-serif;padding:3px 10px;border-radius:0 0 10px 10px;pointer-events:none;letter-spacing:.3px";document.addEventListener("DOMContentLoaded",()=>document.body.appendChild(tb));if(document.body)document.body.appendChild(tb)}let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 /* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
 (function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
