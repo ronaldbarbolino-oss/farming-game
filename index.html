@@ -2905,7 +2905,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="218";const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
+const GAMEVER="219";const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
 if(TESTSRV){document.title="🧪 TEST · "+document.title;const tb=document.createElement("div");tb.id="testBar";tb.textContent=MIRROR_TEST?"🧪 TEST SERVER · a copy of your farm · changes here don't touch your real farm":"🧪 TEST SERVER · changes here don't touch your real farm";tb.style.cssText="position:fixed;left:50%;top:0;transform:translateX(-50%);z-index:9999;background:#7a3fc0;color:#fff;font:900 11px/1.2 sans-serif;padding:3px 10px;border-radius:0 0 10px 10px;pointer-events:none;letter-spacing:.3px";document.addEventListener("DOMContentLoaded",()=>document.body.appendChild(tb));if(document.body)document.body.appendChild(tb)}let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 /* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
 (function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
@@ -3239,7 +3239,9 @@ const BUILDS=[
   {id:"palasyo",n:"Palace Mansion",cost:40000,wood:120,lv:12,r:6,inc:160,d:"Three-storey white palace with a golden dome, two towers, grand stairs and a fountain."},
   {id:"zen",n:"Zen Garden Mansion",cost:65000,wood:160,lv:13,r:6,inc:230,d:"Japanese-style mansion with curved two-tier roofs, glowing shoji screens, a red torii gate, a koi pond with swimming koi, cherry trees and stone lanterns."},
   {id:"kastilyo",n:"Royal Castle",cost:95000,wood:220,lv:14,r:6.5,inc:330,d:"Stone castle with a tall keep, four blue-roofed towers, a gatehouse, a drawbridge over a moat, royal banners, fountains and glowing windows at night."},
-  {id:"neon",n:"Sky Glass Mansion",cost:140000,wood:280,lv:15,r:6.5,inc:470,d:"Futuristic three-level glass mansion with cantilevered floors, color-changing LED lights, a rooftop helipad with a helicopter, an infinity pool and a spinning hologram."}];
+  {id:"neon",n:"Sky Glass Mansion",cost:140000,wood:280,lv:15,r:6.5,inc:470,d:"Futuristic three-level glass mansion with cantilevered floors, color-changing LED lights, a rooftop helipad with a helicopter, an infinity pool and a spinning hologram."},
+  {id:"tore",n:"Sky Tower Residence",cost:200000,wood:350,lv:16,r:6.5,inc:650,d:"Twelve-storey glass skyscraper with lit windows at night, a golden crown and spire with a blinking light, a lobby canopy, a plaza fountain and a limo."},
+  {id:"hotel",n:"Grand Royal Hotel",cost:300000,wood:450,lv:17,r:7,inc:950,d:"Big seven-storey luxury hotel with gold trim, hundreds of glowing windows, a clock tower with a golden dome, a rooftop pool, a grand entrance with a red carpet, palms and a fountain."}];
 const BOATS=[{id:"bangka",n:"Rowboat",cost:600,lv:2,speed:3.6,d:"Rowboat with outriggers. Slow but reliable."},
   {id:"speed",n:"Speed Boat",cost:2500,lv:5,speed:10,d:"Motorboat. Just a few seconds to the island."}];
 const ISLEITEMS=[{id:"isla",n:"Secret Island",cost:100000,lv:3,d:"Buy the whole Secret Island next to the Fiesta carnival, with a 6×6 field for secret crops. Needs a boat."},
@@ -3400,10 +3402,33 @@ function makeBuild(id){if(String(id).startsWith("sap_")){const o=makeTreeG(0,0,n
     [[W/2+7.6,-3.5],[W/2+7.6,3.5],[-W/2-1.2,-3.4],[-W/2-1.2,3.4]].forEach(([x,z])=>mPalm(b,x,z));
     b.add("cyl",0xe8ecef,W/2+6.4,.35,1.4,.55,.7,.55);b.add("cyl",0x30363e,W/2+6.4,.72,1.4,.6,.06,.6);
     [-2.6,2.6].forEach(z=>mLamp(b,W/2+1.4,z))}
+  else if(id==="tore"){const W=5.4,D=5.4,GL=0x2a4a66,FR=0xe8ecef,GD=0xe6b84a,H=.9,NF=12;
+    b.add("box",0xd8dcde,0,.15,0,W+1.4,.3,D+1.4);b.add("box",FR,0,.9,0,W+.2,1.2,D+.2);gw.add("box",0xffe2b8,W/2+.12,.9,0,.04,1,D-1);
+    b.add("box",FR,W/2+1.1,1.55,0,2,.12,2.6);[-1,1].forEach(sd=>b.add("cyl",0xcfd3d6,W/2+1.9,.8,sd*1.1,.06,1.5,.06));
+    for(let f=0;f<NF;f++){const y=1.5+f*H+H/2,sc=f<8?1:f<10?.82:.66,w=W*sc,d=D*sc;b.add("box",GL,0,y,0,w,H-.06,d);b.add("box",FR,0,y+H/2-.02,0,w+.1,.06,d+.1);
+      for(let k=0;k<4;k++){const o=-w/2+w*(k+.5)/4;if((f*7+k*3)%5!==0){gw.add("box",0xfff1cf,w/2+.02,y,o*d/w,.03,H*.6,d/4-.18);gw.add("box",0xfff1cf,o,y,d/2+.02,w/4-.18,H*.6,.03);gw.add("box",0xfff1cf,o,y,-d/2-.02,w/4-.18,H*.6,.03)}}
+      [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([sx,sz])=>b.add("box",FR,sx*w/2,y,sz*d/2,.12,H,.12))}
+    const top=1.5+NF*H;b.add("box",FR,0,top+.2,0,W*.66+.2,.4,D*.66+.2);b.add("cyl",GD,0,top+1.2,0,.9,1.6,.9);b.add("cone",GD,0,top+3,0,.6,2.2,.6);b.add("cyl",0xcfd3d6,0,top+4.6,0,.05,1.2,.05);
+    sn.add("box",0xffffff,0,top+.43,0,W*.66,.04,D*.66);
+    mFountain(b,W/2+4.8,0,1.2);[-2.4,2.4].forEach(z=>{mLamp(b,W/2+3,z);mLamp(b,W/2+6.6,z)});[[W/2+3.6,-3.4],[W/2+3.6,3.4],[W/2+6.6,-3.4],[W/2+6.6,3.4]].forEach(([x,z])=>{b.add("cyl",0xc9c2b4,x,.25,z,.32,.5,.32);b.add("cone",0x2f7f28,x,1.2,z,.42,1.6,.42)});
+    b.add("box",0xd8d2c4,W/2+3.4,.04,0,4.4,.04,1.8)}
+  else if(id==="hotel"){const W=8,D=7,WH=0xf4ead6,TR=0xd8c8a4,GD=0xe6b84a,RF=0x7a2a2a,F=1,NF=7;
+    b.add("box",TR,0,.2,0,W+1,.4,D+1);
+    for(let f=0;f<NF;f++){const y=.4+f*F+F/2;b.add("box",f===0?TR:WH,0,y,0,W,F,D);b.add("box",GD,0,y+F/2,0,W+.12,.06,D+.12);
+      for(let k=0;k<9;k++){const z=-D/2+.45+k*(D-.9)/8;if(f===0&&k>=3&&k<=5)continue;gw.add("box",0xffe0a0,W/2+.02,y,z,.03,F*.55,.36);b.add("box",GD,W/2+.05,y-F*.32,z,.05,.05,.46)}
+      for(let k=0;k<10;k++){const x=-W/2+.45+k*(W-.9)/9;[-1,1].forEach(sd=>gw.add("box",0xffe0a0,x,y,sd*(D/2+.02),.36,F*.55,.03))}}
+    const top=.4+NF*F;b.add("box",RF,0,top+.3,0,W+.3,.6,D+.3);[-1,1].forEach(sd=>{b.add("box",GD,0,top+.62,sd*(D/2+.15),W+.4,.08,.14);b.add("box",GD,sd*(W/2+.15),top+.62,0,.14,.08,D+.4)});sn.add("box",0xffffff,0,top+.66,0,W+.2,.05,D+.2);
+    b.add("box",WH,0,top+1.6,0,2.6,2,2.6);b.add("cyl",WH,0,top+2.9,0,1.1,.6,1.1);b.add("sph",GD,0,top+3.3,0,1.1,1,1.1);b.add("cyl",GD,0,top+4.5,0,.05,.6,.05);
+    b.add("cyl",0xffffff,1.32,top+1.9,0,.5,.05,.5,0,0,Math.PI/2);b.add("cyl",0x2b2b2b,1.34,top+1.9,0,.54,.03,.54,0,0,Math.PI/2);
+    b.add("box",0x28c8f0,-2.2,top+.64,-1.8,2.6,.04,2);b.add("box",0xe8ecef,-2.2,top+.66,-1.8,2.9,.02,2.3);
+    // porte-cochere entrance with columns and a red carpet
+    b.add("box",WH,W/2+1.4,2.1,0,2.8,.2,3.4);b.add("box",GD,W/2+1.4,2.22,0,2.9,.06,3.5);for(let k=0;k<4;k++)b.add("cyl",0xffffff,W/2+2.6,1.05,-1.4+k*.93,.12,2.1,.12);
+    b.add("box",0xb82a2a,W/2+1.6,.42,0,3.2,.03,1);gw.add("box",0xfff1cf,W/2+.03,1,0,.03,1.2,2);
+    mFountain(b,W/2+5.6,0,1.4);[-2.6,2.6].forEach(z=>{mLamp(b,W/2+3.6,z);mLamp(b,W/2+7.4,z)});[[W/2+4,-3.6],[W/2+4,3.6],[W/2+7.2,-3.6],[W/2+7.2,3.6]].forEach(([x,z])=>mPalm(b,x,z))}
 
   const m=b.mesh();g.add(m);const s=new THREE.Mesh(sn.geo(),SNOWMAT);g.add(s);if(gw.p.length){const gm=new THREE.MeshBasicMaterial({vertexColors:true,toneMapped:false});gm.color.setScalar(.7);const gmm=new THREE.Mesh(gw.geo(),gm);g.add(gmm);g.userData.glowM=gm}addBuildAnim(g,id);return g}
 /* mansion footprints in their own space: house + front yard (x from -W/2 to x1, |z| < zc-1.1) and a side driveway lane at z = zc */
-const MANS_MD={mansyon:{W:4.2,zc:3.7,x1:6.6,sc:1.18,cx:4.2,rx:1.5,rz:2.1,car:0xd23a2a},villa:{W:6,zc:6,x1:9.4,sc:1,cx:6.4,rx:2.2,rz:2.6,car:0xf2f2ee},moderno:{W:6.2,zc:3.9,x1:7.6,sc:1,cx:5.7,rx:2.2,rz:2.8,car:0x2b2b2b},palasyo:{W:7,zc:5.5,x1:10.6,sc:1,cx:7.9,rx:2.2,rz:2.6,car:0xe6b84a},zen:{W:7,zc:5.6,x1:10.8,sc:1,cx:8.2,rx:1.4,rz:1.2,car:0x1b1b1b},kastilyo:{W:7.6,zc:6,x1:11.4,sc:1,cx:8.6,rx:2,rz:2.2,car:0x6a1a2a},neon:{W:7.4,zc:5.6,x1:11.2,sc:1,cx:8.6,rx:1.8,rz:1.6,car:0xf2f2f2}};
+const MANS_MD={mansyon:{W:4.2,zc:3.7,x1:6.6,sc:1.18,cx:4.2,rx:1.5,rz:2.1,car:0xd23a2a},villa:{W:6,zc:6,x1:9.4,sc:1,cx:6.4,rx:2.2,rz:2.6,car:0xf2f2ee},moderno:{W:6.2,zc:3.9,x1:7.6,sc:1,cx:5.7,rx:2.2,rz:2.8,car:0x2b2b2b},palasyo:{W:7,zc:5.5,x1:10.6,sc:1,cx:7.9,rx:2.2,rz:2.6,car:0xe6b84a},zen:{W:7,zc:5.6,x1:10.8,sc:1,cx:8.2,rx:1.4,rz:1.2,car:0x1b1b1b},kastilyo:{W:7.6,zc:6,x1:11.4,sc:1,cx:8.6,rx:2,rz:2.2,car:0x6a1a2a},neon:{W:7.4,zc:5.6,x1:11.2,sc:1,cx:8.6,rx:1.8,rz:1.6,car:0xf2f2f2},tore:{W:6.8,zc:5.4,x1:10.6,sc:1,cx:7.7,rx:1.4,rz:1.5,car:0x2b2b2b},hotel:{W:9,zc:6.4,x1:12.4,sc:1,cx:9.6,rx:1.6,rz:1.8,car:0xe6b84a}};
 function mansCell(o,x,z){const M=MANS_MD[o.id];if(!M)return 0;const r=o.r||0,c=Math.cos(r),sn=Math.sin(r),dx=(x-o.x)/M.sc,dz=(z-o.z)/M.sc,lx=dx*c-dz*sn,lz=dx*sn+dz*c;
   if(lx>-M.W/2-.4&&lx<M.x1+1.3&&Math.abs(lz-M.zc)<.75)return 2;                      // driveway lane: cheap to drive on
   if(lx>-M.W/2-2&&lx<M.x1+1.4&&lz>-M.zc+.2-1.2&&lz<M.zc-.2)return 1;                   // house and yard: blocked
@@ -3411,7 +3436,7 @@ function mansCell(o,x,z){const M=MANS_MD[o.id];if(!M)return 0;const r=o.r||0,c=M
 /* moving parts on houses: waving flags, chimney smoke, fountain water, sparkling pools, window lights */
 const BA={pole:new THREE.CylinderGeometry(.03,.03,1,6),flag:new THREE.BoxGeometry(.5,.32,.02),puff:new THREE.SphereGeometry(.16,8,6),jet:new THREE.SphereGeometry(1,12,8),
   poleM:new THREE.MeshLambertMaterial({color:0xdfe3e5}),jetM:new THREE.MeshLambertMaterial({color:0x9be6ff,transparent:true,opacity:.75}),shimM:new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.25,depthWrite:false})};
-const FLAGC={zen:0xc8302a,kastilyo:0xb82a3a,neon:0x8a4fc8,mansyon:0xd23a2a,villa:0xf2b632,moderno:0x2f7fb8,palasyo:0xe6b84a,bato:0x3f8f2c,kamalig:0xd23a2a,kubo:0x3f8f2c,bodega:0x2f7fb8};
+const FLAGC={tore:0x2f7fb8,hotel:0xb82a2a,zen:0xc8302a,kastilyo:0xb82a3a,neon:0x8a4fc8,mansyon:0xd23a2a,villa:0xf2b632,moderno:0x2f7fb8,palasyo:0xe6b84a,bato:0x3f8f2c,kamalig:0xd23a2a,kubo:0x3f8f2c,bodega:0x2f7fb8};
 function addBuildAnim(g,id){const A=[];const flag=(x,y,z,h,c)=>{const p=new THREE.Mesh(BA.pole,BA.poleM);p.scale.y=h;p.position.set(x,y+h/2,z);g.add(p);const piv=new THREE.Group();piv.position.set(x,y+h-.18,z);g.add(piv);
     const f=new THREE.Mesh(BA.flag,new THREE.MeshLambertMaterial({color:c}));f.position.x=.26;piv.add(f);A.push({k:"flag",o:piv,f,ph:Math.random()*6})};
   const smoke=(x,y,z)=>{const L=[];for(let i=0;i<4;i++){const m=new THREE.Mesh(BA.puff,new THREE.MeshBasicMaterial({color:0xeeeeee,transparent:true,opacity:.6,depthWrite:false}));m.position.set(x,y,z);g.add(m);L.push(m)}A.push({k:"smoke",L,x,y,z,ph:Math.random()})};
@@ -3427,6 +3452,8 @@ function addBuildAnim(g,id){const A=[];const flag=(x,y,z,h,c)=>{const p=new THRE
   else if(id==="moderno"){flag(-3.7,3.43,-2.0,1.3,c);shim(3.1+2.6,.32,0,2.7,4.2)}
   else if(id==="palasyo"){[-1,1].forEach(sd=>flag(3.1,6.9,sd*3.1,1.1,c));flag(0,6.6,0,1.2,0xd23a2a);jet(3.5+4.4,1.75,0,1.3)}
   else if(id==="zen"){const kg=new THREE.Group();kg.position.set(3.5+3.4,.1,-1.9);g.add(kg);[[0xf26a1a,1.1,0],[0xffffff,.8,2.1],[0xf2b632,1.3,4.2],[0xd23a2a,.6,1]].forEach(([c,r,a])=>{const f=new THREE.Mesh(BA.puff,new THREE.MeshLambertMaterial({color:c}));f.scale.set(.9,.4,.45);f.position.set(Math.cos(a)*r,0,Math.sin(a)*r*.62);f.rotation.y=-a;kg.add(f)});A.push({k:"spin",o:kg,sp:.5});smoke(-1.5,4.5,.8);flag(3.5+6.7,2.5,1.2,.8,c)}
+  else if(id==="tore"){const bm=new THREE.MeshBasicMaterial({color:0xff3030,toneMapped:false}),bl=new THREE.Mesh(new THREE.SphereGeometry(.12,8,6),bm);bl.position.set(0,1.5+12*.9+5.25,0);g.add(bl);A.push({k:"blink",m:bm});}
+  else if(id==="hotel"){[-1,1].forEach(sd=>flag(4+2.6,2.28,sd*1.4,1,sd>0?c:0xe6b84a));flag(0,7.4+4.8,0,1,c);shim(-2.2,7.4+.7,-1.8,2.6,2);jet(4+5.6,1.9,0,1.4)}
   else if(id==="kastilyo"){[[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([sx,sz])=>flag(sx*3.25,7.1,sz*2.65,1,sx>0?c:0x2f4f8a));flag(-.7,9.9,0,1.3,0xe6b84a);jet(3.8+4.2,1.3,-1.9,.8);jet(3.8+4.2,1.3,1.9,.8)}
   else if(id==="neon"){const hg=new THREE.Group();hg.position.set(-.9,5.06,.4);g.add(hg);const hb=new Builder();hb.add("sph",0x2b3640,0,.38,0,.55,.36,.32);hb.add("box",0x2b3640,-.85,.42,0,1.1,.12,.1);hb.add("box",0x7fd4f0,.3,.42,0,.2,.2,.3);hb.add("box",0x9aa3ab,0,.06,.25,.9,.04,.06);hb.add("box",0x9aa3ab,0,.06,-.25,.9,.04,.06);hb.add("box",0xd23a2a,-1.38,.55,0,.06,.3,.04);hg.add(hb.mesh(true,false,true));
     const rot=new THREE.Group();rot.position.set(0,.8,0);hg.add(rot);const bl=new THREE.Mesh(new THREE.BoxGeometry(2.6,.03,.14),am(0x1b1b1b));rot.add(bl);const bl2=bl.clone();bl2.rotation.y=Math.PI/2;rot.add(bl2);A.push({k:"spin",o:rot,sp:9});
@@ -3437,8 +3464,8 @@ function addBuildAnim(g,id){const A=[];const flag=(x,y,z,h,c)=>{const p=new THRE
   if(MD){const L=MD.x1+1.2,X0=-MD.W/2,db=new Builder();db.add("box",0x4a5058,(L+X0)/2,.03,MD.zc,L-X0,.04,1.7);for(let x=X0+.6;x<L;x+=1.2)db.add("box",0xf5c732,x,.055,MD.zc,.5,.01,.08);
       db.add("box",0xd8d2c6,(L-MD.W/2)/2+MD.W/4-.5,.04,MD.zc+.92,L+MD.W/2,.06,.14);db.add("box",0xd8d2c6,(L-MD.W/2)/2+MD.W/4-.5,.04,MD.zc-.92,L+MD.W/2,.06,.14);
       const dm=db.mesh(false,true,false);g.add(dm);g.userData.drive=[L,MD.zc];
-    const car=makeCar(MD.car,id==="palasyo"||id==="kastilyo"||id==="neon");car.position.set(MD.W/2+1.4,0,MD.zc);g.add(car);A.push({k:"car",o:car,x0:MD.W/2+1.4,x1:L-.8,ph:Math.random()*30,w:car.userData.wheels});
-    const SH=[0x2f7fb8,0xd9568a,0x3f8f2c,0xf2b632,0x8a4fc8],n=id==="palasyo"||id==="kastilyo"||id==="neon"?3:2;for(let i=0;i<n;i++){const f=makeFarmer({shirt:SH[(i*2+id.length)%5],pants:[0x2b2b3a,0xf2f2ee,0x3b5f9a][i%3],skin:[0xe0a878,0xc68a5a,0x8a5a3a][(i+id.length)%3],hat:[0xffffff,0x2b2b3a,0xe8c66a][i%3]});
+    const car=makeCar(MD.car,["palasyo","kastilyo","neon","tore","hotel"].includes(id));car.position.set(MD.W/2+1.4,0,MD.zc);g.add(car);A.push({k:"car",o:car,x0:MD.W/2+1.4,x1:L-.8,ph:Math.random()*30,w:car.userData.wheels});
+    const SH=[0x2f7fb8,0xd9568a,0x3f8f2c,0xf2b632,0x8a4fc8],n=["palasyo","kastilyo","neon","tore","hotel"].includes(id)?3:2;for(let i=0;i<n;i++){const f=makeFarmer({shirt:SH[(i*2+id.length)%5],pants:[0x2b2b3a,0xf2f2ee,0x3b5f9a][i%3],skin:[0xe0a878,0xc68a5a,0x8a5a3a][(i+id.length)%3],hat:[0xffffff,0x2b2b3a,0xe8c66a][i%3]});
       f.g.scale.setScalar(.9);g.add(f.g);A.push({k:"npc",f,cx:MD.cx,cz:0,rx:MD.rx,rz:MD.rz,a:i/n*Math.PI*2,sp:(i%2?-1:1)*(.22+i*.05),pause:0})}}
   if(A.length)g.userData.anim=A}
 function makeCar(c,limo){const g=new THREE.Group(),b=new Builder(),Lb=limo?2.3:1.7;b.add("box",c,0,.42,0,Lb,.42,.86);b.add("box",c,limo?-.15:-.1,.8,0,limo?1.3:.95,.36,.78);
@@ -3452,6 +3479,7 @@ function stepBuildAnim(t){const night=typeof isNight==="function"&&isNight();BUI
     else if(a.k==="jet"){const k=1+Math.sin(t*6+a.ph)*.25;a.o.scale.set(.14*a.s*(2-k),.4*a.s*k,.14*a.s*(2-k));a.o.position.y=a.y+(k-1)*.2*a.s}
     else if(a.k==="shim"){a.o.material.opacity=.12+.12*(Math.sin(t*2+a.ph)*.5+.5)}
     else if(a.k==="spin"){a.o.rotation.y+=a.sp/60;if(a.bob)a.o.position.y=a.y+Math.sin(t*2)*a.bob}
+    else if(a.k==="blink"){a.m.color.setHex(Math.sin(t*4)>.3?0xff3030:0x401010)}
     else if(a.k==="led"){a.m.color.setHSL((t*.07+a.ph)%1,.85,night?.62:.55*(a.s||1))}
     else if(a.k==="car"){const T=30,u=((t+a.ph)%T)/T;let e=0;if(u>.55&&u<.7)e=(u-.55)/.15;else if(u>=.7&&u<.8)e=1;else if(u>=.8&&u<.95)e=1-(u-.8)/.15;const k=e*e*(3-2*e),px=a.o.position.x;a.o.position.x=a.x0+(a.x1-a.x0)*k;a.o.position.y=Math.abs(Math.sin(t*14))*.01*(Math.abs(a.o.position.x-px)>1e-4?1:0);
       const dv=a.o.position.x-px;if(a.w)a.w.forEach(w=>w.rotation.y+=dv*5)}
@@ -3482,15 +3510,17 @@ function buildMansionRoads(){while(ROADG.children.length)ROADG.remove(ROADG.chil
     else if(FTREES.some(T=>Math.hypot(x-T.x,z-T.z)<1.1))c=6;
     cost[k]=c}
   const DX=[1,0,-1,0],DZ=[0,1,0,-1];
-  G.forEach(g=>{g.updateMatrixWorld(true);const d=g.userData.drive;v.set(d[0],0,d[1]);g.localToWorld(v);const sx=Math.floor(v.x),sz=Math.floor(v.z);if(sx<X0||sx>=X0+NX||sz<Z0||sz>=Z0+NZ)return;
+  // closest houses connect first; later ones join the nearest road already built, so the roads form one tidy network
+  const ends=G.map(g=>{g.updateMatrixWorld(true);const d=g.userData.drive,w=new THREE.Vector3(d[0],0,d[1]);g.localToWorld(w);return{g,w}}).sort((a,b)=>Math.abs(a.w.z+8)+Math.abs(a.w.x+4)*.3-(Math.abs(b.w.z+8)+Math.abs(b.w.x+4)*.3));
+  ends.forEach(({g,w})=>{v.copy(w);const sx=Math.floor(v.x),sz=Math.floor(v.z);if(sx<X0||sx>=X0+NX||sz<Z0||sz>=Z0+NZ)return;
     // A* with a turn penalty so roads run straight and turn at right angles
-    const S0=ci(sx,sz),best=new Float32Array(N*4).fill(1e9),from=new Int32Array(N*4).fill(-1),open=[];const h=k=>{const x=k%NX,z=(k/NX)|0;let m=1e9;return Math.max(0,Math.abs((z+Z0)+8)-1.4)*1+0*x+0*m};
+    const S0=ci(sx,sz),best=new Float32Array(N*4).fill(1e9),from=new Int32Array(N*4).fill(-1),open=[];const h=k=>0;
     const push=(st,f)=>{open.push([f,st]);let i=open.length-1;while(i>0){const p=(i-1)>>1;if(open[p][0]<=open[i][0])break;[open[p],open[i]]=[open[i],open[p]];i=p}};
     const pop=()=>{const t=open[0],l=open.pop();if(open.length){open[0]=l;let i=0;for(;;){let a=2*i+1,c=a+1,m=i;if(a<open.length&&open[a][0]<open[m][0])m=a;if(c<open.length&&open[c][0]<open[m][0])m=c;if(m===i)break;[open[m],open[i]]=[open[i],open[m]];i=m}}return t};
     for(let dIx=0;dIx<4;dIx++){best[S0*4+dIx]=0;push(S0*4+dIx,h(S0))}
-    let end=-1,it=0;while(open.length&&it++<60000){const [f,st]=pop(),k=st>>2,dir=st&3,gk=best[st];if(f-h(k)>gk+1e-6)continue;if(goal[k]){end=st;break}
+    let end=-1,it=0;while(open.length&&it++<400000){const [f,st]=pop(),k=st>>2,dir=st&3,gk=best[st];if(f-h(k)>gk+1e-6)continue;if(goal[k]){end=st;break}
       const x=k%NX,z=(k/NX)|0;for(let nd=0;nd<4;nd++){const nx=x+DX[nd],nz=z+DZ[nd];if(nx<0||nz<0||nx>=NX||nz>=NZ)continue;const nk=nz*NX+nx,c=cost[nk];if(c<0&&nk!==S0)continue;
-        const ng=gk+Math.max(1,c)+(nd!==dir?3:0)+(cost[nk]===.2?-.6:0),ns=nk*4+nd;if(ng<best[ns]){best[ns]=ng;from[ns]=st;push(ns,ng+h(nk))}}}
+        const ng=gk+(c===.2?.35:Math.max(1,c))+(nd!==dir?4:0),ns=nk*4+nd;if(ng<best[ns]){best[ns]=ng;from[ns]=st;push(ns,ng+h(nk))}}}
     if(end<0)return;const P=[];for(let st=end;st>=0;st=from[st]){P.push(st>>2);if(P.length>4000)break}P.reverse();
     P.forEach(k=>{goal[k]=1;cost[k]=.2});
     // merge straight runs into segments
