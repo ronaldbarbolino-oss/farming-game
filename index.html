@@ -2905,7 +2905,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="226";const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
+const GAMEVER="227";const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
 if(TESTSRV){document.title="🧪 TEST · "+document.title;const tb=document.createElement("div");tb.id="testBar";tb.textContent=MIRROR_TEST?"🧪 TEST SERVER · a copy of your farm · changes here don't touch your real farm":"🧪 TEST SERVER · changes here don't touch your real farm";tb.style.cssText="position:fixed;left:50%;top:0;transform:translateX(-50%);z-index:9999;background:#7a3fc0;color:#fff;font:900 11px/1.2 sans-serif;padding:3px 10px;border-radius:0 0 10px 10px;pointer-events:none;letter-spacing:.3px";document.addEventListener("DOMContentLoaded",()=>document.body.appendChild(tb));if(document.body)document.body.appendChild(tb)}let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 /* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
 (function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
@@ -3572,8 +3572,11 @@ function buildMansionRoads(){while(ROADG.children.length)ROADG.remove(ROADG.chil
     if(end<0)return null;const P=[];for(let st=end;st>=0;st=from[st]){P.push(st>>2);if(P.length>6000)break}return P.reverse()};
   const free=(x,z)=>{let bk=-1,bd=1e9;for(let dz=-8;dz<=8;dz++)for(let dx=-8;dx<=8;dx++){const ix=Math.floor(x)-X0+dx,iz=Math.floor(z)-Z0+dz;if(ix<0||iz<0||ix>=NX||iz>=NZ)continue;const k=iz*NX+ix;if(cost[k]<0)continue;const d=dx*dx+dz*dz;if(d<bd){bd=d;bk=k}}return bk};
   const pt=k=>[X0+(k%NX)+.5,Z0+((k/NX)|0)+.5];
-  const drawRun=P=>{if(!P||!P.length)return;let a=pt(P[0]),prev=a,dir=null;const out=(p0,p1)=>{const mx=(p0[0]+p1[0])/2,mz=(p0[1]+p1[1])/2;if(mz>-9.4&&mz<-6.6&&mx<-4&&Math.abs(p0[1]-p1[1])<.1)return;seg(p0[0],p0[1],p1[0],p1[1])};
-    for(let i=1;i<P.length;i++){const c=pt(P[i]),nd=(c[0]-prev[0])+","+(c[1]-prev[1]);if(dir!==null&&nd!==dir){out(a,prev);a=prev}dir=nd;prev=c}out(a,prev)};
+  const drawRun=(P,sp)=>{if(!P||!P.length)return;const out=(p0,p1)=>{const mx=(p0[0]+p1[0])/2,mz=(p0[1]+p1[1])/2;if(mz>-9.4&&mz<-6.6&&mx<-4&&Math.abs(p0[1]-p1[1])<.1)return;seg(p0[0],p0[1],p1[0],p1[1])};
+    const C=[pt(P[0])];let prev=C[0],dir=null;for(let i=1;i<P.length;i++){const c=pt(P[i]),nd=(c[0]-prev[0])+","+(c[1]-prev[1]);if(dir!==null&&nd!==dir)C.push(prev);dir=nd;prev=c}if(P.length>1)C.push(prev);
+    // line the road up exactly with the driveway it starts from, so it runs straight out of it
+    if(sp){const d=[sp[0]-C[0][0],sp[1]-C[0][1]];if(C.length>1){const ux=Math.sign(C[1][0]-C[0][0]),uz=Math.sign(C[1][1]-C[0][1]);const px=ux?0:d[0],pz=uz?0:d[1];C[1]=[C[1][0]+px,C[1][1]+pz]}C[0]=[sp[0],sp[1]]}
+    for(let i=1;i<C.length;i++)out(C[i-1],C[i]);if(C.length===1&&sp)out(sp,pt(P[0]))};
   // ring road around the whole farm so cars can drive all the way round
   if(ONEISLE){const C=[[-66,-8],[-66,69],[13.5,69],[13.5,-3],[-2,-8]].map(([x,z])=>free(x,z)).filter(k=>k>=0);let loop=[];
     for(let i=0;i<C.length;i++){const a=C[i],b2=C[(i+1)%C.length];const P=route(a,k=>k===b2);if(!P){loop=null;break}if(loop.length)P.shift();loop=loop.concat(P)}
@@ -3584,7 +3587,7 @@ function buildMansionRoads(){while(ROADG.children.length)ROADG.remove(ROADG.chil
     const S0=ci(sx,sz),P=route(S0,k=>!!goal[k]);if(!P)return;
     P.forEach(k=>{goal[k]=1;cost[k]=.2});
     // merge straight runs into segments
-    seg(v.x,v.z,pt(P[0])[0],pt(P[0])[1]);drawRun(P)});
+    drawRun(P,[v.x,v.z])});
   if(any){const m=b.mesh(false,true,false);ROADG.add(m)}try{trafficBuild()}catch(e){console.warn(e)}}
 /* traffic: cars drive round the ring road and queue up behind each other; now and then a jam forms */
 function trafficBuild(){TRAFFIC.cars.forEach(c=>c.g.parent&&c.g.parent.remove(c.g));TRAFFIC.cars=[];const L=TRAFFIC.loop;if(!L||L.length<10)return;
@@ -3660,6 +3663,12 @@ function validPlace(x,z,R0,skipT){const r=R0*.75;
   if(inBarn(x,z,r))return false;if(inStall(x,z,r))return false;
   if(z>-9.6-r&&z<-6.4+r&&x<-3.5)return false;if(Math.hypot(x-.5,z-4)<.4||Math.hypot(x-CF.x,z-CF.z)<1.9+r)return false;
   for(const o of S.builds||[]){const d=BUILDS.find(q=>q.id===o.id);if(Math.hypot(x-o.x,z-o.z)<r+(d?d.r:1.5)*.75+.15)return false}
+  // nothing may sit on a mansion's house, yard or driveway, and a new mansion's driveway must be clear too
+  if(typeof MANS_MD!=="undefined"){for(const o of S.builds||[])if(MANS_MD[o.id])for(let k=0;k<9;k++){const a=k/8*Math.PI*2,rr=k===8?0:r;if(mansCell(o,x+Math.cos(a)*rr,z+Math.sin(a)*rr)>0)return false}
+    const PD=typeof PLACE!=="undefined"&&PLACE&&PLACE.d&&!PLACE.tree?PLACE.d:null,M=PD&&MANS_MD[PD.id];
+    if(M&&R0===PD.r){const rt=PLACE.r||0,c=Math.cos(rt),sn=Math.sin(rt);for(let lx=-M.W/2-1.5;lx<=M.x1+1.21;lx+=1.4)for(let lz=-M.zc;lz<=M.zc+.81;lz+=1.4){const px=x+(lx*c+lz*sn)*M.sc,pz=z+(-lx*sn+lz*c)*M.sc;
+      if(farmH(px,pz)<-.03||px<-72.5||px>17.5||pz<-71||pz>72.5)return false;if(inAnyPen(px,pz,.3))return false;
+      for(const o of S.builds||[]){if(MANS_MD[o.id]){if(mansCell(o,px,pz)>0)return false}else{const d=BUILDS.find(q=>q.id===o.id);if(Math.hypot(px-o.x,pz-o.z)<(d?d.r:1.5)*.75)return false}}}}}
   for(const T of FTREES)if(T!==skipT&&Math.hypot(x-T.x,z-T.z)<r+.6*(T.s||1))return false;
   return true}
 let PLACE=null;const GHOSTMAT=new THREE.MeshBasicMaterial({color:0x7fe08a,transparent:true,opacity:.45,depthWrite:false});
@@ -4422,18 +4431,18 @@ function buildAirportB(){if(AIRP.on||!AIRP.land)return;AIRP.on=true;const b=new 
 function stepAirport(dt,t){if(AIRP.on){const night=typeof isNight==="function"&&isNight();(AIRP.glows||[]).forEach(g=>g.material.opacity=night?.9:0);(AIRP.seq||[]).forEach((m,i)=>{const n=AIRP.seq.length,ph=((t*1.6)%1)*n*1.4;m.material.opacity=Math.abs(n-1-i-ph)<.6?1:.05});if(AIRP.beacon)AIRP.beacon.rotation.y+=dt*3;AIRP.planes.forEach(P=>P.g.userData.props.forEach(p=>p.rotation.x+=dt*40));(AIRP.parked||[]).forEach(p=>p.userData.props.forEach(q=>q.rotation.x+=dt*(Math.sin(t*.2)>.5?40:0)))}
   if(!AIRP.on){if(AIRP.land&&(AIRP._ck=(AIRP._ck||0)-dt)<=0){AIRP._ck=2;if(airOK())buildAirportB()}return}const night=typeof isNight==="function"&&isNight();if(AIRP.glow)AIRP.glow.color.setScalar(night?1:.65);AIRP.lights.forEach((m,i)=>m.color.setScalar(((t*1.5+i*.4)%1)<.25?1:.25));
   const RZ=AIRP.RZ,TW=AIRP.TWZ,X0=AIRP.AX-AIRP.RL/2+4,X1=AIRP.AX+AIRP.RL/2-4,sm=u=>u*u*(3-2*u),D=[0,11,9,10,16,10,5,18];
-  const busy=AIRP.planes.some(q=>q.s===1||q.s===4||q.s===5||q.s===6);let waitN=0;
+  const busy=AIRP.planes.some(q=>(q.s===1||q.s===4||q.s===5||q.s===6||q.s===11));let waitN=0;
   (AIRP.gates||[]).forEach(G=>{const P=G.p,act=P&&((P.s===7&&P.pi>=1)||P.s===9),m=G.m;if(act){const w=Math.sin(t*5);m.armL.rotation.z=2.6+w*.5;m.armR.rotation.z=2.6-w*.5}else{m.armL.rotation.z*=.9;m.armR.rotation.z*=.9}});
-  AIRP.planes.forEach((P,pi)=>{if(P.s==null){const G=pi>=4&&AIRP.gates?AIRP.gates[pi-4]:null;if(G){G.p=P;P.gate=G;P.s=8;P.t=pi*5}else{P.s=pi===0?0:3;P.t=-pi*9}}P.t+=dt;const g=P.g;let x,y=0,z=RZ,pitch=0,ry=0,k=D[P.s]?Math.min(1,P.t/D[P.s]):0;g.visible=true;
-    if(P.s===0){x=X0+2+waitN*9;z=TW;ry=0;waitN++;if(!busy&&waitN===1&&P.t>4&&!AIRP.planes.some(q=>q!==P&&(q.s===1||q.s===4||q.s===5||q.s===6))){P.s=1;P.t=0}}  // hold short, wait for a free runway
+  AIRP.planes.forEach((P,pi)=>{if(P.s==null){const G=pi>=4&&AIRP.gates?AIRP.gates[pi-4]:null;if(G){G.p=P;P.gate=G;P.s=8;P.t=pi*5}else{P.s=3;P.t=-pi*9}}P.t+=dt;const g=P.g;let x,y=0,z=RZ,pitch=0,ry=0,k=D[P.s]?Math.min(1,P.t/D[P.s]):0;g.visible=true;
+    if(P.s===0){const slot=AIRP.planes.filter(q=>q.s===0).sort((a,b)=>(a.qt||0)-(b.qt||0)).indexOf(P),tx=X0+2+slot*9;P.qx=P.qx==null?tx:P.qx+(tx-P.qx)*Math.min(1,dt*1.2);x=P.qx;z=TW;ry=Math.PI;waitN++;if(!busy&&slot===0&&Math.abs(P.qx-tx)<.3&&P.t>4&&!AIRP.planes.some(q=>q!==P&&(q.s===1||q.s===4||q.s===5||q.s===6||q.s===11))){P.s=11;P.t=0;P.path=[[X0-3,TW],[X0-3,RZ],[X0,RZ]];P.pi=0;P.cur=[x,z];P.hd=Math.PI;P.qx=null}}  // hold short, wait for a free runway
     else if(P.s===1){const e=k*k;x=X0+(X1-X0)*.7*e;y=k>.6?Math.pow((k-.6)/.4,2)*3:0;pitch=k>.6?.18:0;if(k>=1){P.s=2;P.t=0}}          // take-off roll and lift
     else if(P.s===2){x=X0+(X1-X0)*.7+k*120;y=3+k*k*45;pitch=.25;if(k>=1){P.s=3;P.t=0}}                                          // climb away
-    else if(P.s===3){g.visible=false;x=X1+200;y=50;if(P.t>D[3]&&!AIRP.planes.some(q=>q!==P&&(q.s===1||q.s===4||q.s===5||q.s===6))){P.s=4;P.t=0}}  // away; lands only when no other plane is on the runway
+    else if(P.s===3){g.visible=false;x=X1+200;y=50;if(P.t>D[3]&&!AIRP.planes.some(q=>q!==P&&(q.s===1||q.s===4||q.s===5||q.s===6||q.s===11))){P.s=4;P.t=0}}  // away; lands only when no other plane is on the runway
     else if(P.s===4){x=X0-140+k*140;y=40*(1-sm(k));pitch=-.12*(1-k);if(k>=1){P.s=5;P.t=0}}                                     // approach and descend
     else if(P.s===5){const e=1-(1-k)*(1-k);x=X0+(X1-X0)*e;if(k>=1){P.s=6;P.t=0}}                                                // touch down and brake
-    else if(P.s===6){x=X1;if(k>=1){const G=AIRP.gates&&AIRP.gates.find(q=>!q.p);P.s=7;P.t=0;P.cur=[X1,RZ];P.pi=0;if(G){G.p=P;P.gate=G;P.path=[[X1,TW],[G.x,TW],[G.x,G.z]]}else P.path=[[X1,TW],[X0+2,TW]],P.s=10}}  // 5 seconds stopped after landing, then to a free gate
-    else if(P.s===7||P.s===9||P.s===10){const tg=P.path[P.pi],cur=P.cur||(P.cur=[g.position.x,g.position.z]),dx=tg[0]-cur[0],dz=tg[1]-cur[1],L=Math.hypot(dx,dz),last=P.pi===P.path.length-1,v=P.s===9?1.3:(last&&L<6?Math.max(1.2,L*.9):5),st=v*dt;
-      if(L<=st){cur[0]=tg[0];cur[1]=tg[1];P.pi++;if(P.pi>=P.path.length){if(P.s===7){P.s=8;P.t=0}else if(P.s===9){P.s=10;P.t=0;P.path=[[X0+2,TW]];P.pi=0;if(P.gate)P.gate.p=null;P.gate=null}else{P.s=0;P.t=0}}}
+    else if(P.s===6){x=X1;if(k>=1){const G=AIRP.gates&&AIRP.gates.find(q=>!q.p);P.s=7;P.t=0;P.cur=[X1,RZ];P.pi=0;if(G){G.p=P;P.gate=G;P.path=[[X1,TW],[G.x,TW],[G.x,G.z]]}else P.path=[[X1,TW],[X0+2+AIRP.planes.filter(q=>q.s===0||q.s===10).length*9,TW]],P.s=10}}  // 5 seconds stopped after landing, then to a free gate
+    else if(P.s===7||P.s===9||P.s===10||P.s===11){const tg=P.path[P.pi],cur=P.cur||(P.cur=[g.position.x,g.position.z]),dx=tg[0]-cur[0],dz=tg[1]-cur[1],L=Math.hypot(dx,dz),last=P.pi===P.path.length-1,v=P.s===9?1.3:P.s===11?3:(last&&L<6?Math.max(1.2,L*.9):5),st=v*dt;
+      if(L<=st){cur[0]=tg[0];cur[1]=tg[1];P.pi++;if(P.pi>=P.path.length){if(P.s===11){P.s=1;P.t=0}else if(P.s===7){P.s=8;P.t=0}else if(P.s===9){P.s=10;P.t=0;const nq=AIRP.planes.filter(q=>q.s===0||q.s===10).length;P.path=[[X0+2+nq*9,TW]];P.pi=0;if(P.gate)P.gate.p=null;P.gate=null}else{P.s=0;P.t=0;P.qt=t;P.qx=cur[0]}}}
       else{cur[0]+=dx/L*st;cur[1]+=dz/L*st;if(P.s!==9)P.hd=Math.atan2(-dz,dx)}x=cur[0];z=cur[1];ry=P.hd!=null?P.hd:Math.PI}
     else if(P.s===8){const G=P.gate;x=G.x;z=G.z;ry=Math.PI/2;if(P.t>18+P.ph%9){P.s=9;P.t=0;P.path=[[G.x,TW]];P.pi=0;P.cur=[G.x,G.z];P.hd=Math.PI/2}}
     else x=X1;
@@ -9268,6 +9277,7 @@ function visSpawnBuyer(){const L=visTargets();if(!L.length)return;const p=L[Math
   toast("🧑‍💼 A buyer is coming to your farm to look at your animals.",3200)}
 function visSpawnThief(){const L=visTargets();if(!L.length)return;const n=ONEISLE?2+(Math.random()<.5?1:0):1;
   for(let k=0;k<n&&L.length;k++){const p=L.splice(Math.floor(Math.random()*L.length),1)[0];const T={kind:"thief",f:npcMake("thief"),p,st:"in",t:-k*1.2,wp:0,ox:(k-(n-1)/2)*1.3,oz:k*.9};T.f.g.position.x+=T.ox;T.f.g.position.z+=T.oz-k*1.5;VIS.gang.push(T)}VIS.thief=VIS.gang[0];
+  if(ONEISLE&&!VIS.van){const v=makeCar([0x1b1b1b,0x2b2b3a,0xe8ecef][Math.floor(Math.random()*3)],false);v.scale.set(1.3,1.45,1.2);v.position.set(VIS_IN[0][0]-3.2,0,VIS_IN[0][1]+.2);v.rotation.y=Math.PI;scene.add(v);VIS.van={g:v,st:"wait",t:0,v:0,n:0}}
   const m=VIS.gang.length;toast(m>1?"🚨 "+m+" thieves are sneaking into your farm together! Tap 🚨 Catch above each thief so your helpers can stop them.":"🚨 A thief is sneaking into your farm! Tap 🚨 Catch above the thief so your helper can stop them.",4800);if(typeof sfx==="function")try{sfx("alarm")}catch(e){}}
 function buyerAccept(){const B=VIS.buyer;if(!B||B.st!=="offer")return;const i=S.pens.indexOf(B.p);if(i<0){B.st="out";return}const a=animal(B.p.id),o=animalObjs[i];
   if(o)burst(o.g.position.x,.8,o.g.position.z,0xffd84a,14);const c=makeAnimal(B.p.id);paintAnimal(c,B.p.id,B.p.v);c.scale.setScalar(.85);scene.add(c);B.carry=c;
@@ -9286,7 +9296,7 @@ function thiefDown(T,f){T.st="down";T.t=0;f.o.chase=null;f.o.state="idle";f.o.st
   S.coins+=100;S.xp=(S.xp||0)+5;after();const sc=toScreen(T.f.g.position.x,2,T.f.g.position.z);floatText("💥 +100 🪙",sc.x,sc.y);
   toast(T.grab?"💥 "+(f===farmer?"You":"Your helper")+" beat the thief! Your "+animal(T.p.id).n+" is safe. +100 coins":"💥 "+(f===farmer?"You":"Your helper")+" beat the thief! +100 coins",3800)}
 function stepVisitors(dt,t){
-  if(npcAway()){if(VIS.buyer){npcRemove(VIS.buyer);VIS.buyer=null}VIS.gang.forEach(T=>{const o=visObj(T.p);if(o)o.g.position.y=0;npcRemove(T)});VIS.gang=[];VIS.thief=null;return}
+  if(npcAway()){if(VIS.buyer){npcRemove(VIS.buyer);VIS.buyer=null}VIS.gang.forEach(T=>{const o=visObj(T.p);if(o)o.g.position.y=0;npcRemove(T)});VIS.gang=[];VIS.thief=null;if(VIS.van){scene.remove(VIS.van.g);VIS.van=null}return}
   if(visOk()&&S.pens.length){if(!VIS.buyer&&(VIS.buyT-=dt)<=0){VIS.buyT=150+Math.random()*120;visSpawnBuyer()}if((ONEISLE||(!FARMVERSE&&!FEAT))&&!VIS.gang.length&&(VIS.thT-=dt)<=0){VIS.thT=ONEISLE?300+Math.random()*600:260+Math.random()*200;visSpawnThief()}}
   const B=VIS.buyer;if(B){const f=B.f,g=f.g;B.t+=dt;let aL=null;
     if(B.st==="in"){if(npcWalk(f,VIS_IN[1][0],VIS_IN[1][1],1.7,dt))B.st="go"}
@@ -9300,16 +9310,17 @@ function stepVisitors(dt,t){
         if(!B.el._on){B.el._on=1;B.el.onclick=e=>{const v=e.target.dataset&&e.target.dataset.v;if(v==="y")buyerAccept();else if(v==="n")buyerNo()}}}
       else if(B.el){B.el.remove();B.el=null;B.html=null}
       npcBubblePos(B)}}
-  for(const T of VIS.gang.slice()){VIS.thief=T;stepThief(T,dt,t);if(VIS.thief!==T)VIS.gang=VIS.gang.filter(q=>q!==T)}VIS.thief=VIS.gang[0]||null}
+  for(const T of VIS.gang.slice()){VIS.thief=T;stepThief(T,dt,t);if(VIS.thief!==T)VIS.gang=VIS.gang.filter(q=>q!==T)}VIS.thief=VIS.gang[0]||null;
+  {const V=VIS.van;if(V){V.t+=dt;if(V.st==="wait"&&!VIS.gang.length){V.st="go";if(V.n)toast("🚐 The thieves jumped into their van and drove off!",3000)}if(V.st==="go"){V.v=Math.min(9,V.v+dt*4);V.g.position.x-=V.v*dt;if(V.g.userData.wheels)V.g.userData.wheels.forEach(w=>w.rotation.y+=V.v*dt*4);if(V.g.position.x<-82||V.t>120){scene.remove(V.g);VIS.van=null}}}}}
 function stepThief(T,dt,t){if(T){const f=T.f,g=f.g;T.t+=dt;let aL=null,aR=null;if(T.t<0){npcAnim(f,t,dt);return}
     if(T.st==="in"){if(npcWalk(f,VIS_IN[1][0]+(T.ox||0),VIS_IN[1][1]+(T.oz||0),1.4,dt))T.st="go"}
     else if(T.st==="go"){const o=visObj(T.p);if(!o||!o.g.visible){T.st="flee";T.wp=1}else{const ap=o.g.position,d=Math.hypot(g.position.x-ap.x,g.position.z-ap.z);if(d<.8){T.st="grab";T.t=0}else npcWalk(f,ap.x,ap.z,1.5,dt)}
       f.hips.position.y=.45}
     else if(T.st==="grab"){const o=visObj(T.p);aL=aR=1.1;if(!o){T.st="flee";T.wp=1}else{o.g.position.x+=Math.sin(t*30)*.01;if(T.t>2.5){T.grab=true;T.st="run";T.wp=1;toast("🚨 The thief grabbed your "+animal(T.p.id).n+"! Tap 🚨 Catch now!",3500)}}}
-    else if(T.st==="run"||T.st==="flee"){const w=VIS_IN[T.wp];if(npcWalk(f,w[0]+(T.ox||0),w[1]+(T.oz||0),T.st==="run"?2.3:2.6,dt)){if(T.wp===1)T.wp=0;else{
+    else if(T.st==="run"||T.st==="flee"){const w=T.wp===0&&VIS.van?[VIS.van.g.position.x+.4,VIS.van.g.position.z-.9]:VIS_IN[T.wp];if(npcWalk(f,w[0]+(T.wp===0&&VIS.van?0:(T.ox||0)),w[1]+(T.wp===0&&VIS.van?0:(T.oz||0)),T.st==="run"?2.3:2.6,dt)){if(T.wp===1)T.wp=0;else{
         if(T.grab){const i=S.pens.indexOf(T.p);if(i>=0){const a=animal(T.p.id);S.pens.splice(i,1);hovered=null;rebuildAnimals();after();toast("😢 The thief got away with your "+a.n+". Catch them faster next time!",4200)}}
         else toast("The thief ran away without taking anything.",2400);
-        npcRemove(T);VIS.thief=null}}
+        if(VIS.van){VIS.van.n++;burst(VIS.van.g.position.x,1,VIS.van.g.position.z,0xdddddd,8,.3)}npcRemove(T);VIS.thief=null}}
       if(T.grab&&VIS.thief){const o=visObj(T.p);if(o){const fx=Math.cos(g.rotation.y),fz=-Math.sin(g.rotation.y);o.g.position.set(g.position.x-fx*.1,.55,g.position.z-fz*.1);o.g.rotation.y=g.rotation.y+Math.PI/2;o.state="idle";o.st=1}aL=aR=2.6}}
     else if(T.st==="down"){f._w=0;g.rotation.z=lerp(g.rotation.z,-1.5,Math.min(1,dt*8));g.position.y=.1;if(T.t>.3&&Math.random()<dt*6)burst(g.position.x,.8,g.position.z,0xffe14a,2,.3);
       if(T.t>1.8){burst(g.position.x,.6,g.position.z,0xdddddd,20,.6);npcRemove(T);VIS.thief=null}}
