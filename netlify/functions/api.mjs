@@ -1,6 +1,5 @@
 // Farming online API: player directory + farm snapshots for visiting, stored in Netlify Blobs.
 import { getStore } from "@netlify/blobs";
-import GF_SEED from "./gf_seed.json";
 
 const J = (o, s = 200) => new Response(JSON.stringify(o), { status: s, headers: { "content-type": "application/json", "cache-control": "no-store" } });
 const norm = u => String(u || "").toLowerCase().replace(/[^a-z0-9_]/g, "").slice(0, 20);
@@ -20,7 +19,7 @@ const FROZEN = m => J({ error: "This account is frozen by the game admin. Please
 const pub = m => ({ u: m.u, farm: m.farm, farmer: m.farmer, shirt: m.shirt, lv: m.lv, size: m.size, seen: m.seen, ...(m.app ? { app: 1 } : {}) });
 
 // a restart time shipped with a deploy: open games reload once after it
-const DEPLOY_RESTART = 1791730384551;
+const DEPLOY_RESTART = 1791731297184;
 export default async (req) => {
   const url = new URL(req.url);
   const path = url.pathname.replace(/^.*?\/api\/?/, "").replace(/^\.netlify\/functions\/api\/?/, "").replace(/\/$/, "");
@@ -33,10 +32,6 @@ export default async (req) => {
   const farms = gs({ name: "farms", consistency: "strong" });
   try {
     const ctl = gs({ name: "control", consistency: "strong" });
-    // one-time: put the Gods Farm farm from Claude into the "godsfarm" account (wallet kept)
-    if (!TEST && !globalThis.__gfSeed) { globalThis.__gfSeed = 1; try { if (!(await ctl.get("seed-gf-1"))) { const u = "godsfarm", m = await meta.get(u, { type: "json" }); if (m) { const cur = await farms.get(u, { type: "json" }).catch(() => null), cs = (cur && cur.state) || {};
-      const st = { ...GF_SEED, ...(cs.peso ? { peso: cs.peso } : {}), ...(cs.redeemed ? { redeemed: cs.redeemed } : {}), seen: Date.now() / 1000 + 30 };
-      await farms.setJSON(u, { ...(cur || {}), ...pub(m), state: st }); await meta.setJSON(u, { ...m, lv: GF_SEED.lv | 0, coins: Math.floor(GF_SEED.coins || 0), size: GF_SEED.size | 0 }); await ctl.set("seed-gf-1", String(Date.now())) } } } catch (e) { globalThis.__gfSeed = 0 } }
     if (req.method === "GET" && path === "restart") {
       const r = await ctl.get("restart", { type: "json" });
       const dep = DEPLOY_RESTART <= Date.now() ? DEPLOY_RESTART : 0;
