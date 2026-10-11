@@ -896,7 +896,7 @@ const _ca=new THREE.Color(),_cb=new THREE.Color();
 const mix=(a,b,t)=>_ca.set(a).lerp(_cb.set(b),Math.max(0,Math.min(1,t))).getHex();
 /* -------- extra farmland parcels -------- */
 const PN=8;
-const FARMVERSE=false;const GPLIVE=true;const MIRROR_TEST=false,MAIN_ART="https://claude.ai/artifact/UyPMu4gvJm8nFYiZ8snZbo",TEST_ART="https://claude.ai/artifact/FXF22kREKnNuiM4FxwxmGY";const FEAT=true;const NOBRAND=true;const ONEISLE=true;const MAXPL=ONEISLE?120:1e9;const AIRPORT_ON=false;function nbSnap(){return new Set(scene.children)}function nbDrop(s0){if(!ONEISLE)return;try{const rm=scene.children.filter(c=>!s0.has(c)&&!(window.__SEAMAT&&c.material===window.__SEAMAT));rm.forEach(c=>scene.remove(c));const gone=new Set(rm);const on=o=>{for(let n=0;o&&n<40;n++){if(gone.has(o))return false;if(o===scene)return true;o=o.parent}return true};for(let i=BTN3D.length-1;i>=0;i--)if(!on(BTN3D[i]))BTN3D.splice(i,1)}catch(e){console.warn(e)}}if(ONEISLE)document.head.insertAdjacentHTML("beforeend","<style>#wxHead,#wxPanel{display:none!important}</style>");function nbCut(fn){const s0=nbSnap();try{fn()}catch(e){console.warn(e)}nbDrop(s0)}const NB_SQ=["gp","pots","roll","wfl","gs","t2b","cow"],NB_BTN=["carnival","parkEnter","potsEnter","gsEnter","t2bEnter","theme0","theme1","theme2"];
+const FARMVERSE=false;const GPLIVE=true;const MIRROR_TEST=false,MAIN_ART="https://claude.ai/artifact/UyPMu4gvJm8nFYiZ8snZbo",TEST_ART="https://claude.ai/artifact/FXF22kREKnNuiM4FxwxmGY";const FEAT=true;const NOBRAND=true;const ONEISLE=true;const MAXPL=ONEISLE?120:1e9;const AIRPORT_ON=false;var TRAFFIC={loop:null,cars:[],len:0,cum:[],jam:null,jamT:30};function nbSnap(){return new Set(scene.children)}function nbDrop(s0){if(!ONEISLE)return;try{const rm=scene.children.filter(c=>!s0.has(c)&&!(window.__SEAMAT&&c.material===window.__SEAMAT));rm.forEach(c=>scene.remove(c));const gone=new Set(rm);const on=o=>{for(let n=0;o&&n<40;n++){if(gone.has(o))return false;if(o===scene)return true;o=o.parent}return true};for(let i=BTN3D.length-1;i>=0;i--)if(!on(BTN3D[i]))BTN3D.splice(i,1)}catch(e){console.warn(e)}}if(ONEISLE)document.head.insertAdjacentHTML("beforeend","<style>#wxHead,#wxPanel{display:none!important}</style>");function nbCut(fn){const s0=nbSnap();try{fn()}catch(e){console.warn(e)}nbDrop(s0)}const NB_SQ=["gp","pots","roll","wfl","gs","t2b","cow"],NB_BTN=["carnival","parkEnter","potsEnter","gsEnter","t2bEnter","theme0","theme1","theme2"];
 const IX_=80,IZ_=4;const CX=180,CZ=4,CHX=32,CHZ=26;
 const CITY_POS=FEAT?[]:[[180,4]];
 const PLOTS=[{id:"isla",n:"Secret Island",x0:IX_-.5,z0:IZ_+31,sz:6,y:1.2,island:true,cost:100000,lv:3},{id:"timog",n:"South Land",x0:-4,z0:12,cost:1500,lv:4},{id:"kanluran",n:"West Land",x0:-17,z0:10,cost:4000,lv:6},{id:"malayo",n:"Far Land",x0:-26.5,z0:10,cost:8000,lv:8},{id:"lambak",n:"Valley Land",x0:-4,z0:21,cost:15000,lv:9},{id:"burol",n:"Hill Land",x0:-17,z0:21,cost:25000,lv:10},{id:"parang",n:"Meadow Land",x0:-26.5,z0:21,cost:40000,lv:11},{id:"ilog",n:"Riverside Land",x0:-4,z0:30,cost:60000,lv:12},{id:"gubat",n:"Forest Land",x0:-17,z0:30,cost:85000,lv:13},{id:"bukal",n:"Spring Land",x0:-26.5,z0:30,cost:120000,lv:14},{id:"talampas",n:"Plateau Land",x0:-36,z0:10,cost:160000,lv:15},{id:"dulo",n:"Edge Land",x0:-36,z0:21,cost:220000,lv:16}];
@@ -2905,7 +2905,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="224";const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
+const GAMEVER="225";const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
 if(TESTSRV){document.title="🧪 TEST · "+document.title;const tb=document.createElement("div");tb.id="testBar";tb.textContent=MIRROR_TEST?"🧪 TEST SERVER · a copy of your farm · changes here don't touch your real farm":"🧪 TEST SERVER · changes here don't touch your real farm";tb.style.cssText="position:fixed;left:50%;top:0;transform:translateX(-50%);z-index:9999;background:#7a3fc0;color:#fff;font:900 11px/1.2 sans-serif;padding:3px 10px;border-radius:0 0 10px 10px;pointer-events:none;letter-spacing:.3px";document.addEventListener("DOMContentLoaded",()=>document.body.appendChild(tb));if(document.body)document.body.appendChild(tb)}let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 /* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
 (function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
@@ -3541,12 +3541,12 @@ let _roadT=null;function roadsSoon(){clearTimeout(_roadT);_roadT=setTimeout(()=>
 function buildMansionRoads(){while(ROADG.children.length)ROADG.remove(ROADG.children[0]);const b=new Builder();let any=false;const v=new THREE.Vector3();
   const seg=(x0,z0,x1,z1)=>{const dx=x1-x0,dz=z1-z0,L=Math.hypot(dx,dz);if(L<.05)return;any=true;const cx=(x0+x1)/2,cz=(z0+z1)/2,ry=Math.atan2(-dz,dx);b.add("box",0x4a5058,cx,.022,cz,L+1.7,.03,1.7,0,ry,0);
     for(let k=.6;k<L;k+=1.2)b.add("box",0xf5c732,x0+dx*k/L,.04,z0+dz*k/L,.5,.01,.08,0,ry,0)};
-  const G=BUILDG.children.filter(g=>g.userData.drive);if(!G.length)return;
+  const G=BUILDG.children.filter(g=>g.userData.drive);if(!G.length&&!ONEISLE)return;
   // grid of 1x1 cells over the farm; cars avoid pens, fields, land, houses, water, trees and the barn
-  const X0=-72,Z0=-24,NX=90,NZ=96,N=NX*NZ,cost=new Float32Array(N),goal=new Uint8Array(N),ci=(x,z)=>(z-Z0)*NX+(x-X0);
+  const X0=-72,Z0=-24,NX=90,NZ=96,N=NX*NZ,cost=new Float32Array(N),goal=new Uint8Array(N),FR=new Uint8Array(N),ci=(x,z)=>(z-Z0)*NX+(x-X0);
   const L=layout(),blds=(S.builds||[]).map(o=>{const d=BUILDS.find(q=>q.id===o.id);return[o.x,o.z,(d?d.r:1.5)*.8+.9]});
   for(let iz=0;iz<NZ;iz++)for(let ix=0;ix<NX;ix++){const x=X0+ix+.5,z=Z0+iz+.5,k=iz*NX+ix;let c=1;
-    if(z>-9.4&&z<-6.6&&x<-4){goal[k]=1}
+    if(z>-9.4&&z<-6.6&&x<-4){goal[k]=1;if(ONEISLE)FR[k]=1}
     if(inAnyPen(x,z,1.6))c=-1;
     else if(L.some(a=>!(a.p&&a.p.island)&&x>a.x0-1.1&&x<a.x0+a.n+1.1&&z>a.z0-1.1&&z<a.z0+a.n+1.1))c=-1;
     else if(PLOTS.some(q=>plotLive(q)&&x>q.x0-1&&x<q.x0+(q.sz||PN)+1&&z>q.z0-1&&z<q.z0+(q.sz||PN)+1))c=-1;
@@ -3559,23 +3559,46 @@ function buildMansionRoads(){while(ROADG.children.length)ROADG.remove(ROADG.chil
     else if(FTREES.some(T=>Math.hypot(x-T.x,z-T.z)<1.1))c=6;
     cost[k]=c}
   const DX=[1,0,-1,0],DZ=[0,1,0,-1];
+  for(let k=0;k<N;k++)if(FR[k]&&cost[k]>=0)cost[k]=.2;
+  const route=(S0,isEnd)=>{const best=new Float32Array(N*4).fill(1e9),from=new Int32Array(N*4).fill(-1),open=[];
+    const push=(st,f)=>{open.push([f,st]);let i=open.length-1;while(i>0){const p=(i-1)>>1;if(open[p][0]<=open[i][0])break;[open[p],open[i]]=[open[i],open[p]];i=p}};
+    const pop=()=>{const t=open[0],l=open.pop();if(open.length){open[0]=l;let i=0;for(;;){let a=2*i+1,c=a+1,m=i;if(a<open.length&&open[a][0]<open[m][0])m=a;if(c<open.length&&open[c][0]<open[m][0])m=c;if(m===i)break;[open[m],open[i]]=[open[i],open[m]];i=m}}return t};
+    for(let d=0;d<4;d++){best[S0*4+d]=0;push(S0*4+d,0)}let end=-1,it=0;
+    while(open.length&&it++<500000){const [f,st]=pop(),k=st>>2,dir=st&3,gk=best[st];if(f>gk+1e-6)continue;if(k!==S0&&isEnd(k)){end=st;break}
+      const x=k%NX,z=(k/NX)|0;for(let nd=0;nd<4;nd++){const nx=x+DX[nd],nz=z+DZ[nd];if(nx<0||nz<0||nx>=NX||nz>=NZ)continue;const nk=nz*NX+nx,c=cost[nk];if(c<0)continue;
+        const ng=gk+(c===.2?.35:Math.max(1,c))+(nd!==dir?4:0),ns=nk*4+nd;if(ng<best[ns]){best[ns]=ng;from[ns]=st;push(ns,ng)}}}
+    if(end<0)return null;const P=[];for(let st=end;st>=0;st=from[st]){P.push(st>>2);if(P.length>6000)break}return P.reverse()};
+  const free=(x,z)=>{let bk=-1,bd=1e9;for(let dz=-8;dz<=8;dz++)for(let dx=-8;dx<=8;dx++){const ix=Math.floor(x)-X0+dx,iz=Math.floor(z)-Z0+dz;if(ix<0||iz<0||ix>=NX||iz>=NZ)continue;const k=iz*NX+ix;if(cost[k]<0)continue;const d=dx*dx+dz*dz;if(d<bd){bd=d;bk=k}}return bk};
+  const pt=k=>[X0+(k%NX)+.5,Z0+((k/NX)|0)+.5];
+  const drawRun=P=>{if(!P||!P.length)return;let a=pt(P[0]),prev=a,dir=null;const out=(p0,p1)=>{const mx=(p0[0]+p1[0])/2,mz=(p0[1]+p1[1])/2;if(mz>-9.4&&mz<-6.6&&mx<-4&&Math.abs(p0[1]-p1[1])<.1)return;seg(p0[0],p0[1],p1[0],p1[1])};
+    for(let i=1;i<P.length;i++){const c=pt(P[i]),nd=(c[0]-prev[0])+","+(c[1]-prev[1]);if(dir!==null&&nd!==dir){out(a,prev);a=prev}dir=nd;prev=c}out(a,prev)};
+  // ring road around the whole farm so cars can drive all the way round
+  if(ONEISLE){const C=[[-66,-8],[-66,69],[13.5,69],[13.5,-3],[-2,-8]].map(([x,z])=>free(x,z)).filter(k=>k>=0);let loop=[];
+    for(let i=0;i<C.length;i++){const a=C[i],b2=C[(i+1)%C.length];const P=route(a,k=>k===b2);if(!P){loop=null;break}if(loop.length)P.shift();loop=loop.concat(P)}
+    if(loop&&loop.length>20){loop.forEach(k=>{goal[k]=1;cost[k]=.2});drawRun(loop.concat([loop[0]]));TRAFFIC.loop=loop.map(pt);any=true}else TRAFFIC.loop=null}
   // closest houses connect first; later ones join the nearest road already built, so the roads form one tidy network
   const ends=G.map(g=>{g.updateMatrixWorld(true);const d=g.userData.drive,w=new THREE.Vector3(d[0],0,d[1]);g.localToWorld(w);return{g,w}}).sort((a,b)=>Math.abs(a.w.z+8)+Math.abs(a.w.x+4)*.3-(Math.abs(b.w.z+8)+Math.abs(b.w.x+4)*.3));
   ends.forEach(({g,w})=>{v.copy(w);const sx=Math.floor(v.x),sz=Math.floor(v.z);if(sx<X0||sx>=X0+NX||sz<Z0||sz>=Z0+NZ)return;
-    // A* with a turn penalty so roads run straight and turn at right angles
-    const S0=ci(sx,sz),best=new Float32Array(N*4).fill(1e9),from=new Int32Array(N*4).fill(-1),open=[];const h=k=>0;
-    const push=(st,f)=>{open.push([f,st]);let i=open.length-1;while(i>0){const p=(i-1)>>1;if(open[p][0]<=open[i][0])break;[open[p],open[i]]=[open[i],open[p]];i=p}};
-    const pop=()=>{const t=open[0],l=open.pop();if(open.length){open[0]=l;let i=0;for(;;){let a=2*i+1,c=a+1,m=i;if(a<open.length&&open[a][0]<open[m][0])m=a;if(c<open.length&&open[c][0]<open[m][0])m=c;if(m===i)break;[open[m],open[i]]=[open[i],open[m]];i=m}}return t};
-    for(let dIx=0;dIx<4;dIx++){best[S0*4+dIx]=0;push(S0*4+dIx,h(S0))}
-    let end=-1,it=0;while(open.length&&it++<400000){const [f,st]=pop(),k=st>>2,dir=st&3,gk=best[st];if(f-h(k)>gk+1e-6)continue;if(goal[k]){end=st;break}
-      const x=k%NX,z=(k/NX)|0;for(let nd=0;nd<4;nd++){const nx=x+DX[nd],nz=z+DZ[nd];if(nx<0||nz<0||nx>=NX||nz>=NZ)continue;const nk=nz*NX+nx,c=cost[nk];if(c<0&&nk!==S0)continue;
-        const ng=gk+(c===.2?.35:Math.max(1,c))+(nd!==dir?4:0),ns=nk*4+nd;if(ng<best[ns]){best[ns]=ng;from[ns]=st;push(ns,ng+h(nk))}}}
-    if(end<0)return;const P=[];for(let st=end;st>=0;st=from[st]){P.push(st>>2);if(P.length>4000)break}P.reverse();
+    const S0=ci(sx,sz),P=route(S0,k=>!!goal[k]);if(!P)return;
     P.forEach(k=>{goal[k]=1;cost[k]=.2});
     // merge straight runs into segments
-    const pt=k=>[X0+(k%NX)+.5,Z0+((k/NX)|0)+.5];let a=pt(P[0]),prev=a,dir=null;seg(v.x,v.z,a[0],a[1]);
-    for(let i=1;i<P.length;i++){const c=pt(P[i]),nd=(c[0]-prev[0])+","+(c[1]-prev[1]);if(dir!==null&&nd!==dir){seg(a[0],a[1],prev[0],prev[1]);a=prev}dir=nd;prev=c}seg(a[0],a[1],prev[0],prev[1])});
-  if(any){const m=b.mesh(false,true,false);ROADG.add(m)}}
+    seg(v.x,v.z,pt(P[0])[0],pt(P[0])[1]);drawRun(P)});
+  if(any){const m=b.mesh(false,true,false);ROADG.add(m)}try{trafficBuild()}catch(e){console.warn(e)}}
+/* traffic: cars drive round the ring road and queue up behind each other; now and then a jam forms */
+function trafficBuild(){TRAFFIC.cars.forEach(c=>c.g.parent&&c.g.parent.remove(c.g));TRAFFIC.cars=[];const L=TRAFFIC.loop;if(!L||L.length<10)return;
+  const P=[L[0]];for(let i=1;i<L.length;i++){const a=P[P.length-1],c=L[i],n=L[(i+1)%L.length];if((c[0]-a[0])*(n[1]-c[1])-(c[1]-a[1])*(n[0]-c[0])!==0||i===L.length-1)P.push(c)}P.push(L[0]);
+  const cum=[0];for(let i=1;i<P.length;i++)cum.push(cum[i-1]+Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1]));TRAFFIC.pts=P;TRAFFIC.cum=cum;TRAFFIC.len=cum[cum.length-1];
+  const n=Math.max(8,Math.min(22,Math.round(TRAFFIC.len/14))),COL=[0xd23a2a,0x2f7fb8,0xf2f2f2,0x2b2b2b,0xf2b632,0x3f8f2c,0x8a4fc8,0xe86a1a,0x9aa3ab,0x1f3a6a];
+  for(let i=0;i<n;i++){const g=makeCar(COL[i%COL.length],i%7===3);g.scale.setScalar(.9);ROADG.add(g);TRAFFIC.cars.push({g,u:i/n*TRAFFIC.len,v:0,vmax:3.6+Math.random()*1.6})}}
+function trafficAt(u){const T=TRAFFIC,P=T.pts,C=T.cum;u=((u%T.len)+T.len)%T.len;let i=1;while(i<C.length-1&&C[i]<u)i++;const a=P[i-1],b=P[i],f=(u-C[i-1])/((C[i]-C[i-1])||1),dx=b[0]-a[0],dz=b[1]-a[1],l=Math.hypot(dx,dz)||1;return[a[0]+dx*f,a[1]+dz*f,dx/l,dz/l]}
+function stepTraffic(dt,t){const T=TRAFFIC;if(!T.cars.length||!T.len)return;dt=Math.min(dt,.1);
+  if(T.jam){if(t>T.jam.until){if(T.jam.lab)scene.remove(T.jam.lab);T.jam=null}}else if((T.jamT-=dt)<=0){T.jamT=30+Math.random()*40;const c=T.cars[Math.floor(Math.random()*T.cars.length)];T.jam={car:c,until:t+8+Math.random()*6};
+    const lab=labelSprite("🚦 Traffic jam!");lab.scale.set(3,.75,1);scene.add(lab);T.jam.lab=lab}
+  const cs=T.cars.slice().sort((a,b)=>a.u-b.u);cs.forEach((c,i)=>{const nx=cs[(i+1)%cs.length];let gap=(nx.u-c.u+T.len)%T.len;if(cs.length===1)gap=1e9;
+    let want=c.vmax;if(gap<2.4)want=0;else if(gap<6)want=Math.min(want,(gap-2.4)*1.2);if(T.jam&&T.jam.car===c)want=0;
+    c.v+=(want-c.v)*Math.min(1,dt*(want<c.v?6:1.5));c.u=(c.u+c.v*dt)%T.len;const [x,z,dx,dz]=trafficAt(c.u);c.g.position.set(x-dz*.45,0,z+dx*.45);c.g.rotation.y=Math.atan2(-dz,dx);
+    if(c.g.userData.wheels)c.g.userData.wheels.forEach(w=>w.rotation.y+=c.v*dt*5)});
+  if(T.jam&&T.jam.lab){const p=T.jam.car.g.position;T.jam.lab.position.set(p.x,2.4,p.z)}}
 function renderBuilds(){fixSaleSoon();while(BUILDG.children.length)BUILDG.remove(BUILDG.children[0]);(S.builds||[]).forEach((o,i)=>{const g=makeBuild(o.id);g.position.set(o.x,0,o.z);g.rotation.y=o.r||0;
   const d=BUILDS.find(q=>q.id===o.id),r=d?d.r:1;const hb=new THREE.Mesh(new THREE.BoxGeometry(r*1.5,2.6,r*1.5),new THREE.MeshBasicMaterial({visible:false}));hb.position.y=1.3;hb.userData.build=i;g.add(hb);g.userData.hit=hb;BUILDG.add(g)});buildMansionRoads()}
 let EDIT=-1;
@@ -4341,7 +4364,7 @@ function buildAirportB(){if(AIRP.on||!AIRP.land)return;AIRP.on=true;const b=new 
   // windsock, parked fuel truck, trees and lamps
   b.add("cyl",0xdfe3e5,AX+36,2,RZ-6,.05,4,.05);b.add("cone",0xff7a1a,AX+36.8,3.8,RZ-6,.25,1.4,.25,0,0,Math.PI/2);b.add("box",0xf2b632,AX-30,.6,AZ-3,2.6,1.2,1.2);b.add("cyl",0xe8ecef,AX-30.4,.9,AZ-3,.5,1.8,.5,0,0,Math.PI/2);
   for(let k=0;k<14;k++){const x=AX-44+k*6.4,z=AZ+33;b.add("cyl",0x6b4a2a,x,.8,z,.12,1.6,.12);b.add("sph",0x3fa833,x,2,z,1,1,1)}for(let k=0;k<7;k++)mLamp(b,TX-12+k*4,TZ-7.2);
-  b.add("box",0x4a5058,AX-12,.02,AZ-26,3,.04,12);
+  b.add("box",0x4a5058,AX-12,.025,AZ-30.6,3,.04,21.4);for(let k=0;k<8;k++)b.add("box",0xf5c732,AX-12,.05,AZ-40+k*2.4,.1,.01,1);
   scene.add(b.mesh());const gm=new THREE.MeshBasicMaterial({vertexColors:true,toneMapped:false});const gmm=new THREE.Mesh(gw.geo(),gm);scene.add(gmm);AIRP.glow=gm;
   
   // parked planes at the gates
@@ -4389,7 +4412,7 @@ function stepAirport(dt,t){if(AIRP.on){const night=typeof isNight==="function"&&
     if(u<.15){sp=u/.15*0}else if(u<.25){const k=(u-.15)/.1;y=.1+sm(k)*(H.big?20:14);sp=1}else if(u<.8){const k=(u-.25)/.55,a=k*Math.PI*2,RX=H.big?45:30,RZ2=H.big?60:40,Y=H.big?20:14;x=H.x+(H.big?RX:-RX)-(H.big?RX:-RX)*Math.cos(a);z=H.z-RZ2*Math.sin(a)*(.7+.3*Math.sin(a*2));y=Y+Math.sin(k*12)*1.5;sp=1;g.rotation.y=Math.atan2(-(H.z-RZ2*Math.sin(a+.01)*(.7+.3*Math.sin(2*a+.02))-z),(H.x+(H.big?RX:-RX)-(H.big?RX:-RX)*Math.cos(a+.01))-x)}
     else if(u<.9){const k=(u-.8)/.1;y=(H.big?20:14)*(1-sm(k))+.1;sp=1}
     g.position.set(x,y,z);g.userData.rot.rotation.y+=dt*(sp?22:2);if(g.userData.rot2)g.userData.rot2.rotation.y-=dt*(sp?22:2);g.userData.tr.rotation.z+=dt*(sp?30:3)})}
-function stepTown(dt,t){stepMunicipal(dt,t);try{stepAirport(dt,t)}catch(e){}
+function stepTown(dt,t){stepMunicipal(dt,t);try{stepAirport(dt,t)}catch(e){}try{stepTraffic(dt,t)}catch(e){}
   if(TOWNX.loop&&(!TOWNX.placed||Math.hypot(cam.tx-TOWN.x,cam.tz-TOWN.z)<90)){TOWNX.placed=true;const {seg,tot}=TOWNX.loop;TOWNX.cars.forEach(c=>{c.u=(c.u+c.sp*dt)%tot;let s2=c.u,k=0;while(s2>seg[k][2]){s2-=seg[k][2];k++}const [a,b2,l]=seg[k],f=s2/l,dx=(b2[0]-a[0])/l,dz=(b2[1]-a[1])/l;
     c.m.position.set(a[0]+(b2[0]-a[0])*f-dz*.55,0,a[1]+(b2[1]-a[1])*f+dx*.55);c.m.rotation.y=Math.atan2(-dz,dx);if(c.m.userData.wheels)c.m.userData.wheels.forEach(w=>w.rotation.y+=dt*c.sp*4)})}const h=typeof phHour==="function"?phHour():12,dark=1-daylight(h),show=h>=18&&h<21&&!isBad();
   TOWNX.pl.forEach(l=>l.intensity=dark*1.8);TOWNX.glows.forEach(g=>g.material.opacity=dark*.85);if(TOWNX.lit)TOWNX.lit.visible=dark>.35;TOWNX.lights.forEach(m=>{});
