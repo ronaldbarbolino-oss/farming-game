@@ -436,7 +436,7 @@ body.land .sbtns .sb{font-size:.6rem!important;padding:3px 6px!important}
       <button class="tb" data-t="care" aria-pressed="false" title="Care (5): collect from animals, treat them, pull weeds"><span>3</span>Care</button>
       
     </div>
-    <div class="placeBar" id="hillBar" hidden><span id="hillTxt"></span><div><button class="cbtn" id="hillMove" type="button">✥ Move</button><button class="cbtn" id="hillGrow" type="button">⬆ Bigger</button><button class="cbtn" id="hillRm" type="button">🗑 Remove · 500</button><button class="cbtn on" id="hillDone" type="button">Done</button></div></div><div class="placeBar" id="editBar" hidden><span id="editTxt"></span><div><button class="cbtn" id="editRot" type="button">⟳ Rotate</button><button class="cbtn" id="editMove" type="button">✥ Move</button><button class="cbtn" id="editSell" type="button" style="background:#e8a33a;color:#fff">💰 Sell</button><button class="cbtn on" id="editDone" type="button">Done</button></div></div>
+    <div class="placeBar" id="hillBar" hidden><span id="hillTxt"></span><div><button class="cbtn" id="hillMove" type="button">✥ Move</button><button class="cbtn" id="hillGrow" type="button">⬆ Bigger</button><button class="cbtn" id="hillRm" type="button">🗑 Remove · 500</button><button class="cbtn on" id="hillDone" type="button">Done</button></div></div><div class="placeBar" id="editBar" hidden><span id="editTxt"></span><div><button class="cbtn" id="editRot" type="button">⟳ Rotate</button><button class="cbtn" id="editMove" type="button">✥ Move</button><button class="cbtn" id="editUp" type="button" hidden style="background:#3f9a3a;color:#fff">⬆ Upgrade</button><button class="cbtn" id="editSell" type="button" style="background:#e8a33a;color:#fff">💰 Sell</button><button class="cbtn on" id="editDone" type="button">Done</button></div></div>
     <div id="actPad" aria-label="Quick actions"><button class="ap ap-h" type="button" data-ap="tAll"><b>🧺</b>Harvest<br>All</button><button class="ap ap-p" type="button" data-ap="tPlantAll"><b>🌱</b>Plant<br>All</button><button class="ap ap-w" type="button" data-ap="tPlow"><b>🚜</b>Plow<br>All</button><button class="ap ap-m" type="button" data-ap="menu"><b>☰</b>Menu</button></div>
     <div class="placeBar" id="placeBar" hidden><span id="placeTxt"></span><div><button class="cbtn" id="placeRot" type="button">Rotate</button><button class="cbtn on" id="placeOk" type="button">Place here</button><button class="cbtn" id="placeX" type="button">Cancel</button></div></div>
     <div class="cam">
@@ -2905,7 +2905,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="227";const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
+const GAMEVER="228";const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
 if(TESTSRV){document.title="🧪 TEST · "+document.title;const tb=document.createElement("div");tb.id="testBar";tb.textContent=MIRROR_TEST?"🧪 TEST SERVER · a copy of your farm · changes here don't touch your real farm":"🧪 TEST SERVER · changes here don't touch your real farm";tb.style.cssText="position:fixed;left:50%;top:0;transform:translateX(-50%);z-index:9999;background:#7a3fc0;color:#fff;font:900 11px/1.2 sans-serif;padding:3px 10px;border-radius:0 0 10px 10px;pointer-events:none;letter-spacing:.3px";document.addEventListener("DOMContentLoaded",()=>document.body.appendChild(tb));if(document.body)document.body.appendChild(tb)}let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 /* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
 (function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
@@ -3233,10 +3233,11 @@ const BUILDS=[
   {id:"kamalig",n:"Big Barn",cost:2500,wood:20,lv:4,r:2.3,inc:15,d:"Red barn with two doors and a hayloft."},
   {id:"kiskisan",n:"Windmill",cost:2000,wood:15,lv:5,r:1.4,inc:12,d:"Mill whose blades turn in the wind."},
   {id:"bato",n:"Stone House",cost:3500,wood:25,lv:6,r:2.1,inc:22,d:"Stone and wood house with capiz windows and a balcony."},
-  {id:"ostrich",n:"Ostrich Ranch",cost:18000,wood:40,lv:7,r:3.9,inc:75,d:"Sandy ranch with 3 ostriches that run around, a nest of giant eggs, an acacia tree and a feeding trough."},
-  {id:"unggoy",n:"Monkey Jungle",cost:22000,wood:50,lv:8,r:3.9,inc:90,d:"Jungle trees with a rope bridge and a tire swing. 4 monkeys hop around, and one climbs up and down a tree. Bananas included!"},
-  {id:"elepante",n:"Elephant Habitat",cost:30000,wood:60,lv:8,r:4.9,inc:120,d:"Savanna yard with a mother elephant and her baby that walk, swing their trunks and flap their ears, a waterhole, acacia trees and rocks."},
-  {id:"jirafa",n:"Giraffe Habitat",cost:35000,wood:70,lv:9,r:4.9,inc:140,d:"Tall acacia trees with 2 giraffes (mother and young) that walk and sway their long necks, plus a high feeding platform."},
+  {id:"apartment",n:"Apartment Building",cost:45000,wood:90,lv:9,r:4.6,inc:0,apt:true,d:"Apartment block for NPC renters. Tenants move in over time and each pays 12 coins of rent every minute. Upgrade it for more floors and units (8 → 14 → 20)."},
+  {id:"ostrich",wild:true,n:"Ostrich Ranch",cost:18000,wood:40,lv:7,r:3.9,inc:75,d:"Sandy ranch with 3 ostriches that run around, a nest of giant eggs, an acacia tree and a feeding trough."},
+  {id:"unggoy",wild:true,n:"Monkey Jungle",cost:22000,wood:50,lv:8,r:3.9,inc:90,d:"Jungle trees with a rope bridge and a tire swing. 4 monkeys hop around, and one climbs up and down a tree. Bananas included!"},
+  {id:"elepante",wild:true,n:"Elephant Habitat",cost:30000,wood:60,lv:8,r:4.9,inc:120,d:"Savanna yard with a mother elephant and her baby that walk, swing their trunks and flap their ears, a waterhole, acacia trees and rocks."},
+  {id:"jirafa",wild:true,n:"Giraffe Habitat",cost:35000,wood:70,lv:9,r:4.9,inc:140,d:"Tall acacia trees with 2 giraffes (mother and young) that walk and sway their long necks, plus a high feeding platform."},
   {id:"mansyon",n:"Mansion",cost:9000,wood:40,lv:7,r:4.2,inc:45,d:"Grand two-storey white mansion with columns, a balcony, a fountain, lamps and a garden."},
   {id:"villa",n:"Grand Villa",cost:18000,wood:60,lv:9,r:5,inc:80,d:"Spanish villa with a red tile roof, arches, two wings, a swimming pool and palm trees."},
   {id:"moderno",n:"Modern Mansion",cost:25000,wood:80,lv:10,r:5,inc:110,d:"Two-storey glass and wood mansion with a roof deck, a garage and an infinity pool."},
@@ -3263,13 +3264,13 @@ function mPalm(b,x,z){for(let k=0;k<5;k++)b.add("cyl",0x9a6a3a,x+k*.05,.3+k*.55,
 function mHedge(b,x,z0,z1){for(let z=z0;z<=z1+.01;z+=.6)if(Math.abs(z)>.9)b.add("sph",0x3f9a2c,x,.32,z,.36,.34,.36)}
 /* -- wild animals: elephant, giraffe, ostrich and monkey models for the habitats -- */
 function wildLeg(g,x,y,z,r,len,col,foot){const p=new THREE.Group();p.position.set(x,y,z);g.add(p);const b=new Builder();b.add("cyl",col,0,-len/2,0,r,len,r);if(foot)b.add("cyl",foot,0,-len+.04,0,r*1.15,.08,r*1.15);p.add(b.mesh(true,false,true));return p}
-function makeWild(kind,s){const g=new THREE.Group(),b=new Builder(),U={legs:[],kind};
+function makeWild(kind,s,sx){const F=sx==="f";const g=new THREE.Group(),b=new Builder(),U={legs:[],kind};
   if(kind==="elephant"){const C=0x6a6f78,D=0x555a62;b.add("sph",C,0,1.55,0,1.15,.85,.78);b.add("sph",C,1.05,1.85,0,.58,.55,.52);b.add("sph",D,-1.05,1.6,0,.25,.3,.3);
-    [1,-1].forEach(sd=>{b.add("box",D,.82,1.85,sd*.55,.12,.85,.6,sd*.15,0,0);b.add("box",0xd9a0a0,.86,1.85,sd*.52,.04,.6,.42,sd*.15,0,0);b.add("cone",0xf4efe2,1.45,1.35,sd*.22,.07,.55,.07,0,0,-2.0);b.add("sph",0x111111,1.42,2.0,sd*.3,.06,.06,.06)});
+    [1,-1].forEach(sd=>{b.add("box",D,.82,1.85,sd*.55,.12,.85,.6,sd*.15,0,0);b.add("box",0xd9a0a0,.86,1.85,sd*.52,.04,.6,.42,sd*.15,0,0);if(!F)b.add("cone",0xf4efe2,1.45,1.35,sd*.22,.09,.75,.09,0,0,-2.0);b.add("sph",0x111111,1.42,2.0,sd*.3,.06,.06,.06)});
     g.add(b.mesh(true,false,true));const tr=new THREE.Group();tr.position.set(1.55,1.7,0);g.add(tr);const tb=new Builder();for(let k=0;k<5;k++)tb.add("cyl",C,.08+k*.04,-.18-k*.22,0,.17-k*.022,.26,.17-k*.022,0,0,.15+k*.06);tr.add(tb.mesh(true,false,true));U.trunk=tr;
     const tl=new THREE.Group();tl.position.set(-1.15,1.7,0);g.add(tl);const tb2=new Builder();tb2.add("cyl",D,-.08,-.3,0,.04,.6,.04,0,0,-.25);tb2.add("sph",0x333333,-.16,-.62,0,.07,.1,.07);tl.add(tb2.mesh(true,false,false));U.tail=tl;
     [[.55,.42],[.55,-.42],[-.55,.42],[-.55,-.42]].forEach(([x,z])=>U.legs.push(wildLeg(g,x,1.1,z,.24,1.1,C,0xd8d2c4)));U.sp=.55;U.gait=4.2;U.sw=.35}
-  else if(kind==="giraffe"){const C=0xe8b84a,P=0x9a5a22;b.add("box",C,0,2.05,0,1.15,.62,.55);b.add("sph",C,.5,2.1,0,.32,.34,.3);b.add("sph",C,-.5,2.05,0,.3,.32,.29);
+  else if(kind==="giraffe"){const C=F?0xf0c868:0xe0a838,P=F?0xb87a3a:0x6a3410;b.add("box",C,0,2.05,0,1.15,.62,.55);b.add("sph",C,.5,2.1,0,.32,.34,.3);b.add("sph",C,-.5,2.05,0,.3,.32,.29);
     [[-.2,2.25,.28],[.25,2.0,.28],[-.35,1.9,-.28],[.1,2.25,-.28],[.35,2.3,.1],[-.1,2.37,-.05],[0,1.8,.28],[.4,1.9,-.28]].forEach(([x,y,z])=>b.add("box",P,x,y,z,.22,.18,.02));
     g.add(b.mesh(true,false,true));const nk=new THREE.Group();nk.position.set(.55,2.25,0);g.add(nk);const nb=new Builder();nb.add("cyl",C,.3,.85,0,.13,1.8,.13,0,0,-.32);
     for(let k=0;k<5;k++)nb.add("box",P,.12+k*.12,.35+k*.33,.12,.12,.12,.02,0,0,-.32);for(let k=0;k<6;k++)nb.add("box",P,.0+k*.1,.3+k*.28,0,.05,.18,.05);
@@ -3277,15 +3278,17 @@ function makeWild(kind,s){const g=new THREE.Group(),b=new Builder(),U={legs:[],k
     [1,-1].forEach(sd=>{nb.add("cyl",P,.52,2.0,sd*.07,.025,.2,.025);nb.add("sph",0x5a3412,.52,2.11,sd*.07,.045,.045,.045);nb.add("box",C,.45,1.9,sd*.16,.05,.06,.16)});
     nk.add(nb.mesh(true,false,true));U.neck=nk;const tl=new THREE.Group();tl.position.set(-.6,2.2,0);g.add(tl);const tb=new Builder();tb.add("cyl",C,-.03,-.35,0,.025,.7,.025,0,0,-.1);tb.add("sph",0x333333,-.07,-.72,0,.05,.1,.05);tl.add(tb.mesh(true,false,false));U.tail=tl;
     [[.45,.18],[.45,-.18],[-.45,.18],[-.45,-.18]].forEach(([x,z])=>U.legs.push(wildLeg(g,x,1.8,z,.075,1.8,C,0x3a2a1a)));U.sp=.8;U.gait=3.6;U.sw=.4}
-  else if(kind==="ostrich"){b.add("sph",0x1f1f22,0,1.12,0,.52,.4,.36);b.add("sph",0xf4f0e6,-.45,1.25,0,.26,.24,.3);[1,-1].forEach(sd=>b.add("sph",0xf4f0e6,-.05,1.1,sd*.33,.32,.16,.06));
+  else if(kind==="ostrich"){b.add("sph",F?0x8a7a66:0x1f1f22,0,1.12,0,.52,.4,.36);b.add("sph",0xf4f0e6,-.45,1.25,0,.26,.24,.3);[1,-1].forEach(sd=>b.add("sph",0xf4f0e6,-.05,1.1,sd*.33,.32,.16,.06));
     b.add("cyl",0xe8b8a0,.38,1.62,0,.05,.85,.05,0,0,-.25);b.add("sph",0xe8b8a0,.5,2.07,0,.11,.1,.09);b.add("cone",0xe89a3a,.66,2.05,0,.04,.16,.035,0,0,-Math.PI/2);b.add("sph",0x111111,.55,2.1,.07,.025,.025,.025);b.add("sph",0x111111,.55,2.1,-.07,.025,.025,.025);
     g.add(b.mesh(true,false,true));[[.05,.12],[.05,-.12]].forEach(([x,z])=>U.legs.push(wildLeg(g,x,.95,z,.05,.95,0xe8b8a0,0xc89070)));U.sp=1.6;U.gait=9;U.sw=.7}
-  else if(kind==="monkey"){const C=0x7a4a2a,F=0xe0b088;b.add("sph",C,0,.5,0,.22,.28,.2);b.add("sph",F,.08,.48,0,.12,.18,.14);b.add("sph",C,.05,.86,0,.17,.16,.16);b.add("sph",F,.16,.84,0,.09,.09,.12);
-    [1,-1].forEach(sd=>{b.add("sph",F,.02,.88,sd*.17,.06,.07,.03);b.add("sph",0x111111,.18,.9,sd*.05,.022,.022,.022)});g.add(b.mesh(true,false,true));
+  else if(kind==="monkey"){const C=0x7a4a2a,FC=0xe0b088;if(F){b.add("sph",0xff6aa8,.02,1.02,.08,.07,.05,.06);b.add("sph",0xff6aa8,.02,1.02,-.08,.07,.05,.06)}b.add("sph",C,0,.5,0,.22,.28,.2);b.add("sph",FC,.08,.48,0,.12,.18,.14);b.add("sph",C,.05,.86,0,.17,.16,.16);b.add("sph",FC,.16,.84,0,.09,.09,.12);
+    [1,-1].forEach(sd=>{b.add("sph",FC,.02,.88,sd*.17,.06,.07,.03);b.add("sph",0x111111,.18,.9,sd*.05,.022,.022,.022)});g.add(b.mesh(true,false,true));
     const tl=new THREE.Group();tl.position.set(-.18,.4,0);g.add(tl);const tb=new Builder();for(let k=0;k<5;k++)tb.add("cyl",C,-.08-k*.07,.0+k*.09+Math.sin(k)*.04,0,.03,.14,.03,0,0,.8-k*.3);tl.add(tb.mesh(true,false,false));U.tail=tl;
-    [[0,.6,.2],[0,.6,-.2]].forEach(([x,y,z])=>{const a=wildLeg(g,x,y,z,.045,.32,C,F);U.legs.push(a)});[[.02,.3,.1],[.02,.3,-.1]].forEach(([x,y,z])=>U.legs.push(wildLeg(g,x,y,z,.055,.3,C,F)));U.sp=.9;U.gait=12;U.sw=.6;U.hop=true}
+    [[0,.6,.2],[0,.6,-.2]].forEach(([x,y,z])=>{const a=wildLeg(g,x,y,z,.045,.32,C,FC);U.legs.push(a)});[[.02,.3,.1],[.02,.3,-.1]].forEach(([x,y,z])=>U.legs.push(wildLeg(g,x,y,z,.055,.3,C,FC)));U.sp=.9;U.gait=12;U.sw=.6;U.hop=true}
   g.scale.setScalar(s||1);g.userData.wild=U;return g}
-function makeBuild(id){if(String(id).startsWith("sap_")){const o=makeTreeG(0,0,null,7);o.g.remove(o.hit);o.g.scale.setScalar(.45);const w=new THREE.Group();w.add(o.g);return w}
+const WILD_GROW=20*60000,WILD_BREED=10*60000,WBASE={elepante:2,jirafa:2,ostrich:3,unggoy:4};
+const wildPop=(o,id)=>o&&o.pop?o.pop:WBASE[id]||2,wildCap=(o,id)=>(WBASE[id]||2)+2*((o&&o.lv)||1),aptUnits=o=>8+6*(((o&&o.lv)||1)-1),bsc=o=>{const d=o&&BUILDS.find(q=>q.id===o.id);return d&&d.wild?1+.3*((o.lv||1)-1):1};
+let BO=null;function makeBuild(id,o){BO=o||null;if(String(id).startsWith("sap_")){const o=makeTreeG(0,0,null,7);o.g.remove(o.hit);o.g.scale.setScalar(.45);const w=new THREE.Group();w.add(o.g);return w}
   const g=new THREE.Group(),b=new Builder(),sn=new Builder(),gw=new Builder();
   if(id==="kubo"){[[-.85,-.85],[.85,-.85],[-.85,.85],[.85,.85]].forEach(([x,z])=>b.add("cyl",0xa8884a,x,.35,z,.08,.7,.08));
     b.add("box",0x9a7a44,0,.72,0,2,.1,2);b.add("box",0xd9b878,0,1.3,0,1.8,1.1,1.8);
@@ -3430,7 +3433,19 @@ function makeBuild(id){if(String(id).startsWith("sap_")){const o=makeTreeG(0,0,n
     [[W/2+7.6,-3.5],[W/2+7.6,3.5],[-W/2-1.2,-3.4],[-W/2-1.2,3.4]].forEach(([x,z])=>mPalm(b,x,z));
     b.add("cyl",0xe8ecef,W/2+6.4,.35,1.4,.55,.7,.55);b.add("cyl",0x30363e,W/2+6.4,.72,1.4,.6,.06,.6);
     [-2.6,2.6].forEach(z=>mLamp(b,W/2+1.4,z))}
-  else if(id==="elepante"||id==="jirafa"||id==="ostrich"||id==="unggoy"){const R={elepante:4.8,jirafa:4.8,ostrich:3.8,unggoy:3.8}[id],SA=id==="unggoy"?0x5aa83a:0xd8c08a;
+  else if(id==="apartment"){const LV=(BO&&BO.lv)||1,NF=4+2*(LV-1),W=6.4,D=5,FH=1.15,C=[0xf2e2c4,0xd8e8f2,0xf2d4d4][LV-1],TR=0xffffff;
+    b.add("box",0xd8d2c6,0,.12,0,W+1.4,.24,D+1.4);b.add("box",0x3a5a7a,0,.85,0,W,1.3,D);gw.add("box",0xfff1cf,W/2+.02,.85,0,.03,1,D-1);b.add("box",0x2b1d12,W/2+.03,.75,0,.04,1.1,1.1);
+    b.add("box",0xe8ecef,W/2+.8,1.55,0,1.6,.12,2.2);[-1,1].forEach(sd=>b.add("cyl",0xcfd3d6,W/2+1.5,.8,sd*.95,.05,1.5,.05));
+    for(let f=0;f<NF;f++){const y=1.5+f*FH+FH/2;b.add("box",C,0,y,0,W,FH,D);b.add("box",TR,0,y+FH/2,0,W+.08,.06,D+.08);
+      for(let k=0;k<4;k++){const z=-D/2+.7+k*(D-1.4)/3,lit=(f*5+k*3+LV)%4!==0;(lit?gw:b).add("box",lit?0xffe6b0:0x3a5a7a,W/2+.02,y,z,.03,FH*.55,.6);b.add("box",0xffffff,W/2+.25,y-FH*.32,z,.5,.05,.85);for(let q=0;q<3;q++)b.add("box",0x5a6470,W/2+.48,y-FH*.18,z-.35+q*.35,.03,.28,.03)}
+      for(let k=0;k<5;k++){const x=-W/2+.7+k*(W-1.4)/4;[-1,1].forEach(sd=>{const lit=(f+k+(sd>0?1:0))%3!==0;(lit?gw:b).add("box",lit?0xffe6b0:0x3a5a7a,x,y,sd*(D/2+.02),.55,FH*.55,.03)})}}
+    const top=1.5+NF*FH;b.add("box",0x9aa0a6,0,top+.1,0,W+.2,.2,D+.2);b.add("box",0x5a6470,-1.6,top+.6,-1,1.2,.8,1.2);b.add("cyl",0x8ab8d8,1.4,top+.8,1,.5,1.2,.5);sn.add("box",0xffffff,0,top+.22,0,W,.04,D);
+    b.add("box",0x4a5058,W/2+3,.03,0,3.4,.05,D+2);for(let k=0;k<4;k++)b.add("box",0xffffff,W/2+3,.06,-D/2+k*1.6,3,.01,.06);mLamp(b,W/2+1.4,-2.4);mLamp(b,W/2+1.4,2.4);
+    const ten=(BO&&BO.ten)||0,units=8+6*(LV-1);if(ten<units){b.add("cyl",0x5a3a22,W/2+2,.6,-D/2-.4,.05,1.2,.05);b.add("box",0xd23a2a,W/2+2,1.25,-D/2-.4,.06,.5,1.1)}
+    {const c=document.createElement("canvas");c.width=256;c.height=64;const x=c.getContext("2d");x.fillStyle="#1f3a6a";x.fillRect(0,0,256,64);x.fillStyle="#fff";x.font="900 30px Arial";x.textAlign="center";x.textBaseline="middle";x.fillText("🏢 "+ten+"/"+units+" RENTED",128,34,240);
+      const sg=new THREE.Mesh(new THREE.PlaneGeometry(2.6,.65),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(c),toneMapped:false}));sg.position.set(W/2+.04,1.75,0);sg.rotation.y=Math.PI/2;g.add(sg);
+      if(ten<units){const c2=document.createElement("canvas");c2.width=128;c2.height=64;const y2=c2.getContext("2d");y2.fillStyle="#d23a2a";y2.fillRect(0,0,128,64);y2.fillStyle="#fff";y2.font="900 26px Arial";y2.textAlign="center";y2.textBaseline="middle";y2.fillText("FOR RENT",64,34,120);const fr=new THREE.Mesh(new THREE.PlaneGeometry(1.1,.5),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(c2),toneMapped:false}));fr.position.set(W/2+2.04,1.25,-D/2-.4);fr.rotation.y=Math.PI/2;g.add(fr)}}}
+  else if(id==="elepante"||id==="jirafa"||id==="ostrich"||id==="unggoy"){const R={elepante:4.8,jirafa:4.8,ostrich:3.8,unggoy:3.8}[id]*(1+.3*(((BO&&BO.lv)||1)-1)),SA=id==="unggoy"?0x5aa83a:0xd8c08a;
     b.add("cyl",SA,0,.03,0,R,.05,R);for(let k=0;k<14;k++){const a=k/14*Math.PI*2;b.add("sph",id==="unggoy"?0x4f9e31:0xc9ae72,Math.cos(a)*R*.7+Math.sin(k*3)*.4,.04,Math.sin(a)*R*.7,.7,.04,.5)}
     const N=Math.round(R*6);for(let k=0;k<N;k++){const a=k/N*Math.PI*2,x=Math.cos(a)*(R+.15),z=Math.sin(a)*(R+.15);if(Math.abs(Math.atan2(z,x))<.18)continue;b.add("cyl",0x8a5a2a,x,.45,z,.06,.9,.06);const a2=(k+1)/N*Math.PI*2;if(Math.abs(Math.atan2(Math.sin(a2),Math.cos(a2)))<.18)continue;b.seg(0x9a6a3a,x,.7,z,Math.cos(a2)*(R+.15),.7,Math.sin(a2)*(R+.15),.035);b.seg(0x9a6a3a,x,.35,z,Math.cos(a2)*(R+.15),.35,Math.sin(a2)*(R+.15),.035)}
     [-1,1].forEach(sd=>{b.add("cyl",0x6b4422,R+.15,1.1,sd*.85,.1,2.2,.1)});b.add("box",0x6b4422,R+.15,2.2,0,.16,.16,1.9);b.add("box",0xf2e2b8,R+.24,1.9,0,.04,.4,1.5);
@@ -3492,8 +3507,9 @@ function addBuildAnim(g,id){const A=[];const flag=(x,y,z,h,c)=>{const p=new THRE
   else if(id==="moderno"){flag(-3.7,3.43,-2.0,1.3,c);shim(3.1+2.6,.32,0,2.7,4.2)}
   else if(id==="palasyo"){[-1,1].forEach(sd=>flag(3.1,6.9,sd*3.1,1.1,c));flag(0,6.6,0,1.2,0xd23a2a);jet(3.5+4.4,1.75,0,1.3)}
   else if(id==="zen"){const kg=new THREE.Group();kg.position.set(3.5+3.4,.1,-1.9);g.add(kg);[[0xf26a1a,1.1,0],[0xffffff,.8,2.1],[0xf2b632,1.3,4.2],[0xd23a2a,.6,1]].forEach(([c,r,a])=>{const f=new THREE.Mesh(BA.puff,new THREE.MeshLambertMaterial({color:c}));f.scale.set(.9,.4,.45);f.position.set(Math.cos(a)*r,0,Math.sin(a)*r*.62);f.rotation.y=-a;kg.add(f)});A.push({k:"spin",o:kg,sp:.5});smoke(-1.5,4.5,.8);flag(3.5+6.7,2.5,1.2,.8,c)}
-  else if(id==="elepante"||id==="jirafa"||id==="ostrich"||id==="unggoy"){const L={elepante:[["elephant",1],["elephant",.55]],jirafa:[["giraffe",1],["giraffe",.7]],ostrich:[["ostrich",1],["ostrich",.9],["ostrich",.75]],unggoy:[["monkey",1.4],["monkey",1.2],["monkey",1.3],["monkey",1]]}[id],R={elepante:4.8,jirafa:4.8,ostrich:3.8,unggoy:3.8}[id]-1.2;
-    L.forEach(([k,s],i)=>{const m=makeWild(k,s),a=i/L.length*Math.PI*2;m.position.set(Math.cos(a)*R*.5,0,Math.sin(a)*R*.5);m.rotation.y=Math.random()*6;g.add(m);A.push({k:"wild",o:m,U:m.userData.wild,R,tx:0,tz:0,pause:Math.random()*3,ph:Math.random()*6,climb:k==="monkey"&&i===0?{x:-1.6,z:-1.4}:null,cy:0})});flag(R+1.35,2.3,.85,.8,c)}
+  else if(id==="elepante"||id==="jirafa"||id==="ostrich"||id==="unggoy"){const K={elepante:"elephant",jirafa:"giraffe",ostrich:"ostrich",unggoy:"monkey"}[id],AS={elephant:1,giraffe:1,ostrich:1,monkey:1.35}[K],pop=wildPop(BO,id),bt=(BO&&BO.bt)||[],L=[];for(let i=0;i<pop;i++){const bi=i-2,baby=bi>=0&&bt[bi]&&Date.now()-bt[bi]<WILD_GROW;L.push([K,AS*(baby?.55:1),i%2?"f":"m"])}
+    const R={elepante:4.8,jirafa:4.8,ostrich:3.8,unggoy:3.8}[id]*(1+.3*(((BO&&BO.lv)||1)-1))-1.2;
+    L.forEach(([k,s,sx],i)=>{const m=makeWild(k,s,sx),a=i/L.length*Math.PI*2;m.position.set(Math.cos(a)*R*.5,0,Math.sin(a)*R*.5);m.rotation.y=Math.random()*6;g.add(m);A.push({k:"wild",o:m,U:m.userData.wild,R,tx:0,tz:0,pause:Math.random()*3,ph:Math.random()*6,climb:k==="monkey"&&i===0?{x:-1.6,z:-1.4}:null,cy:0})});flag(R+1.35,2.3,.85,.8,c)}
   else if(id==="tore"){const bm=new THREE.MeshBasicMaterial({color:0xff3030,toneMapped:false}),bl=new THREE.Mesh(new THREE.SphereGeometry(.12,8,6),bm);bl.position.set(0,1.5+12*.9+5.25,0);g.add(bl);A.push({k:"blink",m:bm});}
   else if(id==="hotel"){[-1,1].forEach(sd=>flag(4+2.6,2.28,sd*1.4,1,sd>0?c:0xe6b84a));flag(0,7.4+4.8,0,1,c);shim(-2.2,7.4+.7,-1.8,2.6,2);jet(4+5.6,1.9,0,1.4)}
   else if(id==="kastilyo"){[[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([sx,sz])=>flag(sx*3.25,7.1,sz*2.65,1,sx>0?c:0x2f4f8a));flag(-.7,9.9,0,1.3,0xe6b84a);jet(3.8+4.2,1.3,-1.9,.8);jet(3.8+4.2,1.3,1.9,.8)}
@@ -3502,6 +3518,7 @@ function addBuildAnim(g,id){const A=[];const flag=(x,y,z,h,c)=>{const p=new THRE
     const hol=new THREE.Group();hol.position.set(3.7+6.4,1.7,1.4);g.add(hol);const hm=new THREE.MeshBasicMaterial({color:0x6ae8ff,transparent:true,opacity:.7,depthWrite:false,toneMapped:false});const c1=new THREE.Mesh(new THREE.OctahedronGeometry(.45,0),hm);hol.add(c1);const ring=new THREE.Mesh(new THREE.TorusGeometry(.65,.03,6,24),hm);ring.rotation.x=Math.PI/2;hol.add(ring);A.push({k:"spin",o:hol,sp:1.4,bob:.15,y:1.7});A.push({k:"led",m:hm,ph:.5,s:.85});
     const lm=new THREE.MeshBasicMaterial({color:0xff4fd8,vertexColors:true,toneMapped:false}),lb=new Builder();lb.add("box",0xffffff,0,2.2,3.21,7.8,.05,.03);lb.add("box",0xffffff,0,2.2,-3.21,7.8,.05,.03);lb.add("box",0xffffff,3.91,2.2,0,.03,.05,6.4);lb.add("box",0xffffff,1.3,3.8,-.4+2.42,6.6,.05,.03);lb.add("box",0xffffff,4.22,3.8,-.4,.03,.05,4.8);lb.add("box",0xffffff,-.9,5.0,2.01,3.6,.05,.03);lb.add("box",0xffffff,3.7+2.8,.51,-1.5+1.71,3.2,.04,.03);
     const lmm=new THREE.Mesh(lb.geo(),lm);g.add(lmm);A.push({k:"led",m:lm,ph:0,s:1});flag(-2.3,4.98,-.9,1.2,c)}
+  if(id==="apartment"){const n=Math.min(3,1+Math.floor(((BO&&BO.ten)||0)/4));for(let i=0;i<n;i++){const f=makeFarmer({shirt:[0xd9568a,0x2f7fb8,0xf2b632][i],pants:[0x2b2b3a,0x3b5f9a,0xf2f2ee][i],skin:[0xe0a878,0xc68a5a,0x8a5a3a][i],hat:[0xffffff,0x2b2b3a,0xe8c66a][i]});f.g.scale.setScalar(.9);g.add(f.g);A.push({k:"npc",f,cx:5.4,cz:0,rx:1.6,rz:2.6,a:i/n*Math.PI*2,sp:(i%2?-1:1)*.25,pause:0})}}
   const MD=MANS_MD[id];
   if(MD){const L=MD.x1+1.2,X0=-MD.W/2,db=new Builder();db.add("box",0x4a5058,(L+X0)/2,.03,MD.zc,L-X0,.04,1.7);for(let x=X0+.6;x<L;x+=1.2)db.add("box",0xf5c732,x,.055,MD.zc,.5,.01,.08);
       db.add("box",0xd8d2c6,(L-MD.W/2)/2+MD.W/4-.5,.04,MD.zc+.92,L+MD.W/2,.06,.14);db.add("box",0xd8d2c6,(L-MD.W/2)/2+MD.W/4-.5,.04,MD.zc-.92,L+MD.W/2,.06,.14);
@@ -3546,7 +3563,7 @@ function buildMansionRoads(){while(ROADG.children.length)ROADG.remove(ROADG.chil
   const G=BUILDG.children.filter(g=>g.userData.drive);if(!G.length&&!ONEISLE)return;
   // grid of 1x1 cells over the farm; cars avoid pens, fields, land, houses, water, trees and the barn
   const X0=-72,Z0=-24,NX=90,NZ=96,N=NX*NZ,cost=new Float32Array(N),goal=new Uint8Array(N),FR=new Uint8Array(N),ci=(x,z)=>(z-Z0)*NX+(x-X0);
-  const L=layout(),blds=(S.builds||[]).map(o=>{const d=BUILDS.find(q=>q.id===o.id);return[o.x,o.z,(d?d.r:1.5)*.8+.9]});
+  const L=layout(),blds=(S.builds||[]).map(o=>{const d=BUILDS.find(q=>q.id===o.id);return[o.x,o.z,(d?d.r:1.5)*bsc(o)*.8+.9]});
   for(let iz=0;iz<NZ;iz++)for(let ix=0;ix<NX;ix++){const x=X0+ix+.5,z=Z0+iz+.5,k=iz*NX+ix;let c=1;
     if(z>-9.4&&z<-6.6&&x<-4){goal[k]=1;if(ONEISLE)FR[k]=1}
     if(inAnyPen(x,z,1.6))c=-1;
@@ -3580,7 +3597,14 @@ function buildMansionRoads(){while(ROADG.children.length)ROADG.remove(ROADG.chil
   // ring road around the whole farm so cars can drive all the way round
   if(ONEISLE){const C=[[-66,-8],[-66,69],[13.5,69],[13.5,-3],[-2,-8]].map(([x,z])=>free(x,z)).filter(k=>k>=0);let loop=[];
     for(let i=0;i<C.length;i++){const a=C[i],b2=C[(i+1)%C.length];const P=route(a,k=>k===b2);if(!P){loop=null;break}if(loop.length)P.shift();loop=loop.concat(P)}
-    if(loop&&loop.length>20){loop.forEach(k=>{goal[k]=1;cost[k]=.2});drawRun(loop.concat([loop[0]]));TRAFFIC.loop=loop.map(pt);any=true}else TRAFFIC.loop=null}
+    if(loop&&loop.length>20){loop.forEach(k=>{goal[k]=1;cost[k]=.2});drawRun(loop.concat([loop[0]]));TRAFFIC.loop=loop.map(pt);any=true;
+      // seaside wall right next to the east side of the ring road (on the water side, so it never blocks a road)
+      {const E={};loop.forEach(k=>{const [x,z]=pt(k);if(x>4&&z>-3)E[z]=Math.max(E[z]==null?-1e9:E[z],x)});const sw=new Builder();
+        Object.keys(E).map(Number).sort((a,b)=>a-b).forEach(z=>{const x=E[z];if(farmH(x+2.2,z)>-.02&&x<15)return;if(z>-.5&&z<4)return;const WX=x+1.55;
+          sw.add("box",0xbab2a2,WX,-.7,z,.8,2.2,1.02);sw.add("box",0xe2dccc,WX,.42,z,1,.14,1.02);sw.add("box",0x9a9286,WX+.42,-.4,z,.04,1.6,.06);sw.add("sph",0x8a8378,WX+1.1+Math.sin(z*1.7)*.3,-.55,z,.6,.4,.5);
+          if(Math.round(z)%2===0)sw.add("cyl",0x5a6470,WX-.2,.85,z,.04,.8,.04);sw.add("box",0x5a6470,WX-.2,1.25,z,.06,.06,1.02);sw.add("box",0x5a6470,WX-.2,.95,z,.04,.04,1.02);
+          if(Math.round(z)%12===0){sw.add("cyl",0x2b3640,WX-.1,1.35,z,.06,2.7,.06);sw.add("box",0x2b3640,WX-.35,2.7,z,.5,.06,.08);sw.add("box",0xfff2b0,WX-.55,2.62,z,.2,.12,.2)}});
+        if(sw.p.length)ROADG.add(sw.mesh(true,true,false))}}else TRAFFIC.loop=null}
   // closest houses connect first; later ones join the nearest road already built, so the roads form one tidy network
   const ends=G.map(g=>{g.updateMatrixWorld(true);const d=g.userData.drive,w=new THREE.Vector3(d[0],0,d[1]);g.localToWorld(w);return{g,w}}).sort((a,b)=>Math.abs(a.w.z+8)+Math.abs(a.w.x+4)*.3-(Math.abs(b.w.z+8)+Math.abs(b.w.x+4)*.3));
   ends.forEach(({g,w})=>{v.copy(w);const sx=Math.floor(v.x),sz=Math.floor(v.z);if(sx<X0||sx>=X0+NX||sz<Z0||sz>=Z0+NZ)return;
@@ -3604,10 +3628,10 @@ function stepTraffic(dt,t){const T=TRAFFIC;if(!T.cars.length||!T.len)return;dt=M
     c.v+=(want-c.v)*Math.min(1,dt*(want<c.v?6:1.5));c.u=(c.u+c.v*dt)%T.len;const [x,z,dx,dz]=trafficAt(c.u);c.g.position.set(x-dz*.45,0,z+dx*.45);c.g.rotation.y=Math.atan2(-dz,dx);
     if(c.g.userData.wheels)c.g.userData.wheels.forEach(w=>w.rotation.y+=c.v*dt*5)});
   if(T.jam&&T.jam.lab){const p=T.jam.car.g.position;T.jam.lab.position.set(p.x,2.4,p.z)}}
-function renderBuilds(){fixSaleSoon();while(BUILDG.children.length)BUILDG.remove(BUILDG.children[0]);(S.builds||[]).forEach((o,i)=>{const g=makeBuild(o.id);g.position.set(o.x,0,o.z);g.rotation.y=o.r||0;
+function renderBuilds(){fixSaleSoon();while(BUILDG.children.length)BUILDG.remove(BUILDG.children[0]);(S.builds||[]).forEach((o,i)=>{const g=makeBuild(o.id,o);g.position.set(o.x,0,o.z);g.rotation.y=o.r||0;
   const d=BUILDS.find(q=>q.id===o.id),r=d?d.r:1;const hb=new THREE.Mesh(new THREE.BoxGeometry(r*1.5,2.6,r*1.5),new THREE.MeshBasicMaterial({visible:false}));hb.position.y=1.3;hb.userData.build=i;g.add(hb);g.userData.hit=hb;BUILDG.add(g)});buildMansionRoads()}
 let EDIT=-1;
-function editBuild(i){const o=(S.builds||[])[i];if(!o)return;const d=BUILDS.find(q=>q.id===o.id);EDIT=i;$("editTxt").textContent=(d?d.n:"Item")+" · rotate, move or sell it"+(sellPriceB(o)?" (+"+sellPriceB(o).toLocaleString()+")":"");$("editBar").hidden=false;
+function editBuild(i){const o=(S.builds||[])[i];if(!o)return;const d=BUILDS.find(q=>q.id===o.id);EDIT=i;$("editTxt").textContent=(d?d.n:"Item")+" · rotate, move or sell it"+(sellPriceB(o)?" (+"+sellPriceB(o).toLocaleString()+")":"");$("editBar").hidden=false;try{bldInfo(i)}catch(e){}
   const g=BUILDG.children[i];if(g)burst(o.x,.4,o.z,0xffd84a,10,.3)}
 function endEdit(){EDIT=-1;$("editBar").hidden=true}
 function rotEdit(){const o=(S.builds||[])[EDIT];if(!o)return endEdit();o.r=((o.r||0)+Math.PI/4)%(Math.PI*2);const g=BUILDG.children[EDIT];if(g)g.rotation.y=o.r;buildMansionRoads();save()};
@@ -3618,6 +3642,14 @@ function sellEdit(){const i=EDIT,o=(S.builds||[])[i];if(!o)return endEdit();cons
   b.dataset.sure="";b.textContent="💰 Sell";endEdit();S.builds.splice(i,1);S.coins+=v;burst(o.x,.8,o.z,0xffd84a,24,.6);renderBuilds();try{landDeco()}catch(e){}after();shopUI(true);
   toast((v?"Sold the "+(d?d.n:"building")+" · +"+v.toLocaleString()+" coins":"Removed the "+(d?d.n:"item")+"."),3000)}
 $("editSell").onclick=sellEdit;
+const upCost=(d,lv)=>Math.round(d.cost*(d.apt?.7:.8)*lv/100)*100;
+function bldInfo(i){const o=(S.builds||[])[i],d=o&&BUILDS.find(q=>q.id===o.id),u=$("editUp");if(!d||!(d.wild||d.apt)){u.hidden=true;return}const lv=o.lv||1;
+  let info=" · Lv "+lv+"/3";if(d.wild){const pop=wildPop(o,o.id),bt=o.bt||[],bab=bt.filter(t=>Date.now()-t<WILD_GROW).length;info+=" · ♂ "+Math.ceil(pop/2)+" ♀ "+Math.floor(pop/2)+(bab?" · 🍼 "+bab+" baby":"")+" · room for "+wildCap(o,o.id)}
+  else info+=" · 🧳 "+(o.ten||0)+"/"+aptUnits(o)+" rented · +"+((o.ten||0)*12)+"/min";
+  $("editTxt").textContent=d.n+info;u.hidden=lv>=3||!!VISIT;u.textContent="⬆ Upgrade · "+upCost(d,lv).toLocaleString()}
+$("editUp").onclick=()=>{const i=EDIT,o=(S.builds||[])[i];if(!o)return;const d=BUILDS.find(q=>q.id===o.id),lv=o.lv||1;if(!d||lv>=3)return;const c=upCost(d,lv);if(S.coins<c)return toast("You need "+c.toLocaleString()+" coins to upgrade.",2400);
+  if(d.wild){const keep=S.builds.splice(i,1)[0];const ok=validPlace(o.x,o.z,d.r*(1+.3*lv));S.builds.splice(i,0,keep);if(!ok)return toast("⛔ Not enough space around the habitat to make it bigger. Move it to an open spot first.",3200)}
+  S.coins-=c;o.lv=lv+1;renderBuilds();after();burst(o.x,1,o.z,0xffd84a,26,.6);toast("⬆ "+d.n+" upgraded to Lv "+o.lv+(d.wild?" · bigger yard, room for "+wildCap(o,o.id)+" animals":" · "+aptUnits(o)+" units now"),3200);bldInfo(i)};
 $("editRot").onclick=rotEdit;$("editMove").onclick=moveEdit;
 const HILLG=new THREE.Group();scene.add(HILLG);const HILLHITS=[];let _hillK=null,HILLSEL=null;
 function buildHills(){const k=JSON.stringify([S.hillPos||{},S.hillGone||[],S.hillLv||{}]);if(k===_hillK)return;_hillK=k;while(HILLG.children.length)HILLG.remove(HILLG.children[0]);HILLHITS.length=0;HILLG.userData.snow=null;
@@ -3662,7 +3694,7 @@ function validPlace(x,z,R0,skipT){const r=R0*.75;
   for(let i=0;i<RIVER.length-1;i++)if(segDist(x,z,RIVER[i][0],RIVER[i][1],RIVER[i+1][0],RIVER[i+1][1])<r+.9)return false;
   if(inBarn(x,z,r))return false;if(inStall(x,z,r))return false;
   if(z>-9.6-r&&z<-6.4+r&&x<-3.5)return false;if(Math.hypot(x-.5,z-4)<.4||Math.hypot(x-CF.x,z-CF.z)<1.9+r)return false;
-  for(const o of S.builds||[]){const d=BUILDS.find(q=>q.id===o.id);if(Math.hypot(x-o.x,z-o.z)<r+(d?d.r:1.5)*.75+.15)return false}
+  for(const o of S.builds||[]){const d=BUILDS.find(q=>q.id===o.id);if(Math.hypot(x-o.x,z-o.z)<r+(d?d.r:1.5)*bsc(o)*.75+.15)return false}
   // nothing may sit on a mansion's house, yard or driveway, and a new mansion's driveway must be clear too
   if(typeof MANS_MD!=="undefined"){for(const o of S.builds||[])if(MANS_MD[o.id])for(let k=0;k<9;k++){const a=k/8*Math.PI*2,rr=k===8?0:r;if(mansCell(o,x+Math.cos(a)*rr,z+Math.sin(a)*rr)>0)return false}
     const PD=typeof PLACE!=="undefined"&&PLACE&&PLACE.d&&!PLACE.tree?PLACE.d:null,M=PD&&MANS_MD[PD.id];
@@ -3772,7 +3804,11 @@ function confirmPlace(){
   burst(p.x,.5,p.z,0xc98a4b,18);gain(0,Math.round(d.cost/100),null);cancelPlace();renderBuilds();try{landDeco()}catch(e){}after();shopUI(true);toast(d.inc?"Built: "+d.n+"! +"+d.inc+" coins per minute.":"Placed: "+d.n+".",3000);townUI(true)}
 function placePointer(e,click){const gp=groundPoint(e);if(!gp||!PLACE)return;updateGhost(gp.x,gp.z);if(click&&PLACE.ok)confirmPlace();else if(click&&!PLACE.ok)toast("⛔ "+(PLACE.why||"Can't put it there. Try another spot."),2200)}
 /* -- passive income -- */
-let incT=0;function stepIncome(dt){if(VISIT)return;incT+=dt;if(incT<60)return;incT=0;let v=0;(S.builds||[]).forEach(o=>{const d=BUILDS.find(q=>q.id===o.id);if(d)v+=d.inc});if(v>0){S.coins+=v;save();ui();toast("+"+v+" coins from your buildings",2200)}}
+let incT=0;function stepIncome(dt){if(VISIT)return;incT+=dt;if(incT<60)return;incT=0;let v=0,re=false;const now=Date.now();(S.builds||[]).forEach(o=>{const d=BUILDS.find(q=>q.id===o.id);if(!d)return;
+    if(d.wild){const lv=o.lv||1,pop=wildPop(o,o.id),base=WBASE[o.id]||2;v+=Math.round(d.inc*(1+.5*(lv-1))*(1+.25*Math.max(0,pop-base)));if(!o.lb)o.lb=now;if(pop<wildCap(o,o.id)&&now-o.lb>WILD_BREED){o.pop=pop+1;o.bt=(o.bt||[]).concat(now).slice(-12);o.lb=now;re=true;toast("🍼 A baby "+({elepante:"elephant",jirafa:"giraffe",ostrich:"ostrich",unggoy:"monkey"}[o.id])+" was born at your "+d.n+"!",3600)}
+      else if((o.bt||[]).some(t=>now-t>=WILD_GROW&&now-t<WILD_GROW+61000))re=true}
+    else if(d.apt){if(!o.lt)o.lt=now;const u=aptUnits(o);if((o.ten||0)<u&&now-o.lt>3*60000){o.ten=(o.ten||0)+1;o.lt=now;re=true;toast("🧳 A new tenant moved into your Apartment Building ("+o.ten+"/"+u+")",3000)}v+=(o.ten||0)*12}
+    else v+=d.inc});if(re){renderBuilds();save()}if(v>0){S.coins+=v;save();ui();toast("+"+v+" coins from your buildings",2200)}}
 /* -- piers -- */
 (function piers(){const b=new Builder(),r=rnd(12);
   const pier=(x0,x1,z,w)=>{for(let x=x0;x<x1;x+=.36)b.add("box",r()<.5?0xb98a55:0xa87a48,x+.18,.45,z,.32,.1,w);
@@ -4326,14 +4362,6 @@ function makeHeli(c){const g=new THREE.Group(),b=new Builder();b.add("sph",c,0,.
   const sh=new THREE.Mesh(new THREE.BoxGeometry(96,1.6,76),new THREE.MeshLambertMaterial({color:0xe6d29a}));sh.position.set(AX,-1.3,AZ);scene.add(sh);
   const fill=new THREE.Mesh(new THREE.BoxGeometry(92,2,8),new THREE.MeshLambertMaterial({color:0x6ec43e}));fill.position.set(AX,-1.012,73);scene.add(fill);
   {const sm=window.__SEAMAT;if(sm){const sea3=new THREE.Mesh(new THREE.PlaneGeometry(420,200),sm);sea3.rotation.x=-Math.PI/2;sea3.position.set(-110,-.06,215);scene.add(sea3);const sea4=new THREE.Mesh(new THREE.PlaneGeometry(120,140),sm);sea4.rotation.x=-Math.PI/2;sea4.position.set(-265,-.06,105);scene.add(sea4)}}
-  // seaside wall and promenade along the east ring road
-  {const sw=new Builder(),Z0=-2,Z1=73,WX=17.1;for(let z=Z0;z<Z1;z+=4){const z1=Math.min(Z1,z+4);if(z1>-.5&&z<4)continue;const L=z1-z,cz=(z+z1)/2;
-      sw.add("box",0xd8d2c6,15.5,.03,cz,1.9,.06,L);for(let q=0;q<L;q+=1)sw.add("box",0xc4bca8,15.5,.065,z+q,1.9,.01,.05);
-      sw.add("box",0xbab2a2,WX,-.7,cz,.9,2.2,L);sw.add("box",0xe2dccc,WX,.42,cz,1.1,.14,L);for(let q=0;q<L;q+=1.6)sw.add("box",0x9a9286,WX+.46,-.4,z+q,.04,1.6,.06);
-      for(let q=0;q<=L;q+=2){sw.add("cyl",0x5a6470,WX-.25,.85,z+q,.04,.8,.04)}sw.add("box",0x5a6470,WX-.25,1.25,cz,.06,.06,L);sw.add("box",0x5a6470,WX-.25,.95,cz,.04,.04,L);
-      for(let q=.6;q<L;q+=1.5)sw.add("sph",0x8a8378,WX+1.2+Math.sin((z+q)*1.7)*.35,-.55,z+q,.7,.45,.55);
-      if(Math.round(z)%12===0){sw.add("cyl",0x2b3640,15.0,1.35,cz,.06,2.7,.06);sw.add("box",0x2b3640,15.25,2.7,cz,.5,.06,.08);sw.add("box",0xfff2b0,15.45,2.62,cz,.2,.12,.2);sw.add("box",0x8a5a2a,15.9,.42,cz+1.2,.5,.08,1.4);sw.add("box",0x8a5a2a,16.1,.65,cz+1.2,.06,.4,1.4)}}
-    scene.add(sw.mesh())}
   // more land west of the airport, joining the town's land, so there is no empty gap
   {const W0=-226,W1=AX-46,Z0=66,Z1=AZ+36;const wl=new THREE.Mesh(new THREE.BoxGeometry(W1-W0+.5,2,Z1-Z0),new THREE.MeshLambertMaterial({color:0x5aa83a}));wl.position.set((W0+W1)/2,-1.012,(Z0+Z1)/2);wl.receiveShadow=true;scene.add(wl);
     const ws=new THREE.Mesh(new THREE.BoxGeometry(W1-W0+4,1.6,Z1-Z0+4),new THREE.MeshLambertMaterial({color:0xe6d29a}));ws.position.set((W0+W1)/2-2,-1.3,(Z0+Z1)/2+2);scene.add(ws);
@@ -4434,15 +4462,15 @@ function stepAirport(dt,t){if(AIRP.on){const night=typeof isNight==="function"&&
   const busy=AIRP.planes.some(q=>(q.s===1||q.s===4||q.s===5||q.s===6||q.s===11));let waitN=0;
   (AIRP.gates||[]).forEach(G=>{const P=G.p,act=P&&((P.s===7&&P.pi>=1)||P.s===9),m=G.m;if(act){const w=Math.sin(t*5);m.armL.rotation.z=2.6+w*.5;m.armR.rotation.z=2.6-w*.5}else{m.armL.rotation.z*=.9;m.armR.rotation.z*=.9}});
   AIRP.planes.forEach((P,pi)=>{if(P.s==null){const G=pi>=4&&AIRP.gates?AIRP.gates[pi-4]:null;if(G){G.p=P;P.gate=G;P.s=8;P.t=pi*5}else{P.s=3;P.t=-pi*9}}P.t+=dt;const g=P.g;let x,y=0,z=RZ,pitch=0,ry=0,k=D[P.s]?Math.min(1,P.t/D[P.s]):0;g.visible=true;
-    if(P.s===0){const slot=AIRP.planes.filter(q=>q.s===0).sort((a,b)=>(a.qt||0)-(b.qt||0)).indexOf(P),tx=X0+2+slot*9;P.qx=P.qx==null?tx:P.qx+(tx-P.qx)*Math.min(1,dt*1.2);x=P.qx;z=TW;ry=Math.PI;waitN++;if(!busy&&slot===0&&Math.abs(P.qx-tx)<.3&&P.t>4&&!AIRP.planes.some(q=>q!==P&&(q.s===1||q.s===4||q.s===5||q.s===6||q.s===11))){P.s=11;P.t=0;P.path=[[X0-3,TW],[X0-3,RZ],[X0,RZ]];P.pi=0;P.cur=[x,z];P.hd=Math.PI;P.qx=null}}  // hold short, wait for a free runway
+    if(P.s===0){const slot=AIRP.planes.filter(q=>q.s===0).sort((a,b)=>(a.qt||0)-(b.qt||0)).indexOf(P),tx=X0+2+slot*12;P.qx=P.qx==null?tx:P.qx+(tx-P.qx)*Math.min(1,dt*1.2);x=P.qx;z=TW;ry=Math.PI;waitN++;if(!busy&&slot===0&&Math.abs(P.qx-tx)<.3&&P.t>4&&!AIRP.planes.some(q=>q!==P&&(q.s===1||q.s===4||q.s===5||q.s===6||q.s===11))){P.s=11;P.t=0;P.path=[[X0-3,TW],[X0-3,RZ],[X0,RZ]];P.pi=0;P.cur=[x,z];P.hd=Math.PI;P.qx=null}}  // hold short, wait for a free runway
     else if(P.s===1){const e=k*k;x=X0+(X1-X0)*.7*e;y=k>.6?Math.pow((k-.6)/.4,2)*3:0;pitch=k>.6?.18:0;if(k>=1){P.s=2;P.t=0}}          // take-off roll and lift
     else if(P.s===2){x=X0+(X1-X0)*.7+k*120;y=3+k*k*45;pitch=.25;if(k>=1){P.s=3;P.t=0}}                                          // climb away
-    else if(P.s===3){g.visible=false;x=X1+200;y=50;if(P.t>D[3]&&!AIRP.planes.some(q=>q!==P&&(q.s===1||q.s===4||q.s===5||q.s===6||q.s===11))){P.s=4;P.t=0}}  // away; lands only when no other plane is on the runway
+    else if(P.s===3){g.visible=false;x=X1+200;y=50;if(P.t>D[3]&&!AIRP.planes.some(q=>q!==P&&(q.s===1||q.s===4||q.s===5||q.s===6||q.s===11))&&!AIRP.planes.some(q=>q.s===0&&q.t>5)){P.s=4;P.t=0}}  // away; lands only when no other plane is on the runway
     else if(P.s===4){x=X0-140+k*140;y=40*(1-sm(k));pitch=-.12*(1-k);if(k>=1){P.s=5;P.t=0}}                                     // approach and descend
     else if(P.s===5){const e=1-(1-k)*(1-k);x=X0+(X1-X0)*e;if(k>=1){P.s=6;P.t=0}}                                                // touch down and brake
-    else if(P.s===6){x=X1;if(k>=1){const G=AIRP.gates&&AIRP.gates.find(q=>!q.p);P.s=7;P.t=0;P.cur=[X1,RZ];P.pi=0;if(G){G.p=P;P.gate=G;P.path=[[X1,TW],[G.x,TW],[G.x,G.z]]}else P.path=[[X1,TW],[X0+2+AIRP.planes.filter(q=>q.s===0||q.s===10).length*9,TW]],P.s=10}}  // 5 seconds stopped after landing, then to a free gate
+    else if(P.s===6){x=X1;if(k>=1){const G=AIRP.gates&&AIRP.gates.find(q=>!q.p);P.s=7;P.t=0;P.cur=[X1,RZ];P.pi=0;if(G){G.p=P;P.gate=G;P.path=[[X1,TW],[G.x,TW],[G.x,G.z]]}else P.path=[[X1,TW],[X0+2+AIRP.planes.filter(q=>q.s===0||q.s===10).length*12,TW]],P.s=10}}  // 5 seconds stopped after landing, then to a free gate
     else if(P.s===7||P.s===9||P.s===10||P.s===11){const tg=P.path[P.pi],cur=P.cur||(P.cur=[g.position.x,g.position.z]),dx=tg[0]-cur[0],dz=tg[1]-cur[1],L=Math.hypot(dx,dz),last=P.pi===P.path.length-1,v=P.s===9?1.3:P.s===11?3:(last&&L<6?Math.max(1.2,L*.9):5),st=v*dt;
-      if(L<=st){cur[0]=tg[0];cur[1]=tg[1];P.pi++;if(P.pi>=P.path.length){if(P.s===11){P.s=1;P.t=0}else if(P.s===7){P.s=8;P.t=0}else if(P.s===9){P.s=10;P.t=0;const nq=AIRP.planes.filter(q=>q.s===0||q.s===10).length;P.path=[[X0+2+nq*9,TW]];P.pi=0;if(P.gate)P.gate.p=null;P.gate=null}else{P.s=0;P.t=0;P.qt=t;P.qx=cur[0]}}}
+      if(L<=st){cur[0]=tg[0];cur[1]=tg[1];P.pi++;if(P.pi>=P.path.length){if(P.s===11){P.s=1;P.t=0}else if(P.s===7){P.s=8;P.t=0}else if(P.s===9){P.s=10;P.t=0;const nq=AIRP.planes.filter(q=>q.s===0||q.s===10).length;P.path=[[X0+2+nq*12,TW]];P.pi=0;if(P.gate)P.gate.p=null;P.gate=null}else{P.s=0;P.t=0;P.qt=t;P.qx=cur[0]}}}
       else{cur[0]+=dx/L*st;cur[1]+=dz/L*st;if(P.s!==9)P.hd=Math.atan2(-dz,dx)}x=cur[0];z=cur[1];ry=P.hd!=null?P.hd:Math.PI}
     else if(P.s===8){const G=P.gate;x=G.x;z=G.z;ry=Math.PI/2;if(P.t>18+P.ph%9){P.s=9;P.t=0;P.path=[[G.x,TW]];P.pi=0;P.cur=[G.x,G.z];P.hd=Math.PI/2}}
     else x=X1;
@@ -8424,7 +8452,7 @@ function townBuy(kind,id){if(!S.inTown)return toast("Go to Town first to shop he
 
 /* ===== quick Store (test server): buy seeds, tools, home goods, animals and buildings straight from the menu ===== */
 var QS=window.QS||{tab:"seed"};window.QS=QS;
-function qsEmoji(n){n=n.toLowerCase();const M=[["elephant","🐘"],["giraffe","🦒"],["ostrich","🪶"],["monkey","🐒"],["tower","🏙️"],["hotel","🏨"],["castle","🏰"],["zen","🏯"],["sky glass","🌆"],["fert","🧪"],["axe","🪓"],["water","🚿"],["basket","🧺"],["wood","🪵"],["tricycle","🛺"],["table","🍽️"],["bench","🪑"],["chair","🪑"],["lamp","💡"],["light","💡"],["flower","🌸"],["fount","⛲"],["swing","🪀"],["well","🪣"],["mango","🥭"],["coconut","🥥"],["banana","🍌"],["tree","🌳"],["house","🏠"],["barn","🛖"],["kubo","🛖"],["nipa","🛖"],["silo","🏗️"],["coop","🐔"],["mill","🌀"],["boat","⛵"],["row","🚣"],["fish","🎣"],["stall","🏪"],["fence","🚧"],["statue","🗿"],["car","🚗"]];for(const[k,e] of M)if(n.includes(k))return e;return "📦"}
+function qsEmoji(n){n=n.toLowerCase();const M=[["apartment","🏢"],["elephant","🐘"],["giraffe","🦒"],["ostrich","🪶"],["monkey","🐒"],["tower","🏙️"],["hotel","🏨"],["castle","🏰"],["zen","🏯"],["sky glass","🌆"],["fert","🧪"],["axe","🪓"],["water","🚿"],["basket","🧺"],["wood","🪵"],["tricycle","🛺"],["table","🍽️"],["bench","🪑"],["chair","🪑"],["lamp","💡"],["light","💡"],["flower","🌸"],["fount","⛲"],["swing","🪀"],["well","🪣"],["mango","🥭"],["coconut","🥥"],["banana","🍌"],["tree","🌳"],["house","🏠"],["barn","🛖"],["kubo","🛖"],["nipa","🛖"],["silo","🏗️"],["coop","🐔"],["mill","🌀"],["boat","⛵"],["row","🚣"],["fish","🎣"],["stall","🏪"],["fence","🚧"],["statue","🗿"],["car","🚗"]];for(const[k,e] of M)if(n.includes(k))return e;return "📦"}
 const QSA={manok:"🐔",kambing:"🐐",bibe:"🦆",pato:"🦆",pusa:"🐱",aso:"🐶",baboy:"🐷",baka:"🐄",kabayo:"🐴",kalabaw:"🐃"};
 function qsCard(o){return `<div class="qc ${o.cls||""}"><b>${o.n}</b><div class="ic">${o.img?`<img src="${o.img}" alt="">`:o.e}</div>${o.l1?`<small>${o.l1}</small>`:""}${o.l2?`<small>${o.l2}</small>`:""}<span class="qp">🪙 ${o.cost.toLocaleString()}</span>${o.tag?`<span class="qtag">${o.tag}</span>`:`<div class="qb">${o.btn}</div>`}</div>`}
 function qsRender(){const g=$("qsGrid");if(!g)return;qsTabsUI();const T=QS.tab,lk=lv=>S.lv<lv;let h="";
