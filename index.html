@@ -896,7 +896,7 @@ const _ca=new THREE.Color(),_cb=new THREE.Color();
 const mix=(a,b,t)=>_ca.set(a).lerp(_cb.set(b),Math.max(0,Math.min(1,t))).getHex();
 /* -------- extra farmland parcels -------- */
 const PN=8;
-const FARMVERSE=false;const GPLIVE=true;const MIRROR_TEST=false,MAIN_ART="https://claude.ai/artifact/UyPMu4gvJm8nFYiZ8snZbo",TEST_ART="https://claude.ai/artifact/FXF22kREKnNuiM4FxwxmGY";const FEAT=true;const NOBRAND=true;const NB_SQ=["gp","pots","roll","wfl","gs","t2b","cow"],NB_BTN=["carnival","parkEnter","potsEnter","gsEnter","t2bEnter","theme0","theme1","theme2"];
+const FARMVERSE=false;const GPLIVE=true;const MIRROR_TEST=false,MAIN_ART="https://claude.ai/artifact/UyPMu4gvJm8nFYiZ8snZbo",TEST_ART="https://claude.ai/artifact/FXF22kREKnNuiM4FxwxmGY";const FEAT=true;const NOBRAND=true;const ONEISLE=true;function nbSnap(){return new Set(scene.children)}function nbDrop(s0){if(!ONEISLE)return;try{const rm=scene.children.filter(c=>!s0.has(c)&&!(window.__SEAMAT&&c.material===window.__SEAMAT));rm.forEach(c=>scene.remove(c));const gone=new Set(rm);const on=o=>{for(let n=0;o&&n<40;n++){if(gone.has(o))return false;if(o===scene)return true;o=o.parent}return true};for(let i=BTN3D.length-1;i>=0;i--)if(!on(BTN3D[i]))BTN3D.splice(i,1)}catch(e){console.warn(e)}}function nbCut(fn){const s0=nbSnap();try{fn()}catch(e){console.warn(e)}nbDrop(s0)}const NB_SQ=["gp","pots","roll","wfl","gs","t2b","cow"],NB_BTN=["carnival","parkEnter","potsEnter","gsEnter","t2bEnter","theme0","theme1","theme2"];
 const IX_=80,IZ_=4;const CX=180,CZ=4,CHX=32,CHZ=26;
 const CITY_POS=FEAT?[]:[[180,4]];
 const PLOTS=[{id:"isla",n:"Secret Island",x0:IX_-.5,z0:IZ_+31,sz:6,y:1.2,island:true,cost:100000,lv:3},{id:"timog",n:"South Land",x0:-4,z0:12,cost:1500,lv:4},{id:"kanluran",n:"West Land",x0:-17,z0:10,cost:4000,lv:6},{id:"malayo",n:"Far Land",x0:-26.5,z0:10,cost:8000,lv:8},{id:"lambak",n:"Valley Land",x0:-4,z0:21,cost:15000,lv:9},{id:"burol",n:"Hill Land",x0:-17,z0:21,cost:25000,lv:10},{id:"parang",n:"Meadow Land",x0:-26.5,z0:21,cost:40000,lv:11},{id:"ilog",n:"Riverside Land",x0:-4,z0:30,cost:60000,lv:12},{id:"gubat",n:"Forest Land",x0:-17,z0:30,cost:85000,lv:13},{id:"bukal",n:"Spring Land",x0:-26.5,z0:30,cost:120000,lv:14},{id:"talampas",n:"Plateau Land",x0:-36,z0:10,cost:160000,lv:15},{id:"dulo",n:"Edge Land",x0:-36,z0:21,cost:220000,lv:16}];
@@ -2905,7 +2905,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="214";const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
+const GAMEVER="215";const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
 if(TESTSRV){document.title="🧪 TEST · "+document.title;const tb=document.createElement("div");tb.id="testBar";tb.textContent=MIRROR_TEST?"🧪 TEST SERVER · a copy of your farm · changes here don't touch your real farm":"🧪 TEST SERVER · changes here don't touch your real farm";tb.style.cssText="position:fixed;left:50%;top:0;transform:translateX(-50%);z-index:9999;background:#7a3fc0;color:#fff;font:900 11px/1.2 sans-serif;padding:3px 10px;border-radius:0 0 10px 10px;pointer-events:none;letter-spacing:.3px";document.addEventListener("DOMContentLoaded",()=>document.body.appendChild(tb));if(document.body)document.body.appendChild(tb)}let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 /* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
 (function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
@@ -5109,7 +5109,7 @@ const SQDEF=[
  {id:"bigi",n:"Isla Grande",type:"pine",icon:"🍍",title:"Isla Grande Plantation",btn:"🍍 Plantation",col:0xf0b62a,lv:8,lead:"Plant the island's pineapple plantation and harvest it for extra coins.",
   opts:[{k:"Baby Pineapple",cost:90,t:300,pay:380},{k:"Golden Pineapple",cost:200,t:720,pay:900}],go:"🌱 Plant",done:"🧺 Harvest"}];
 function nbStrip(){if(!NOBRAND)return;for(let i=BTN3D.length-1;i>=0;i--){const q=BTN3D[i];if(NB_BTN.includes(q.userData.btn3d)){q.visible=false;if(q.parent)q.parent.remove(q);BTN3D.splice(i,1);try{(CLOUDS.banks||[]).forEach(B=>{if(B.btns)B.btns=B.btns.filter(x=>x!==q)})}catch(e){}}}}
-if(NOBRAND)for(let i=SQDEF.length-1;i>=0;i--)if(NB_SQ.includes(SQDEF[i].id))SQDEF.splice(i,1);
+if(NOBRAND)for(let i=SQDEF.length-1;i>=0;i--)if(NB_SQ.includes(SQDEF[i].id)||(ONEISLE&&SQDEF[i].id==="bigi"))SQDEF.splice(i,1);
 const SQ_DAILY=3,SQ_BONUS=500,SQ_RARE=.15;
 const SQ_FISH=[{n:"Galunggong",e:"🐟",m:.6,w:30},{n:"Tilapia",e:"🐟",m:1,w:35},{n:"Bangus",e:"🐠",m:1.3,w:20},{n:"Lapu-lapu",e:"🐡",m:2,w:12},{n:"Golden Clover Fish",e:"✨🐠",m:4,w:3}];
 const SQ_PEARL=[{n:"Empty",e:"🫧",m:0,w:30},{n:"White pearl",e:"⚪",m:.25,w:35},{n:"Pink pearl",e:"🩷",m:.45,w:20},{n:"Black pearl",e:"⚫",m:.8,w:12},{n:"Golden pearl",e:"🟡",m:3,w:3}];
@@ -5513,7 +5513,7 @@ function openThemeUrl(u){toast("Opening "+u.replace(/^https?:\/\//,"").replace(/
 function enterThemeBuilding(i){const T=THEMES[i];if(!T)return;const u=T.o.url;if(!u)return toast("🚧 "+T.o.name+" is opening soon.",2600);toast("Opening "+u.replace(/^https?:\/\//,"")+"…",2200);save();const emb=window.top!==window||!!(window.claude&&window.claude.use);if(emb)return openLink(u);let w=null;try{w=window.open(u,"_blank","noopener")}catch(e){}if(!w)setTimeout(()=>{location.href=u},300)}
 function enterTheme(i){const T=THEMES[i];if(!T)return;try{cloudOpen(T.o.x,T.o.z)}catch(e){}if(S.inTown)return toast("Go home to the farm first, then ride the boat.",3000);cam.follow=false;Object.assign(camT,{tx:T.o.x+1,ty:1.4,tz:T.o.z+2,dist:46,pol:.86});toast("⛴️ Welcome to "+T.o.name+"!",3000)}
 if(FEAT&&typeof Image!=="undefined"){
-  try{buildBigIsle()}catch(e){console.warn(e)}try{buildPark()}catch(e){console.warn(e)}try{buildPots()}catch(e){console.warn(e)}try{buildGameSpot()}catch(e){console.warn(e)}
+  nbCut(buildBigIsle);try{buildPark()}catch(e){console.warn(e)}nbCut(()=>{try{buildPots()}catch(e){console.warn(e)}try{buildGameSpot()}catch(e){console.warn(e)}});const _nbT=nbSnap();
   // Green City: lucky green village of nipa huts around a big bahay kubo hall
   buildThemeIsle({name:"Green City",city:true,cinema:true,block:parisBlock,
     strips(b,Y,T,RR){const sign=(t,bg,fg)=>{const c=document.createElement("canvas");c.width=256;c.height=64;const x=c.getContext("2d");x.fillStyle=bg;x.fillRect(0,0,256,64);x.fillStyle=fg;x.font="900 30px Arial Black, Arial";x.textAlign="center";x.textBaseline="middle";x.fillText(t,128,34,240);return new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(c)})};
@@ -5641,7 +5641,7 @@ enter:"🍀 Green City",url:"",x:230,z:-100,r:19,seed:7,g1:0x5fbf3a,g2:0x3f9a2a,
       // violet lamp posts with glowing heads
       [[-5,5],[5,5],[-7.5,8.5],[7.5,8.5],[-9,3],[9,3]].forEach(([x,z])=>{b.add("cyl",0x2b2440,x,Y+1.4,z,.07,2.8,.07);const lh=new THREE.Mesh(new THREE.SphereGeometry(.2,10,8),T.neon);lh.position.set(x,Y+2.9,z);T.g.add(lh)});
       return{x:0,y:Y+6.4,z:-3.3,w:6}}});
-}
+nbDrop(_nbT)}
 function stepCity(dt,t){CITIES.forEach(C=>stepCityOne(C,dt,t))}
 function stepCityOne(CITY,dt,t){const CX=CITY.cx,CZ=CITY.cz;const near=Math.hypot(cam.tx-CX,cam.tz-CZ)<60+CHX;if(!near&&!CITY._was)return;CITY._was=near;
   const h=typeof phHour==="function"?phHour():12,dark=1-daylight(h),bad=isBad();
@@ -8591,14 +8591,24 @@ function perfInit(){if(PERF.init)return;PERF.init=true;
   const NOC=[typeof BUILDG!=='undefined'&&BUILDG,typeof ROADG!=='undefined'&&ROADG,typeof animalGroup!=='undefined'&&animalGroup,typeof TREEG!=='undefined'&&TREEG,typeof HILLG!=='undefined'&&HILLG,typeof PENX!=='undefined'&&PENX,typeof fieldGroup!=='undefined'&&fieldGroup,typeof world!=='undefined'&&world];
   scene.children.slice().forEach(o=>{if(o.isLight||o.isCamera||o.userData.cw||o===camera||o.frustumCulled===false||o.isPoints||o.isLineSegments||NOC.includes(o))return;
     box.setFromObject(o);if(box.isEmpty())return;box.getBoundingSphere(sph);if(!(sph.radius<70))return;
-    const w=new THREE.Group();w.userData.cw=true;scene.add(w);w.add(o);PERF.cull.push({w,o,off:sph.center.clone().sub(o.position),r:sph.radius})})}
+    const w=new THREE.Group();w.userData.cw=true;scene.add(w);w.add(o);PERF.cull.push({w,o,off:sph.center.clone().sub(o.position),r:sph.radius})});
+  try{fineInit()}catch(e){console.warn(e)}}
+// fine cull: small detailed props and people inside big areas are skipped when the camera is not near them
+function fineInit(){const box=new THREE.Box3(),sph=new THREE.Sphere(),wp=new THREE.Vector3();PERF.fine=[];
+  const ms=g=>{const a=[];g.traverse(o=>{if(o.isMesh||o.isSprite)a.push(o)});return a};
+  const walk=(g,d)=>{for(const c of g.children){if(c.isLight||c.isCamera||c.frustumCulled===false)continue;const m=ms(c);if(m.length<2){continue}
+      box.setFromObject(c);if(box.isEmpty())continue;box.getBoundingSphere(sph);
+      if(sph.radius<7){c.getWorldPosition(wp);const isO=o=>o.userData.outline||(typeof OUT!=='undefined'&&o.material===OUT)||(typeof OUTU!=='undefined'&&o.material===OUTU);PERF.fine.push({g:c,ms:m.filter(o=>!isO(o)),ol:m.filter(isO),off:sph.center.clone().sub(wp),r:sph.radius,on:2})}else if(d<4&&c.children.length)walk(c,d+1)}};
+  PERF.cull.forEach(c=>walk(c.w,0))}
+const _fw=new THREE.Vector3();function fineStep(){if(!PERF.fine)return;const R=cam.dist<=78?cam.dist*(QLV===0?1:1.25)+(QLV===0?14:24):(QLV===0?30:42);
+  for(const f of PERF.fine){f.g.getWorldPosition(_fw);_fw.add(f.off);const d=Math.hypot(_fw.x-cam.tx,_fw.z-cam.tz)-f.r,on=d<R?(d<R*(QLV>=2?.8:.5)?2:1):0;if(on!==f.on){f.on=on;for(const m of f.ms)m.layers.mask=on?1:0;for(const m of f.ol)m.layers.mask=on===2?1:0}}}
 function hideOutlines(){scene.traverse(o=>{if(o.isMesh&&(o.userData.outline||o.material===OUT||o.material===OUTU))o.visible=false})}
 const _pc=new THREE.Vector3();
 function perfStep(dt,t){if(typeof applyBarnPos==="function")applyBarnPos();if(typeof applyStall==="function")applyStall();{const ff=scene.fog&&scene.fog.far>=50?scene.fog.far:400,want=Math.max(110,Math.min(420,ff+20));if(Math.abs(camera.far-want)>1){camera.far=want;camera.updateProjectionMatrix()}}
   if(!PERF.init)return;
   if(QLV<2){PERF.sh+=dt;if(PERF.sh>(QLV===0?.5:.12)){PERF.sh=0;renderer.shadowMap.needsUpdate=true}}
   PERF.t+=dt;if(PERF.t>.25){PERF.t=0;const far=(scene.fog?scene.fog.far:200)+8,cp=camera.position;
-    for(const c of PERF.cull){_pc.copy(c.o.position).add(c.off);c.w.visible=_pc.distanceTo(cp)-c.r<far}
+    for(const c of PERF.cull){_pc.copy(c.o.position).add(c.off);c.w.visible=_pc.distanceTo(cp)-c.r<far}try{fineStep()}catch(e){}
     if(QLV===0&&Math.random()<.05)hideOutlines()}
   // auto: if the phone is slow, lower the resolution a little at a time
   if(QPICK==null&&RPICK==null){PERF.fr++;PERF.ft+=dt;if(PERF.ft>4){const fps=PERF.fr/PERF.ft;PERF.fr=0;PERF.ft=0;
@@ -8618,7 +8628,7 @@ function t2bLogoTex(){const c=document.createElement("canvas");c.width=1024;c.he
   const t=new THREE.CanvasTexture(c);t.anisotropy=4;return t}
 function t2bApplyLogo(){const t=t2bLogoTex();T2B.logoMats.forEach(m=>{if(m.map)m.map.dispose();m.map=t;m.needsUpdate=true})}
 function setT2BLogo(src){const im=new Image();im.onload=()=>{T2B_LOGO=im;t2bApplyLogo()};im.src=src}
-(function buildT2B(){if(!FEAT)return;
+nbCut(function buildT2B(){if(!FEAT)return;
   {const mt=document.getElementById("modeTag");if(mt)mt.style.display="none";const sm=window.__SEAMAT;if(sm){const sea2=new THREE.Mesh(new THREE.PlaneGeometry(420,260),sm);sea2.rotation.x=-Math.PI/2;sea2.position.set(150,-.04,215);scene.add(sea2);
     const bed=new THREE.Mesh(new THREE.PlaneGeometry(420,260),new THREE.MeshBasicMaterial({color:0x1d6f96}));bed.rotation.x=-Math.PI/2;bed.position.set(150,-3.3,215);scene.add(bed)}}T2B.fans=[];T2B.flags=[];const G=new THREE.Group();G.position.set(T2X,0,T2Z);scene.add(G);T2B.g=G;
   const R=a=>29+2.8*Math.sin(3*a+.7)+2*Math.sin(5*a+2)+1.2*Math.sin(8*a+.3),RZ=.78,TOWNY=1.2;
@@ -8838,7 +8848,7 @@ function setT2BLogo(src){const im=new Image();im.onload=()=>{T2B_LOGO=im;t2bAppl
       const j=makeFarmer({shirt:c,pants:0xf2f2ee,hat:c,skin:[0xe0a878,0xc68a5a,0xa8724a][i%3]});j.g.scale.setScalar(.42);j.g.position.set(.02,.86,0);j.legL.rotation.x=.9;j.legR.rotation.x=-.9;j.torso.rotation.z=-.5;g.add(j.g);
       const lb=new THREE.Mesh(new THREE.PlaneGeometry(.34,.24),new THREE.MeshBasicMaterial({color:c,side:THREE.DoubleSide}));lb.position.set(0,.62,.2);g.add(lb);G.add(g);T2B.horses.push({g,j,n,c,lane:TR-W/2+.35+i*.34,d:0,v:0,ph:i})});
     T2B.race={state:"wait",t:3,winner:null,order:[]};if(typeof Image!=="undefined"){T2B.rlogo=new Image();T2B.rlogo.onload=()=>{try{drawRaceBoard()}catch(e){}};T2B.rlogo.src=T2B_LOGO_SRC}try{drawRaceBoard()}catch(e){}}
-  T2B.on=true})();
+  T2B.on=true});
 
 function drawRaceBoard(){const B=T2B.board,R0=T2B.race;if(!B)return;const x=B.x;const g=x.createLinearGradient(0,0,0,384);g.addColorStop(0,"#16264d");g.addColorStop(1,"#050d22");x.fillStyle=g;x.fillRect(0,0,1024,384);x.strokeStyle="#ffcc33";x.lineWidth=10;x.strokeRect(5,5,1014,374);
   x.textAlign="center";x.textBaseline="middle";if(T2B.rlogo&&T2B.rlogo.complete&&T2B.rlogo.naturalWidth){const lh=70,lw=lh*T2B.rlogo.naturalWidth/T2B.rlogo.naturalHeight;x.drawImage(T2B.rlogo,40,37,lw,lh);x.font="900 70px Arial Black, Arial";x.fillStyle="#ffcc33";x.fillText("RACE",60+lw+(1024-60-lw)/2-20,74)}else{x.font="900 76px Arial Black, Arial";x.fillStyle="#ffcc33";x.fillText("RACE",512,72)}
@@ -8875,10 +8885,10 @@ if(!FEAT&&GPLIVE&&typeof Image!=="undefined"){try{buildPark()}catch(e){console.w
 function enterT2B(){if(!T2B.on)return toast("Royal Town is only on the test server for now.");try{cloudOpen(T2X,T2Z)}catch(e){}if(S.inTown)return toast("Go home to the farm first, then ride the boat.",3000);
   ISLE_OPEN=false;cam.follow=false;Object.assign(camT,{tx:T2X+1,ty:1.4,tz:T2Z+2,dist:30,pol:.9});toast("⛴️ Welcome to Royal Town!",4200)}
 /* ================= VISITORS: buyers who offer coins for your animals, thieves who try to steal them ================= */
-const VIS={buyT:100+Math.random()*80,thT:200+Math.random()*120,buyer:null,thief:null};
+const VIS={buyT:100+Math.random()*80,thT:(ONEISLE?120+Math.random()*240:200+Math.random()*120),buyer:null,thief:null,gang:[]};
 const VIS_IN=[[-38,-8],[-6,-8]];
 function visOk(){return !VISIT&&!onIsle&&!onCity&&!S.inTown&&!JTRIP.on&&!TRIP.on&&!isNight()&&!isBad()}
-function visTargets(){const L=[];S.pens.forEach((p,i)=>{const o=animalObjs[i];if(o&&o.g.visible&&!o.shelter&&!isBaby(p)&&!p.sick&&!(VIS.thief&&VIS.thief.p===p)&&!(VIS.buyer&&VIS.buyer.p===p))L.push(p)});return L}
+function visTargets(){const L=[];S.pens.forEach((p,i)=>{const o=animalObjs[i];if(o&&o.g.visible&&!o.shelter&&!isBaby(p)&&!p.sick&&!VIS.gang.some(q=>q.p===p)&&!(VIS.buyer&&VIS.buyer.p===p))L.push(p)});return L}
 function visObj(p){const i=S.pens.indexOf(p);return i<0?null:animalObjs[i]}
 function npcMake(kind){const f=kind==="thief"?makeFarmer({shirt:0x2a2a2e,pants:0x1c1c20,hat:0x2a2a2e,skin:0xc89068}):makeFarmer({shirt:0x2f7fb8,pants:0x6b4a2a,hat:0xf3efe2,skin:0xd9a070});
   if(kind==="thief"){part(f.head,gBox,0x111111,.14,.16,0,.05,.06,.31);part(f.torso,gSph,0x8a6a3a,-.2,.25,0,.17,.2,.17)}else{part(f.torso,gBox,0x2b1e14,0,.3,.17,.05,.2,.02);part(f.armL,gBox,0x5a3a22,0,-.42,0,.08,.14,.2)}
@@ -8894,18 +8904,19 @@ function npcAway(){return !visOk()&&(onIsle||onCity||S.inTown||JTRIP.on||TRIP.on
 function visSpawnBuyer(){const L=visTargets();if(!L.length)return;const p=L[Math.floor(Math.random()*L.length)],a=animal(p.id);
   const mood=Math.random(),mult=mood<.2?.7+Math.random()*.25:mood<.85?.95+Math.random()*.45:1.45+Math.random()*.45,offer=Math.max(5,Math.round(a.cost*mult/5)*5);VIS.buyer={kind:"buyer",f:npcMake("buyer"),p,offer,st:"in",t:0,wp:0};
   toast("🧑‍💼 A buyer is coming to your farm to look at your animals.",3200)}
-function visSpawnThief(){const L=visTargets();if(!L.length)return;const p=L[Math.floor(Math.random()*L.length)];VIS.thief={kind:"thief",f:npcMake("thief"),p,st:"in",t:0,wp:0};
-  toast("🚨 A thief is sneaking into your farm! Tap 🚨 Catch above the thief so your helper can stop them.",4500);if(typeof sfx==="function")try{sfx("alarm")}catch(e){}}
+function visSpawnThief(){const L=visTargets();if(!L.length)return;const n=ONEISLE?2+(Math.random()<.5?1:0):1;
+  for(let k=0;k<n&&L.length;k++){const p=L.splice(Math.floor(Math.random()*L.length),1)[0];const T={kind:"thief",f:npcMake("thief"),p,st:"in",t:-k*1.2,wp:0,ox:(k-(n-1)/2)*1.3,oz:k*.9};T.f.g.position.x+=T.ox;T.f.g.position.z+=T.oz-k*1.5;VIS.gang.push(T)}VIS.thief=VIS.gang[0];
+  const m=VIS.gang.length;toast(m>1?"🚨 "+m+" thieves are sneaking into your farm together! Tap 🚨 Catch above each thief so your helpers can stop them.":"🚨 A thief is sneaking into your farm! Tap 🚨 Catch above the thief so your helper can stop them.",4800);if(typeof sfx==="function")try{sfx("alarm")}catch(e){}}
 function buyerAccept(){const B=VIS.buyer;if(!B||B.st!=="offer")return;const i=S.pens.indexOf(B.p);if(i<0){B.st="out";return}const a=animal(B.p.id),o=animalObjs[i];
   if(o)burst(o.g.position.x,.8,o.g.position.z,0xffd84a,14);const c=makeAnimal(B.p.id);paintAnimal(c,B.p.id,B.p.v);c.scale.setScalar(.85);scene.add(c);B.carry=c;
   S.pens.splice(i,1);S.coins+=B.offer;hovered=null;rebuildAnimals();after();const sc=toScreen(B.f.g.position.x,2,B.f.g.position.z);floatText("+"+B.offer+" 🪙",sc.x,sc.y);
   toast("💰 Sold your "+a.n+" to the buyer for "+B.offer.toLocaleString()+" coins!",3200);B.st="out";B.wp=1}
 function buyerNo(){const B=VIS.buyer;if(!B)return;B.st="out";B.wp=1;toast("The buyer said goodbye and left.",2000)}
-function catchThief(){const T=VIS.thief;if(!T||T.st==="down"||T.chaser)return;const W=[farmer,...HELPERS.filter((H,i)=>H&&(i===0||CREW[HKEYS[i]])&&H.o.state!=="rest")].filter(f=>f&&!f.o.tired);if(!W.length)return;
+function catchThief(T0){const T=T0||VIS.thief;if(!T||T.st==="down"||T.chaser)return;const W=[farmer,...HELPERS.filter((H,i)=>H&&(i===0||CREW[HKEYS[i]])&&H.o.state!=="rest")].filter(f=>f&&!f.o.tired&&!f.o.chase);if(!W.length)return toast("All your helpers are busy chasing. Hire more helpers to catch every thief!",2600);
   const tp=T.f.g.position;W.sort((a,b)=>Math.hypot(a.g.position.x-tp.x,a.g.position.z-tp.z)-Math.hypot(b.g.position.x-tp.x,b.g.position.z-tp.z));const c=W[0];
   if(c.o.fun)funEnd(c);c.g.visible=true;c.g.position.y=0;c.g.rotation.x=0;c.o.chase=T;T.chaser=c;if(T.st!=="run"){T.st="flee";T.wp=1}toast("🏃 "+(c===farmer?"You are":"Your helper is")+" chasing the thief!",2200)}
 function chaseTick(f,dt,t){try{return chaseTick0(f,dt,t)}catch(e){if(f&&f.o){f.o.chase=null;f.o.state="idle";f.o.st=.5}return false}}
-function chaseTick0(f,dt,t){const T=f&&f.o.chase;if(!T)return false;if(T.st==="down"||VIS.thief!==T){f.o.chase=null;f.o.state="idle";f.o.st=.6;return false}
+function chaseTick0(f,dt,t){const T=f&&f.o.chase;if(!T)return false;if(T.st==="down"||!VIS.gang.includes(T)){f.o.chase=null;f.o.state="idle";f.o.st=.6;return false}
   const tp=T.f.g.position;npcWalk(f,tp.x,tp.z,3.8,dt);npcAnim(f,t,dt);
   if(Math.hypot(tp.x-f.g.position.x,tp.z-f.g.position.z)<.75)thiefDown(T,f);return true}
 function thiefDown(T,f){T.st="down";T.t=0;f.o.chase=null;f.o.state="idle";f.o.st=1.4;f.armR.rotation.z=2.8;burst(T.f.g.position.x,1.1,T.f.g.position.z,0xffe14a,18);
@@ -8913,8 +8924,8 @@ function thiefDown(T,f){T.st="down";T.t=0;f.o.chase=null;f.o.state="idle";f.o.st
   S.coins+=100;S.xp=(S.xp||0)+5;after();const sc=toScreen(T.f.g.position.x,2,T.f.g.position.z);floatText("💥 +100 🪙",sc.x,sc.y);
   toast(T.grab?"💥 "+(f===farmer?"You":"Your helper")+" beat the thief! Your "+animal(T.p.id).n+" is safe. +100 coins":"💥 "+(f===farmer?"You":"Your helper")+" beat the thief! +100 coins",3800)}
 function stepVisitors(dt,t){
-  if(npcAway()){if(VIS.buyer){npcRemove(VIS.buyer);VIS.buyer=null}if(VIS.thief){const o=visObj(VIS.thief.p);if(o)o.g.position.y=0;npcRemove(VIS.thief);VIS.thief=null}return}
-  if(visOk()&&S.pens.length){if(!VIS.buyer&&(VIS.buyT-=dt)<=0){VIS.buyT=150+Math.random()*120;visSpawnBuyer()}if(!FARMVERSE&&!FEAT&&!VIS.thief&&(VIS.thT-=dt)<=0){VIS.thT=260+Math.random()*200;visSpawnThief()}}
+  if(npcAway()){if(VIS.buyer){npcRemove(VIS.buyer);VIS.buyer=null}VIS.gang.forEach(T=>{const o=visObj(T.p);if(o)o.g.position.y=0;npcRemove(T)});VIS.gang=[];VIS.thief=null;return}
+  if(visOk()&&S.pens.length){if(!VIS.buyer&&(VIS.buyT-=dt)<=0){VIS.buyT=150+Math.random()*120;visSpawnBuyer()}if((ONEISLE||(!FARMVERSE&&!FEAT))&&!VIS.gang.length&&(VIS.thT-=dt)<=0){VIS.thT=ONEISLE?300+Math.random()*600:260+Math.random()*200;visSpawnThief()}}
   const B=VIS.buyer;if(B){const f=B.f,g=f.g;B.t+=dt;let aL=null;
     if(B.st==="in"){if(npcWalk(f,VIS_IN[1][0],VIS_IN[1][1],1.7,dt))B.st="go"}
     else if(B.st==="go"){const o=visObj(B.p);if(!o||!o.g.visible){B.st="out";B.wp=1}else{const ap=o.g.position,dx=g.position.x-ap.x,dz=g.position.z-ap.z,d=Math.hypot(dx,dz)||1;if(d<1.4){B.st="offer";B.t=0}else npcWalk(f,ap.x+dx/d*1.2,ap.z+dz/d*1.2,1.7,dt)}}
@@ -8927,12 +8938,13 @@ function stepVisitors(dt,t){
         if(!B.el._on){B.el._on=1;B.el.onclick=e=>{const v=e.target.dataset&&e.target.dataset.v;if(v==="y")buyerAccept();else if(v==="n")buyerNo()}}}
       else if(B.el){B.el.remove();B.el=null;B.html=null}
       npcBubblePos(B)}}
-  const T=VIS.thief;if(T){const f=T.f,g=f.g;T.t+=dt;let aL=null,aR=null;
-    if(T.st==="in"){if(npcWalk(f,VIS_IN[1][0],VIS_IN[1][1],1.4,dt))T.st="go"}
+  for(const T of VIS.gang.slice()){VIS.thief=T;stepThief(T,dt,t);if(VIS.thief!==T)VIS.gang=VIS.gang.filter(q=>q!==T)}VIS.thief=VIS.gang[0]||null}
+function stepThief(T,dt,t){if(T){const f=T.f,g=f.g;T.t+=dt;let aL=null,aR=null;if(T.t<0){npcAnim(f,t,dt);return}
+    if(T.st==="in"){if(npcWalk(f,VIS_IN[1][0]+(T.ox||0),VIS_IN[1][1]+(T.oz||0),1.4,dt))T.st="go"}
     else if(T.st==="go"){const o=visObj(T.p);if(!o||!o.g.visible){T.st="flee";T.wp=1}else{const ap=o.g.position,d=Math.hypot(g.position.x-ap.x,g.position.z-ap.z);if(d<.8){T.st="grab";T.t=0}else npcWalk(f,ap.x,ap.z,1.5,dt)}
       f.hips.position.y=.45}
     else if(T.st==="grab"){const o=visObj(T.p);aL=aR=1.1;if(!o){T.st="flee";T.wp=1}else{o.g.position.x+=Math.sin(t*30)*.01;if(T.t>2.5){T.grab=true;T.st="run";T.wp=1;toast("🚨 The thief grabbed your "+animal(T.p.id).n+"! Tap 🚨 Catch now!",3500)}}}
-    else if(T.st==="run"||T.st==="flee"){const w=VIS_IN[T.wp];if(npcWalk(f,w[0],w[1],T.st==="run"?2.3:2.6,dt)){if(T.wp===1)T.wp=0;else{
+    else if(T.st==="run"||T.st==="flee"){const w=VIS_IN[T.wp];if(npcWalk(f,w[0]+(T.ox||0),w[1]+(T.oz||0),T.st==="run"?2.3:2.6,dt)){if(T.wp===1)T.wp=0;else{
         if(T.grab){const i=S.pens.indexOf(T.p);if(i>=0){const a=animal(T.p.id);S.pens.splice(i,1);hovered=null;rebuildAnimals();after();toast("😢 The thief got away with your "+a.n+". Catch them faster next time!",4200)}}
         else toast("The thief ran away without taking anything.",2400);
         npcRemove(T);VIS.thief=null}}
@@ -8940,13 +8952,13 @@ function stepVisitors(dt,t){
     else if(T.st==="down"){f._w=0;g.rotation.z=lerp(g.rotation.z,-1.5,Math.min(1,dt*8));g.position.y=.1;if(T.t>.3&&Math.random()<dt*6)burst(g.position.x,.8,g.position.z,0xffe14a,2,.3);
       if(T.t>1.8){burst(g.position.x,.6,g.position.z,0xdddddd,20,.6);npcRemove(T);VIS.thief=null}}
     if(VIS.thief){npcAnim(f,t,dt,aL,aR);
-      if(T.st!=="down"){npcBubble(T,T.chaser?'<b>🏃 Chasing the thief…</b>':'<button class="btn sm npcC" type="button">🚨 Catch</button>');if(!T.el._on){T.el._on=1;T.el.onclick=()=>catchThief()}}
+      if(T.st!=="down"){npcBubble(T,T.chaser?'<b>🏃 Chasing the thief…</b>':'<button class="btn sm npcC" type="button">🚨 Catch</button>');if(!T.el._on){T.el._on=1;T.el.onclick=()=>catchThief(T)}}
       else if(T.el){T.el.remove();T.el=null}
       npcBubblePos(T)}}
 }
 function loop(t){
   const dt=Math.min(.1,(t-last)/1000);last=t;const ts=t/1000;
-  applyCam(dt);stepAnimals(dt,ts);try{stepT2B(dt,ts)}catch(e){}try{stepThemes(dt,ts)}catch(e){}try{stepEnergy(dt)}catch(e){}try{stepVisitors(dt,ts)}catch(e){try{if(VIS.thief){const o=visObj(VIS.thief.p);if(o)o.g.position.y=0;npcRemove(VIS.thief);VIS.thief=null}if(VIS.buyer){npcRemove(VIS.buyer);VIS.buyer=null}[farmer,...HELPERS].forEach(f=>{if(f&&f.o)f.o.chase=null})}catch(e2){}}stepExtras(dt,ts);stepFarm2(dt,ts);stepFire(dt,ts);stepNet(dt);stepSound(dt);stepFish(dt,ts);ISLE.step(dt,ts);checkIsle();stepCity(dt,ts);checkCity();
+  applyCam(dt);stepAnimals(dt,ts);try{stepT2B(dt,ts)}catch(e){}try{stepThemes(dt,ts)}catch(e){}try{stepEnergy(dt)}catch(e){}try{stepVisitors(dt,ts)}catch(e){try{VIS.gang.forEach(T=>{const o=visObj(T.p);if(o)o.g.position.y=0;npcRemove(T)});VIS.gang=[];VIS.thief=null;if(VIS.buyer){npcRemove(VIS.buyer);VIS.buyer=null}[farmer,...HELPERS].forEach(f=>{if(f&&f.o)f.o.chase=null})}catch(e2){}}stepExtras(dt,ts);stepFarm2(dt,ts);stepFire(dt,ts);stepNet(dt);stepSound(dt);stepFish(dt,ts);ISLE.step(dt,ts);checkIsle();stepCity(dt,ts);checkCity();
   clouds.forEach(c=>{c.position.x+=c.userData.v*dt;if(c.position.x>130)c.position.x=-60});
   tileObjs.forEach((o,i)=>{if(o.sp.visible){o.sp.rotation.y=ts*2+i;o.sp.position.y=.95+Math.sin(ts*3+i)*.08}});
   acc+=dt;if(acc>.2){acc=0;syncField()}
