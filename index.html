@@ -2905,7 +2905,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="229";const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
+const GAMEVER="230";setTimeout(()=>{try{const q=document.getElementById("qset");if(q&&!document.getElementById("verTag")){const v=document.createElement("div");v.id="verTag";v.style.cssText="font-size:.7rem;opacity:.6;margin-top:4px;width:100%;text-align:center";v.textContent="Version "+GAMEVER;q.after(v)}}catch(e){}},1500);const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
 if(TESTSRV){document.title="🧪 TEST · "+document.title;const tb=document.createElement("div");tb.id="testBar";tb.textContent=MIRROR_TEST?"🧪 TEST SERVER · a copy of your farm · changes here don't touch your real farm":"🧪 TEST SERVER · changes here don't touch your real farm";tb.style.cssText="position:fixed;left:50%;top:0;transform:translateX(-50%);z-index:9999;background:#7a3fc0;color:#fff;font:900 11px/1.2 sans-serif;padding:3px 10px;border-radius:0 0 10px 10px;pointer-events:none;letter-spacing:.3px";document.addEventListener("DOMContentLoaded",()=>document.body.appendChild(tb));if(document.body)document.body.appendChild(tb)}let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 /* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
 (function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
@@ -4380,7 +4380,7 @@ function makeHeli(c){const g=new THREE.Group(),b=new Builder();b.add("sph",c,0,.
     for(let k=0;k<14;k++){const x=W0+10+r()*(W1-W0-20),z=Z0+8+r()*(Z1-Z0-16);if(x>-182)continue;b.add("ico1",k%2?0x5aa83a:0x4f9e31,x,-1.2,z,6+r()*5,3+r()*2.5,6+r()*5,0,k,0)}
     for(let k=0;k<30;k++){const x=W0+4+r()*(W1-W0-8),z=Z0+4+r()*(Z1-Z0-8);if(x>-176)continue;b.add("sph",[0xff7bb0,0xffd84a,0xffffff,0xe2402f][k%4],x,.15,z,.25,.15,.25)}}
   scene.add(b.mesh());AIRP.on=false;AIRP.land=true})();
-function airOK(){if(AIRPORT_ON)return true;try{const u=LOCAL.user;if(!u)return false;const a=accts()[u]||{},re=/gods?[\s_.-]*farm/i;return re.test(String(u))||re.test(String(a.farm||""))||re.test(String(a.farmer||""))}catch(e){return false}}
+function airOK(){if(AIRPORT_ON)return true;try{const u=LOCAL.user;if(!u)return false;const a=accts()[u]||{},re=/gods?[\s_.-]*farm/i,lb=(document.getElementById("acct")||{}).textContent||"";return re.test(String(u))||re.test(String(a.farm||""))||re.test(String(a.farmer||""))||re.test(lb)}catch(e){return false}}
 function buildAirportB(){if(AIRP.on||!AIRP.land)return;AIRP.on=true;const b=new Builder(),gw=new Builder(),AX=-27,AZ=110;
   // runway, taxiway and aprons
   const RZ=AZ+14,RL=150,RX=AX-36;b.add("box",0x3a3f45,RX,.02,RZ,RL,.04,6.4);for(let x=-RL/2+4;x<RL/2-4;x+=3.4)b.add("box",0xffffff,RX+x,.05,RZ,1.8,.01,.18);
