@@ -2905,7 +2905,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="217";const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
+const GAMEVER="218";const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
 if(TESTSRV){document.title="🧪 TEST · "+document.title;const tb=document.createElement("div");tb.id="testBar";tb.textContent=MIRROR_TEST?"🧪 TEST SERVER · a copy of your farm · changes here don't touch your real farm":"🧪 TEST SERVER · changes here don't touch your real farm";tb.style.cssText="position:fixed;left:50%;top:0;transform:translateX(-50%);z-index:9999;background:#7a3fc0;color:#fff;font:900 11px/1.2 sans-serif;padding:3px 10px;border-radius:0 0 10px 10px;pointer-events:none;letter-spacing:.3px";document.addEventListener("DOMContentLoaded",()=>document.body.appendChild(tb));if(document.body)document.body.appendChild(tb)}let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 /* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
 (function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
@@ -3080,7 +3080,7 @@ const SELRING=new THREE.Mesh(new THREE.RingGeometry(.38,.5,28),new THREE.MeshBas
 function selectWorker(k){SEL=k&&CREW[k]?k:null;renderCrewSel();const m=$("modeTag");
   m.textContent=SEL?"Orders for "+wName(SEL)+": tap where to work · tap Move to stop giving orders":"No worker selected: you will do it yourself";m.style.opacity=1;clearTimeout(modeT);modeT=setTimeout(()=>m.style.opacity=.85,2600)}
 function groundPoint(e){const r=cvRect(),P=exy(e);ndc.set((P.x-r.left)/r.width*2-1,-(P.y-r.top)/r.height*2+1);ray.setFromCamera(ndc,camera);
-  const v=ray.ray.intersectPlane(GPLANE,_gpv);if(!v)return null;return{x:Math.max(-70,Math.min(17,v.x)),z:Math.max(-24,Math.min(51,v.z))}}
+  const v=ray.ray.intersectPlane(GPLANE,_gpv);if(!v)return null;return{x:Math.max(-73,Math.min(17,v.x)),z:Math.max(-72,Math.min(72,v.z))}}
 function taskTarget(q){
   if(q.type==="walk")return[q.x,q.z];
   if(q.type==="rest")return[1.1+barnOff()[0],-6.75+barnOff()[1]];
@@ -3546,7 +3546,7 @@ function validHill(id,x,z){const H=HILLS.find(q=>q.id===id),R=H.rad*hs(H)*1.3;if
 function startHillMove(id){const H=HILLS.find(q=>q.id===id);if(!H)return;closeHill();cancelPlace();const [x,z]=hillXZ(H),g=new THREE.Group(),m=new THREE.Mesh(new THREE.ConeGeometry(H.rad*hs(H)*1.2,H.h*hs(H),16),GHOSTMAT);m.position.y=H.h*hs(H)/2;g.add(m);scene.add(g);
   PLACE={hill:id,g,d:{n:"Hill",r:H.rad*hs(H)},r:0,ok:false,x,z};updateGhost(x,z);$("placeRot").hidden=true;$("placeBar").hidden=false;$("placeTxt").textContent="Move the hill · drag it and let go, or tap where it should go";setTool("move")}
 function validPlace(x,z,R0,skipT){const r=R0*.75;
-  if(x<-71||x>16.5||z<-23||z>70)return false;if(farmH(x,z)<-.03)return false;
+  if(x<-72.5||x>16.5||z<-71||z>71.5)return false;if(farmH(x,z)<-.03)return false;
   for(const [mx,mz,mr] of mtns())if(Math.hypot(x-mx,z-mz)<mr*1.25+r)return false;
   for(const a of layout())if(!(a.p&&a.p.island)&&x>a.x0-r-.2&&x<a.x0+a.n+r+.2&&z>a.z0-r-.2&&z<a.z0+a.n+r+.2)return false;
   for(const p of PLOTS)if(plotLive(p)&&x>p.x0-r-.2&&x<p.x0+(p.sz||PN)+r+.2&&z>p.z0-r-.2&&z<p.z0+(p.sz||PN)+r+.2)return false;
