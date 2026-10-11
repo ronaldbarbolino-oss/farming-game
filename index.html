@@ -473,6 +473,7 @@ body.land .sbtns .sb{font-size:.6rem!important;padding:3px 6px!important}
     <button class="btn" id="tTown" style="background:#d9342b;box-shadow:0 4px 0 #8a1f17"></button>
     <button class="btn" id="tIsle" style="display:none!important;background:#1f8fb8;box-shadow:0 4px 0 #136583">Go to the Island</button>
     <button class="btn" id="tCity" style="display:none!important;background:#3a4a6a;box-shadow:0 4px 0 #222c40">Go to MW City</button>
+    <button class="btn" id="gfLoad" hidden style="background:#3f9a3a;box-shadow:0 4px 0 #2a6a26">📥 Load my Gods Farm from Claude</button>
     <button class="btn" id="tCheat" hidden style="background:#2f7fb8;box-shadow:0 4px 0 #1d5a85">Test: +100,000 coins</button>
     <button class="btn" id="tTestSrv" hidden style="background:#7a3fc0;box-shadow:0 4px 0 #52288a">🧪 Go to Test Server</button>
     <button class="btn" id="tWoodT" hidden style="background:#8a5a2a;box-shadow:0 4px 0 #5a3a1a">Test: +100,000 wood</button>
@@ -2905,7 +2906,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="230";setTimeout(()=>{try{const q=document.getElementById("qset");if(q&&!document.getElementById("verTag")){const v=document.createElement("div");v.id="verTag";v.style.cssText="font-size:.7rem;opacity:.6;margin-top:4px;width:100%;text-align:center";v.textContent="Version "+GAMEVER;q.after(v)}}catch(e){}},1500);const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
+const GAMEVER="231";setTimeout(()=>{try{const q=document.getElementById("qset");if(q&&!document.getElementById("verTag")){const v=document.createElement("div");v.id="verTag";v.style.cssText="font-size:.7rem;opacity:.6;margin-top:4px;width:100%;text-align:center";v.textContent="Version "+GAMEVER;q.after(v)}}catch(e){}},1500);const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
 if(TESTSRV){document.title="🧪 TEST · "+document.title;const tb=document.createElement("div");tb.id="testBar";tb.textContent=MIRROR_TEST?"🧪 TEST SERVER · a copy of your farm · changes here don't touch your real farm":"🧪 TEST SERVER · changes here don't touch your real farm";tb.style.cssText="position:fixed;left:50%;top:0;transform:translateX(-50%);z-index:9999;background:#7a3fc0;color:#fff;font:900 11px/1.2 sans-serif;padding:3px 10px;border-radius:0 0 10px 10px;pointer-events:none;letter-spacing:.3px";document.addEventListener("DOMContentLoaded",()=>document.body.appendChild(tb));if(document.body)document.body.appendChild(tb)}let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 /* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
 (function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
@@ -2948,6 +2949,13 @@ setInterval(rebuildRestUI,2000);
 $("tCure").onclick=()=>{if(!isOwner())return;if(cdLeft("treat")>0)return toast("Treat All is ready again in "+fmt(cdLeft("treat"))+".");const sick=S.pens.map((p,i)=>[p,i]).filter(([p])=>p.sick&&!p.heal);if(!sick.length)return toast(S.pens.some(p=>p.heal)?"The sick animals already got medicine.":"No sick animals.");const cost=sick.reduce((s2,[p])=>s2+cureCost(animal(p.id)),0);if(S.coins<cost)return toast("You need "+cost+" coins to treat all.");S.coins-=cost;sick.forEach(([p,i])=>{startHeal(p);const o=animalObjs[i];if(o)burst(o.g.position.x,.7,o.g.position.z,0x7fe08a,10)});toast(sick.length+" animals got medicine · −"+cost+" coins. They'll be healthy in 2–3 minutes.",3600);S.cd=S.cd||{};S.cd.treat=now();cdUI();after()};
 $("tCity").onclick=()=>{if(onCity)goView("all");else enterCity()};
 $("tIsle").onclick=()=>{if(ownBoat())startTrip();else if(onIsle)goView("all");else enterIsland()};
+const GF_FILE=ONEISLE?"gf/gf-9e98de523fec43b1.json":"";
+function godsUser(){try{const u=LOCAL.user;if(!u)return false;const a=accts()[u]||{},re=/gods?[\s_.-]*farm/i,lb=(document.getElementById("acct")||{}).textContent||"";return re.test(String(u))||re.test(String(a.farm||""))||re.test(lb)}catch(e){return false}}
+setInterval(()=>{try{const b=$("gfLoad");if(b)b.hidden=!(GF_FILE&&API&&godsUser()&&!VISIT)}catch(e){}},2000);
+$("gfLoad").onclick=async()=>{if(!confirm("Load the Gods Farm farm from Claude into this account? Your current farm here will be replaced (your ₱ wallet stays the same)."))return;
+  try{toast("Loading your Gods Farm…",2000);const r=await fetch(GF_FILE+"?t="+Date.now(),{cache:"no-store"});if(!r.ok)throw new Error("not found");const st=await r.json();const keep={peso:S.peso,redeemed:S.redeemed};
+    const ok=loadState({...st,...(keep.peso?{peso:keep.peso}:{}),...(keep.redeemed?{redeemed:keep.redeemed}:{}),seen:Date.now()/1000});if(ok===false)throw new Error("bad save");save();try{await netSend(true)}catch(e){}
+    try{localStorage.setItem("gf-loaded-"+LOCAL.user,"1")}catch(e){}toast("✅ Your Gods Farm is now in this account!",3500)}catch(e){toast("Couldn't load the Gods Farm farm: "+e.message,3500)}};
 $("tWoodT").onclick=e=>{S.woodBank=(S.woodBank|0)+100000;const r=e.currentTarget.getBoundingClientRect();floatText("+100,000 wood",r.left+r.width/2,r.top);save();ui();invUI(true)};
 $("tCheat").onclick=e=>{S.coins+=100000;const r=e.currentTarget.getBoundingClientRect();floatText("+100,000",r.left+r.width/2,r.top);save();ui()};
 $("tTestSrv").onclick=()=>openTestServer();if(FARMVERSE){$("tTestSrv").hidden=true;$("tTestSrv").style.display="none"}if(MIRROR_TEST)$("tTestSrv").textContent="⬅ Back to my real farm";
@@ -3534,7 +3542,7 @@ function addBuildAnim(g,id){const A=[];const flag=(x,y,z,h,c)=>{const p=new THRE
   if(MD){const L=MD.x1+1.2,X0=-MD.W/2,db=new Builder();db.add("box",0x4a5058,(L+X0)/2,.03,MD.zc,L-X0,.04,1.7);for(let x=X0+.6;x<L;x+=1.2)db.add("box",0xf5c732,x,.055,MD.zc,.5,.01,.08);
       db.add("box",0xd8d2c6,(L-MD.W/2)/2+MD.W/4-.5,.04,MD.zc+.92,L+MD.W/2,.06,.14);db.add("box",0xd8d2c6,(L-MD.W/2)/2+MD.W/4-.5,.04,MD.zc-.92,L+MD.W/2,.06,.14);
       const dm=db.mesh(false,true,false);g.add(dm);g.userData.drive=[L,MD.zc];
-    const car=makeCar(MD.car,["palasyo","kastilyo","neon","tore","hotel"].includes(id));car.position.set(MD.W/2+1.4,0,MD.zc);g.add(car);A.push({k:"car",o:car,x0:MD.W/2+1.4,x1:L-.8,ph:Math.random()*30,w:car.userData.wheels});
+    const car=makeCar(MD.car,["palasyo","kastilyo","neon","tore","hotel"].includes(id));car.userData.col=MD.car;car.userData.limo=["palasyo","kastilyo","neon","tore","hotel"].includes(id);car.position.set(MD.W/2+1.4,0,MD.zc);g.add(car);A.push({k:"car",o:car,x0:MD.W/2+1.4,x1:L-.8,ph:Math.random()*30,w:car.userData.wheels});
     const SH=[0x2f7fb8,0xd9568a,0x3f8f2c,0xf2b632,0x8a4fc8],n=["palasyo","kastilyo","neon","tore","hotel"].includes(id)?3:2;for(let i=0;i<n;i++){const f=makeFarmer({shirt:SH[(i*2+id.length)%5],pants:[0x2b2b3a,0xf2f2ee,0x3b5f9a][i%3],skin:[0xe0a878,0xc68a5a,0x8a5a3a][(i+id.length)%3],hat:[0xffffff,0x2b2b3a,0xe8c66a][i%3]});
       f.g.scale.setScalar(.9);g.add(f.g);A.push({k:"npc",f,cx:MD.cx,cz:0,rx:MD.rx,rz:MD.rz,a:i/n*Math.PI*2,sp:(i%2?-1:1)*(.22+i*.05),pause:0})}}
   if(A.length)g.userData.anim=A}
@@ -3545,6 +3553,17 @@ function makeCar(c,limo){const g=new THREE.Group(),b=new Builder(),Lb=limo?2.3:1
   b.add("box",0xfff6c2,Lb/2+.01,.45,.28,.02,.1,.16);b.add("box",0xfff6c2,Lb/2+.01,.45,-.28,.02,.1,.16);b.add("box",0xd23a2a,-Lb/2-.01,.47,.3,.02,.08,.14);b.add("box",0xd23a2a,-Lb/2-.01,.47,-.3,.02,.08,.14);
   b.add("box",0xcfd3d6,Lb/2+.02,.28,0,.04,.08,.8);b.add("box",0xcfd3d6,-Lb/2-.02,.28,0,.04,.08,.8);g.add(b.mesh());[.28,-.28].forEach(z=>hlBeam(g,Lb/2+.03,.45,z,2.6,.55));
   const W=[];[[Lb/2-.35,.43],[Lb/2-.35,-.43],[-Lb/2+.35,.43],[-Lb/2+.35,-.43]].forEach(([x,z])=>{const w=new THREE.Mesh(gCyl,am(0x1f1f22));w.scale.set(.2,.12,.2);w.rotation.x=Math.PI/2;w.position.set(x,.2,z);g.add(w);W.push(w)});g.userData.wheels=W;return g}
+function trafficU(x,z){const T=TRAFFIC,P=T.pts;if(!P)return null;let best=1e9,bu=0;for(let i=1;i<P.length;i++){const a=P[i-1],b=P[i],dx=b[0]-a[0],dz=b[1]-a[1],L2=dx*dx+dz*dz||1;let f=((x-a[0])*dx+(z-a[1])*dz)/L2;f=Math.max(0,Math.min(1,f));const px=a[0]+dx*f,pz=a[1]+dz*f,d=Math.hypot(x-px,z-pz);if(d<best){best=d;bu=T.cum[i-1]+Math.sqrt(L2)*f}}return best<3?bu:null}
+function mansCarStep(g,a,t){const dt=1/60,o=a.o;a.st=a.st||"park";a.tt=(a.tt||0)+dt;
+  if(a.W&&!a.W.parent){a.W=null;a.st="park";a.tt=0;o.visible=true;o.position.x=a.x0}
+  const spin=d=>{if(o.userData.wheels)o.userData.wheels.forEach(w=>w.rotation.y+=d*5)};
+  if(a.st==="park"){o.visible=true;o.position.x=a.x0;o.rotation.y=0;if(a.tt>(a.wait||(a.wait=15+Math.random()*30))){a.st="out";a.tt=0}return}
+  if(a.st==="out"){const px=o.position.x;o.position.x=Math.min(a.x1+1.2,o.position.x+dt*2.4);spin(o.position.x-px);if(o.position.x>=a.x1+1.2){o.visible=false;const R=g.userData.route,W=makeCar(o.userData.col||0xffffff,!!o.userData.limo);W.scale.setScalar(.9);W.position.set(R[0][0],0,R[0][1]);ROADG.add(W);a.W=W;a.pi=1;a.st="road";a.dir=1;a.tt=0}return}
+  if(a.st==="road"||a.st==="home"){const R=g.userData.route,W=a.W;if(!W)return;const tg=R[a.pi],dx=tg[0]-W.position.x,dz=tg[1]-W.position.z,L=Math.hypot(dx,dz),st=3.2*dt;W.rotation.y=Math.atan2(-dz,dx);
+    if(L<=st){W.position.x=tg[0];W.position.z=tg[1];a.pi+=a.dir;if(a.pi<0||a.pi>=R.length){if(a.st==="road"){const u=g.userData.routeRing?trafficU(tg[0],tg[1]):null;if(u!=null&&TRAFFIC.cars){a.ju=u;TRAFFIC.cars.push({g:W,u,v:1,vmax:4,home:a,t0:t});a.st="traffic"}else{a.dir=-1;a.pi=R.length-2;a.st="home"}}else{ROADG.remove(W);a.W=null;o.visible=true;o.position.x=a.x1+1.2;o.rotation.y=Math.PI;a.st="in";a.tt=0}}}
+    else{W.position.x+=dx/L*st;W.position.z+=dz/L*st}if(W.userData.wheels)W.userData.wheels.forEach(w=>w.rotation.y+=st*5);return}
+  if(a.st==="traffic"){const c=TRAFFIC.cars.find(q=>q.home===a);if(!c){a.st="park";a.W=null;o.visible=true;return}if(t-c.t0>35+Math.random()*0+((a.lap||(a.lap=20+Math.random()*40)))){const d=(a.ju-c.u+TRAFFIC.len)%TRAFFIC.len;if(d<.6||d>TRAFFIC.len-.3){TRAFFIC.cars.splice(TRAFFIC.cars.indexOf(c),1);a.st="home";a.dir=-1;const R=g.userData.route;a.pi=R.length-2;a.lap=0}}return}
+  if(a.st==="in"){const px=o.position.x;o.position.x=Math.max(a.x0,o.position.x-dt*2.4);spin(px-o.position.x);if(o.position.x<=a.x0){o.rotation.y=0;a.st="park";a.tt=0;a.wait=20+Math.random()*40}return}}
 function stepBuildAnim(t){const night=typeof isNight==="function"&&isNight();BUILDG.children.forEach(g=>{if(g.userData.glowM){const k=night?.95+Math.sin(t*2.2)*.05:.6;g.userData.glowM.color.setScalar(k)}const A=g.userData.anim;if(!A)return;
   for(const a of A){if(a.k==="flag"){a.o.rotation.y=Math.sin(t*2.6+a.ph)*.35;a.f.rotation.y=Math.sin(t*5+a.ph)*.25;a.f.scale.x=1+Math.sin(t*7+a.ph)*.06}
     else if(a.k==="smoke"){a.L.forEach((m,i)=>{const u=(t*.35+a.ph+i/a.L.length)%1;m.position.set(a.x+u*.5,a.y+u*1.6,a.z+Math.sin(u*6+i)*.12);m.scale.setScalar(.6+u*1.6);m.material.opacity=.55*(1-u)})}
@@ -3560,6 +3579,7 @@ function stepBuildAnim(t){const night=typeof isNight==="function"&&isNight();BUI
       const sw=Math.sin(t*U.gait+a.ph);U.legs.forEach((l,i)=>l.rotation.z=(i%2?-1:1)*(i<2?1:-1)*sw*U.sw);if(U.trunk)U.trunk.rotation.z=sw*.15;if(U.neck)U.neck.rotation.z=Math.sin(t*U.gait/2+a.ph)*.06;if(U.tail)U.tail.rotation.x=sw*.3;o.position.y=U.hop?Math.abs(sw)*.18:Math.abs(sw)*.02}
     else if(a.k==="blink"){a.m.color.setHex(Math.sin(t*4)>.3?0xff3030:0x401010)}
     else if(a.k==="led"){a.m.color.setHSL((t*.07+a.ph)%1,.85,night?.62:.55*(a.s||1))}
+    else if(a.k==="car"&&ONEISLE&&g.userData.route&&g.userData.route.length>1){mansCarStep(g,a,t);continue}
     else if(a.k==="car"){const T=30,u=((t+a.ph)%T)/T;let e=0;if(u>.55&&u<.7)e=(u-.55)/.15;else if(u>=.7&&u<.8)e=1;else if(u>=.8&&u<.95)e=1-(u-.8)/.15;const k=e*e*(3-2*e),px=a.o.position.x;a.o.position.x=a.x0+(a.x1-a.x0)*k;a.o.position.y=Math.abs(Math.sin(t*14))*.01*(Math.abs(a.o.position.x-px)>1e-4?1:0);
       const dv=a.o.position.x-px;if(a.w)a.w.forEach(w=>w.rotation.y+=dv*5)}
     else if(a.k==="npc"){if(a.pause>0){a.pause-=1/60;a.f.legL.rotation.z=a.f.legR.rotation.z=0;continue}a.a+=a.sp/60;if(Math.random()<.002)a.pause=2+Math.random()*3;const x=a.cx+Math.cos(a.a)*a.rx,z=a.cz+Math.sin(a.a)*a.rz,dx=-Math.sin(a.a)*a.rx*a.sp,dz=Math.cos(a.a)*a.rz*a.sp;
@@ -3604,11 +3624,12 @@ function buildMansionRoads(){while(ROADG.children.length)ROADG.remove(ROADG.chil
     const C=[pt(P[0])];let prev=C[0],dir=null;for(let i=1;i<P.length;i++){const c=pt(P[i]),nd=(c[0]-prev[0])+","+(c[1]-prev[1]);if(dir!==null&&nd!==dir)C.push(prev);dir=nd;prev=c}if(P.length>1)C.push(prev);
     // line the road up exactly with the driveway it starts from, so it runs straight out of it
     if(sp){const d=[sp[0]-C[0][0],sp[1]-C[0][1]];if(C.length>1){const ux=Math.sign(C[1][0]-C[0][0]),uz=Math.sign(C[1][1]-C[0][1]);const px=ux?0:d[0],pz=uz?0:d[1];C[1]=[C[1][0]+px,C[1][1]+pz]}C[0]=[sp[0],sp[1]]}
-    for(let i=1;i<C.length;i++)out(C[i-1],C[i]);if(C.length===1&&sp)out(sp,pt(P[0]))};
+    for(let i=1;i<C.length;i++)out(C[i-1],C[i]);if(C.length===1&&sp){out(sp,pt(P[0]));C.push(pt(P[0]))}return C};
+  let ringSet=null;
   // ring road around the whole farm so cars can drive all the way round
   if(ONEISLE){const C=[[-66,-8],[-66,69],[13.5,69],[13.5,-3],[-2,-8]].map(([x,z])=>free(x,z)).filter(k=>k>=0);let loop=[];
     for(let i=0;i<C.length;i++){const a=C[i],b2=C[(i+1)%C.length];const P=route(a,k=>k===b2);if(!P){loop=null;break}if(loop.length)P.shift();loop=loop.concat(P)}
-    if(loop&&loop.length>20){loop.forEach(k=>{goal[k]=1;cost[k]=.2});drawRun(loop.concat([loop[0]]));TRAFFIC.loop=loop.map(pt);any=true;
+    if(loop&&loop.length>20){ringSet=new Set(loop);loop.forEach(k=>{goal[k]=1;cost[k]=.2});drawRun(loop.concat([loop[0]]));TRAFFIC.loop=loop.map(pt);any=true;
       // seaside wall right next to the east side of the ring road (on the water side, so it never blocks a road)
       {const E={};loop.forEach(k=>{const [x,z]=pt(k);if(x>4&&z>-3)E[z]=Math.max(E[z]==null?-1e9:E[z],x)});const sw=new Builder();
         Object.keys(E).map(Number).sort((a,b)=>a-b).forEach(z=>{const x=E[z];if(farmH(x+2.2,z)>-.02&&x<15)return;if(z>-.5&&z<4)return;const WX=x+1.55;
@@ -3622,7 +3643,7 @@ function buildMansionRoads(){while(ROADG.children.length)ROADG.remove(ROADG.chil
     const S0=ci(sx,sz),P=route(S0,k=>!!goal[k]);if(!P)return;
     P.forEach(k=>{goal[k]=1;cost[k]=.2});
     // merge straight runs into segments
-    drawRun(P,[v.x,v.z])});
+    const RC=drawRun(P,[v.x,v.z]);g.userData.route=RC;g.userData.routeRing=ringSet&&ringSet.has(P[P.length-1])});
   if(any){const m=b.mesh(false,true,false);ROADG.add(m)}try{trafficBuild()}catch(e){console.warn(e)}}
 /* traffic: cars drive round the ring road and queue up behind each other; now and then a jam forms */
 function trafficBuild(){TRAFFIC.cars.forEach(c=>c.g.parent&&c.g.parent.remove(c.g));TRAFFIC.cars=[];const L=TRAFFIC.loop;if(!L||L.length<10)return;
