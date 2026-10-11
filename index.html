@@ -2905,7 +2905,7 @@ function placeSbtns(){const sb=document.querySelector(".sbtns"),tb=document.quer
   if(innerWidth>640&&!document.body.classList.contains("land")){sb.style.top=(tb.offsetTop+tb.offsetHeight+8)+"px"}else sb.style.top=""}
 setInterval(placeSbtns,1500);
 /* portrait phone: turn the whole game sideways so it always plays in landscape */
-const GAMEVER="221";const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
+const GAMEVER="222";const TESTSRV=(/^test--/.test(location.hostname)||MIRROR_TEST)&&!FARMVERSE;
 if(TESTSRV){document.title="🧪 TEST · "+document.title;const tb=document.createElement("div");tb.id="testBar";tb.textContent=MIRROR_TEST?"🧪 TEST SERVER · a copy of your farm · changes here don't touch your real farm":"🧪 TEST SERVER · changes here don't touch your real farm";tb.style.cssText="position:fixed;left:50%;top:0;transform:translateX(-50%);z-index:9999;background:#7a3fc0;color:#fff;font:900 11px/1.2 sans-serif;padding:3px 10px;border-radius:0 0 10px 10px;pointer-events:none;letter-spacing:.3px";document.addEventListener("DOMContentLoaded",()=>document.body.appendChild(tb));if(document.body)document.body.appendChild(tb)}let ROT=false;const exy=e=>ROT?{x:e.clientY,y:innerWidth-e.clientX}:{x:e.clientX,y:e.clientY};const S2L=(x,y)=>ROT?[y,innerWidth-x]:[x,y],L2S=(x,y)=>ROT?[innerWidth-y,x]:[x,y];
 /* when the screen is turned sideways with CSS, swipes on lists and boxes scroll the wrong way: scroll them by hand */
 (function(){let el=null,lx=0,ly=0,mv=0;const scroller=t=>{for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.id==="cv")return null;const cs=getComputedStyle(n);if(/(auto|scroll)/.test(cs.overflowY+cs.overflowX)&&(n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1))return n}return null};
@@ -4274,6 +4274,12 @@ function makeHeli(c){const g=new THREE.Group(),b=new Builder();b.add("sph",c,0,.
   const land=new THREE.Mesh(new THREE.BoxGeometry(92,2,72),new THREE.MeshLambertMaterial({color:0x6ec43e}));land.position.set(AX,-1.012,AZ-.5);land.receiveShadow=true;scene.add(land);
   const sh=new THREE.Mesh(new THREE.BoxGeometry(96,1.6,76),new THREE.MeshLambertMaterial({color:0xe6d29a}));sh.position.set(AX,-1.3,AZ);scene.add(sh);
   const fill=new THREE.Mesh(new THREE.BoxGeometry(92,2,8),new THREE.MeshLambertMaterial({color:0x6ec43e}));fill.position.set(AX,-1.012,73);scene.add(fill);
+  // more land west of the airport, joining the town's land, so there is no empty gap
+  {const W0=-226,W1=AX-46,Z0=66,Z1=AZ+36;const wl=new THREE.Mesh(new THREE.BoxGeometry(W1-W0+.5,2,Z1-Z0),new THREE.MeshLambertMaterial({color:0x5aa83a}));wl.position.set((W0+W1)/2,-1.012,(Z0+Z1)/2);wl.receiveShadow=true;scene.add(wl);
+    const ws=new THREE.Mesh(new THREE.BoxGeometry(W1-W0+4,1.6,Z1-Z0+4),new THREE.MeshLambertMaterial({color:0xe6d29a}));ws.position.set((W0+W1)/2-2,-1.3,(Z0+Z1)/2+2);scene.add(ws);
+    const r=rnd(777);for(let k=0;k<70;k++){const x=W0+6+r()*(W1-W0-12),z=Z0+4+r()*(Z1-Z0-8);if(x>AX-60&&z<AZ+30)continue;const h=1.4+r()*1.4;b.add("cyl",0x6b4a2a,x,h/2,z,.14,h,.14);b.add("sph",[0x3fa833,0x2f8f2c,0x4fb83a][k%3],x,h+.6,z,1+r()*.5,.9+r()*.4,1+r()*.5)}
+    for(let k=0;k<14;k++){const x=W0+10+r()*(W1-W0-20),z=Z0+8+r()*(Z1-Z0-16);b.add("ico1",k%2?0x5aa83a:0x4f9e31,x,-1.2,z,6+r()*5,3+r()*2.5,6+r()*5,0,k,0)}
+    for(let k=0;k<30;k++){const x=W0+4+r()*(W1-W0-8),z=Z0+4+r()*(Z1-Z0-8);b.add("sph",[0xff7bb0,0xffd84a,0xffffff,0xe2402f][k%4],x,.15,z,.25,.15,.25)}}
   // runway, taxiway and aprons
   const RZ=AZ+14,RL=78;b.add("box",0x3a3f45,AX,.02,RZ,RL,.04,6.4);for(let x=-RL/2+4;x<RL/2-4;x+=3.4)b.add("box",0xffffff,AX+x,.05,RZ,1.8,.01,.18);
   [-1,1].forEach(sd=>{for(let k=0;k<6;k++)b.add("box",0xffffff,AX+sd*(RL/2-1.6),.05,RZ-2.2+k*.88,2.2,.01,.36);b.add("box",0xffffff,AX,.05,RZ+sd*3,RL-1,.01,.1)});
