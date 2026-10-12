@@ -53,13 +53,19 @@ ul{padding-left:18px;margin:6px 0 0}li{margin:4px 0;word-break:break-all;font-si
   <div class="stats"><div class="stat"><b id="stTotal">–</b><small>Installed / signed up</small></div><div class="stat"><b id="stOn">–</b><small>Online now</small></div><div class="stat"><b id="stToday">–</b><small>New today</small></div><div class="stat"><b id="stAvg">–</b><small>Average level</small></div></div>
   <div class="toolsrow"><input id="pq" placeholder="Search username or farm"><button type="button" class="alt" id="pRefresh" style="margin:0">Refresh</button><button type="button" id="pCsv" style="margin:0">Download CSV</button></div>
   <p class="note" id="pNote">Counts players who opened the game with an account since the online map was added.</p>
-  <div class="tbl"><table><thead><tr><th data-s="u">Username</th><th data-s="farm">Farm</th><th data-s="lv">Level</th><th data-s="coins">Coins</th><th data-s="animals">Animals</th><th data-s="seen">Last seen</th><th data-s="created">Joined</th><th data-s="app">App</th><th data-s="sync">Sync</th><th data-s="devices">Devices</th><th>Email</th></tr></thead><tbody id="pBody"><tr><td colspan="11">Unlock to load players.</td></tr></tbody></table></div>
+  <div class="tbl"><table><thead><tr><th data-s="u">Username</th><th data-s="farm">Farm</th><th data-s="lv">Level</th><th data-s="coins">Coins</th><th data-s="animals">Animals</th><th data-s="seen">Last seen</th><th data-s="created">Joined</th><th data-s="app">App</th><th data-s="sync">Sync</th><th data-s="devices">Devices</th><th>Email</th><th data-s="frozen">Account</th></tr></thead><tbody id="pBody"><tr><td colspan="12">Unlock to load players.</td></tr></tbody></table></div>
   <p class="err" id="pErr" role="alert"></p>
   <hr style="border:0;border-top:3px dashed var(--wood);margin:18px 0 6px">
   <label for="tU">Transfer code for a player</label>
   <p class="note">Makes a one-time code (valid 24 hours) that moves this player's farm to the app or a new phone. Give it only to the owner of the farm. Their old device stops saving online.</p>
   <div class="toolsrow"><input id="tU" placeholder="Username" autocomplete="off"><button type="button" id="tGo" style="margin:0">📲 Make transfer code</button></div>
   <p class="note" id="tOut" role="status" style="font-size:1.05em"></p><p class="err" id="tErr" role="alert"></p>
+  <hr style="border:0;border-top:3px dashed var(--wood);margin:18px 0 6px">
+  <label for="fzU">Freeze an account</label>
+  <p class="note">A frozen account can't play, save, log in, sync or buy coins until you unfreeze it. Only you can unfreeze it from this page. You can also use the 🧊 button in the players list.</p>
+  <div class="toolsrow"><input id="fzU" placeholder="Username" autocomplete="off"><input id="fzR" placeholder="Reason (optional, the player sees it)" autocomplete="off" maxlength="200"></div>
+  <div class="toolsrow"><button type="button" id="fzOn" style="margin:0;background:#2f7fb8">🧊 Freeze</button><button type="button" id="fzOff" style="margin:0;background:#3f8f2c">✅ Unfreeze</button></div>
+  <p class="note" id="fzOut" role="status"></p><p class="err" id="fzErr" role="alert"></p>
 </section>
 <section class="card" id="support" style="grid-column:1/-1">
   <label>Customer support messages</label>
@@ -118,6 +124,14 @@ $("tGo").disabled=true;try{const at=Date.now(),sig=new Uint8Array(await signRaw(
 const r=await fetch("/api/admin/transfer",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({u,at,sig:b64u(sig)})});const d=await r.json();if(!r.ok)throw new Error(d.error||r.status);
 const c=d.code.slice(0,4)+"-"+d.code.slice(4);$("tOut").innerHTML="";const b=document.createElement("b");b.textContent=c;$("tOut").append("Code for "+d.u+" ("+(d.farm||"")+"): ",b," · valid until "+new Date(d.exp).toLocaleString("en-PH",{timeZone:"Asia/Manila"}))}
 catch(e){$("tErr").textContent="Couldn't make the code: "+e.message}$("tGo").disabled=false};
+async function freezeUser(u,on,reason){$("fzErr").textContent="";$("fzOut").textContent="";u=String(u||"").trim().toLowerCase();if(!u){$("fzErr").textContent="Type a username.";return}
+  if(on&&!confirm("Freeze the account "+u+"? They won't be able to play until you unfreeze it."))return;
+  if(reason==null)reason=on?($("fzU").value.trim().toLowerCase()===u?$("fzR").value.trim():(prompt("Reason for freezing "+u+" (optional, the player sees it):","")||"")):"";
+  try{const at=Date.now(),k=on?1:0,sig=new Uint8Array(await signRaw(new TextEncoder().encode("freeze:"+u+":"+k+":"+at)));
+    const r=await fetch("/api/admin/freeze",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({u,on:k,reason,at,sig:b64u(sig)})});const d=await r.json();if(!r.ok)throw new Error(d.error||r.status);
+    $("fzOut").textContent=(on?"🧊 Frozen: ":"✅ Unfrozen: ")+d.u+(d.farm?" ("+d.farm+")":"");const p=PL.find(x=>x.u===d.u);if(p){p.frozen=k;p.frozenReason=on?reason:""}drawPlayers()}
+  catch(e){$("fzErr").textContent="Couldn't change the account: "+e.message}}
+$("fzOn").onclick=()=>freezeUser($("fzU").value,true,$("fzR").value.trim());$("fzOff").onclick=()=>freezeUser($("fzU").value,false,"");
 let SP=[];
 async function loadSupport(set){$("spErr").textContent="";try{const at=Date.now(),sig=new Uint8Array(await signRaw(new TextEncoder().encode("support:"+at)));
   const r=await fetch("/api/admin/support",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({at,sig:b64u(sig),...(set?{set}:{})})});const d=await r.json();if(!r.ok)throw new Error(d.error||r.status);SP=d.tickets||[];drawSupport()}catch(e){$("spErr").textContent="Couldn't load messages: "+e.message}}
@@ -144,7 +158,8 @@ async function loadPlayers(){$("pErr").textContent="";$("pRefresh").disabled=tru
 function drawPlayers(){const q=$("pq").value.trim().toLowerCase(),on=p=>PNOW-p.seen<150000,day=new Date(PNOW).toLocaleDateString("en-PH",{timeZone:"Asia/Manila"});
   $("stTotal").textContent=PL.length;$("stOn").textContent=PL.filter(on).length;$("stToday").textContent=PL.filter(p=>p.created&&new Date(p.created).toLocaleDateString("en-PH",{timeZone:"Asia/Manila"})===day).length;$("stAvg").textContent=PL.length?(PL.reduce((a,p)=>a+(p.lv||1),0)/PL.length).toFixed(1):"–";
   const L=PL.filter(p=>!q||(p.u+" "+p.farm+" "+p.farmer).toLowerCase().includes(q)).sort((a,b)=>{const x=a[SORT.k],y=b[SORT.k];return(typeof x==="string"?String(x).localeCompare(y):(x||0)-(y||0))*SORT.d});
-  $("pBody").innerHTML=L.length?L.map(p=>`<tr><td><span class="dot${on(p)?" on":""}"></span><b>${esc(p.u)}</b></td><td>${esc(p.farm)}<br><small>${esc(p.farmer)}</small></td><td class="n">${p.lv||1}</td><td class="n">${(p.coins||0).toLocaleString()}</td><td class="n">${p.animals||0}</td><td>${on(p)?"Online":ago(PNOW-p.seen)}</td><td>${dfmt(p.created)}</td><td>${p.app?"📲 App":"🌐 Web"}</td><td>${p.sync?"☁️ On":"<small>Not yet</small>"}</td><td class="n">${p.devices||0}</td><td><small>${esc(p.email||"")}</small></td></tr>`).join(""):'<tr><td colspan="11">No players yet.</td></tr>'}
+  $("pBody").innerHTML=L.length?L.map(p=>`<tr><td><span class="dot${on(p)?" on":""}"></span><b>${esc(p.u)}</b></td><td>${esc(p.farm)}<br><small>${esc(p.farmer)}</small></td><td class="n">${p.lv||1}</td><td class="n">${(p.coins||0).toLocaleString()}</td><td class="n">${p.animals||0}</td><td>${on(p)?"Online":ago(PNOW-p.seen)}</td><td>${dfmt(p.created)}</td><td>${p.app?"📲 App":"🌐 Web"}</td><td>${p.sync?"☁️ On":"<small>Not yet</small>"}</td><td class="n">${p.devices||0}</td><td><small>${esc(p.email||"")}</small></td><td>${p.frozen?`<b style="color:#c0392b">🧊 Frozen</b>${p.frozenReason?`<br><small>${esc(p.frozenReason)}</small>`:""}<br><button type="button" class="frzB" data-u="${esc(p.u)}" data-on="0" style="margin:4px 0 0;padding:4px 10px;font-size:.85em;background:#3f8f2c">Unfreeze</button>`:`<button type="button" class="frzB" data-u="${esc(p.u)}" data-on="1" style="margin:0;padding:4px 10px;font-size:.85em;background:#2f7fb8">🧊 Freeze</button>`}</td></tr>`).join(""):'<tr><td colspan="12">No players yet.</td></tr>';
+  $("pBody").querySelectorAll(".frzB").forEach(b=>b.onclick=()=>freezeUser(b.dataset.u,b.dataset.on==="1"))}
 document.querySelectorAll("th[data-s]").forEach(th=>th.onclick=()=>{const k=th.dataset.s;SORT=SORT.k===k?{k,d:-SORT.d}:{k,d:k==="u"||k==="farm"?1:-1};drawPlayers()});
 $("pq").oninput=drawPlayers;$("pRefresh").onclick=loadPlayers;
 $("pCsv").onclick=()=>{const rows=[["username","farm","farmer","level","coins","animals","last_seen","joined","app","sync","devices","email"],...PL.map(p=>[p.u,p.farm,p.farmer,p.lv,p.coins,p.animals,new Date(p.seen).toISOString(),p.created?new Date(p.created).toISOString():"",p.app?"app":"web",p.sync?"on":"",p.devices||0,p.email||""])];
